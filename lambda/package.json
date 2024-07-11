@@ -1,24 +1,23 @@
 {
-  "name": "mawaqit",
-  "version": "1.0.0",
-  "description": "mawaqit function",
-  "main": "app.js",
-  "repository": "https://github.com/awslabs/aws-sam-cli/tree/develop/samcli/local/init/templates/cookiecutter-aws-sam-hello-nodejs",
-  "author": "Momamed Amine nour",
-  "license": "MIT",
-  "dependencies": {
-    "apisauce": "^1.1.1",
-    "ask-sdk-core": "^2.0.0",
-    "ask-sdk-model": "^1.0.0",
-    "ask-sdk-s3-persistence-adapter": "^2.7.0",
-    "i18next": "^15.0.5",
-    "moment-timezone": "^0.5.27"
-  },
-  "scripts": {
-    "test": "mocha tests/unit/"
-  },
-  "devDependencies": {
-    "chai": "^4.2.0",
-    "mocha": "^6.1.4"
+    "name": "mawaqit-alexa-skill",
+    "version": "1.2.0",
+    "description": "mawaqit-alexa-skill-backend",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Amazon Alexa",
+    "license": "Apache License",
+    "dependencies": {
+      "ask-sdk-core": "^2.7.0",
+      "ask-sdk-model": "^1.19.0",
+      "aws-sdk": "^2.326.0",
+      "axios": "^1.7.2",
+      "moment-timezone": "^0.5.4",
+      "ask-sdk-dynamodb-persistence-adapter": "^2.9.0",
+      "i18next": "^15.0.5",
+      "i18next-sprintf-postprocessor": "^0.2.2",
+      "util": "^0.12.5",
+      "moment":"^2.29.4"
+    }
   }
-}

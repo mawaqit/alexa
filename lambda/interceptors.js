@@ -2,6 +2,7 @@ const i18n = require('i18next');
 const sprintf = require('i18next-sprintf-postprocessor');
 const languageStrings = require('./languageStrings')
 const Alexa = require('ask-sdk-core');
+const helperFunctions = require('./helperFunctions.js');
 
 const LogRequestInterceptor = {
   process(handlerInput) {
@@ -57,8 +58,26 @@ const LocalizationInterceptor = {
   },
 };
 
+const SavePersistenceAttributesToSession = {
+  async process (handlerInput) {
+    const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
+    if(isNewSession) {
+      console.log("New Session");
+      const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+      const persistentAttributes = await helperFunctions.getPersistedData(handlerInput);
+      if(persistentAttributes) {
+        console.log("Persistent Attributes: ", JSON.stringify(persistentAttributes));
+        sessionAttributes.persistentAttributes = persistentAttributes;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+      }
+    }
+
+  },
+}
+
 module.exports = {
   LogResponseInterceptor,
   LogRequestInterceptor,
-  LocalizationInterceptor
+  LocalizationInterceptor,
+  SavePersistenceAttributesToSession
 };

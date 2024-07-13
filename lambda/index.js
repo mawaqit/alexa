@@ -1,16 +1,16 @@
 const Alexa = require("ask-sdk-core");
-const moment = require("moment-timezone");
-const axios = require("axios");
 const AWS = require("aws-sdk");
 const ddbAdapter = require("ask-sdk-dynamodb-persistence-adapter");
 const {
   LocalizationInterceptor,
   LogRequestInterceptor,
   LogResponseInterceptor,
+  SavePersistenceAttributesToSession
 } = require("./interceptors.js");
-const helperFunctions = require('./helperFunctions.js');
+const helperFunctions = require("./helperFunctions.js");
 const { SkillEventHandler } = require("./handlers/skillEventHandler.js");
-const apiKey = "Bearer 66ecf547-ee3d-4bf2-bcc9-65b52f76ae9d";
+const { SelectMosqueIntentAfterSelectingMosqueHandler } = require("./handlers/intentHandler.js");
+const { MosqueListTouchEventHandler } = require("./handlers/touchHandler.js");
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -19,131 +19,10 @@ const LaunchRequestHandler = {
     );
   },
   async handle(handlerInput) {
-    await helperFunctions.getPersistedData(handlerInput);    
-    const { requestEnvelope, serviceClientFactory, responseBuilder, attributesManager } = handlerInput;
-    const requestAttributes = attributesManager.getRequestAttributes();
-    const isGeolocationSupported = Alexa.getSupportedInterfaces(requestEnvelope)['Geolocation'];
-    if ( isGeolocationSupported ) {
-      const geoObject = requestEnvelope.context.Geolocation;
-      if (!geoObject || !geoObject.coordinate) {
-        return responseBuilder
-          .speak(requestAttributes.t('requestForGeoLocationPrompt'))
-          .withAskForPermissionsConsentCard([
-            "alexa::devices:all:geolocation:read",
-          ])
-          .getResponse();
-      } else {
-        // use location data
-        console.log('Location data: ', JSON.stringify(geoObject));
-      }
-    } else if (!helperFunctions.checkForConsentTokenToAccessDeviceLocation(handlerInput)) {
-      return responseBuilder
-        .speak(requestAttributes.t('requestForGeoLocationPrompt'))
-        .withAskForPermissionsConsentCard(['read::alexa:device:all:address'])
-        .getResponse();
-    } 
-    
-    try {
-      const deviceId = Alexa.getDeviceId(requestEnvelope);
-      const deviceAddressServiceClient = serviceClientFactory.getDeviceAddressServiceClient();
-      const address = await deviceAddressServiceClient.getFullAddress(deviceId);
-
-      console.log('Address successfully retrieved, now responding to user : ', address);
-
-      if (address.stateOrRegion === null || address.city === null) {
-        return responseBuilder
-          .speak(requestAttributes.t('noAddressPrompt'))
-          .getResponse();
-      } 
-    } catch (error) {
-      console.log('Error in retrieving address: ', error);
-      if (error.name !== 'ServiceError') {
-        return responseBuilder
-          .speak('Uh Oh. Looks like something went wrong.')
-          .withShouldEndSession(true)
-          .getResponse();
-      }
-    }
-    const speakOutput = requestAttributes.t('welcomePrompt');
-
-    return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .reprompt(speakOutput)
-      .withSimpleCard("MAWAQIT", speakOutput)
-      .getResponse();
+    return await helperFunctions.checkForPersistenceData(handlerInput);
   },
 };
 
-const PrayerTimeIntentHandler = {
-  canHandle(handlerInput) {
-    return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      Alexa.getIntentName(handlerInput.requestEnvelope) === "PrayerTimeIntent"
-    );
-  },
-  async handle(handlerInput) {
-    let speakOutput =
-      "Unable to fetch your next Prayer Timings. Please try agin later";
-    const prayerTimings = await getPrayerTimings();
-    if (!prayerTimings) {
-      return (
-        handlerInput.responseBuilder
-          .speak(speakOutput)
-          .withSimpleCard("Prayer Time", speakOutput)
-          //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-          .getResponse()
-      );
-    }
-    const serviceClientFactory = handlerInput.serviceClientFactory;
-    const deviceId =
-      handlerInput.requestEnvelope.context.System.device.deviceId;
-    let userTimeZone = "America/Los_Angeles";
-    try {
-      const upsServiceClient = serviceClientFactory.getUpsServiceClient();
-      userTimeZone = await upsServiceClient.getSystemTimeZone(deviceId);
-    } catch (error) {
-      console.log("Error while fetching Prayer Timings: ", error.message);
-    }
-    console.log("Timezone: ", userTimeZone);
-    console.log("Prayer Timings: ", prayerTimings);
-    const nextPrayerTime = getNextPrayerTime(prayerTimings, userTimeZone);
-    speakOutput = "Your next Prayer Time is " + nextPrayerTime;
-    return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .withSimpleCard("Prayer Time", speakOutput)
-      .reprompt(speakOutput)
-      .getResponse();
-  },
-};
-
-const MosqueDetailIntentHandler = {
-  canHandle(handlerInput) {
-    return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      Alexa.getIntentName(handlerInput.requestEnvelope) === "MosqueDetailIntent"
-    );
-  },
-  async handle(handlerInput) {
-    const mosqueName = await getMosqueName();
-    let speakOutput = "Unable to fetch mosque details. Please try agin later";
-    if (!mosqueName) {
-      return (
-        handlerInput.responseBuilder
-          .speak(speakOutput)
-          .withSimpleCard("Mosque Details", speakOutput)
-          //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-          .getResponse()
-      );
-    }
-    speakOutput = "Your mosque name is " + mosqueName;
-
-    return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .withSimpleCard("Mosque Details", speakOutput)
-      .reprompt(speakOutput)
-      .getResponse();
-  },
-};
 
 const HelpIntentHandler = {
   canHandle(handlerInput) {
@@ -176,9 +55,9 @@ const CancelAndStopIntentHandler = {
     const speakOutput = "Goodbye!";
 
     return handlerInput.responseBuilder
-    .speak(speakOutput)
-    .withShouldEndSession(true)
-    .getResponse();
+      .speak(speakOutput)
+      .withShouldEndSession(true)
+      .getResponse();
   },
 };
 /* *
@@ -268,90 +147,6 @@ const ErrorHandler = {
   },
 };
 
-//Helper functions
-const getMosqueName = async () => {
-  let config = {
-    method: "get",
-    url: "https://mawaqit.net/api/3.0/mosque/0ff4259c-540a-445e-ad4c-8131299f14a9/info",
-    headers: {
-      accept: "application/json",
-      Authorization: apiKey,
-    },
-  };
-
-  let response = await axios
-    .request(config)
-    .then((response) => {
-      if (!response || !response.data || !response.data.name) {
-        throw "Received Empty Response";
-      }
-      console.log("Mosque Details: ", JSON.stringify(response.data));
-
-      return response.data.name;
-    })
-    .catch((error) => {
-      console.log("Error while fetching mosque Details: ", error);
-      return null;
-    });
-  return response;
-};
-
-const getPrayerTimings = async () => {
-  let config = {
-    method: "get",
-    url: "https://mawaqit.net/api/3.0/mosque/0ff4259c-540a-445e-ad4c-8131299f14a9/times",
-    headers: {
-      accept: "application/json",
-      Authorization: apiKey,
-    },
-  };
-
-  let response = await axios
-    .request(config)
-    .then((response) => {
-      if (!response || !response.data || !response.data.times) {
-        throw "Received Empty Response";
-      }
-      console.log("Mosque Timings: ", JSON.stringify(response.data));
-
-      return response.data.times;
-    })
-    .catch((error) => {
-      console.log("Error while fetching mosque Timings: ", error);
-      return null;
-    });
-  return response;
-};
-
-const getNextPrayerTime = (times, timezone) => {
-  const currentDateTime = new Date(
-    new Date().toLocaleString("en-US", { timeZone: timezone })
-  );
-  // Get the current moment object with time zone information
-  const now = moment(currentDateTime);
-  console.log("Now: ", JSON.stringify(now));
-
-  // Parse times into moment objects (assuming times are in your current time zone)
-  const timeMoments = times.map((time) => {
-    const [hours, minutes] = time.split(":");
-    return moment(`${now.format("YYYY-MM-DD")}T${hours}:${minutes}`);
-  });
-  console.log("Time Moments: ", timeMoments);
-  // Find the first time greater than or equal to current time (considering time zone)
-  const nextTime = timeMoments.find((time) => time.isSameOrAfter(now));
-  console.log("Next Time: ", nextTime);
-  if (nextTime) {
-    console.log(
-      "The first time greater than or equal to current time is:",
-      nextTime.format("HH:mm")
-    );
-    return nextTime.format("HH:mm");
-  } else {
-    console.log("No time is greater than or equal to current time: ", times[0]);
-    return times[0];
-  }
-};
-
 /**
  * This handler acts as the entry point for your skill, routing all request and response
  * payloads to the handlers above. Make sure any new handlers or interceptors you've
@@ -360,16 +155,16 @@ const getNextPrayerTime = (times, timezone) => {
 exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
-    PrayerTimeIntentHandler,
-    MosqueDetailIntentHandler,
     HelpIntentHandler,
+    SelectMosqueIntentAfterSelectingMosqueHandler,
+    MosqueListTouchEventHandler,
     SkillEventHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,
     SessionEndedRequestHandler,
     IntentReflectorHandler
   )
-  .addRequestInterceptors(LogRequestInterceptor, LocalizationInterceptor)
+  .addRequestInterceptors(LogRequestInterceptor,SavePersistenceAttributesToSession, LocalizationInterceptor)
   .addResponseInterceptors(LogResponseInterceptor)
   .addErrorHandlers(ErrorHandler)
   .withPersistenceAdapter(

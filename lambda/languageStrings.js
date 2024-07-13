@@ -3,5 +3,5 @@ const en_US = require("./prompts/en_US")
 
 module.exports ={
   'en-US': en_US,
-  'en-IN': en_IN
+  'en-IN': en_US
 }

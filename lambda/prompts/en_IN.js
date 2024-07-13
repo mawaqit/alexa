@@ -10,6 +10,6 @@ module.exports = {
     noDataPrompt:`Sorry, I couldn't find any data for that request. Please try again.`,
     noCityPrompt:`Sorry, I couldn't find any data for that city. Please try again.`,
     requestForGeoLocationPrompt: `${process.env.skillName} would like to use your location. To turn on location sharing, please go to your Alexa app, and follow the instructions.`,
-    noAddressPrompt: "It looks like you don't have an address set. You can set your address from the Alexa app."
+    noAddressPrompt: "It looks like you don't have an city set. You can set your city from the Alexa app."
     }
 }

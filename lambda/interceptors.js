@@ -1,8 +1,11 @@
-const i18n = require('i18next');
-const sprintf = require('i18next-sprintf-postprocessor');
-const languageStrings = require('./languageStrings')
-const Alexa = require('ask-sdk-core');
-const helperFunctions = require('./helperFunctions.js');
+const i18n = require("i18next");
+const sprintf = require("i18next-sprintf-postprocessor");
+const languageStrings = require("./languageStrings");
+const Alexa = require("ask-sdk-core");
+const helperFunctions = require("./helperFunctions.js");
+const apiHandler = require("./handlers/apiHandler.js");
+const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
+const { getDatSourceForPrayerTime } = require("./datasources.js");
 
 const LogRequestInterceptor = {
   process(handlerInput) {
@@ -19,6 +22,42 @@ const LogResponseInterceptor = {
     // Log Response
     console.log("==== RESPONSE ======");
     console.log(JSON.stringify(response, null, 2));
+  },
+};
+
+const AddDirectiveResponseInterceptor = {
+  process(handlerInput, response) {
+    if (
+      Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
+        "Alexa.Presentation.APL"
+      ]
+    ) {
+      const { directives } = response;
+      const aplDirective = directives
+        ? directives.find(
+            (directive) =>
+              directive.type === "Alexa.Presentation.APL.RenderDocument"
+          )
+        : false;
+      console.log("APL Directive: ", JSON.stringify(aplDirective));
+      if (!aplDirective) {
+        const ssmlText = response.outputSpeech.ssml;
+        const regex = /<speak>(.*?)<\/speak>/;
+        const match = ssmlText.match(regex);
+        const text = match && match[1] ? match[1] : "";
+        const dataSource = getDatSourceForPrayerTime(handlerInput, text);
+        const directive = helperFunctions.createDirectivePayload(
+          prayerTimeApl,
+          dataSource
+        );
+
+        if (!directives) {
+          response.directives = [directive];
+        } else {
+          response.directives.push(directive);
+        }
+      }
+    }
   },
 };
 
@@ -59,25 +98,44 @@ const LocalizationInterceptor = {
 };
 
 const SavePersistenceAttributesToSession = {
-  async process (handlerInput) {
+  async process(handlerInput) {
     const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
-    if(isNewSession) {
+    if (isNewSession) {
       console.log("New Session");
-      const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-      const persistentAttributes = await helperFunctions.getPersistedData(handlerInput);
-      if(persistentAttributes) {
-        console.log("Persistent Attributes: ", JSON.stringify(persistentAttributes));
-        sessionAttributes.persistentAttributes = persistentAttributes;
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const persistentAttributes = await helperFunctions.getPersistedData(
+        handlerInput
+      );
+      if (persistentAttributes && persistentAttributes.uuid) {
+        console.log(
+          "Persistent Attributes: ",
+          JSON.stringify(persistentAttributes)
+        );
+        try {
+          const mosqueTimes = await apiHandler.getPrayerTimings(
+            persistentAttributes.uuid
+          );
+          sessionAttributes.mosqueTimes = mosqueTimes;
+          sessionAttributes.persistentAttributes = persistentAttributes;
+          handlerInput.attributesManager.setSessionAttributes(
+            sessionAttributes
+          );
+        } catch (error) {
+          console.log("Error while fetching mosque list: ", error);
+          if (error === "Mosque not found") {
+            await handlerInput.attributesManager.deletePersistentAttributes();
+          }
+        }
       }
     }
-
   },
-}
+};
 
 module.exports = {
   LogResponseInterceptor,
   LogRequestInterceptor,
   LocalizationInterceptor,
-  SavePersistenceAttributesToSession
+  SavePersistenceAttributesToSession,
+  AddDirectiveResponseInterceptor,
 };

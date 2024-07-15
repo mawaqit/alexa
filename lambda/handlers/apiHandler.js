@@ -51,7 +51,7 @@ const getPrayerTimings = async (mosqueUuid) => {
         throw "Received Empty Response";
       }
 
-      return response.data.times;
+      return response.data;
     })
     .catch((error) => {
         

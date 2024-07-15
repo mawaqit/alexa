@@ -5,24 +5,33 @@ const {
   LocalizationInterceptor,
   LogRequestInterceptor,
   LogResponseInterceptor,
-  SavePersistenceAttributesToSession
+  SavePersistenceAttributesToSession,
+  AddDirectiveResponseInterceptor,
 } = require("./interceptors.js");
 const helperFunctions = require("./helperFunctions.js");
 const { SkillEventHandler } = require("./handlers/skillEventHandler.js");
-const { SelectMosqueIntentAfterSelectingMosqueHandler } = require("./handlers/intentHandler.js");
+const {
+  SelectMosqueIntentAfterSelectingMosqueHandler,
+  SelectMosqueIntentStartedHandler,
+  SelectMosqueIntentSearchWordHandler,
+  NextPrayerTimeIntentHandler,
+} = require("./handlers/intentHandler.js");
 const { MosqueListTouchEventHandler } = require("./handlers/touchHandler.js");
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest" ||
+      (Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+        Alexa.getIntentName(handlerInput.requestEnvelope) ===
+          "NextPrayerTimeIntent" &&
+        !Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerName"))
     );
   },
   async handle(handlerInput) {
     return await helperFunctions.checkForPersistenceData(handlerInput);
   },
 };
-
 
 const HelpIntentHandler = {
   canHandle(handlerInput) {
@@ -156,6 +165,9 @@ exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
     HelpIntentHandler,
+    NextPrayerTimeIntentHandler,
+    SelectMosqueIntentStartedHandler,
+    SelectMosqueIntentSearchWordHandler,
     SelectMosqueIntentAfterSelectingMosqueHandler,
     MosqueListTouchEventHandler,
     SkillEventHandler,
@@ -164,8 +176,15 @@ exports.handler = Alexa.SkillBuilders.custom()
     SessionEndedRequestHandler,
     IntentReflectorHandler
   )
-  .addRequestInterceptors(LogRequestInterceptor,SavePersistenceAttributesToSession, LocalizationInterceptor)
-  .addResponseInterceptors(LogResponseInterceptor)
+  .addRequestInterceptors(
+    LogRequestInterceptor,
+    SavePersistenceAttributesToSession,
+    LocalizationInterceptor
+  )
+  .addResponseInterceptors(
+    LogResponseInterceptor,
+    AddDirectiveResponseInterceptor
+  )
   .addErrorHandlers(ErrorHandler)
   .withPersistenceAdapter(
     new ddbAdapter.DynamoDbPersistenceAdapter({

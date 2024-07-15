@@ -1,6 +1,6 @@
 const Alexa = require("ask-sdk-core");
 const helperFunctions = require("../helperFunctions.js");
-
+const { getPrayerTimings } = require("./apiHandler.js");
 const MosqueListTouchEventHandler = {
   canHandle(handlerInput) {
     return (
@@ -17,17 +17,31 @@ const MosqueListTouchEventHandler = {
     const selectedMosque = handlerInput.requestEnvelope.request.arguments[1];
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     sessionAttributes.persistentAttributes = selectedMosque;
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
     handlerInput.attributesManager.setPersistentAttributes(
       sessionAttributes.persistentAttributes
     );
     await handlerInput.attributesManager.savePersistentAttributes();
-    return await helperFunctions.getPrayerTimingsForMosque(
-      handlerInput,
-      selectedMosque,
-      " "
-    );
+    try {
+      const mosqueTimes = await getPrayerTimings(selectedMosque.uuid);
+      sessionAttributes.mosqueTimes = mosqueTimes;
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+      return await helperFunctions.getPrayerTimingsForMosque(
+        handlerInput,
+        mosqueTimes,
+        " "
+      );
+    } catch (error) {
+      console.log("Error in fetching prayer timings: ", error);
+      if (error === "Mosque not found") {
+        return await helperFunctions.getListOfMosque(handlerInput);
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
   },
 };
 

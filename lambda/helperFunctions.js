@@ -1,9 +1,13 @@
 const Alexa = require("ask-sdk-core");
 const { v4: uuidv4 } = require("uuid");
-const { getMosqueList, getPrayerTimings } = require("./handlers/apiHandler.js");
-const { getDataSourceforMosqueList } = require("./datasources.js");
+const { getMosqueList } = require("./handlers/apiHandler.js");
+const {
+  getDataSourceforMosqueList,
+  getDatSourceForPrayerTime,
+} = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
 const moment = require("moment-timezone");
+const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
 
 const getPersistedData = async (handlerInput) => {
   try {
@@ -47,7 +51,7 @@ const getNextPrayerTime = (times, timezone, prayerNames) => {
   const timeMoments = times.map((time, index) => {
     const [hours, minutes] = time.split(":");
     const currentMoment = now.format("YYYY-MM-DDTHH:mm");
-    const timeMoment =`${now.format("YYYY-MM-DD")}T${hours}:${minutes}`;
+    const timeMoment = `${now.format("YYYY-MM-DD")}T${hours}:${minutes}`;
     return {
       name: prayerNames[index],
       time: moment(timeMoment),
@@ -56,14 +60,13 @@ const getNextPrayerTime = (times, timezone, prayerNames) => {
   });
   console.log("Time Moments: ", timeMoments);
   // Find the first time greater than or equal to current time (considering time zone)
-  const nextTime = timeMoments
-    .find(({ time }) => time.isSameOrAfter(now));
+  const nextTime = timeMoments.find(({ time }) => time.isSameOrAfter(now));
   console.log("Next Time: ", nextTime);
   if (nextTime && nextTime) {
     console.log(
       "The first time greater than or equal to current time is:",
       nextTime
-    );    
+    );
     return {
       name: nextTime.name,
       time: nextTime.time.format("HH:mm"),
@@ -74,7 +77,10 @@ const getNextPrayerTime = (times, timezone, prayerNames) => {
     return {
       name: prayerNames[0],
       time: times[0],
-      diffInMinutes: calculateMinutes(now.format("YYYY-MM-DDTHH:mm"), `${now.add(1, 'days').format("YYYY-MM-DD")}T${times[0]}`),
+      diffInMinutes: calculateMinutes(
+        now.format("YYYY-MM-DDTHH:mm"),
+        `${now.add(1, "days").format("YYYY-MM-DD")}T${times[0]}`
+      ),
     };
   }
 };
@@ -82,40 +88,42 @@ const getNextPrayerTime = (times, timezone, prayerNames) => {
 const checkForPersistenceData = async (handlerInput) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
-  const { persistentAttributes } = sessionAttributes;
+  const { persistentAttributes, mosqueTimes } = sessionAttributes;
   console.log("Persisted Data: ", persistentAttributes);
   if (persistentAttributes) {
-    return await getPrayerTimingsForMosque(handlerInput, persistentAttributes);
+    return await getPrayerTimingsForMosque(handlerInput, mosqueTimes);
   }
   return await getListOfMosque(handlerInput);
 };
 
-const getPrayerTimingsForMosque = async (handlerInput, persistedData, speakOutput) => {
+const getPrayerTimingsForMosque = async (
+  handlerInput,
+  mosqueTimes,
+  speakOutput
+) => {
   const { responseBuilder, attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
-  if(!speakOutput) {
+  const persistedData =
+    attributesManager.getSessionAttributes().persistentAttributes;
+  if (!speakOutput) {
     speakOutput = requestAttributes.t("welcomePrompt");
   }
   try {
-    const mosqueTimings = await getPrayerTimings(persistedData.uuid);
     const userTimeZone = await getUserTimezone(handlerInput);
     const prayerNames = requestAttributes.t("prayerNames");
     const nextPrayerTime = getNextPrayerTime(
-      mosqueTimings,
+      mosqueTimes.times,
       userTimeZone,
       prayerNames
     );
-    return responseBuilder
-      .speak(
-        speakOutput +
-          requestAttributes.t(
-            "nextPrayerTimePrompt",
-            nextPrayerTime.name,
-            nextPrayerTime.time,
-            nextPrayerTime.diffInMinutes
-          )
-      )
-      .getResponse();
+    speakOutput += requestAttributes.t(
+      "nextPrayerTimePrompt",
+      persistedData.primaryText,
+      nextPrayerTime.name,
+      nextPrayerTime.time,
+      nextPrayerTime.diffInMinutes
+    );
+    return responseBuilder.speak(speakOutput).getResponse();
   } catch (error) {
     console.log("Error in fetching prayer timings: ", error);
     if (error === "Mosque not found") {
@@ -227,7 +235,9 @@ const createResponseDirectiveForMosqueList = (
   const { responseBuilder, attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
   if (!speechPrompt) {
-    speechPrompt = requestAttributes.t("welcomePrompt");
+    speechPrompt =
+      requestAttributes.t("welcomePrompt") +
+      requestAttributes.t("mosqueNotRegisteredPrompt");
   }
   responseBuilder.addDirective({
     type: "Dialog.ElicitSlot",
@@ -264,9 +274,7 @@ const createResponseDirectiveForMosqueList = (
     .join(", ");
   console.log("Mosque List Prompt: ", mosqueListPrompt);
   speechPrompt += requestAttributes.t("chooseMosquePrompt", mosqueListPrompt);
-  return responseBuilder
-    .speak(speechPrompt)
-    .getResponse();
+  return responseBuilder.speak(speechPrompt).getResponse();
 };
 
 const getUserTimezone = async (handlerInput) => {
@@ -297,8 +305,130 @@ function calculateMinutes(start, end) {
   // Convert the difference to minutes
   const diffInMinutes = diffInMilliseconds / 1000 / 60;
 
-  return String(diffInMinutes);
+  let result;
+
+  if (diffInMinutes >= 60) {
+    const hours = Math.floor(diffInMinutes / 60);
+    const minutes = Math.floor(diffInMinutes % 60);
+    result = `${hours} hours and ${minutes} minutes`;
+  } else if (diffInMinutes < 1) {
+    const diffInSeconds = diffInMilliseconds / 1000;
+    result = `${diffInSeconds} seconds`;
+  } else {
+    result = `${diffInMinutes} minutes`;
+  }
+
+  return result;
 }
+
+//Provides resolved slot value
+function getResolvedValue(requestEnvelope, slotName) {
+  if (
+    requestEnvelope &&
+    requestEnvelope.request &&
+    requestEnvelope.request.intent &&
+    requestEnvelope.request.intent.slots &&
+    requestEnvelope.request.intent.slots[slotName] &&
+    requestEnvelope.request.intent.slots[slotName].resolutions &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0] &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values[0] &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values[0].value &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values[0].value.name
+  ) {
+    return requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values[0].value.name;
+  }
+  return undefined;
+}
+
+//Provides resolved slot id
+function getResolvedId(requestEnvelope, slotName) {
+  if (
+    requestEnvelope &&
+    requestEnvelope.request &&
+    requestEnvelope.request.intent &&
+    requestEnvelope.request.intent.slots &&
+    requestEnvelope.request.intent.slots[slotName] &&
+    requestEnvelope.request.intent.slots[slotName].resolutions &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0] &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values[0] &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values[0].value &&
+    requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values[0].value.id
+  ) {
+    return requestEnvelope.request.intent.slots[slotName].resolutions
+      .resolutionsPerAuthority[0].values[0].value.id;
+  }
+  return undefined;
+}
+
+const getPrayerTimeForSpecificPrayer = (
+  handlerInput,
+  nameOfMosque,
+  prayerTime,
+  currentMoment,
+  now,
+  prayerName
+) => {
+  try {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    const [hours, minutes] = prayerTime.split(":");
+    const timeMoment = moment(
+      `${now.format("YYYY-MM-DD")}T${hours}:${minutes}`
+    );
+    const timeDifference = timeMoment.isSameOrAfter(currentMoment)
+      ? moment.duration(timeMoment.diff(currentMoment))
+      : moment.duration(timeMoment.add(1, "days").diff(currentMoment));
+    const hoursDiff = timeDifference.hours();
+    const minutesDiff = timeDifference.minutes();
+    let speakOutput;
+    if (minutesDiff < 59 && hoursDiff < 1) {
+      speakOutput = requestAttributes.t("minutesPrompt", minutesDiff);
+    } else {
+      speakOutput = requestAttributes.t(
+        "hoursAndMinutesPrompt",
+        hoursDiff,
+        minutesDiff
+      );
+    }
+    return handlerInput.responseBuilder
+      .speak(
+        requestAttributes.t(
+          "nextPrayerTimeWithNamePrompt",
+          nameOfMosque,
+          prayerName,
+          prayerTime,
+          speakOutput
+        )
+      )
+      .withShouldEndSession(false)
+      .getResponse();
+  } catch (error) {
+    console.log("Error in fetching prayer time for specific prayer: ", error);
+    return handlerInput.responseBuilder
+      .speak(
+        "Sorry, I am unable to fetch the prayer time for the specific prayer."
+      )
+      .withShouldEndSession(true)
+      .getResponse();
+  }
+};
 
 module.exports = {
   getPersistedData,
@@ -309,4 +439,10 @@ module.exports = {
   getListOfMosque,
   checkForPersistenceData,
   createResponseDirectiveForMosqueList,
+  getListOfMosqueBasedOnCity,
+  getResolvedValue,
+  getResolvedId,
+  getUserTimezone,
+  calculateMinutes,
+  getPrayerTimeForSpecificPrayer,
 };

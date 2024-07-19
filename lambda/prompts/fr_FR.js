@@ -9,7 +9,7 @@ module.exports = {
     errorPrompt: `Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.`,
     noDataPrompt: `Désolé, je n'ai pu trouver aucune donnée pour cette reqûete. Veuillez réessayer s'il vous plaît.`,
     noCityPrompt: `Désolé, je n'ai pu trouver aucune mosuée pour cette ville. Veuillez réessayer s'il vous plaît.`,
-    requestForGeoLocationPrompt: `${process.env.skillName} aimerais utiliser votre localisation. Pour activer le partage de localisation, lancez l'application Alexa et suivez les instructions.`,
+    requestForGeoLocationPrompt: `${process.env.skillName} aimerait utiliser votre localisation. Pour activer le partage de connexion, lancez l'application Alexa et suivez les instructions.`,
     noAddressPrompt:
       "Il semble que vous n'avez pas défini votre adresse sur Alexa. Vous pouvez le faire depuis l'application Alexa. Cela me permettra de trouver les mosquées proches de vous.",
     errorPromptforMosqueList: `Vous ne pouvez pas utiliser notre Skill pour l'instant car vous n'avez pas de mosquée MAWAQIT proche de vous. S'il vous plaît, vérifiez votre localisation.`,

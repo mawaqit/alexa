@@ -42,19 +42,23 @@ const AddDirectiveResponseInterceptor = {
       console.log("APL Directive: ", JSON.stringify(aplDirective));
       if (!aplDirective) {
         const ssmlText = response.outputSpeech.ssml;
-        const regex = /<speak>(.*?)<\/speak>/;
-        const match = ssmlText.match(regex);
-        const text = match && match[1] ? match[1] : "";
-        const dataSource = getDatSourceForPrayerTime(handlerInput, text);
-        const directive = helperFunctions.createDirectivePayload(
-          prayerTimeApl,
-          dataSource
-        );
+        console.log("SSML Text: ", ssmlText);
+        if (ssmlText && !ssmlText.includes("audio src=")) {
+          console.log("Adding APL Directive");
+          const regex = /<speak>(.*?)<\/speak>/;
+          const match = ssmlText.match(regex);
+          const text = match && match[1] ? match[1] : "";
+          const dataSource = getDatSourceForPrayerTime(handlerInput, text);
+          const directive = helperFunctions.createDirectivePayload(
+            prayerTimeApl,
+            dataSource
+          );
 
-        if (!directives) {
-          response.directives = [directive];
-        } else {
-          response.directives.push(directive);
+          if (!directives) {
+            response.directives = [directive];
+          } else {
+            response.directives.push(directive);
+          }
         }
       }
     }

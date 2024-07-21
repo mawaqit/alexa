@@ -1,6 +1,6 @@
 const axios = require("axios");
-const apiKey = "Bearer " + process.env.apiKey;
-const baseUrl = process.env.baseUrl;
+const apiKey = "Bearer " + process.env.mawaqitApiKey;
+const mawaqitBaseUrl = process.env.baseUrl;
 const headers = {
   accept: "application/json",
   Authorization: apiKey,
@@ -12,11 +12,11 @@ const getMosqueList = async (
   longitudeInDegrees
 ) => {
   let url = `/mosque/search?`;
-  if (searchWord) {
-    url += `word=${searchWord}`;
-  } else {
-    url += `lat=${latitudeInDegrees}&lon=${longitudeInDegrees}`;
-  }
+  // if (searchWord) {
+  //   url += `word=${searchWord}`;
+  // } else {
+  //   url += `lat=${latitudeInDegrees}&lon=${longitudeInDegrees}`;
+  // }
   url += `word=India`; //TODO: testing purposes remove later
   const config = getConfig("get", url, "2.0");
   console.log("Config: ", JSON.stringify(config));
@@ -67,7 +67,7 @@ const getPrayerTimings = async (mosqueUuid) => {
 const getConfig = (httpMethod, url, apiVersion = "3.0") => {
   return {
     method: httpMethod,
-    url: baseUrl + apiVersion + url,
+    url: mawaqitBaseUrl + apiVersion + url,
     headers: headers,
   };
 };

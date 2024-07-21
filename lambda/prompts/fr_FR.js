@@ -31,5 +31,8 @@ module.exports = {
     minutesPrompt: "%s minutes",
     nextPrayerTimeSpecificPrompt: `à %s, la prière de %s est à %s. Voulez-vous savoir autre chose ?`,
     shuruqPrompt: `à %s, Shourouk est à %s. Voulez-vous savoir autre chose ?`,
+    secondsPrompt: "%s seconds",
+    errorGeoConversionPrompt: `Sorry, I couldn't convert the address to geolocation. Please try again.`,
+    nextIqamaTimePrompt: `The next iqama time at %s is %s at %s in %s. Do you want something more?`
   },
 };

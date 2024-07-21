@@ -1,13 +1,10 @@
 const Alexa = require("ask-sdk-core");
 const { v4: uuidv4 } = require("uuid");
 const { getMosqueList } = require("./handlers/apiHandler.js");
-const {
-  getDataSourceforMosqueList,
-  getDatSourceForPrayerTime,
-} = require("./datasources.js");
+const { getDataSourceforMosqueList } = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
 const moment = require("moment-timezone");
-const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
+const { getLatLng } = require("./handlers/googleGeoApiHandler.js");
 
 const getPersistedData = async (handlerInput) => {
   try {
@@ -39,7 +36,7 @@ const createDirectivePayload = (aplDocument, dataSources = {}) => {
   };
 };
 
-const getNextPrayerTime = (times, timezone, prayerNames) => {
+const getNextPrayerTime = (requestAttributes, times, timezone, prayerNames, iqamaTime = []) => {
   const currentDateTime = new Date(
     new Date().toLocaleString("en-US", { timeZone: timezone })
   );
@@ -48,21 +45,12 @@ const getNextPrayerTime = (times, timezone, prayerNames) => {
   console.log("Now: ", JSON.stringify(now));
 
   // Parse times into moment objects (assuming times are in your current time zone)
-  const timeMoments = times.map((time, index) => {
-    const [hours, minutes] = time.split(":");
-    const currentMoment = now.format("YYYY-MM-DDTHH:mm");
-    const timeMoment = `${now.format("YYYY-MM-DD")}T${hours}:${minutes}`;
-    return {
-      name: prayerNames[index],
-      time: moment(timeMoment),
-      diffInMinutes: calculateMinutes(currentMoment, timeMoment),
-    };
-  });
+  const timeMoments = times.map((time, index) => generateNextPrayerTime(requestAttributes, time, now, prayerNames, index, iqamaTime[index]));
   console.log("Time Moments: ", timeMoments);
   // Find the first time greater than or equal to current time (considering time zone)
   const nextTime = timeMoments.find(({ time }) => time.isSameOrAfter(now));
   console.log("Next Time: ", nextTime);
-  if (nextTime && nextTime) {
+  if (nextTime) {
     console.log(
       "The first time greater than or equal to current time is:",
       nextTime
@@ -78,6 +66,7 @@ const getNextPrayerTime = (times, timezone, prayerNames) => {
       name: prayerNames[0],
       time: times[0],
       diffInMinutes: calculateMinutes(
+        requestAttributes,
         now.format("YYYY-MM-DDTHH:mm"),
         `${now.add(1, "days").format("YYYY-MM-DD")}T${times[0]}`
       ),
@@ -112,6 +101,7 @@ const getPrayerTimingsForMosque = async (
     const userTimeZone = await getUserTimezone(handlerInput);
     const prayerNames = requestAttributes.t("prayerNames");
     const nextPrayerTime = getNextPrayerTime(
+      requestAttributes,
       mosqueTimes.times,
       userTimeZone,
       prayerNames
@@ -206,20 +196,33 @@ const getListOfMosqueBasedOnCity = async (handlerInput) => {
       "Address successfully retrieved, now responding to user : ",
       address
     );
-    const { city } = address;
+    const { city, postalCode } = address;
 
-    if (city === null || !city.length) {
+    if (
+      city === null ||
+      !city.length ||
+      postalCode === null ||
+      !postalCode.length
+    ) {
       return responseBuilder
         .speak(requestAttributes.t("noAddressPrompt"))
         .withShouldEndSession(true)
         .getResponse();
     }
-    const mosqueList = await getMosqueList(city);
+
+    const { lat, lng } = await getLatLng(address);
+    const mosqueList = await getMosqueList(false, lat, lng);
     sessionAttributes.mosqueList = mosqueList;
     attributesManager.setSessionAttributes(sessionAttributes);
     return createResponseDirectiveForMosqueList(handlerInput, mosqueList);
   } catch (error) {
     console.log("Error in retrieving address: ", error);
+    if (error && error.startsWith("GeoConversionError")) {
+      return responseBuilder
+        .speak(requestAttributes.t("errorGeoConversionPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
     return responseBuilder
       .speak(requestAttributes.t("errorPromptforMosqueList"))
       .withShouldEndSession(true)
@@ -294,7 +297,7 @@ const getUserTimezone = async (handlerInput) => {
   return userTimeZone;
 };
 
-function calculateMinutes(start, end) {
+function calculateMinutes(requestAttributes, start, end) {
   // Create Date objects from the input strings
   const startDate = new Date(start);
   const endDate = new Date(end);
@@ -310,14 +313,13 @@ function calculateMinutes(start, end) {
   if (diffInMinutes >= 60) {
     const hours = Math.floor(diffInMinutes / 60);
     const minutes = Math.floor(diffInMinutes % 60);
-    result = `${hours} hours and ${minutes} minutes`;
+    result = requestAttributes.t("hoursAndMinutesPrompt", hours, minutes);
   } else if (diffInMinutes < 1) {
     const diffInSeconds = diffInMilliseconds / 1000;
-    result = `${diffInSeconds} seconds`;
+    result = requestAttributes.t("secondsPrompt", diffInSeconds);
   } else {
-    result = `${diffInMinutes} minutes`;
+    result = requestAttributes.t("minutesPrompt", diffInMinutes);
   }
-
   return result;
 }
 
@@ -430,6 +432,22 @@ const getPrayerTimeForSpecificPrayer = (
   }
 };
 
+const generateNextPrayerTime = (requestAttributes, prayerTime, now, prayerNames, index, iqamaTime) => {
+  const [hours, minutes] = prayerTime.split(":");
+  const currentMoment = now.format("YYYY-MM-DDTHH:mm");
+  const minutesToAdd = iqamaTime? iqamaTime: 0;
+  const timeMoment = moment(now).set('hour', parseInt(hours)).set('minute', parseInt(minutes)).add(parseInt(minutesToAdd), "minutes").format("YYYY-MM-DDTHH:mm");
+  return {
+    name: prayerNames[index],
+    time: moment(timeMoment),
+    diffInMinutes: calculateMinutes(
+      requestAttributes,
+      currentMoment,
+      timeMoment
+    ),
+  };
+};
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -445,4 +463,5 @@ module.exports = {
   getUserTimezone,
   calculateMinutes,
   getPrayerTimeForSpecificPrayer,
+  generateNextPrayerTime
 };

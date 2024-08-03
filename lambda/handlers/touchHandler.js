@@ -30,7 +30,7 @@ const MosqueListTouchEventHandler = {
       return await helperFunctions.getPrayerTimingsForMosque(
         handlerInput,
         mosqueTimes,
-        " "
+        requestAttributes.t("selectedMosquePrompt", selectedMosque.primaryText)
       );
     } catch (error) {
       console.log("Error in fetching prayer timings: ", error);

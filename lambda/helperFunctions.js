@@ -5,6 +5,7 @@ const { getDataSourceforMosqueList } = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
 const moment = require("moment-timezone");
 const { getLatLng } = require("./handlers/googleGeoApiHandler.js");
+const translate = require('@iamtraction/google-translate');
 
 const getPersistedData = async (handlerInput) => {
   try {
@@ -161,13 +162,13 @@ const getListOfMosqueBasedOnGeoLocation = async (handlerInput) => {
     const { latitudeInDegrees, longitudeInDegrees } = coordinate;
     try {
       const mosqueList = await getMosqueList(
-        null,
+        false,
         latitudeInDegrees,
         longitudeInDegrees
       );
       sessionAttributes.mosqueList = mosqueList;
       attributesManager.setSessionAttributes(sessionAttributes);
-      return createResponseDirectiveForMosqueList(handlerInput, mosqueList);
+      return await createResponseDirectiveForMosqueList(handlerInput, mosqueList);
     } catch (error) {
       console.log("Error in fetching mosque list: ", error);
       return responseBuilder
@@ -214,7 +215,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput) => {
     const mosqueList = await getMosqueList(false, lat, lng);
     sessionAttributes.mosqueList = mosqueList;
     attributesManager.setSessionAttributes(sessionAttributes);
-    return createResponseDirectiveForMosqueList(handlerInput, mosqueList);
+    return await createResponseDirectiveForMosqueList(handlerInput, mosqueList);
   } catch (error) {
     console.log("Error in retrieving address: ", error);
     if (error && error.startsWith("GeoConversionError")) {
@@ -230,7 +231,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput) => {
   }
 };
 
-const createResponseDirectiveForMosqueList = (
+const createResponseDirectiveForMosqueList = async (
   handlerInput,
   mosqueList,
   speechPrompt
@@ -249,17 +250,25 @@ const createResponseDirectiveForMosqueList = (
       name: "SelectMosqueIntent",
       confirmationStatus: "NONE",
       slots: {
-        searchWord: {
-          name: "searchWord",
-          confirmationStatus: "NONE",
-        },
         selectedMosque: {
           name: "selectedMosque",
           confirmationStatus: "NONE",
         },
       },
     },
-  });
+  });  
+  mosqueList = await Promise.all(
+    mosqueList.map(async (mosque) => {
+      mosque.primaryText = await convertTextToEnglish(mosque.primaryText);
+      return mosque;
+    })
+  )
+  console.log("Mosque List: ", mosqueList);
+  const mosqueListPrompt = mosqueList
+  .map((mosque, index) => `${index + 1}. ${mosque.primaryText}`)
+  .join(", ");
+  console.log("Mosque List Prompt: ", mosqueListPrompt);  
+  speechPrompt += requestAttributes.t("chooseMosquePrompt", mosqueListPrompt);
   if (
     Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
       "Alexa.Presentation.APL"
@@ -269,15 +278,9 @@ const createResponseDirectiveForMosqueList = (
     console.log("Data Source: ", JSON.stringify(dataSource));
     const aplDirective = createDirectivePayload(mosqueListApl, dataSource);
     responseBuilder.addDirective(aplDirective);
+    speechPrompt += requestAttributes.t("chooseMosqueByTouchPrompt");
   }
-  console.log("Mosque List: ", mosqueList);
-  const mosqueListPrompt = mosqueList
-    .map((mosque) => mosque.primaryText)
-    .map((primaryText, index) => `${index + 1}. ${primaryText}`)
-    .join(", ");
-  console.log("Mosque List Prompt: ", mosqueListPrompt);
-  speechPrompt += requestAttributes.t("chooseMosquePrompt", mosqueListPrompt);
-  return responseBuilder.speak(speechPrompt).getResponse();
+  return responseBuilder.speak(speechPrompt).withShouldEndSession(false).getResponse();
 };
 
 const getUserTimezone = async (handlerInput) => {
@@ -381,7 +384,6 @@ function getResolvedId(requestEnvelope, slotName) {
 
 const getPrayerTimeForSpecificPrayer = (
   handlerInput,
-  nameOfMosque,
   prayerTime,
   currentMoment,
   now,
@@ -413,7 +415,6 @@ const getPrayerTimeForSpecificPrayer = (
       .speak(
         requestAttributes.t(
           "nextPrayerTimeWithNamePrompt",
-          nameOfMosque,
           prayerName,
           prayerTime,
           speakOutput
@@ -433,20 +434,40 @@ const getPrayerTimeForSpecificPrayer = (
 };
 
 const generateNextPrayerTime = (requestAttributes, prayerTime, now, prayerNames, index, iqamaTime) => {
-  const [hours, minutes] = prayerTime.split(":");
   const currentMoment = now.format("YYYY-MM-DDTHH:mm");
   const minutesToAdd = iqamaTime? iqamaTime: 0;
-  const timeMoment = moment(now).set('hour', parseInt(hours)).set('minute', parseInt(minutes)).add(parseInt(minutesToAdd), "minutes").format("YYYY-MM-DDTHH:mm");
+  const timeMoment = iqamaTime && iqamaTime.includes(":")? generateMomentObject(iqamaTime, now) : generateMomentObject(prayerTime, now).add(parseInt(minutesToAdd), "minutes");
   return {
     name: prayerNames[index],
-    time: moment(timeMoment),
+    time: timeMoment,
     diffInMinutes: calculateMinutes(
       requestAttributes,
       currentMoment,
-      timeMoment
+      timeMoment.format("YYYY-MM-DDTHH:mm")
     ),
   };
 };
+
+const generateMomentObject = (time, now) => {
+  const [hours, minutes] = time.split(":");
+  return moment(now).set("hour", parseInt(hours)).set("minute", parseInt(minutes));
+};
+
+const convertTextToEnglish = async (text) => {
+  try {    
+    let pattern =  /[a-zA-Z]/;
+    console.log("Text to convert: ", text);
+    if (pattern.test(text)) {
+      return text;
+    }
+    const translatedText = await translate(text, { to: "en" });
+    console.log("Translated Text: ", translatedText);
+    return translatedText && translatedText.text? translatedText.text : text;
+  } catch (error) {
+    console.log("Error in converting text to english: ", error);
+    return text;
+  }
+}
 
 module.exports = {
   getPersistedData,

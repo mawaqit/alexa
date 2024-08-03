@@ -1,6 +1,6 @@
 const Alexa = require("ask-sdk-core");
 const helperFunctions = require("../helperFunctions.js");
-const { getPrayerTimings } = require("./apiHandler.js");
+const { getPrayerTimings, getMosqueList } = require("./apiHandler.js");
 const moment = require("moment-timezone");
 const { getS3PreSignedUrl } = require("./s3Handler.js");
 
@@ -35,19 +35,20 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
     console.log("Selected Mosque: ", selectedMosque);
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
+    const { latitudeInDegrees, longitudeInDegrees } = sessionAttributes;
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const mosqueList = sessionAttributes.mosqueList;
     const selectedMosqueDetails = mosqueList[parseInt(selectedMosque) - 1];
     if (!selectedMosqueDetails) {
-      return helperFunctions.createResponseDirectiveForMosqueList(
+      return await helperFunctions.createResponseDirectiveForMosqueList(
         handlerInput,
         mosqueList,
         requestAttributes.t("unableToFindMosquePrompt")
       );
     }
     console.log("Selected Mosque Details: ", selectedMosqueDetails);
-    sessionAttributes.persistentAttributes = selectedMosqueDetails;
+    sessionAttributes.persistentAttributes = selectedMosqueDetails
     handlerInput.attributesManager.setPersistentAttributes(
       sessionAttributes.persistentAttributes
     );
@@ -59,7 +60,10 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       return await helperFunctions.getPrayerTimingsForMosque(
         handlerInput,
         mosqueTimes,
-        " "
+        requestAttributes.t(
+          "selectedMosquePrompt",
+          selectedMosqueDetails.primaryText
+        )
       );
     } catch (error) {
       console.log("Error in fetching prayer timings: ", error);
@@ -121,7 +125,6 @@ const NextPrayerTimeIntentHandler = {
         mosqueTimesData.times[parseInt(prayerNameResolvedId)];
       return helperFunctions.getPrayerTimeForSpecificPrayer(
         handlerInput,
-        primaryText,
         timeForNextPrayer,
         currentMoment,
         now,
@@ -137,7 +140,7 @@ const NextPrayerTimeIntentHandler = {
           mosqueTimesData.jumua3,
         ];
         // Find the first non-null Jumu'ah time
-        const firstNonNullJumua = jumuaTimes.find((time) => time !== null);
+        const firstNonNullJumua = jumuaTimes.filter((time) => time !== null).join(" , ");
         if (firstNonNullJumua) {
           return handlerInput.responseBuilder
             .speak(
@@ -162,7 +165,7 @@ const NextPrayerTimeIntentHandler = {
           mosqueTimesData.aidPrayerTime2,
         ];
         // Find the first non-null Eid time
-        const firstNonNullEid = eidTimes.find((time) => time !== null);
+        const firstNonNullEid = eidTimes.filter((time) => time !== null).join(" , ");
         if (firstNonNullEid) {
           return handlerInput.responseBuilder
             .speak(
@@ -185,7 +188,6 @@ const NextPrayerTimeIntentHandler = {
         if (firstNonNullShuruq) {
           return helperFunctions.getPrayerTimeForSpecificPrayer(
             handlerInput,
-            primaryText,
             firstNonNullShuruq,
             currentMoment,
             now,
@@ -198,6 +200,33 @@ const NextPrayerTimeIntentHandler = {
           .getResponse();
     }
   },
+};
+
+const NextPrayerTimeIntentWithoutNameHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "NextPrayerTimeIntent" &&
+      !Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerName")
+    );
+  },
+  async handle(handlerInput) {
+    const sessionAttributes =
+      handlerInput.attributesManager.getSessionAttributes();
+    const { persistentAttributes, mosqueTimes } = sessionAttributes;
+    const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
+    if (!persistentAttributes || !persistentAttributes.uuid) {
+      return await helperFunctions.checkForPersistenceData(handlerInput);
+    }
+    const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), requestAttributes.t("prayerNames"));
+    const speakOutput = requestAttributes.t("nextPrayerWithoutMosquePrompt", prayerTimeDetails.name, prayerTimeDetails.time, prayerTimeDetails.diffInMinutes);
+    return handlerInput.responseBuilder
+      .speak(speakOutput)
+      .withShouldEndSession(false)
+      .getResponse();
+  }
 };
 
 const NextIqamaTimeIntentHandler = {
@@ -216,12 +245,18 @@ const NextIqamaTimeIntentHandler = {
       if (!persistentAttributes || !persistentAttributes.uuid) {
         return helperFunctions.checkForPersistenceData(handlerInput);
       }
-      const { primaryText } = persistentAttributes;
       const requestAttributes =
         handlerInput.attributesManager.getRequestAttributes();
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       console.log("User Timezone: ", userTimeZone);
       const prayerNames = requestAttributes.t("prayerNames");
+      const { iqamaEnabled } =  mosqueTimes;
+      if(!iqamaEnabled) {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("iqamaNotEnabledPrompt"))
+          .withShouldEndSession(false)
+          .getResponse();
+      }
       const iqamaCalendar = mosqueTimes.iqamaCalendar;
       const currentDateTime = new Date(
         new Date().toLocaleString("en-US", { timeZone: userTimeZone })
@@ -242,9 +277,7 @@ const NextIqamaTimeIntentHandler = {
         .speak(
           requestAttributes.t(
             "nextIqamaTimePrompt",
-            primaryText,
             nextIqamaTime.name,
-            nextIqamaTime.time,
             nextIqamaTime.diffInMinutes
           )
         )
@@ -276,10 +309,55 @@ const PlayAdhanIntentHandler = {
   },
 };
 
+const MosqueInfoIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "MosqueInfoIntent"
+    );
+  },
+  async handle(handlerInput) {
+    try {
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const { persistentAttributes } = sessionAttributes;
+      if (!persistentAttributes || !persistentAttributes.uuid) {
+        return helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      const requestAttributes =
+        handlerInput.attributesManager.getRequestAttributes();
+      const { primaryText, localisation, proximity, jumua, jumua2, jumua3 } = persistentAttributes;
+       // Extract only the Jumu'ah times
+       const jumuaTimes = [
+        jumua,
+        jumua2,
+        jumua3,
+      ];
+      // Find the first non-null Jumu'ah time
+      const firstNonNullJumua = jumuaTimes.filter((time) => time !== null).join(" , ");
+      const speakOutput = requestAttributes.t("mosqueInfoPrompt", primaryText, localisation, String(proximity), firstNonNullJumua);
+      return handlerInput.responseBuilder
+        .speak(speakOutput)
+        .withShouldEndSession(false)
+        .getResponse();
+
+    } catch (error) {
+      console.log("Error in fetching Mosque Info ", error);
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("mosqueInfoErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  },
+};
+
 module.exports = {
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
   NextPrayerTimeIntentHandler,
   NextIqamaTimeIntentHandler,
-  PlayAdhanIntentHandler
+  PlayAdhanIntentHandler,
+  NextPrayerTimeIntentWithoutNameHandler,
+  MosqueInfoIntentHandler
 };

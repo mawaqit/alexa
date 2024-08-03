@@ -17,7 +17,8 @@ const getMosqueList = async (
   // } else {
   //   url += `lat=${latitudeInDegrees}&lon=${longitudeInDegrees}`;
   // }
-  url += `word=India`; //TODO: testing purposes remove later
+  // url += `word=India`; //TODO: testing purposes remove later
+  url += `lat=10.9543588&lon=79.7294113`;
   const config = getConfig("get", url, "2.0");
   console.log("Config: ", JSON.stringify(config));
   return await axios
@@ -28,9 +29,14 @@ const getMosqueList = async (
         throw "Received Empty Response";
       }
 
-      return response.data.map(({ name, uuid }) => ({
+      return response.data.map(({ name, uuid, proximity, localisation, jumua, jumua2, jumua3 }) => ({
         primaryText: name,
-        uuid
+        uuid,
+        proximity,
+        localisation,
+        jumua,
+        jumua2,
+        jumua3
       })).slice(0, 5);
     })
     .catch((error) => {

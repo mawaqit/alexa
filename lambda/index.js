@@ -15,18 +15,16 @@ const {
   SelectMosqueIntentStartedHandler,
   NextPrayerTimeIntentHandler,
   NextIqamaTimeIntentHandler,
-  PlayAdhanIntentHandler
+  PlayAdhanIntentHandler,
+  NextPrayerTimeIntentWithoutNameHandler,
+  MosqueInfoIntentHandler
 } = require("./handlers/intentHandler.js");
 const { MosqueListTouchEventHandler } = require("./handlers/touchHandler.js");
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest" ||
-      (Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-        Alexa.getIntentName(handlerInput.requestEnvelope) ===
-          "NextPrayerTimeIntent" &&
-        !Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerName"))
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
     );
   },
   async handle(handlerInput) {
@@ -42,8 +40,8 @@ const HelpIntentHandler = {
     );
   },
   handle(handlerInput) {
-    const speakOutput = "You can say hello to me! How can I help?";
-
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const speakOutput = requestAttributes.t("helpPrompt");
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(speakOutput)
@@ -166,6 +164,8 @@ exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
     HelpIntentHandler,
+    MosqueInfoIntentHandler,
+    NextPrayerTimeIntentWithoutNameHandler,
     NextPrayerTimeIntentHandler,
     NextIqamaTimeIntentHandler,
     PlayAdhanIntentHandler,

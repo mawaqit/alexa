@@ -3,16 +3,17 @@ module.exports = {
   translation: {
     skillName: process.env.skillName, //new
     welcomePrompt: `Salam Aleykoum ! `,
-    chooseMosquePrompt: ` Quelle mosquée voulez-vous choisir ? %s. Vous pouvez dire le numéro associé à la mosquée, vous pouvez aussi sélectionner en cliquant sur l'écran.`,
-    helpPrompt: `Vous pouvez me demander les heures de prière, des informations sur votre mosquée, vous pouvez aussi changer de mosquée ou quitter la Skill. Comment puis-je vous aider ?`,
+    chooseMosquePrompt: ` Which mosque do you want to choose? The nearest mosques are :  %s. You can choose by saying the number associated to the mosque `,
+    chooseMosqueByTouchPrompt: "or you can choose by clicking on the mosque on your screen.",
+    helpPrompt: `You can ask me to tell you the time of the next prayer or any other prayer, you can also ask me information on your mosque. I can play adhan and change your favorite mosque.`,
     stopPrompt: `Au revoir et qu'Allah vous préserve !`,
     errorPrompt: `Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.`,
     noDataPrompt: `Désolé, je n'ai pu trouver aucune donnée pour cette reqûete. Veuillez réessayer s'il vous plaît.`,
-    noCityPrompt: `Désolé, je n'ai pu trouver aucune mosuée pour cette ville. Veuillez réessayer s'il vous plaît.`,
-    requestForGeoLocationPrompt: `${process.env.skillName} aimerait utiliser votre localisation. Pour activer le partage de connexion, lancez l'application Alexa et suivez les instructions.`,
+    noCityPrompt: `Désolé, je n'ai pu trouver aucune mosuée pour cette ville. Veuillez réessayer s'il vous plaît.`,    
+    requestForGeoLocationPrompt: `Thanks for using ${process.env.skillName} to provide you exact prayer times of your mosque. To use our skill, we will need to have access to your location so that we can find the nearest mosques from you. Please open the Alexa app to accept.`,
     noAddressPrompt:
       "Il semble que vous n'avez pas défini votre adresse sur Alexa. Vous pouvez le faire depuis l'application Alexa. Cela me permettra de trouver les mosquées proches de vous.",
-    errorPromptforMosqueList: `Vous ne pouvez pas utiliser notre Skill pour l'instant car vous n'avez pas de mosquée MAWAQIT proche de vous. S'il vous plaît, vérifiez votre localisation.`,
+    errorPromptforMosqueList: `I have found no mosque near your location. I am sorry but for now, there is no mosque equipped with ${process.env.skillName} around you.`,
     logoUrl:
       "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
     backgroundImageUrl:
@@ -20,7 +21,7 @@ module.exports = {
     titleForMosqueList: `Mosquées ${process.env.skillName}`,
     layoutDirection: "LTR",
     nextPrayerTimeErrorPrompt: `Désolé, je n'ai pas pu trouver l'heure de la prochaine prière pour votre mosquée. Veuillez réessayer s'il vous plaît.`,
-    nextPrayerTimePrompt: "La prochaine prière à %s est %s à %s dans %s. Voulez-vous savoir autre chose ?",
+    nextPrayerTimePrompt: "At %s the next prayer is %s at %s in %s. Do you want something more?",
     prayerNames: ["Fajr", "Dohr", "Asr", "Maghrib", "Isha"],
     unableToFindMosquePrompt: `Désolé, je n'ai pas pu trouver la mosquée que vous cherchez. S'il vous plaît, choisissez une option valide.`,
     mosqueNotRegisteredPrompt: `Vous n'avez pas enregistré de mosquée pour faire cette reqûete. Veuillez enregistrer une mosquée d'abord.`,
@@ -33,6 +34,12 @@ module.exports = {
     shuruqPrompt: `à %s, Shourouk est à %s. Voulez-vous savoir autre chose ?`,
     secondsPrompt: "%s seconds",
     errorGeoConversionPrompt: `Sorry, I couldn't convert the address to geolocation. Please try again.`,
-    nextIqamaTimePrompt: `The next iqama time at %s is %s at %s in %s. Do you want something more?`
+    nextIqamaTimePrompt: `The iqama for the next prayer %s is in %s. `,
+    selectedMosquePrompt: `Perfect, %s is now your favorite mosque! `,
+    nextPrayerWithoutMosquePrompt: `The next prayer is %s at %s in %s.`,
+    iqamaNotEnabledPrompt: "Iqama information is not provided by your mosque.",
+    mosqueInfoPrompt: "Your mosque is %s. Located at %s, approximately %s km from your location. The jumua is at %s.",
+    mosqueInfoErrorPrompt: "Sorry, I couldn't find the information for your mosque. Please try again.",
+    nextPrayerTimeWithNamePrompt: ` %s at %s in %s. `,     
   },
 };

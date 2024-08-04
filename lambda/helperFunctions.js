@@ -46,7 +46,7 @@ const getNextPrayerTime = (requestAttributes, times, timezone, prayerNames, iqam
   console.log("Now: ", JSON.stringify(now));
 
   // Parse times into moment objects (assuming times are in your current time zone)
-  const timeMoments = times.map((time, index) => generateNextPrayerTime(requestAttributes, time, now, prayerNames, index, iqamaTime[index]));
+  const timeMoments = times.map((time, index) => generateNextPrayerTime(requestAttributes, time, now, prayerNames[index], iqamaTime[index]));
   console.log("Time Moments: ", timeMoments);
   // Find the first time greater than or equal to current time (considering time zone)
   const nextTime = timeMoments.find(({ time }) => time.isSameOrAfter(now));
@@ -433,12 +433,12 @@ const getPrayerTimeForSpecificPrayer = (
   }
 };
 
-const generateNextPrayerTime = (requestAttributes, prayerTime, now, prayerNames, index, iqamaTime) => {
+const generateNextPrayerTime = (requestAttributes, prayerTime, now, prayerName, iqamaTime) => {
   const currentMoment = now.format("YYYY-MM-DDTHH:mm");
   const minutesToAdd = iqamaTime? iqamaTime: 0;
   const timeMoment = iqamaTime && iqamaTime.includes(":")? generateMomentObject(iqamaTime, now) : generateMomentObject(prayerTime, now).add(parseInt(minutesToAdd), "minutes");
   return {
-    name: prayerNames[index],
+    name: prayerName,
     time: timeMoment,
     diffInMinutes: calculateMinutes(
       requestAttributes,

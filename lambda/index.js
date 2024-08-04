@@ -17,7 +17,8 @@ const {
   NextIqamaTimeIntentHandler,
   PlayAdhanIntentHandler,
   NextPrayerTimeIntentWithoutNameHandler,
-  MosqueInfoIntentHandler
+  MosqueInfoIntentHandler,
+  AllIqamaTimeIntentHandler
 } = require("./handlers/intentHandler.js");
 const { MosqueListTouchEventHandler } = require("./handlers/touchHandler.js");
 
@@ -165,6 +166,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     LaunchRequestHandler,
     HelpIntentHandler,
     MosqueInfoIntentHandler,
+    AllIqamaTimeIntentHandler,
     NextPrayerTimeIntentWithoutNameHandler,
     NextPrayerTimeIntentHandler,
     NextIqamaTimeIntentHandler,

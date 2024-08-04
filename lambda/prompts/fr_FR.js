@@ -40,6 +40,7 @@ module.exports = {
     iqamaNotEnabledPrompt: "Iqama information is not provided by your mosque.",
     mosqueInfoPrompt: "Your mosque is %s. Located at %s, approximately %s km from your location. The jumua is at %s.",
     mosqueInfoErrorPrompt: "Sorry, I couldn't find the information for your mosque. Please try again.",
-    nextPrayerTimeWithNamePrompt: ` %s at %s in %s. `,     
+    nextPrayerTimeWithNamePrompt: ` %s at %s in %s. `,
+    allIqamaTimesPrompt: "For %s, the iqama time is %s. ",      
   },
 };

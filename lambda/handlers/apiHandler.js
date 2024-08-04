@@ -12,13 +12,13 @@ const getMosqueList = async (
   longitudeInDegrees
 ) => {
   let url = `/mosque/search?`;
-  // if (searchWord) {
-  //   url += `word=${searchWord}`;
-  // } else {
-  //   url += `lat=${latitudeInDegrees}&lon=${longitudeInDegrees}`;
-  // }
+  if (searchWord) {
+    url += `word=${searchWord}`;
+  } else {
+    url += `lat=${latitudeInDegrees}&lon=${longitudeInDegrees}`;
+  }
   // url += `word=India`; //TODO: testing purposes remove later
-  url += `lat=10.9543588&lon=79.7294113`;
+  // url += `lat=10.9543588&lon=79.7294113`;
   const config = getConfig("get", url, "2.0");
   console.log("Config: ", JSON.stringify(config));
   return await axios

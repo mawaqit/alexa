@@ -35,7 +35,6 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
     console.log("Selected Mosque: ", selectedMosque);
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
-    const { latitudeInDegrees, longitudeInDegrees } = sessionAttributes;
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const mosqueList = sessionAttributes.mosqueList;
@@ -301,7 +300,11 @@ const PlayAdhanIntentHandler = {
     );
   },
   handle(handlerInput) {
-    const speakOutput = `<audio src='${getS3PreSignedUrl(process.env.stage+"/converted-adhan.mp3")}' />`;
+    const prayerName = helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName");    
+    let speakOutput = `<audio src='${getS3PreSignedUrl(process.env.stage+"/converted-adhan.mp3")}' />`;
+    if(prayerName === "0"){
+      speakOutput = `<audio src='${getS3PreSignedUrl(process.env.stage+"/converted-adhan-fajr.mp3")}' />`;
+    }
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .withShouldEndSession(false)
@@ -352,6 +355,65 @@ const MosqueInfoIntentHandler = {
   },
 };
 
+const AllIqamaTimeIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "AllIqamaIntent"
+    );
+  },
+  async handle(handlerInput) {
+    try {
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const { persistentAttributes, mosqueTimes } = sessionAttributes;
+      if (!persistentAttributes || !persistentAttributes.uuid) {
+        return helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      const requestAttributes =
+        handlerInput.attributesManager.getRequestAttributes();
+      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      console.log("User Timezone: ", userTimeZone);
+      const prayerNames = requestAttributes.t("prayerNames");
+      const { iqamaEnabled } =  mosqueTimes;
+      if(!iqamaEnabled) {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("iqamaNotEnabledPrompt"))
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      const iqamaCalendar = mosqueTimes.iqamaCalendar;
+      const currentDateTime = new Date(
+        new Date().toLocaleString("en-US", { timeZone: userTimeZone })
+      );
+      const date = currentDateTime.getDate();
+      const month = currentDateTime.getMonth();
+      const iqamaTimes = iqamaCalendar[month][String(date)];
+      console.log("Iqama Times: ", iqamaTimes);
+      let allIqamaTimes = "";
+      prayerNames.forEach((prayer, index) => {
+        const iqamaTime = iqamaTimes[index];
+        const prayerTime = mosqueTimes.times[index];
+        const iqamaDetails = helperFunctions.generateNextPrayerTime(requestAttributes, prayerTime, moment(currentDateTime), prayer, iqamaTime);
+        console.log("Iqama Details for %s: ",prayer, iqamaDetails);
+        allIqamaTimes += requestAttributes.t("allIqamaTimesPrompt", prayer, iqamaDetails.time.format("HH:mm"));
+      });
+
+      return handlerInput.responseBuilder
+        .speak(allIqamaTimes)
+        .withShouldEndSession(false)
+        .getResponse();
+    } catch (error) {
+      console.log("Error in fetching iqama timings: ", error);
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  },
+};
+
 module.exports = {
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
@@ -359,5 +421,6 @@ module.exports = {
   NextIqamaTimeIntentHandler,
   PlayAdhanIntentHandler,
   NextPrayerTimeIntentWithoutNameHandler,
-  MosqueInfoIntentHandler
+  MosqueInfoIntentHandler,
+  AllIqamaTimeIntentHandler
 };

@@ -5,7 +5,8 @@ const Alexa = require("ask-sdk-core");
 const helperFunctions = require("./helperFunctions.js");
 const apiHandler = require("./handlers/apiHandler.js");
 const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
-const { getDatSourceForPrayerTime } = require("./datasources.js");
+const { getDataSourceForPrayerTime } = require("./datasources.js");
+const awsSsmHandler = require("./handlers/awsSsmHandler.js");
 
 const LogRequestInterceptor = {
   process(handlerInput) {
@@ -27,28 +28,27 @@ const LogResponseInterceptor = {
 
 const AddDirectiveResponseInterceptor = {
   process(handlerInput, response) {
+    
+    const { directives } = response;
+    const aplDirective = directives
+      ? directives.find(
+          (directive) =>
+            directive.type === "Alexa.Presentation.APL.RenderDocument"
+        )
+      : false;
+    console.log("APL Directive: ", JSON.stringify(aplDirective));      
+    const ssmlText = response.outputSpeech.ssml;      
+    console.log("SSML Text: ", ssmlText);
     if (
       Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
         "Alexa.Presentation.APL"
       ]
     ) {
-      const { directives } = response;
-      const aplDirective = directives
-        ? directives.find(
-            (directive) =>
-              directive.type === "Alexa.Presentation.APL.RenderDocument"
-          )
-        : false;
-      console.log("APL Directive: ", JSON.stringify(aplDirective));
       if (!aplDirective) {
-        const ssmlText = response.outputSpeech.ssml;
-        console.log("SSML Text: ", ssmlText);
         if (ssmlText && !ssmlText.includes("audio src=")) {
           console.log("Adding APL Directive");
-          const regex = /<speak>(.*?)<\/speak>/;
-          const match = ssmlText.match(regex);
-          const text = match && match[1] ? match[1] : "";
-          const dataSource = getDatSourceForPrayerTime(handlerInput, text);
+          const text = ssmlText.replace(/<\/?[^>]+(>|$)/g, "")
+          const dataSource = getDataSourceForPrayerTime(handlerInput, text);
           const directive = helperFunctions.createDirectivePayload(
             prayerTimeApl,
             dataSource
@@ -60,6 +60,17 @@ const AddDirectiveResponseInterceptor = {
             response.directives.push(directive);
           }
         }
+      }
+    } else {
+      console.log("APL not supported");
+      if (ssmlText && !ssmlText.includes("audio src=")) {
+        console.log("Adding APL Directive");
+        const text = ssmlText.replace(/<\/?[^>]+(>|$)/g, "");
+        response.card = {
+          type: "Simple",
+          title: process.env.skillName,
+          content: text,
+        };
       }
     }
   },
@@ -136,10 +147,19 @@ const SavePersistenceAttributesToSession = {
   },
 };
 
+const SetApiKeysAsEnvironmentVaraibleFromAwsSsm = {
+  async process(handlerInput) {
+    const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
+    if (isNewSession)
+      await awsSsmHandler.handler();
+  },
+};
+
 module.exports = {
   LogResponseInterceptor,
   LogRequestInterceptor,
   LocalizationInterceptor,
   SavePersistenceAttributesToSession,
   AddDirectiveResponseInterceptor,
+  SetApiKeysAsEnvironmentVaraibleFromAwsSsm
 };

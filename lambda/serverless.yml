@@ -27,6 +27,16 @@ provider:
       Action:
         - dynamodb:*
       Resource: "*"
+    - Effect: Allow
+      Action:
+        - 'ssm:GetParameter'
+        - 'ssm:GetParameters'
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - 'kms:Decrypt'
+      Resource: "*"
+
 
 functions:
   indexHandler:

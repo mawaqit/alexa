@@ -1,6 +1,7 @@
 const Alexa = require("ask-sdk-core");
 const helperFunctions = require("../helperFunctions.js");
 const { getPrayerTimings } = require("./apiHandler.js");
+
 const MosqueListTouchEventHandler = {
   canHandle(handlerInput) {
     return (
@@ -18,6 +19,9 @@ const MosqueListTouchEventHandler = {
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    selectedMosque.primaryText = await helperFunctions.convertTextToEnglish(selectedMosque.primaryText);
+    selectedMosque.localisation = await helperFunctions.convertTextToEnglish(selectedMosque.localisation);
+    selectedMosque.proximity = parseInt(selectedMosque.proximity)/1000;
     sessionAttributes.persistentAttributes = selectedMosque;
     handlerInput.attributesManager.setPersistentAttributes(
       sessionAttributes.persistentAttributes
@@ -35,7 +39,7 @@ const MosqueListTouchEventHandler = {
     } catch (error) {
       console.log("Error in fetching prayer timings: ", error);
       if (error === "Mosque not found") {
-        return await helperFunctions.getListOfMosque(handlerInput);
+        return await helperFunctions.getListOfMosque(handlerInput, requestAttributes.t("mosqueNotRegisteredPrompt"));
       }
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))

@@ -1,7 +1,5 @@
 const axios = require("axios");
 const googleBaseUrl = "https://maps.googleapis.com/maps/api/geocode/json";
-// Define the Google API key
-const apiKey = process.env.googleGeoApiKey; // Replace with your Google API key
 
 // Function to construct the full address string from the given JSON
 function constructAddress(addressJson) {
@@ -30,7 +28,7 @@ function constructAddress(addressJson) {
 // Function to fetch geocoding results from Google API
 async function fetchGeocodingResults(address) {
   const url =
-    googleBaseUrl + `?address=${encodeURIComponent(address)}&key=${apiKey}`;
+    googleBaseUrl + `?address=${encodeURIComponent(address)}&key=${getGoogleApiKey()}`;
   const response = await axios.get(url);
   return response.data.results;
 }
@@ -74,7 +72,6 @@ function findBestResult(results, desiredComponents) {
     score: calculateScore(result, desiredComponents),
   }));
   scoredResults.sort((a, b) => b.score - a.score);
-  console.log(`Scoring results: ${JSON.stringify(scoredResults)}`);
   return scoredResults[0].result;
 }
 
@@ -89,12 +86,11 @@ async function getLatLng(addressJson) {
   const desiredComponents = {
     postal_code: addressJson.postalCode || '',
     locality: addressJson.city ? addressJson.city.split(',').pop().trim() : '',
-    sublocality: extractSublocality(addressJson.addressLine2),
+    sublocality: addressJson.addressLine2 ? extractSublocality(addressJson.addressLine2) : "",
     route: addressJson.addressLine1 || ''
 };
 
   const bestResult = findBestResult(results, desiredComponents);
-  console.log(`Best matching result: ${JSON.stringify(bestResult)}`);
   const lat = bestResult.geometry.location.lat;
   const lng = bestResult.geometry.location.lng;
   if(!lat || !lng) throw "GeoConversionError: No latitude or longitude found";
@@ -106,5 +102,9 @@ function extractSublocality(addressLine2) {
   const parts = addressLine2.split(",");
   return parts.length > 1 ? parts[parts.length - 1].trim() : null;
 }
+
+const getGoogleApiKey = () => {
+  return process.env.googleApiKey;
+};
 
 module.exports = { getLatLng };

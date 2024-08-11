@@ -5,7 +5,7 @@ const { getDataSourceforMosqueList } = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
 const moment = require("moment-timezone");
 const { getLatLng } = require("./handlers/googleGeoApiHandler.js");
-const translate = require('@iamtraction/google-translate');
+const { translate, detectLanguage } = require('./handlers/googleTranslateHandler.js');
 
 const getPersistedData = async (handlerInput) => {
   try {
@@ -80,10 +80,11 @@ const checkForPersistenceData = async (handlerInput) => {
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes, mosqueTimes } = sessionAttributes;
   console.log("Persisted Data: ", persistentAttributes);
+  const requestAttributes = attributesManager.getRequestAttributes();
   if (persistentAttributes) {
-    return await getPrayerTimingsForMosque(handlerInput, mosqueTimes);
+    return await getPrayerTimingsForMosque(handlerInput, mosqueTimes, requestAttributes.t("welcomePrompt"));
   }
-  return await getListOfMosque(handlerInput);
+  return await getListOfMosque(handlerInput, requestAttributes.t("welcomePrompt") + requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt"));
 };
 
 const getPrayerTimingsForMosque = async (
@@ -95,9 +96,6 @@ const getPrayerTimingsForMosque = async (
   const requestAttributes = attributesManager.getRequestAttributes();
   const persistedData =
     attributesManager.getSessionAttributes().persistentAttributes;
-  if (!speakOutput) {
-    speakOutput = requestAttributes.t("welcomePrompt");
-  }
   try {
     const userTimeZone = await getUserTimezone(handlerInput);
     const prayerNames = requestAttributes.t("prayerNames");
@@ -118,7 +116,7 @@ const getPrayerTimingsForMosque = async (
   } catch (error) {
     console.log("Error in fetching prayer timings: ", error);
     if (error === "Mosque not found") {
-      return await getListOfMosque(handlerInput);
+      return await getListOfMosque(handlerInput, speakOutput);
     }
     return handlerInput.responseBuilder
       .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
@@ -127,7 +125,7 @@ const getPrayerTimingsForMosque = async (
   }
 };
 
-const getListOfMosque = async (handlerInput) => {
+const getListOfMosque = async (handlerInput, speakOutput) => {
   const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
   const isGeolocationSupported =
@@ -137,23 +135,23 @@ const getListOfMosque = async (handlerInput) => {
       checkForConsentTokenToAccessDeviceLocation(handlerInput);
     if (!consentToken) {
       return responseBuilder
-        .speak(requestAttributes.t("requestForGeoLocationPrompt"))
+        .speak( speakOutput + requestAttributes.t("requestForGeoLocationPrompt"))
         .withAskForPermissionsConsentCard(["read::alexa:device:all:address"])
         .getResponse();
     }
-    return await getListOfMosqueBasedOnCity(handlerInput);
+    return await getListOfMosqueBasedOnCity(handlerInput, speakOutput);
   }
-  return await getListOfMosqueBasedOnGeoLocation(handlerInput);
+  return await getListOfMosqueBasedOnGeoLocation(handlerInput, speakOutput);
 };
 
-const getListOfMosqueBasedOnGeoLocation = async (handlerInput) => {
+const getListOfMosqueBasedOnGeoLocation = async (handlerInput, speakOutput) => {
   const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
   const geoObject = requestEnvelope.context.Geolocation;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const requestAttributes = attributesManager.getRequestAttributes();
   if (!geoObject || !geoObject.coordinate) {
     return responseBuilder
-      .speak(requestAttributes.t("requestForGeoLocationPrompt"))
+      .speak(speakOutput + requestAttributes.t("requestForGeoLocationPrompt"))
       .withAskForPermissionsConsentCard(["alexa::devices:all:geolocation:read"])
       .getResponse();
   } else {
@@ -168,7 +166,7 @@ const getListOfMosqueBasedOnGeoLocation = async (handlerInput) => {
       );
       sessionAttributes.mosqueList = mosqueList;
       attributesManager.setSessionAttributes(sessionAttributes);
-      return await createResponseDirectiveForMosqueList(handlerInput, mosqueList);
+      return await createResponseDirectiveForMosqueList(handlerInput, mosqueList, speakOutput);
     } catch (error) {
       console.log("Error in fetching mosque list: ", error);
       return responseBuilder
@@ -179,7 +177,7 @@ const getListOfMosqueBasedOnGeoLocation = async (handlerInput) => {
   }
 };
 
-const getListOfMosqueBasedOnCity = async (handlerInput) => {
+const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
   const {
     requestEnvelope,
     serviceClientFactory,
@@ -215,7 +213,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput) => {
     const mosqueList = await getMosqueList(false, lat, lng);
     sessionAttributes.mosqueList = mosqueList;
     attributesManager.setSessionAttributes(sessionAttributes);
-    return await createResponseDirectiveForMosqueList(handlerInput, mosqueList);
+    return await createResponseDirectiveForMosqueList(handlerInput, mosqueList, speakOutput);
   } catch (error) {
     console.log("Error in retrieving address: ", error);
     if (error && error.startsWith("GeoConversionError")) {
@@ -238,11 +236,6 @@ const createResponseDirectiveForMosqueList = async (
 ) => {
   const { responseBuilder, attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
-  if (!speechPrompt) {
-    speechPrompt =
-      requestAttributes.t("welcomePrompt") +
-      requestAttributes.t("mosqueNotRegisteredPrompt");
-  }
   responseBuilder.addDirective({
     type: "Dialog.ElicitSlot",
     slotToElicit: "selectedMosque",
@@ -455,13 +448,11 @@ const generateMomentObject = (time, now) => {
 
 const convertTextToEnglish = async (text) => {
   try {    
-    let pattern =  /[a-zA-Z]/;
     console.log("Text to convert: ", text);
-    if (pattern.test(text)) {
+    if (await detectLanguage(text) === "en") {
       return text;
     }
-    const translatedText = await translate(text, { to: "en" });
-    console.log("Translated Text: ", translatedText);
+    const translatedText = await translate(text, "en");
     return translatedText && translatedText.text? translatedText.text : text;
   } catch (error) {
     console.log("Error in converting text to english: ", error);
@@ -484,5 +475,6 @@ module.exports = {
   getUserTimezone,
   calculateMinutes,
   getPrayerTimeForSpecificPrayer,
-  generateNextPrayerTime
+  generateNextPrayerTime,
+  convertTextToEnglish
 };

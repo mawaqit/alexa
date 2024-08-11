@@ -26,7 +26,7 @@ const getDataSourceforMosqueList = (handlerInput, mosqueList) => {
   };
 };
 
-const getDatSourceForPrayerTime = (handlerInput, text) => {
+const getDataSourceForPrayerTime = (handlerInput, text) => {
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
   const backgroundImage = requestAttributes.t("backgroundImageUrl");
@@ -59,5 +59,5 @@ const getDatSourceForPrayerTime = (handlerInput, text) => {
 
 module.exports = {
   getDataSourceforMosqueList,
-  getDatSourceForPrayerTime,
+  getDataSourceForPrayerTime,
 };

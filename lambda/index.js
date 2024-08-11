@@ -7,6 +7,7 @@ const {
   LogResponseInterceptor,
   SavePersistenceAttributesToSession,
   AddDirectiveResponseInterceptor,
+  SetApiKeysAsEnvironmentVaraibleFromAwsSsm
 } = require("./interceptors.js");
 const helperFunctions = require("./helperFunctions.js");
 const { SkillEventHandler } = require("./handlers/skillEventHandler.js");
@@ -18,17 +19,21 @@ const {
   PlayAdhanIntentHandler,
   NextPrayerTimeIntentWithoutNameHandler,
   MosqueInfoIntentHandler,
-  AllIqamaTimeIntentHandler
+  AllIqamaTimeIntentHandler,
+  DeleteDataIntentHandler
 } = require("./handlers/intentHandler.js");
 const { MosqueListTouchEventHandler } = require("./handlers/touchHandler.js");
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest" || 
+      (Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+        Alexa.getIntentName(handlerInput.requestEnvelope) ===
+          "LaunchIntent")
     );
   },
-  async handle(handlerInput) {
+  async handle(handlerInput) {    
     return await helperFunctions.checkForPersistenceData(handlerInput);
   },
 };
@@ -173,6 +178,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     PlayAdhanIntentHandler,
     SelectMosqueIntentStartedHandler,
     SelectMosqueIntentAfterSelectingMosqueHandler,
+    DeleteDataIntentHandler,
     MosqueListTouchEventHandler,
     SkillEventHandler,
     CancelAndStopIntentHandler,
@@ -182,6 +188,7 @@ exports.handler = Alexa.SkillBuilders.custom()
   )
   .addRequestInterceptors(
     LogRequestInterceptor,
+    SetApiKeysAsEnvironmentVaraibleFromAwsSsm,
     SavePersistenceAttributesToSession,
     LocalizationInterceptor
   )

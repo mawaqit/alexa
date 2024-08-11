@@ -14,7 +14,9 @@ const SelectMosqueIntentStartedHandler = {
     );
   },
   async handle(handlerInput) {
-    return await helperFunctions.getListOfMosqueBasedOnCity(handlerInput);
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    return await helperFunctions.getListOfMosqueBasedOnCity(handlerInput, requestAttributes.t("okPrompt"));
   },
 };
 
@@ -46,6 +48,9 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
         requestAttributes.t("unableToFindMosquePrompt")
       );
     }
+    selectedMosqueDetails.primaryText = await helperFunctions.convertTextToEnglish(selectedMosqueDetails.primaryText);
+    selectedMosqueDetails.localisation = await helperFunctions.convertTextToEnglish(selectedMosqueDetails.localisation);
+    selectedMosqueDetails.proximity = parseInt(selectedMosqueDetails.proximity)/1000;
     console.log("Selected Mosque Details: ", selectedMosqueDetails);
     sessionAttributes.persistentAttributes = selectedMosqueDetails
     handlerInput.attributesManager.setPersistentAttributes(
@@ -67,7 +72,7 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
     } catch (error) {
       console.log("Error in fetching prayer timings: ", error);
       if (error === "Mosque not found") {
-        return await helperFunctions.getListOfMosque(handlerInput);
+        return await helperFunctions.getListOfMosque(handlerInput, requestAttributes.t("mosqueNotRegisteredPrompt"));
       }
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
@@ -106,10 +111,7 @@ const NextPrayerTimeIntentHandler = {
       "prayerName"
     );
     console.log("Prayer Name Resolved Id: ", prayerNameResolvedId);
-    const prayerNameFromData = helperFunctions.getResolvedValue(
-      handlerInput.requestEnvelope,
-      "prayerName"
-    );
+    const prayerNameFromData = requestAttributes.t("prayerNames")[parseInt(prayerNameResolvedId)];
     console.log("Prayer Name: ", prayerName);
     const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
     const currentDateTime = new Date(
@@ -139,7 +141,7 @@ const NextPrayerTimeIntentHandler = {
           mosqueTimesData.jumua3,
         ];
         // Find the first non-null Jumu'ah time
-        const firstNonNullJumua = jumuaTimes.filter((time) => time !== null).join(" , ");
+        const firstNonNullJumua = jumuaTimes.filter((time) => time !== null && time !== undefined).join(", ");
         if (firstNonNullJumua) {
           return handlerInput.responseBuilder
             .speak(
@@ -164,7 +166,7 @@ const NextPrayerTimeIntentHandler = {
           mosqueTimesData.aidPrayerTime2,
         ];
         // Find the first non-null Eid time
-        const firstNonNullEid = eidTimes.filter((time) => time !== null).join(" , ");
+        const firstNonNullEid = eidTimes.filter((time) => time !== null && time !== undefined).join(", ");
         if (firstNonNullEid) {
           return handlerInput.responseBuilder
             .speak(
@@ -338,8 +340,8 @@ const MosqueInfoIntentHandler = {
         jumua3,
       ];
       // Find the first non-null Jumu'ah time
-      const firstNonNullJumua = jumuaTimes.filter((time) => time !== null).join(" , ");
-      const speakOutput = requestAttributes.t("mosqueInfoPrompt", primaryText, localisation, String(proximity), firstNonNullJumua);
+      const firstNonNullJumua = jumuaTimes.filter((time) => time !== null && time !== undefined).join(", ");
+      const speakOutput = requestAttributes.t("mosqueInfoPrompt", primaryText, localisation, proximity , firstNonNullJumua);
       return handlerInput.responseBuilder
         .speak(speakOutput)
         .withShouldEndSession(false)
@@ -414,6 +416,35 @@ const AllIqamaTimeIntentHandler = {
   },
 };
 
+const DeleteDataIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "DeleteDataIntent"
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    return await handlerInput.attributesManager
+        .deletePersistentAttributes()
+        .then(() => {
+          console.log("Data deleted successfully");
+          return handlerInput.responseBuilder
+            .speak(requestAttributes.t("deleteDataPrompt"))
+            .withShouldEndSession(true)
+            .getResponse();
+        })
+        .catch((error) => {
+          console.error(`Error while deleting data: ${error}`);
+          return handlerInput.responseBuilder
+            .speak(requestAttributes.t("errorDeleteDataPrompt"))
+            .withShouldEndSession(true)
+            .getResponse();
+        });
+  },
+};
+
 module.exports = {
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
@@ -422,5 +453,6 @@ module.exports = {
   PlayAdhanIntentHandler,
   NextPrayerTimeIntentWithoutNameHandler,
   MosqueInfoIntentHandler,
-  AllIqamaTimeIntentHandler
+  AllIqamaTimeIntentHandler,
+  DeleteDataIntentHandler
 };

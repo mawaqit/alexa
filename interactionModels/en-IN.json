@@ -1,0 +1,310 @@
+{
+  "interactionModel": {
+    "dialog": {
+      "intents": [
+        {
+          "slots": [
+            {
+              "name": "selectedMosque",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.140043125844.413753526068"
+              }
+            }
+          ],
+          "name": "SelectMosqueIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "elicitationRequired": true,
+              "type": "prayerName",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.841213483794.24233923236"
+              }
+            }
+          ],
+          "name": "NextPrayerTimeIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "languageModel": {
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "What are the available commands",
+            "What can I ask you"
+          ]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "slots": [
+            {
+              "name": "selectedMosque",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{selectedMosque}"
+              ]
+            }
+          ],
+          "name": "SelectMosqueIntent",
+          "samples": [
+            "choose my default mosques",
+            "select my mosque",
+            "Change my mosque",
+            "Change my favorite mosque",
+            "I want another mosque",
+            "Search mosque"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName",
+              "samples": [
+                "{prayerName}"
+              ]
+            }
+          ],
+          "name": "NextPrayerTimeIntent",
+          "samples": [
+            "when is {prayerName} prayer",
+            "when is next prayer",
+            "{prayerName}",
+            "when is {prayerName}",
+            "When is the next prayer"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "NextIqamaTimeIntent",
+          "samples": [
+            "next iqama",
+            "How much time left before the iqama of the next prayer",
+            "ikama",
+            "prayer countdown",
+            "countdown"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName"
+            }
+          ],
+          "name": "PlayAdhanIntent",
+          "samples": [
+            "play Azan {prayerName}",
+            "play azane {prayerName}",
+            "Azane {prayerName}",
+            "Azan {prayerName}",
+            "play azane",
+            "play azan",
+            "Azan",
+            "Azane",
+            "Play Adhan",
+            "play adhaan",
+            "play azaan",
+            "Adhan",
+            "Play the Prayer call",
+            "prayer call",
+            "Adhan {prayerName}",
+            "{prayerName} adhan",
+            "Play Adhan {prayerName}",
+            "Play {prayerName} Adhan"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "MosqueInfoIntent",
+          "samples": [
+            "Tell me information about my mosque",
+            "My mosque",
+            "What is my mosque"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "AllIqamaIntent",
+          "samples": [
+            "tell me ikamas",
+            "Tell me the ikamas",
+            "Tell me the iqamas",
+            "ikamas",
+            "iqamas"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "DeleteDataIntent",
+          "samples": [
+            "delete data",
+            "delete my data"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "LaunchIntent",
+          "samples": [
+            "open mawaqit",
+            "launch mawaqit"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "synonyms": [
+                  "shourouk",
+                  "shuruk"
+                ],
+                "value": "shuruq"
+              },
+              "id": "7"
+            },
+            {
+              "name": {
+                "value": "eid"
+              },
+              "id": "6"
+            },
+            {
+              "name": {
+                "value": "jumma"
+              },
+              "id": "5"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "fifth prayer",
+                  "fifth prayer of the day",
+                  "last prayer",
+                  "last prayer of the day",
+                  "icha"
+                ],
+                "value": "isha"
+              },
+              "id": "4"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "fourth prayer",
+                  "fourth prayer of the day",
+                  "magrib",
+                  "maghreeb",
+                  "magreeb",
+                  "sunset",
+                  "iftar",
+                  "ftor"
+                ],
+                "value": "magrib"
+              },
+              "id": "3"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "third prayer",
+                  "third prayer of the day",
+                  "asser",
+                  "assir",
+                  "assar",
+                  "assr"
+                ],
+                "value": "Asr"
+              },
+              "id": "2"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "second prayer",
+                  "second prayer of the day",
+                  "door",
+                  "dor",
+                  "dohar",
+                  "doher",
+                  "duhr",
+                  "dohr"
+                ],
+                "value": "dhuhr"
+              },
+              "id": "1"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "first prayer of the day",
+                  "first prayer",
+                  "Fadjer",
+                  "Fadjr",
+                  "Fadjar",
+                  "Fajar",
+                  "Fajer",
+                  "sunrise"
+                ],
+                "value": "fajr"
+              },
+              "id": "0"
+            }
+          ],
+          "name": "prayerName"
+        }
+      ],
+      "invocationName": "mawaqit"
+    },
+    "prompts": [
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Please say a number associated to the mosque"
+          }
+        ],
+        "id": "Elicit.Slot.140043125844.413753526068"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Which prayer?"
+          }
+        ],
+        "id": "Elicit.Slot.841213483794.24233923236"
+      }
+    ]
+  }
+}

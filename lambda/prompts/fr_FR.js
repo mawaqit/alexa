@@ -16,8 +16,6 @@ module.exports = {
     errorPromptforMosqueList: `I have found no mosque near your location. I am sorry but for now, there is no mosque equipped with ${process.env.skillName} around you.`,
     logoUrl:
       "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
-    backgroundImageUrl:
-      "https://t4.ftcdn.net/jpg/02/70/87/75/360_F_270877592_QRvRPXe7o3ElW3X0MoRIZW3MG7UpVqrm.jpg",
     titleForMosqueList: `Mosquées ${process.env.skillName}`,
     layoutDirection: "LTR",
     nextPrayerTimeErrorPrompt: `Désolé, je n'ai pas pu trouver l'heure de la prochaine prière pour votre mosquée. Veuillez réessayer s'il vous plaît.`,

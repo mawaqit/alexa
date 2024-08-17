@@ -27,8 +27,7 @@ const LogResponseInterceptor = {
 };
 
 const AddDirectiveResponseInterceptor = {
-  process(handlerInput, response) {
-    
+  async process(handlerInput, response) {    
     const { directives } = response;
     const aplDirective = directives
       ? directives.find(
@@ -48,7 +47,8 @@ const AddDirectiveResponseInterceptor = {
         if (ssmlText && !ssmlText.includes("audio src=")) {
           console.log("Adding APL Directive");
           const text = ssmlText.replace(/<\/?[^>]+(>|$)/g, "")
-          const dataSource = getDataSourceForPrayerTime(handlerInput, text);
+          const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
+          console.log("Data Source: ", JSON.stringify(dataSource));
           const directive = helperFunctions.createDirectivePayload(
             prayerTimeApl,
             dataSource

@@ -24,7 +24,6 @@
           "imageMetadataPrimacy": true,
           "imageScale": "best-fit-down",
           "listItems": "${payload.imageListData.listItems}",
-          "backgroundBlur": true,
           "primaryAction": {
             "type": "SendEvent",
             "componentId": "plantList",

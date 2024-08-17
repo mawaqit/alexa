@@ -303,9 +303,9 @@ const PlayAdhanIntentHandler = {
   },
   handle(handlerInput) {
     const prayerName = helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName");    
-    let speakOutput = `<audio src='${getS3PreSignedUrl(process.env.stage+"/converted-adhan.mp3")}' />`;
+    let speakOutput = `<audio src='${getS3PreSignedUrl("converted-adhan.mp3")}' />`;
     if(prayerName === "0"){
-      speakOutput = `<audio src='${getS3PreSignedUrl(process.env.stage+"/converted-adhan-fajr.mp3")}' />`;
+      speakOutput = `<audio src='${getS3PreSignedUrl("converted-adhan-fajr.mp3")}' />`;
     }
     return handlerInput.responseBuilder
       .speak(speakOutput)

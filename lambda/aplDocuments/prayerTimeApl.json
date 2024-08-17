@@ -21,7 +21,6 @@
                     {
                         "type": "AlexaBackground",
                         "backgroundImageSource": "${payload.longTextTemplateData.properties.backgroundImage.sources[0].url}",
-                        "backgroundBlur": true,
                         "backgroundScale": "best-fill"
                     },
                     {

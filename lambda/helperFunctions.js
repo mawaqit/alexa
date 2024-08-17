@@ -267,7 +267,7 @@ const createResponseDirectiveForMosqueList = async (
       "Alexa.Presentation.APL"
     ]
   ) {
-    const dataSource = getDataSourceforMosqueList(handlerInput, mosqueList);
+    const dataSource = await getDataSourceforMosqueList(handlerInput, mosqueList);
     console.log("Data Source: ", JSON.stringify(dataSource));
     const aplDirective = createDirectivePayload(mosqueListApl, dataSource);
     responseBuilder.addDirective(aplDirective);

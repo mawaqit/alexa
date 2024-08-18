@@ -58,7 +58,28 @@ const getDataSourceForPrayerTime = async (handlerInput, text) => {
   };
 };
 
+const getDataSourceforMosqueInfo = async (handlerInput, prayerTimes, mosqueInfo) => {
+  const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
+  const backgroundImage = await s3.getS3PreSignedUrl("background.png");
+  const logoUrl = requestAttributes.t("logoUrl");
+  return {
+    "data": {
+        "properties": {
+            "prayerTimes": prayerTimes,
+            "mosqueTitle": mosqueInfo.mosqueName,
+            "mosqueDescription": mosqueInfo.mosqueDescription ? mosqueInfo.mosqueDescription : "",
+            "mosqueImage": mosqueInfo.mosqueImage ? mosqueInfo.mosqueImage : "https://cdn.mawaqit.net/images/backend/mosque_default_picture.png",
+            "skillName": process.env.skillName,
+            "skillLogoUrl": logoUrl,
+            "backgroundImageUrl": backgroundImage,
+        }
+    }
+}
+}
+
 module.exports = {
   getDataSourceforMosqueList,
   getDataSourceForPrayerTime,
+  getDataSourceforMosqueInfo
 };

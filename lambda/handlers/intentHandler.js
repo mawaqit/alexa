@@ -3,6 +3,7 @@ const helperFunctions = require("../helperFunctions.js");
 const { getPrayerTimings, getMosqueList } = require("./apiHandler.js");
 const moment = require("moment-timezone");
 const { getS3PreSignedUrl } = require("./s3Handler.js");
+const { getDataSourceforMosqueInfo } = require("../datasources.js");
 
 const SelectMosqueIntentStartedHandler = {
   canHandle(handlerInput) {
@@ -326,22 +327,62 @@ const MosqueInfoIntentHandler = {
     try {
       const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
-      const { persistentAttributes } = sessionAttributes;
+      const { persistentAttributes, mosqueTimes } = sessionAttributes;
       if (!persistentAttributes || !persistentAttributes.uuid) {
         return helperFunctions.checkForPersistenceData(handlerInput);
       }
       const requestAttributes =
         handlerInput.attributesManager.getRequestAttributes();
-      const { primaryText, localisation, proximity, jumua, jumua2, jumua3 } = persistentAttributes;
+      const { primaryText, localisation, proximity, jumua, jumua2, jumua3, image } = persistentAttributes;
+      const mosqueInfo = {
+        mosqueName: primaryText,
+        mosqueDescription: localisation,
+        mosqueImage: image,
+      }
        // Extract only the Jumu'ah times
        const jumuaTimes = [
         jumua,
         jumua2,
         jumua3,
       ];
+      const prayerNames = requestAttributes.t("prayerNames");
+      let prayerTimeApl = prayerNames.slice(0,5).map((prayer, index) => {
+        const prayerTime = mosqueTimes.times[index];
+        return {
+          primaryText: `${prayer} ${prayerTime}`,
+        };  
+      });
+      let speakOutput = requestAttributes.t("mosqueInfoPrompt", primaryText, localisation, proximity);
       // Find the first non-null Jumu'ah time
-      const firstNonNullJumua = jumuaTimes.filter((time) => time !== null && time !== undefined).join(", ");
-      const speakOutput = requestAttributes.t("mosqueInfoPrompt", primaryText, localisation, proximity , firstNonNullJumua);
+      const firstNonNullJumua = jumuaTimes.filter((time) => time !== null && time !== undefined);
+      if(firstNonNullJumua.length > 0) {
+        speakOutput += requestAttributes.t("jummaTimePrompt", firstNonNullJumua.join(", "));
+        firstNonNullJumua.forEach((jumuaTime, index) => {
+          prayerTimeApl.push({
+            primaryText: `${prayerNames[5]} ${index+1} ${jumuaTime}`,
+          });
+        });
+      } else {
+        speakOutput += requestAttributes.t("noJumuaTime");
+        prayerTimeApl.push({
+          primaryText: `${prayerNames[5]}  ${requestAttributes.t("none")}`,
+        });
+      }
+      if(mosqueTimes.shuruq){
+        prayerTimeApl.push({
+          primaryText: `${prayerNames[7]}  ${mosqueTimes.shuruq}`,
+        });
+      }
+      if (
+        Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
+          "Alexa.Presentation.APL"
+        ]
+      ) {
+        const dataSource = await getDataSourceforMosqueInfo(handlerInput, prayerTimeApl, mosqueInfo);
+        console.log("Data Source: ", JSON.stringify(dataSource));
+        const aplDirective = helperFunctions.createDirectivePayload(require("../aplDocuments/mosqueInfoApl.json"), dataSource);
+        handlerInput.responseBuilder.addDirective(aplDirective);
+      }
       return handlerInput.responseBuilder
         .speak(speakOutput)
         .withShouldEndSession(false)

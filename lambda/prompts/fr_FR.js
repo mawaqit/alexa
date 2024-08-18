@@ -20,7 +20,7 @@ module.exports = {
     layoutDirection: "LTR",
     nextPrayerTimeErrorPrompt: `Désolé, je n'ai pas pu trouver l'heure de la prochaine prière pour votre mosquée. Veuillez réessayer s'il vous plaît.`,
     nextPrayerTimePrompt: "At %s the next prayer is %s at %s in %s. Do you want something more?",
-    prayerNames: ["<phoneme alphabet=\"ipa\" ph=\"fadʒr\">Fajr</phoneme>", " <phoneme alphabet=\"ipa\" ph=\"duhr\">Dohr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕa.sˤr\">Asr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"maɣ.rɪb\">Maghrib</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʔɪʃaːʔ\">Isha</phoneme>"],
+    prayerNames: ["<phoneme alphabet=\"ipa\" ph=\"fadʒr\">Fajr</phoneme>", " <phoneme alphabet=\"ipa\" ph=\"duhr\">Dohr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕa.sˤr\">Asr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"maɣ.rɪb\">Maghrib</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʔɪʃaːʔ\">Isha</phoneme>","<phoneme alphabet=\"ipa\" ph=\"dʒumʕa\">Jumma</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕiːd\">Eid</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʃu.ruːq\">Shuruq</phoneme>"],
     unableToFindMosquePrompt: `Désolé, je n'ai pas pu trouver la mosquée que vous cherchez. S'il vous plaît, choisissez une option valide.`,
     mosqueNotRegisteredPrompt: `Vous n'avez pas enregistré de mosquée pour faire cette reqûete. Veuillez enregistrer une mosquée d'abord. `,
     mosqueSearchWordPrompt: `Pour quel lieu voulez-vous chercher une mosquée ? Vous pouvez dire le nom de la ville.`,
@@ -42,5 +42,8 @@ module.exports = {
     allIqamaTimesPrompt: "For %s, the iqama time is %s. ", 
     deleteDataPrompt: "Your data has been deleted successfully.",
     okPrompt: "Ok. ",
+    jummaTimePrompt: "The jumma is at %s.",
+    noJummaTimePrompt: "There is no jumma time for this mosque.",
+    none: "None",
   },
 };

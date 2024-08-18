@@ -7,13 +7,13 @@ const getMosqueList = async (
   longitudeInDegrees
 ) => {
   let url = `/mosque/search?`;
-  // if (searchWord) {
-  //   url += `word=${searchWord}`;
-  // } else {
-  //   url += `lat=${latitudeInDegrees}&lon=${longitudeInDegrees}`;
-  // }
+  if (searchWord) {
+    url += `word=${searchWord}`;
+  } else {
+    url += `lat=${latitudeInDegrees}&lon=${longitudeInDegrees}`;
+  }
   // url += `word=India`; //TODO: testing purposes remove later
-  url += `lat=10.9543588&lon=79.7294113`;
+  // url += `lat=10.9543588&lon=79.7294113`;
   const config = getConfig("get", url, "2.0");
   console.log("Config: ", JSON.stringify(config, null, 2).replace(/Bearer \w+/g, "Bearer ****"));
   return await axios
@@ -26,7 +26,7 @@ const getMosqueList = async (
 
       return response.data
         .map(
-          ({ name, uuid, proximity, localisation, jumua, jumua2, jumua3 }) => ({
+          ({ name, uuid, proximity, localisation, jumua, jumua2, jumua3, image }) => ({
             primaryText: name,
             uuid,
             proximity,
@@ -34,6 +34,7 @@ const getMosqueList = async (
             jumua,
             jumua2,
             jumua3,
+            image
           })
         )
         .slice(0, 5);

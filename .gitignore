@@ -2,4 +2,3 @@ ask-resources.json
 .ask
 .vscode
 lambda/node_modules
-lambda/env.json

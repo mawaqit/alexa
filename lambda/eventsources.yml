@@ -2,4 +2,4 @@ ijaz-dev:
   - alexaSkill: ${file(env.json):ijaz-dev.mawaqitAlexaSkillId}
 
 dev:
-  - alexaSkill: ${file(env.json):ijaz-dev.mawaqitAlexaSkillId}
+  - alexaSkill: ${file(env.json):dev.mawaqitAlexaSkillId}

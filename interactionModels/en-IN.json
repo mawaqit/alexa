@@ -175,6 +175,8 @@
           "slots": [],
           "name": "LaunchIntent",
           "samples": [
+            "start mawaqit",
+            "mawaqit",
             "open mawaqit",
             "launch mawaqit"
           ]

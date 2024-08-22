@@ -76,7 +76,7 @@
           ],
           "name": "SelectMosqueIntent",
           "samples": [
-            "choose my default mosque",
+            "choose my default mosques",
             "select my mosque",
             "Change my mosque",
             "Change my favorite mosque",
@@ -154,16 +154,6 @@
         },
         {
           "slots": [],
-          "name": "IqamaInfoIntent",
-          "samples": [
-            "Tell me the ikamas",
-            "Tell me the iqamas",
-            "ikamas",
-            "iqamas"
-          ]
-        },
-        {
-          "slots": [],
           "name": "AllIqamaIntent",
           "samples": [
             "tell me ikamas",
@@ -185,6 +175,8 @@
           "slots": [],
           "name": "LaunchIntent",
           "samples": [
+            "start mawaqit",
+            "mawaqit",
             "open mawaqit",
             "launch mawaqit"
           ]

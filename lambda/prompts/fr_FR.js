@@ -8,7 +8,7 @@ module.exports = {
     helpPrompt: `Vous pouvez me demander de vous donner l'heure de la prochaine prière, ou toute autre prière en disant son nom. Vous pouvez aussi me demander des informations sur votrez mosquée. Je peux aussi lancer l'adhan et changer votre mosquée favorite.`,
     stopPrompt: `Au revoir et qu'Allah vous préserve !`,
     errorPrompt: `Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.`,
-    noDataPrompt: `Désolé, je n'ai pu trouver aucune donnée pour cette reqûete. Veuillez réessayer s'il vous plaît.`,
+    noDataPrompt: `Désolé, je n'ai pu trouver aucune donnée pour cette requête. Veuillez réessayer s'il vous plaît.`,
     noCityPrompt: `Désolé, je n'ai pu trouver aucune mosuée pour cette ville. Veuillez réessayer s'il vous plaît.`,
     thankYouPrompt: `Merci d'utiliser ${process.env.skillName} afin d'avoir les horaires exactes de prière de votre mosquée favorite.`,
     requestForGeoLocationPrompt: `Pour utiliser l'application, vous devez m'autoriser à accéder à votre localisation pour que je puisse trouver les mosquées les plus proches de vous. Ouvrez l'application Alexa sur votre téléphone pour accepter s'il vous plaît.`,

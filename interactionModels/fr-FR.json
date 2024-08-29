@@ -48,8 +48,8 @@
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
-            "What are the available commands",
-            "What can I ask you"
+            "Quelles sont les commandes disponibles",
+            "qu'est-ce que je peux te demander"
           ]
         },
         {
@@ -76,12 +76,15 @@
           ],
           "name": "SelectMosqueIntent",
           "samples": [
-            "choose my default mosques",
-            "select my mosque",
-            "Change my mosque",
-            "Change my favorite mosque",
-            "I want another mosque",
-            "Search mosque"
+            "choisis ma mosquée",
+            "sélectionne ma mosquée",
+            "Change ma mosquée",
+            "Change ma mosquée favorite",
+            "je veux changer de mosquée",
+            "je veux une nouvelle mosquée",
+            "nouvelle mosquée",
+            "cherche une mosquée",
+            "cherche des mosquées"
           ]
         },
         {
@@ -96,22 +99,20 @@
           ],
           "name": "NextPrayerTimeIntent",
           "samples": [
-            "when is {prayerName} prayer",
-            "when is next prayer",
+            "c'est quand {prayerName}",
+            "quand est-ce que c'est la prochaine prière",
             "{prayerName}",
-            "when is {prayerName}",
-            "When is the next prayer"
+            "c'est quand le {prayerName}",
+            "c'est quand la prochaine prière"
           ]
         },
         {
           "slots": [],
           "name": "NextIqamaTimeIntent",
           "samples": [
-            "next iqama",
-            "How much time left before the iqama of the next prayer",
-            "ikama",
-            "prayer countdown",
-            "countdown"
+            "prochain iqama",
+            "Combien de temps avant l'iqama",
+            "Combien de temps avant l'ikama"
           ]
         },
         {
@@ -123,42 +124,44 @@
           ],
           "name": "PlayAdhanIntent",
           "samples": [
-            "play Azan {prayerName}",
-            "play azane {prayerName}",
+            "joue Azan {prayerName}",
+            "mets azane {prayerName}",
             "Azane {prayerName}",
             "Azan {prayerName}",
-            "play azane",
-            "play azan",
+            "joue azane",
+            "mets azan",
             "Azan",
             "Azane",
-            "Play Adhan",
-            "play adhaan",
-            "play azaan",
+            "joue Adhan",
+            "mets adhaan",
+            "mets azaan",
             "Adhan",
-            "Play the Prayer call",
-            "prayer call",
+            "Mets l'appel à la prière",
+            "appel à la prière",
             "Adhan {prayerName}",
-            "{prayerName} adhan",
-            "Play Adhan {prayerName}",
-            "Play {prayerName} Adhan"
+            "mets l'appel à la prière de {prayerName}",
+            "joue Adhan {prayerName}",
+            "joue l'appel à la prière de {prayerName}"
           ]
         },
         {
           "slots": [],
           "name": "MosqueInfoIntent",
           "samples": [
-            "Tell me information about my mosque",
-            "My mosque",
-            "What is my mosque"
+            "donne moi des informations sur ma mosquée",
+            "Ma mosquée",
+            "Quelle est ma mosquée",
+            "Quel est le nom de ma mosquée"
           ]
         },
         {
           "slots": [],
           "name": "AllIqamaIntent",
           "samples": [
-            "tell me ikamas",
-            "Tell me the ikamas",
-            "Tell me the iqamas",
+            "donne moi les ikamas",
+            "dis moi les ikamas",
+            "donne moi les iqamas",
+            "dis moi les iqamas",
             "ikamas",
             "iqamas"
           ]
@@ -167,18 +170,22 @@
           "slots": [],
           "name": "DeleteDataIntent",
           "samples": [
-            "delete data",
-            "delete my data"
+            "supprime mes données",
+            "efface mes données",
+            "supprime ma mosquée",
+            "efface ma mosquée"
           ]
         },
         {
           "slots": [],
           "name": "LaunchIntent",
           "samples": [
-            "start mawaqit",
+            "ouvre mawaqit",
+            "lance mawaqit",
             "mawaqit",
-            "open mawaqit",
-            "launch mawaqit"
+            "ouvre mawakit",
+            "lance mawakit",
+            "mawakit"
           ]
         }
       ],
@@ -210,10 +217,10 @@
             {
               "name": {
                 "synonyms": [
-                  "fifth prayer",
-                  "fifth prayer of the day",
-                  "last prayer",
-                  "last prayer of the day",
+                  "cinquième prière",
+                  "cinquième prière du jour",
+                  "dernière prière",
+                  "dernière prière du jour",
                   "icha"
                 ],
                 "value": "isha"
@@ -223,12 +230,12 @@
             {
               "name": {
                 "synonyms": [
-                  "fourth prayer",
-                  "fourth prayer of the day",
+                  "quatrième prière",
+                  "quatrième prière du jour",
                   "magrib",
                   "maghreeb",
                   "magreeb",
-                  "sunset",
+                  "coucher du soleil",
                   "iftar",
                   "ftor"
                 ],
@@ -239,8 +246,8 @@
             {
               "name": {
                 "synonyms": [
-                  "third prayer",
-                  "third prayer of the day",
+                  "troisème prière",
+                  "troisème prière du jour",
                   "asser",
                   "assir",
                   "assar",
@@ -253,8 +260,8 @@
             {
               "name": {
                 "synonyms": [
-                  "second prayer",
-                  "second prayer of the day",
+                  "deuxième prière",
+                  "deuxième prière du jour",
                   "door",
                   "dor",
                   "dohar",
@@ -269,14 +276,15 @@
             {
               "name": {
                 "synonyms": [
-                  "first prayer of the day",
-                  "first prayer",
+                  "première prière du jour",
+                  "première prière",
                   "Fadjer",
                   "Fadjr",
                   "Fadjar",
                   "Fajar",
                   "Fajer",
-                  "sunrise"
+                  "aube",
+                  "lever du soleil"
                 ],
                 "value": "fajr"
               },
@@ -293,7 +301,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Please say a number associated to the mosque"
+            "value": "S'il vous plaît, dites le nombre associé à votre mosquée"
           }
         ],
         "id": "Elicit.Slot.140043125844.413753526068"
@@ -302,7 +310,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Which prayer?"
+            "value": "Quelle prière ?"
           }
         ],
         "id": "Elicit.Slot.841213483794.24233923236"

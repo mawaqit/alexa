@@ -103,7 +103,11 @@
             "quand est-ce que c'est la prochaine prière",
             "{prayerName}",
             "c'est quand le {prayerName}",
-            "c'est quand la prochaine prière"
+            "c'est quand la prochaine prière",
+            "à quelle heure est {prayerName}",
+            "à quelle heure est la prochaine prière",
+            "combien de temps avant {prayerName}",
+            "combien de temps avant la prochaine prière"
           ]
         },
         {
@@ -246,8 +250,8 @@
             {
               "name": {
                 "synonyms": [
-                  "troisème prière",
-                  "troisème prière du jour",
+                  "troisième prière",
+                  "troisième prière du jour",
                   "asser",
                   "assir",
                   "assar",

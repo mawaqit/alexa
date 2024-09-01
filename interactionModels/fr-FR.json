@@ -191,6 +191,13 @@
             "lance mawakit",
             "mawakit"
           ]
+        },
+        {
+          "slots": [],
+          "name": "AllPrayerTimeIntent",
+          "samples": [
+            "all prayer time"
+          ]
         }
       ],
       "types": [

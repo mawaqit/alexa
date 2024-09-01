@@ -45,5 +45,9 @@ module.exports = {
     jummaTimePrompt: "The jumma is at %s.",
     noJummaTimePrompt: "There is no jumma time for this mosque.",
     none: "None",
+    globalErrorPrompt: "Sorry, I had trouble doing what you asked. Please try again.",
+    fallbackPrompt: "Sorry, I didn't understand that. Please try again.",
+    stopPrompt: `Goodbye!`,
+    allPrayerTimesPrompt: "For %s, the prayer time is %s. "
   },
 };

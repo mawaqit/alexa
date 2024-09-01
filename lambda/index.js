@@ -20,7 +20,8 @@ const {
   NextPrayerTimeIntentWithoutNameHandler,
   MosqueInfoIntentHandler,
   AllIqamaTimeIntentHandler,
-  DeleteDataIntentHandler
+  DeleteDataIntentHandler,
+  AllPrayerTimeIntentHandler
 } = require("./handlers/intentHandler.js");
 const { MosqueListTouchEventHandler } = require("./handlers/touchHandler.js");
 
@@ -66,7 +67,8 @@ const CancelAndStopIntentHandler = {
     );
   },
   handle(handlerInput) {
-    const speakOutput = "Goodbye!";
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const speakOutput = requestAttributes.t("stopPrompt");
 
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -88,7 +90,8 @@ const FallbackIntentHandler = {
     );
   },
   handle(handlerInput) {
-    const speakOutput = "Sorry, I don't know about that. Please try again.";
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const speakOutput = requestAttributes.t("fallbackPrompt");
 
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -149,8 +152,8 @@ const ErrorHandler = {
     return true;
   },
   handle(handlerInput, error) {
-    const speakOutput =
-      "Sorry, I had trouble doing what you asked. Please try again.";
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const speakOutput = requestAttributes.t("globalErrorPrompt");
     console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
 
     return handlerInput.responseBuilder
@@ -175,6 +178,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     NextPrayerTimeIntentWithoutNameHandler,
     NextPrayerTimeIntentHandler,
     NextIqamaTimeIntentHandler,
+    AllPrayerTimeIntentHandler,
     PlayAdhanIntentHandler,
     SelectMosqueIntentStartedHandler,
     SelectMosqueIntentAfterSelectingMosqueHandler,

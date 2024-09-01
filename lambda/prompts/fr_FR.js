@@ -34,9 +34,9 @@ module.exports = {
     secondsPrompt: "%s secondes",
     errorGeoConversionPrompt: `Désolé, je n'ai pas pu convertir votre adresse en géolocalisation. Veuillez reéssayer.`,
     nextIqamaTimePrompt: `L'iqama pour la prochaine prière %s est dans %s.`,
-    selectedMosquePrompt: `Parfait, %s est désormais votre mosquée favorite !`,
+    selectedMosquePrompt: `Parfait, %s est désormais votre mosquée favorite ! `,
     nextPrayerWithoutMosquePrompt: `La prochaine prière est %s à %s dans %s.`,
-    iqamaNotEnabledPrompt: "Iqama information is not provided by your mosque.",
+    iqamaNotEnabledPrompt: "Les temps entre les adhans et les iqamas ne sont pas fournis par votre mosquée.",
     mosqueInfoPrompt: "Votre mosquée est %s. Localisé à %s, à environ %s kilomètres de votre localisation. De plus, le jumua, la prière du Vendredi, est à %s.",
     mosqueInfoErrorPrompt: "Désolé, je n'ai pas pu trouver d'information pour votre mosquée, veuillez reéssayer s'il vous plaît.",
     nextPrayerTimeWithNamePrompt: ` %s à %s dans %s. `,
@@ -46,10 +46,9 @@ module.exports = {
     jummaTimePrompt: "le jumua, la prière du Vendredi, est à %s.",
     noJummaTimePrompt: "Il n'y a pas de prière de jumua dans cette mosquée.",
     none: "None",
-    thankYouPrompt: `Thanks for using ${process.env.skillName} to provide you exact prayer times of your mosque. `,
-    globalErrorPrompt: "Sorry, I had trouble doing what you asked. Please try again.",
-    fallbackPrompt: "Sorry, I didn't understand that. Please try again.",
-    stopPrompt: `Goodbye!`,
-    allPrayerTimesPrompt: "For %s, the prayer time is %s. "
+    thankYouPrompt: `Merci d'utiliser ${process.env.skillName} afin d'avoir les horaires exactes de prière de votre mosquée favorite.`,
+    globalErrorPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
+    fallbackPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
+    allPrayerTimesPrompt: "%s est à %s. "
   },
 };

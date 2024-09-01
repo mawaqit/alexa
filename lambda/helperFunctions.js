@@ -112,7 +112,7 @@ const getPrayerTimingsForMosque = async (
       nextPrayerTime.time,
       nextPrayerTime.diffInMinutes
     );
-    return responseBuilder.speak(speakOutput).getResponse();
+    return responseBuilder.speak(speakOutput).withShouldEndSession(false).getResponse();
   } catch (error) {
     console.log("Error in fetching prayer timings: ", error);
     if (error === "Mosque not found") {
@@ -236,6 +236,7 @@ const createResponseDirectiveForMosqueList = async (
 ) => {
   const { responseBuilder, attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
+  const locale = Alexa.getLocale(handlerInput.requestEnvelope);
   responseBuilder.addDirective({
     type: "Dialog.ElicitSlot",
     slotToElicit: "selectedMosque",
@@ -252,7 +253,7 @@ const createResponseDirectiveForMosqueList = async (
   });  
   mosqueList = await Promise.all(
     mosqueList.map(async (mosque) => {
-      mosque.primaryText = await convertTextToEnglish(mosque.primaryText);
+      mosque.primaryText = await translateText(mosque.primaryText, locale);  
       return mosque;
     })
   )
@@ -446,14 +447,16 @@ const generateMomentObject = (time, now) => {
   return moment(now).set("hour", parseInt(hours)).set("minute", parseInt(minutes));
 };
 
-const convertTextToEnglish = async (text) => {
+const translateText = async (text, toLang) => {
   try {    
+    toLang = toLang.split("-")[0];
     console.log("Text to convert: ", text);
-    if (await detectLanguage(text) === "en") {
+    const detectedLanguage = await detectLanguage(text);
+    if (detectedLanguage === toLang) {
       return text;
     }
-    const translatedText = await translate(text, "en");
-    return translatedText && translatedText.text? translatedText.text : text;
+    const translatedText = await translate(text, toLang);
+    return translatedText ? translatedText : text;
   } catch (error) {
     console.log("Error in converting text to english: ", error);
     return text;
@@ -476,5 +479,5 @@ module.exports = {
   calculateMinutes,
   getPrayerTimeForSpecificPrayer,
   generateNextPrayerTime,
-  convertTextToEnglish
+  translateText
 };

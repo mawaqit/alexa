@@ -15,12 +15,13 @@ const MosqueListTouchEventHandler = {
       "Request Log in MosqueListTouchEventHandler: ",
       JSON.stringify(handlerInput.requestEnvelope.request)
     );
+    const locale = Alexa.getLocale(handlerInput.requestEnvelope);
     const selectedMosque = handlerInput.requestEnvelope.request.arguments[1];
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    selectedMosque.primaryText = await helperFunctions.convertTextToEnglish(selectedMosque.primaryText);
-    selectedMosque.localisation = await helperFunctions.convertTextToEnglish(selectedMosque.localisation);
+    selectedMosque.primaryText = await helperFunctions.translateText(selectedMosque.primaryText, locale);
+    selectedMosque.localisation = await helperFunctions.translateText(selectedMosque.localisation, locale);
     selectedMosque.proximity = parseInt(selectedMosque.proximity)/1000;
     sessionAttributes.persistentAttributes = selectedMosque;
     handlerInput.attributesManager.setPersistentAttributes(

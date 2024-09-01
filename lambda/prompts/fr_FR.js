@@ -41,10 +41,15 @@ module.exports = {
     mosqueInfoErrorPrompt: "Désolé, je n'ai pas pu trouver d'information pour votre mosquée, veuillez reéssayer s'il vous plaît.",
     nextPrayerTimeWithNamePrompt: ` %s à %s dans %s. `,
     allIqamaTimesPrompt: "Pour %s, l'iqama est %s. ", 
-    deleteDataPrompt: "Vos données ont bien été supprimées. Relancez l'application pour réutiliser ${process.env.skillName}.",
+    deleteDataPrompt: `Vos données ont bien été supprimées. Relancez l'application pour réutiliser ${process.env.skillName}.`,
     okPrompt: "Ok.",
     jummaTimePrompt: "le jumua, la prière du Vendredi, est à %s.",
     noJummaTimePrompt: "Il n'y a pas de prière de jumua dans cette mosquée.",
     none: "None",
+    thankYouPrompt: `Thanks for using ${process.env.skillName} to provide you exact prayer times of your mosque. `,
+    globalErrorPrompt: "Sorry, I had trouble doing what you asked. Please try again.",
+    fallbackPrompt: "Sorry, I didn't understand that. Please try again.",
+    stopPrompt: `Goodbye!`,
+    allPrayerTimesPrompt: "For %s, the prayer time is %s. "
   },
 };

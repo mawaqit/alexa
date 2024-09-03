@@ -40,7 +40,7 @@ module.exports = {
     mosqueInfoPrompt: "Votre mosquée est %s. Localisé à %s, à environ %s kilomètres de votre localisation. De plus, le jumua, la prière du Vendredi, est à %s.",
     mosqueInfoErrorPrompt: "Désolé, je n'ai pas pu trouver d'information pour votre mosquée, veuillez reéssayer s'il vous plaît.",
     nextPrayerTimeWithNamePrompt: ` %s à %s dans %s. `,
-    allIqamaTimesPrompt: "Pour %s, l'iqama est %s. ", 
+    allIqamaTimesPrompt: "Pour %s, l'iqama est à %s. ", 
     deleteDataPrompt: `Vos données ont bien été supprimées. Relancez l'application pour réutiliser ${process.env.skillName}.`,
     okPrompt: "Ok.",
     jummaTimePrompt: "le jumua, la prière du Vendredi, est à %s.",

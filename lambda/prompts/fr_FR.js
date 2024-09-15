@@ -5,7 +5,7 @@ module.exports = {
     welcomePrompt: `Salam Aleykoum ! `,
     chooseMosquePrompt: `Quelle mosquée voulez-vous choisir ? Les mosquées les plus proches sont : %s. Vous pouvez choisir en prononçant le numéro associé à la mosquée`,
     chooseMosqueByTouchPrompt: " ou vous pouvez aussi cliquer sur la mosquée de votre choix sur votre écran.",
-    helpPrompt: `Voici les commandes que vous pouvez utiliser :\n- Quand est la prochaine prière ?\n- Combien de temps reste-il avant l'iqama ?\n- Donne moi des informations sur ma mosquée.\n- Change ma mosquée favorite.\n- Donne moi les heures de prière de la journée.\n- Mets l'appel à la prière.\n- Mets l'appel à la prière du Fajr. Ces commandes peuvent notamment être utilisées dans vos routines Alexa. D'autres commandes arrivent très bientôt inshaAllah.`,
+    helpPrompt: `Voici les commandes que vous pouvez utiliser :\n- Quand est la prochaine prière ?\n- Tu peux aussi demander l'heure de chaque prière en demandant par exemple "Quand est la quatrième prière ?" pour Maghrib\n- Combien de temps reste-il avant l'iqama ?\n- Donne moi des informations sur ma mosquée.\n- Change ma mosquée favorite.\n- Donne moi les heures de prière de la journée.\n- Mets l'appel à la prière.\n- Mets l'appel à la prière du Fajr. Ces commandes peuvent notamment être utilisées dans vos routines Alexa. D'autres commandes arrivent très bientôt inshaAllah.`,
     stopPrompt: `Au revoir et qu'Allah vous préserve !`,
     errorPrompt: `Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.`,
     noDataPrompt: `Désolé, je n'ai pu trouver aucune donnée pour cette requête. Veuillez réessayer s'il vous plaît.`,

@@ -43,26 +43,57 @@
       "intents": [
         {
           "name": "AMAZON.CancelIntent",
-          "samples": []
+          "samples": [
+            "cancela",
+            "para",
+            "detén",
+            "abandona"
+          ]
         },
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
-            "What are the available commands",
-            "What can I ask you"
+            "¿Cuáles son los comandos disponibles?",
+            "¿Qué puedo pedirte?",
+            "ayúdame",
+            "¿cómo funciona esto?",
+            "ayuda",
+            "¿qué puedo hacer?",
+            "¿qué puedes hacer?",
+            "muéstrame lo que puedes hacer",
+            "dame opciones",
+            "¿cuáles son las opciones disponibles?"
           ]
         },
         {
           "name": "AMAZON.StopIntent",
-          "samples": []
+          "samples": [
+            "detener",
+            "para",
+            "fin",
+            "termina",
+            "detén"
+          ]
         },
         {
           "name": "AMAZON.NavigateHomeIntent",
-          "samples": []
+          "samples": [
+            "volver a inicio",
+            "menú principal",
+            "ir a inicio",
+            "inicio",
+            "página principal"
+          ]
         },
         {
           "name": "AMAZON.FallbackIntent",
-          "samples": []
+          "samples": [
+            "no sé",
+            "no estoy seguro",
+            "no entiendo",
+            "¿qué significa eso?",
+            "¿puedes repetir?"
+          ]
         },
         {
           "slots": [
@@ -70,18 +101,26 @@
               "name": "selectedMosque",
               "type": "AMAZON.NUMBER",
               "samples": [
-                "{selectedMosque}"
+                "{selectedMosque}",
+                "elige la mezquita {selectedMosque}",
+                "selecciona la mezquita número {selectedMosque}"
               ]
             }
           ],
           "name": "SelectMosqueIntent",
           "samples": [
-            "choose my default mosques",
-            "select my mosque",
-            "Change my mosque",
-            "Change my favorite mosque",
-            "I want another mosque",
-            "Search mosque"
+            "elige mi mezquita",
+            "selecciona mi mezquita",
+            "cambia mi mezquita",
+            "cambia mi mezquita favorita",
+            "quiero cambiar de mezquita",
+            "quiero una nueva mezquita",
+            "buscar mezquitas",
+            "cambia la ubicación de mi mezquita",
+            "selecciona otra mezquita",
+            "modifica mi mezquita",
+            "encuentra una mezquita para mí",
+            "reemplaza mi mezquita actual"
           ]
         },
         {
@@ -90,28 +129,43 @@
               "name": "prayerName",
               "type": "prayerName",
               "samples": [
-                "{prayerName}"
+                "{prayerName}",
+                "¿cuándo es {prayerName}?",
+                "¿a qué hora es {prayerName}?",
+                "¿cuándo empieza {prayerName}?",
+                "¿cuál es la hora de {prayerName}?",
+                "¿a qué hora comienza {prayerName}?",
+                "¿cuándo termina {prayerName}?",
+                "dame la hora de {prayerName}"
               ]
             }
           ],
           "name": "NextPrayerTimeIntent",
           "samples": [
-            "when is {prayerName} prayer",
-            "when is next prayer",
+            "¿cuándo es la próxima oración?",
+            "próxima oración",
             "{prayerName}",
-            "when is {prayerName}",
-            "When is the next prayer"
+            "¿cuándo es {prayerName}?",
+            "¿a qué hora es la próxima oración?",
+            "¿cuánto tiempo falta para {prayerName}?",
+            "hora de la próxima oración",
+            "¿cuáles son las horas de oración?",
+            "dame la hora de {prayerName}",
+            "hora de oración {prayerName}",
+            "próxima oración"
           ]
         },
         {
           "slots": [],
           "name": "NextIqamaTimeIntent",
           "samples": [
-            "next iqama",
-            "How much time left before the iqama of the next prayer",
-            "ikama",
-            "prayer countdown",
-            "countdown"
+            "próxima iqama",
+            "¿cuánto tiempo falta para el iqama?",
+            "¿a qué hora es el iqama?",
+            "hora del iqama",
+            "dame la hora del iqama",
+            "próximo iqama",
+            "hora para el iqama"
           ]
         },
         {
@@ -123,69 +177,79 @@
           ],
           "name": "PlayAdhanIntent",
           "samples": [
-            "play Azan {prayerName}",
-            "play azane {prayerName}",
-            "Azane {prayerName}",
-            "Azan {prayerName}",
-            "play azane",
-            "play azan",
-            "Azan",
-            "Azane",
-            "Play Adhan",
-            "play adhaan",
-            "play azaan",
-            "Adhan",
-            "Play the Prayer call",
-            "prayer call",
-            "Adhan {prayerName}",
-            "{prayerName} adhan",
-            "Play Adhan {prayerName}",
-            "Play {prayerName} Adhan"
+            "reproduce el adhan {prayerName}",
+            "pon adhan {prayerName}",
+            "adhan {prayerName}",
+            "pon el adhan",
+            "reproduce el adhan",
+            "adhán",
+            "llamada a la oración",
+            "adhan {prayerName}",
+            "pon la llamada a la oración de {prayerName}",
+            "lanza el adhan",
+            "reproduce la llamada a la oración",
+            "haz sonar el adhan"
           ]
         },
         {
           "slots": [],
           "name": "MosqueInfoIntent",
           "samples": [
-            "Tell me information about my mosque",
-            "My mosque",
-            "What is my mosque"
+            "dame información sobre mi mezquita",
+            "mi mezquita",
+            "¿cuál es mi mezquita?",
+            "nombre de mi mezquita",
+            "ubicación de mi mezquita",
+            "info de mi mezquita",
+            "detalles de mi mezquita",
+            "dirección de mi mezquita",
+            "información de mi mezquita"
           ]
         },
         {
           "slots": [],
           "name": "AllIqamaIntent",
           "samples": [
-            "tell me ikamas",
-            "Tell me the ikamas",
-            "Tell me the iqamas",
-            "ikamas",
-            "iqamas"
+            "dame las iqamas",
+            "dame los horarios del iqama",
+            "iqamas",
+            "horario de las iqamas",
+            "¿cuándo son las iqamas?",
+            "hora de las iqamas"
           ]
         },
         {
           "slots": [],
           "name": "DeleteDataIntent",
           "samples": [
-            "delete data",
-            "delete my data"
+            "borra mis datos",
+            "elimina mi mezquita",
+            "borra toda mi información",
+            "elimina mis configuraciones",
+            "borra toda mi configuración"
           ]
         },
         {
           "slots": [],
           "name": "LaunchIntent",
           "samples": [
-            "start mawaqit",
+            "abre mawaqit",
+            "lanza mawaqit",
             "mawaqit",
-            "open mawaqit",
-            "launch mawaqit"
+            "inicia mawaqit",
+            "abre la aplicación mawaqit",
+            "inicia la aplicación mawaqit"
           ]
         },
         {
           "slots": [],
           "name": "AllPrayerTimeIntent",
           "samples": [
-            "all prayer time"
+            "dame los horarios de oración",
+            "dame todas las horas de oración",
+            "¿cuáles son los horarios de oración?",
+            "hora de oración de hoy",
+            "horarios de oración de hoy"
           ]
         }
       ],
@@ -195,8 +259,9 @@
             {
               "name": {
                 "synonyms": [
-                  "shourouk",
-                  "shuruk"
+                  "shuruk",
+                  "amanecer",
+                  "salida del sol"
                 ],
                 "value": "shuruq"
               },
@@ -204,23 +269,31 @@
             },
             {
               "name": {
-                "value": "eid"
+                "value": "eid",
+                "synonyms": [
+                  "Aíd",
+                  "Aíd al-Fitr",
+                  "Aíd al-Adha"
+                ]
               },
               "id": "6"
             },
             {
               "name": {
-                "value": "jumma"
+                "value": "jumma",
+                "synonyms": [
+                  "Yumuah",
+                  "oración del viernes",
+                  "viernes"
+                ]
               },
               "id": "5"
             },
             {
               "name": {
                 "synonyms": [
-                  "fifth prayer",
-                  "fifth prayer of the day",
-                  "last prayer",
-                  "last prayer of the day",
+                  "quinta oración",
+                  "última oración",
                   "icha"
                 ],
                 "value": "isha"
@@ -230,14 +303,9 @@
             {
               "name": {
                 "synonyms": [
-                  "fourth prayer",
-                  "fourth prayer of the day",
-                  "magrib",
-                  "maghreeb",
-                  "magreeb",
-                  "sunset",
-                  "iftar",
-                  "ftor"
+                  "cuarta oración",
+                  "puesta del sol",
+                  "iftar"
                 ],
                 "value": "magrib"
               },
@@ -246,12 +314,8 @@
             {
               "name": {
                 "synonyms": [
-                  "third prayer",
-                  "third prayer of the day",
-                  "asser",
-                  "assir",
-                  "assar",
-                  "assr"
+                  "tercera oración",
+                  "assir"
                 ],
                 "value": "Asr"
               },
@@ -260,14 +324,8 @@
             {
               "name": {
                 "synonyms": [
-                  "second prayer",
-                  "second prayer of the day",
-                  "door",
-                  "dor",
-                  "dohar",
-                  "doher",
-                  "duhr",
-                  "dohr"
+                  "segunda oración",
+                  "duhr"
                 ],
                 "value": "dhuhr"
               },
@@ -276,14 +334,9 @@
             {
               "name": {
                 "synonyms": [
-                  "first prayer of the day",
-                  "first prayer",
-                  "Fadjer",
-                  "Fadjr",
-                  "Fadjar",
-                  "Fajar",
-                  "Fajer",
-                  "sunrise"
+                  "primera oración del día",
+                  "fajr",
+                  "amanecer"
                 ],
                 "value": "fajr"
               },
@@ -300,7 +353,23 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Please say a number associated to the mosque"
+            "value": "Por favor, di el número asociado con tu mezquita"
+          },
+          {
+            "type": "PlainText",
+            "value": "Menciona el número de la mezquita"
+          },
+          {
+            "type": "PlainText",
+            "value": "¿Cuál es el número de tu mezquita?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Indica el número de la mezquita que eliges"
+          },
+          {
+            "type": "PlainText",
+            "value": "Elige el número de tu mezquita, por favor"
           }
         ],
         "id": "Elicit.Slot.140043125844.413753526068"
@@ -309,7 +378,23 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Which prayer?"
+            "value": "¿Cuál oración?"
+          },
+          {
+            "type": "PlainText",
+            "value": "¿Para qué oración?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Indica la oración, por favor"
+          },
+          {
+            "type": "PlainText",
+            "value": "¿Qué oración quieres saber?"
+          },
+          {
+            "type": "PlainText",
+            "value": "¿De qué oración hablas?"
           }
         ],
         "id": "Elicit.Slot.841213483794.24233923236"

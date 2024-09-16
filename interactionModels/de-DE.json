@@ -43,26 +43,56 @@
       "intents": [
         {
           "name": "AMAZON.CancelIntent",
-          "samples": []
+          "samples": [
+            "abbrechen",
+            "stopp",
+            "aufhören",
+            "abbrechen bitte"
+          ]
         },
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
-            "What are the available commands",
-            "What can I ask you"
+            "Welche Befehle gibt es",
+            "Was kann ich fragen",
+            "Hilfe bitte",
+            "Wie funktioniert das",
+            "Hilfe",
+            "Was kann ich tun",
+            "Welche Optionen habe ich",
+            "Zeig mir, was du kannst",
+            "Hilf mir mit den Befehlen",
+            "Welche Möglichkeiten gibt es"
           ]
         },
         {
           "name": "AMAZON.StopIntent",
-          "samples": []
+          "samples": [
+            "stopp",
+            "aufhören",
+            "beenden",
+            "halt"
+          ]
         },
         {
           "name": "AMAZON.NavigateHomeIntent",
-          "samples": []
+          "samples": [
+            "zurück zum Start",
+            "Hauptmenü",
+            "zurück zum Menü",
+            "Startseite",
+            "Hauptseite"
+          ]
         },
         {
           "name": "AMAZON.FallbackIntent",
-          "samples": []
+          "samples": [
+            "ich weiß nicht",
+            "ich bin nicht sicher",
+            "ich verstehe nicht",
+            "Was bedeutet das",
+            "Kannst du das wiederholen"
+          ]
         },
         {
           "slots": [
@@ -70,18 +100,25 @@
               "name": "selectedMosque",
               "type": "AMAZON.NUMBER",
               "samples": [
-                "{selectedMosque}"
+                "{selectedMosque}",
+                "wähle Moschee {selectedMosque}",
+                "wähle die Moschee Nummer {selectedMosque}"
               ]
             }
           ],
           "name": "SelectMosqueIntent",
           "samples": [
-            "choose my default mosques",
-            "select my mosque",
-            "Change my mosque",
-            "Change my favorite mosque",
-            "I want another mosque",
-            "Search mosque"
+            "wähle meine Moschee",
+            "ändere meine Moschee",
+            "ändere meine Lieblingsmoschee",
+            "Ich möchte die Moschee wechseln",
+            "neue Moschee auswählen",
+            "Moschee suchen",
+            "ändere meine Moschee-Position",
+            "wähle eine andere Moschee",
+            "meine Moschee ändern",
+            "finde eine Moschee für mich",
+            "ersetze meine aktuelle Moschee"
           ]
         },
         {
@@ -90,28 +127,40 @@
               "name": "prayerName",
               "type": "prayerName",
               "samples": [
-                "{prayerName}"
+                "{prayerName}",
+                "Wann ist {prayerName}",
+                "Um welche Uhrzeit ist {prayerName}",
+                "Wann ist das Gebet {prayerName}",
+                "Wann beginnt {prayerName}",
+                "Wann endet {prayerName}"
               ]
             }
           ],
           "name": "NextPrayerTimeIntent",
           "samples": [
-            "when is {prayerName} prayer",
-            "when is next prayer",
+            "Wann ist {prayerName}",
+            "Wann ist das nächste Gebet",
             "{prayerName}",
-            "when is {prayerName}",
-            "When is the next prayer"
+            "Wann ist die nächste Gebetszeit",
+            "Um welche Zeit ist {prayerName}",
+            "Wann ist die nächste Gebetszeit",
+            "Wie viel Zeit bis {prayerName}",
+            "Wie viel Zeit bis zum nächsten Gebet",
+            "Gebetszeit für {prayerName}",
+            "Gib mir die Zeit für {prayerName}"
           ]
         },
         {
           "slots": [],
           "name": "NextIqamaTimeIntent",
           "samples": [
-            "next iqama",
-            "How much time left before the iqama of the next prayer",
-            "ikama",
-            "prayer countdown",
-            "countdown"
+            "nächste Iqama",
+            "Wie viel Zeit bis zur Iqama",
+            "Wann ist Iqama",
+            "Wie spät ist die Iqama",
+            "nächste Ikama",
+            "Zeit für Iqama",
+            "Gib mir die Zeit der Iqama"
           ]
         },
         {
@@ -123,69 +172,74 @@
           ],
           "name": "PlayAdhanIntent",
           "samples": [
-            "play Azan {prayerName}",
-            "play azane {prayerName}",
-            "Azane {prayerName}",
-            "Azan {prayerName}",
-            "play azane",
-            "play azan",
-            "Azan",
-            "Azane",
-            "Play Adhan",
-            "play adhaan",
-            "play azaan",
-            "Adhan",
-            "Play the Prayer call",
-            "prayer call",
+            "spiele Adhan {prayerName}",
+            "spiele Azan {prayerName}",
             "Adhan {prayerName}",
-            "{prayerName} adhan",
-            "Play Adhan {prayerName}",
-            "Play {prayerName} Adhan"
+            "spiele Azan",
+            "spiele Adhan",
+            "spiele das Gebetsruf",
+            "spiele das Gebetsruf {prayerName}",
+            "spiele das Adhan",
+            "lasse den Adhan ertönen",
+            "spiele den Gebetsruf"
           ]
         },
         {
           "slots": [],
           "name": "MosqueInfoIntent",
           "samples": [
-            "Tell me information about my mosque",
-            "My mosque",
-            "What is my mosque"
+            "Gib mir Informationen über meine Moschee",
+            "Meine Moschee",
+            "Wo ist meine Moschee",
+            "Moschee-Details",
+            "Moschee-Infos",
+            "Adresse meiner Moschee"
           ]
         },
         {
           "slots": [],
           "name": "AllIqamaIntent",
           "samples": [
-            "tell me ikamas",
-            "Tell me the ikamas",
-            "Tell me the iqamas",
-            "ikamas",
-            "iqamas"
+            "Gib mir alle Iqama-Zeiten",
+            "Nenne mir die Iqama-Zeiten",
+            "Iqama-Zeiten",
+            "Wann sind die Iqama-Zeiten",
+            "Uhrzeiten der Iqama"
           ]
         },
         {
           "slots": [],
           "name": "DeleteDataIntent",
           "samples": [
-            "delete data",
-            "delete my data"
+            "Lösche meine Daten",
+            "Lösche meine Moschee",
+            "Daten löschen",
+            "alles löschen",
+            "lösche alle Einstellungen",
+            "lösche meine Konfiguration"
           ]
         },
         {
           "slots": [],
           "name": "LaunchIntent",
           "samples": [
-            "start mawaqit",
-            "mawaqit",
-            "open mawaqit",
-            "launch mawaqit"
+            "Öffne Mawaqit",
+            "Starte Mawaqit",
+            "Mawaqit öffnen",
+            "Öffne die Mawaqit App",
+            "Mawaqit starten"
           ]
         },
         {
           "slots": [],
           "name": "AllPrayerTimeIntent",
           "samples": [
-            "all prayer time"
+            "Gib mir alle Gebetszeiten für heute",
+            "Wann sind die Gebete heute",
+            "Gebetszeiten heute",
+            "Wann sind die Gebetszeiten",
+            "Wann sind die Gebete",
+            "Heutige Gebetszeiten"
           ]
         }
       ],
@@ -195,8 +249,9 @@
             {
               "name": {
                 "synonyms": [
-                  "shourouk",
-                  "shuruk"
+                  "Shuruk",
+                  "Chourouk",
+                  "Sonnenaufgang"
                 ],
                 "value": "shuruq"
               },
@@ -204,24 +259,32 @@
             },
             {
               "name": {
-                "value": "eid"
+                "value": "eid",
+                "synonyms": [
+                  "Eid",
+                  "Eid al-Fitr",
+                  "Eid al-Adha"
+                ]
               },
               "id": "6"
             },
             {
               "name": {
-                "value": "jumma"
+                "value": "jumma",
+                "synonyms": [
+                  "Jumu'ah",
+                  "Freitagsgebet",
+                  "Freitag"
+                ]
               },
               "id": "5"
             },
             {
               "name": {
                 "synonyms": [
-                  "fifth prayer",
-                  "fifth prayer of the day",
-                  "last prayer",
-                  "last prayer of the day",
-                  "icha"
+                  "Isha'a",
+                  "letztes Gebet des Tages",
+                  "Nachtgebet"
                 ],
                 "value": "isha"
               },
@@ -230,14 +293,9 @@
             {
               "name": {
                 "synonyms": [
-                  "fourth prayer",
-                  "fourth prayer of the day",
-                  "magrib",
-                  "maghreeb",
-                  "magreeb",
-                  "sunset",
-                  "iftar",
-                  "ftor"
+                  "Maghrib",
+                  "Iftar",
+                  "Sonnenuntergang"
                 ],
                 "value": "magrib"
               },
@@ -246,28 +304,18 @@
             {
               "name": {
                 "synonyms": [
-                  "third prayer",
-                  "third prayer of the day",
-                  "asser",
-                  "assir",
-                  "assar",
-                  "assr"
+                  "Asr",
+                  "Nachmittagsgebet"
                 ],
-                "value": "Asr"
+                "value": "asr"
               },
               "id": "2"
             },
             {
               "name": {
                 "synonyms": [
-                  "second prayer",
-                  "second prayer of the day",
-                  "door",
-                  "dor",
-                  "dohar",
-                  "doher",
-                  "duhr",
-                  "dohr"
+                  "Dhuhr",
+                  "Mittagsgebet"
                 ],
                 "value": "dhuhr"
               },
@@ -276,14 +324,8 @@
             {
               "name": {
                 "synonyms": [
-                  "first prayer of the day",
-                  "first prayer",
-                  "Fadjer",
-                  "Fadjr",
-                  "Fadjar",
-                  "Fajar",
-                  "Fajer",
-                  "sunrise"
+                  "Fajr",
+                  "Morgengebet"
                 ],
                 "value": "fajr"
               },
@@ -300,7 +342,19 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Please say a number associated to the mosque"
+            "value": "Bitte nenne die Nummer deiner Moschee"
+          },
+          {
+            "type": "PlainText",
+            "value": "Wie lautet die Nummer deiner Moschee?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Bitte gib die Nummer deiner Moschee an"
+          },
+          {
+            "type": "PlainText",
+            "value": "Wähle die Nummer deiner Moschee"
           }
         ],
         "id": "Elicit.Slot.140043125844.413753526068"
@@ -309,7 +363,23 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Which prayer?"
+            "value": "Welches Gebet?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Für welches Gebet?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Bitte nenne das Gebet"
+          },
+          {
+            "type": "PlainText",
+            "value": "Welches Gebet möchtest du wissen?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Über welches Gebet sprichst du?"
           }
         ],
         "id": "Elicit.Slot.841213483794.24233923236"

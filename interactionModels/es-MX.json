@@ -53,16 +53,16 @@
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
-            "¿Cuáles son los comandos disponibles?",
-            "¿Qué puedo pedirte?",
+            "Cuáles son los comandos disponibles",
+            "Qué puedo pedirte",
             "ayúdame",
-            "¿cómo funciona esto?",
+            "cómo funciona esto",
             "ayuda",
-            "¿qué puedo hacer?",
-            "¿qué puedes hacer?",
+            "qué puedo hacer",
+            "qué puedes hacer",
             "muéstrame lo que puedes hacer",
             "dame opciones",
-            "¿cuáles son las opciones disponibles?"
+            "cuáles son las opciones disponibles"
           ]
         },
         {
@@ -91,8 +91,8 @@
             "no sé",
             "no estoy seguro",
             "no entiendo",
-            "¿qué significa eso?",
-            "¿puedes repetir?"
+            "qué significa eso",
+            "puedes repetir"
           ]
         },
         {
@@ -130,26 +130,25 @@
               "type": "prayerName",
               "samples": [
                 "{prayerName}",
-                "¿cuándo es {prayerName}?",
-                "¿a qué hora es {prayerName}?",
-                "¿cuándo empieza {prayerName}?",
-                "¿cuál es la hora de {prayerName}?",
-                "¿a qué hora comienza {prayerName}?",
-                "¿cuándo termina {prayerName}?",
+                "cuándo es {prayerName}",
+                "a qué hora es {prayerName}",
+                "cuándo empieza {prayerName}",
+                "cuál es la hora de {prayerName}",
+                "a qué hora comienza {prayerName}",
+                "cuándo termina {prayerName}",
                 "dame la hora de {prayerName}"
               ]
             }
           ],
           "name": "NextPrayerTimeIntent",
           "samples": [
-            "¿cuándo es la próxima oración?",
-            "próxima oración",
+            "cuándo es la próxima oración",
             "{prayerName}",
-            "¿cuándo es {prayerName}?",
-            "¿a qué hora es la próxima oración?",
-            "¿cuánto tiempo falta para {prayerName}?",
+            "cuándo es {prayerName}",
+            "a qué hora es la próxima oración",
+            "cuánto tiempo falta para {prayerName}",
             "hora de la próxima oración",
-            "¿cuáles son las horas de oración?",
+            "cuáles son las horas de oración",
             "dame la hora de {prayerName}",
             "hora de oración {prayerName}",
             "próxima oración"
@@ -160,8 +159,8 @@
           "name": "NextIqamaTimeIntent",
           "samples": [
             "próxima iqama",
-            "¿cuánto tiempo falta para el iqama?",
-            "¿a qué hora es el iqama?",
+            "cuánto tiempo falta para el iqama",
+            "a qué hora es el iqama",
             "hora del iqama",
             "dame la hora del iqama",
             "próximo iqama",
@@ -179,7 +178,6 @@
           "samples": [
             "reproduce el adhan {prayerName}",
             "pon adhan {prayerName}",
-            "adhan {prayerName}",
             "pon el adhan",
             "reproduce el adhan",
             "adhán",
@@ -197,7 +195,7 @@
           "samples": [
             "dame información sobre mi mezquita",
             "mi mezquita",
-            "¿cuál es mi mezquita?",
+            "cuál es mi mezquita",
             "nombre de mi mezquita",
             "ubicación de mi mezquita",
             "info de mi mezquita",
@@ -214,7 +212,7 @@
             "dame los horarios del iqama",
             "iqamas",
             "horario de las iqamas",
-            "¿cuándo son las iqamas?",
+            "cuándo son las iqamas",
             "hora de las iqamas"
           ]
         },
@@ -247,7 +245,7 @@
           "samples": [
             "dame los horarios de oración",
             "dame todas las horas de oración",
-            "¿cuáles son los horarios de oración?",
+            "cuáles son los horarios de oración",
             "hora de oración de hoy",
             "horarios de oración de hoy"
           ]
@@ -269,23 +267,23 @@
             },
             {
               "name": {
-                "value": "eid",
                 "synonyms": [
                   "Aíd",
                   "Aíd al-Fitr",
                   "Aíd al-Adha"
-                ]
+                ],
+                "value": "eid"
               },
               "id": "6"
             },
             {
               "name": {
-                "value": "jumma",
                 "synonyms": [
                   "Yumuah",
                   "oración del viernes",
                   "viernes"
-                ]
+                ],
+                "value": "jumma"
               },
               "id": "5"
             },
@@ -361,7 +359,7 @@
           },
           {
             "type": "PlainText",
-            "value": "¿Cuál es el número de tu mezquita?"
+            "value": "Cuál es el número de tu mezquita"
           },
           {
             "type": "PlainText",
@@ -378,11 +376,11 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "¿Cuál oración?"
+            "value": "Cuál oración"
           },
           {
             "type": "PlainText",
-            "value": "¿Para qué oración?"
+            "value": "Para qué oración"
           },
           {
             "type": "PlainText",
@@ -390,11 +388,11 @@
           },
           {
             "type": "PlainText",
-            "value": "¿Qué oración quieres saber?"
+            "value": "Qué oración quieres saber"
           },
           {
             "type": "PlainText",
-            "value": "¿De qué oración hablas?"
+            "value": "De qué oración hablas"
           }
         ],
         "id": "Elicit.Slot.841213483794.24233923236"

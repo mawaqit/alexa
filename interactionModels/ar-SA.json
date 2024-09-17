@@ -226,23 +226,23 @@
             },
             {
               "name": {
-                "value": "eid",
                 "synonyms": [
                   "عيد",
                   "عيد الفطر",
                   "عيد الأضحى"
-                ]
+                ],
+                "value": "eid"
               },
               "id": "6"
             },
             {
               "name": {
-                "value": "jumma",
                 "synonyms": [
                   "الجمعة",
                   "صلاة الجمعة",
                   "الجمعة المباركة"
-                ]
+                ],
+                "value": "jumma"
               },
               "id": "5"
             },
@@ -302,7 +302,7 @@
           "name": "prayerName"
         }
       ],
-      "invocationName": "ماواقِت"
+      "invocationName": "mawaqit"
     },
     "prompts": [
       {

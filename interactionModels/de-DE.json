@@ -60,7 +60,7 @@
             "Hilfe",
             "Was kann ich tun",
             "Welche Optionen habe ich",
-            "Zeig mir, was du kannst",
+            "Zeig mir was du kannst",
             "Hilf mir mit den Befehlen",
             "Welche Möglichkeiten gibt es"
           ]
@@ -259,30 +259,30 @@
             },
             {
               "name": {
-                "value": "eid",
                 "synonyms": [
                   "Eid",
                   "Eid al-Fitr",
                   "Eid al-Adha"
-                ]
+                ],
+                "value": "eid"
               },
               "id": "6"
             },
             {
               "name": {
-                "value": "jumma",
                 "synonyms": [
-                  "Jumu'ah",
+                  "Jumu\u0027ah",
                   "Freitagsgebet",
                   "Freitag"
-                ]
+                ],
+                "value": "jumma"
               },
               "id": "5"
             },
             {
               "name": {
                 "synonyms": [
-                  "Isha'a",
+                  "Isha\u0027a",
                   "letztes Gebet des Tages",
                   "Nachtgebet"
                 ],

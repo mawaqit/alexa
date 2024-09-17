@@ -89,9 +89,9 @@
         {
           "name": "AMAZON.FallbackIntent",
           "samples": [
-            "I don't know",
-            "I'm not sure",
-            "I don't understand",
+            "I don\u0027t know",
+            "I\u0027m not sure",
+            "I don\u0027t understand",
             "What does that mean",
             "Can you repeat"
           ]
@@ -245,11 +245,11 @@
           "slots": [],
           "name": "AllPrayerTimeIntent",
           "samples": [
-            "give me today's prayer times",
+            "give me today\u0027s prayer times",
             "what are the prayer times",
             "prayer schedule",
             "what time are the prayers",
-            "times for today's prayers",
+            "times for today\u0027s prayers",
             "prayer times for today"
           ]
         }
@@ -271,23 +271,23 @@
             },
             {
               "name": {
-                "value": "eid",
                 "synonyms": [
                   "Eid al-Fitr",
                   "Eid al-Adha",
                   "Celebration"
-                ]
+                ],
+                "value": "eid"
               },
               "id": "6"
             },
             {
               "name": {
-                "value": "jumma",
                 "synonyms": [
-                  "Jumu'ah",
+                  "Jumu\u0027ah",
                   "Friday prayer",
                   "Friday"
-                ]
+                ],
+                "value": "jumma"
               },
               "id": "5"
             },

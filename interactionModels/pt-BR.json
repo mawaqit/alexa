@@ -278,24 +278,24 @@
             },
             {
               "name": {
-                "value": "eid",
                 "synonyms": [
                   "Eid",
                   "Eid al-Fitr",
                   "Eid al-Adha"
-                ]
+                ],
+                "value": "eid"
               },
               "id": "6"
             },
             {
               "name": {
-                "value": "jumma",
                 "synonyms": [
                   "sexta-feira",
                   "oração de sexta-feira",
                   "jumuah",
                   "jumua"
-                ]
+                ],
+                "value": "jumma"
               },
               "id": "5"
             },
@@ -304,7 +304,7 @@
                 "synonyms": [
                   "última oração",
                   "quinta oração",
-                  "isha'a",
+                  "isha\u0027a",
                   "icha"
                 ],
                 "value": "isha"

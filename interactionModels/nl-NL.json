@@ -54,7 +54,7 @@
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
-            "Welke commando's kan ik gebruiken",
+            "Welke commando\u0027s kan ik gebruiken",
             "wat kan ik vragen",
             "help mij",
             "hoe werkt het",
@@ -257,23 +257,23 @@
             },
             {
               "name": {
-                "value": "eid",
                 "synonyms": [
                   "Suikerfeest",
                   "Offerfeest",
                   "Aïd"
-                ]
+                ],
+                "value": "eid"
               }
             },
             {
               "name": {
-                "value": "jumma",
                 "synonyms": [
                   "Jumuah",
                   "Vrijdaggebed",
                   "Jumah",
                   "Vrijdag"
-                ]
+                ],
+                "value": "jumma"
               }
             },
             {
@@ -281,7 +281,7 @@
                 "synonyms": [
                   "laatste gebed",
                   "Isha",
-                  "isha'a"
+                  "isha\u0027a"
                 ],
                 "value": "isha"
               }

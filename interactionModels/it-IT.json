@@ -54,14 +54,14 @@
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
-            "Quali comandi posso usare?",
-            "Cosa posso chiederti?",
+            "Quali comandi posso usare",
+            "Cosa posso chiederti",
             "Aiutami",
-            "Come funziona?",
+            "Come funziona",
             "Dammi una mano",
             "Mostrami le opzioni",
-            "Cosa sai fare?",
-            "Quali sono le opzioni?",
+            "Cosa sai fare",
+            "Quali sono le opzioni",
             "Dammi dei consigli",
             "Mostrami i comandi"
           ]
@@ -92,8 +92,8 @@
             "non so",
             "non sono sicuro",
             "non capisco",
-            "Cosa significa?",
-            "Puoi ripetere?"
+            "Cosa significa",
+            "Puoi ripetere"
           ]
         },
         {
@@ -132,26 +132,26 @@
               "type": "prayerName",
               "samples": [
                 "{prayerName}",
-                "Quando è {prayerName}?",
-                "A che ora è {prayerName}?",
-                "Qual è l'ora di {prayerName}?",
-                "Quando inizia {prayerName}?",
-                "A che ora comincia {prayerName}?",
-                "Quanto manca a {prayerName}?"
+                "Quando è {prayerName}",
+                "A che ora è {prayerName}",
+                "Qual è l\u0027ora di {prayerName}",
+                "Quando inizia {prayerName}",
+                "A che ora comincia {prayerName}",
+                "Quanto manca a {prayerName}"
               ]
             }
           ],
           "name": "NextPrayerTimeIntent",
           "samples": [
-            "Quando è la prossima preghiera?",
-            "Quando è {prayerName}?",
-            "Dimmi l'orario di {prayerName}",
-            "Qual è la prossima preghiera?",
-            "Quanto manca a {prayerName}?",
+            "Quando è la prossima preghiera",
+            "Quando è {prayerName}",
+            "Dimmi l\u0027orario di {prayerName}",
+            "Qual è la prossima preghiera",
+            "Quanto manca a {prayerName}",
             "Orario della preghiera {prayerName}",
             "La prossima preghiera è {prayerName}",
-            "Dimmi l'orario di {prayerName}",
-            "A che ora è la preghiera?",
+            "Dimmi l\u0027orario di {prayerName}",
+            "A che ora è la preghiera",
             "Preghiera successiva {prayerName}"
           ]
         },
@@ -160,12 +160,12 @@
           "name": "NextIqamaTimeIntent",
           "samples": [
             "Prossimo iqama",
-            "Quando è l'iqama?",
-            "A che ora è l'iqama?",
-            "Quanto manca all'iqama?",
-            "Orario dell'iqama",
-            "Dammi l'ora dell'iqama",
-            "L'iqama successivo"
+            "Quando è l\u0027iqama",
+            "A che ora è l\u0027iqama",
+            "Quanto manca all\u0027iqama",
+            "Orario dell\u0027iqama",
+            "Dammi l\u0027ora dell\u0027iqama",
+            "L\u0027iqama successivo"
           ]
         },
         {
@@ -177,17 +177,17 @@
           ],
           "name": "PlayAdhanIntent",
           "samples": [
-            "suona l'adhan {prayerName}",
-            "metti l'adhan {prayerName}",
+            "suona l\u0027adhan {prayerName}",
+            "metti l\u0027adhan {prayerName}",
             "Adhan {prayerName}",
-            "suona l'adhan",
-            "metti l'adhan",
-            "Manda l'adhan",
-            "Manda l'appello alla preghiera",
+            "suona l\u0027adhan",
+            "metti l\u0027adhan",
+            "Manda l\u0027adhan",
+            "Manda l\u0027appello alla preghiera",
             "Azan {prayerName}",
-            "lancia l'adhan {prayerName}",
-            "fai partire l'adhan",
-            "Suona l'adhan per {prayerName}"
+            "lancia l\u0027adhan {prayerName}",
+            "fai partire l\u0027adhan",
+            "Suona l\u0027adhan per {prayerName}"
           ]
         },
         {
@@ -195,12 +195,12 @@
           "name": "MosqueInfoIntent",
           "samples": [
             "Dammi informazioni sulla mia moschea",
-            "Dove si trova la mia moschea?",
+            "Dove si trova la mia moschea",
             "Info sulla mia moschea",
             "Dettagli sulla mia moschea",
             "Più informazioni sulla mia moschea",
             "Localizzazione della mia moschea",
-            "Qual è il nome della mia moschea?",
+            "Qual è il nome della mia moschea",
             "Dammi i dettagli della moschea"
           ]
         },
@@ -210,7 +210,7 @@
           "samples": [
             "Dimmi gli orari degli iqama",
             "Orari degli iqama",
-            "Quando sono gli iqama?",
+            "Quando sono gli iqama",
             "Dammi gli iqama",
             "Orario degli iqama"
           ]
@@ -234,8 +234,8 @@
             "Apri MAWAQIT",
             "Lancia MAWAQIT",
             "MAWAQIT",
-            "Apri l'app MAWAQIT",
-            "Lancia l'applicazione MAWAQIT",
+            "Apri l\u0027app MAWAQIT",
+            "Lancia l\u0027applicazione MAWAQIT",
             "Inizia MAWAQIT"
           ]
         },
@@ -247,7 +247,7 @@
             "Orari delle preghiere di oggi",
             "Orario di tutte le preghiere",
             "Dimmi tutte le ore di preghiera",
-            "Quando sono le preghiere?",
+            "Quando sono le preghiere",
             "Orari delle preghiere"
           ]
         }
@@ -269,24 +269,24 @@
             },
             {
               "name": {
-                "value": "Eid",
                 "synonyms": [
                   "Eid al-Fitr",
                   "Eid al-Adha",
                   "Festa del sacrificio"
-                ]
+                ],
+                "value": "Eid"
               },
               "id": "6"
             },
             {
               "name": {
-                "value": "Jumma",
                 "synonyms": [
                   "Preghiera del venerdì",
                   "Venerdì",
                   "Jumua",
                   "Jumah"
-                ]
+                ],
+                "value": "Jumma"
               },
               "id": "5"
             },
@@ -296,7 +296,7 @@
                   "quinta preghiera",
                   "ultima preghiera",
                   "Isha",
-                  "Isha'a",
+                  "Isha\u0027a",
                   "notte"
                 ],
                 "value": "Isha"
@@ -367,7 +367,7 @@
           },
           {
             "type": "PlainText",
-            "value": "Qual è il numero della tua moschea?"
+            "value": "Qual è il numero della tua moschea"
           },
           {
             "type": "PlainText",
@@ -380,15 +380,15 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Quale preghiera?"
+            "value": "Quale preghiera"
           },
           {
             "type": "PlainText",
-            "value": "Per quale preghiera?"
+            "value": "Per quale preghiera"
           },
           {
             "type": "PlainText",
-            "value": "Di quale preghiera parli?"
+            "value": "Di quale preghiera parli"
           }
         ],
         "id": "Elicit.Slot.841213483794.24233923236"

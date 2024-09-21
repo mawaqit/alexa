@@ -1,7 +1,7 @@
 module.exports = {
   translation: {
     skillName: process.env.skillName, //new
-    welcomePrompt: `¡Salam Aleikum!`,
+    welcomePrompt: `¡Salam Aleikum! `,
     chooseMosquePrompt: `¿Qué mezquita deseas elegir? Las mezquitas más cercanas son: %s. Puedes elegir diciendo el número asociado a la mezquita.`,
     chooseMosqueByTouchPrompt: " O también puedes hacer clic en la mezquita de tu elección en tu pantalla.",
     helpPrompt: `Aquí tienes los comandos que puedes usar:\n- ¿Cuándo es la próxima oración?\n- También puedes preguntar la hora de cada oración diciendo, por ejemplo, "¿Cuándo es la cuarta oración?" para el Maghrib\n- ¿Cuánto tiempo queda para el iqama?\n- Dame información sobre mi mezquita.\n- Cambia mi mezquita favorita.\n- Dame los horarios de oración del día.\n- Pon el adhan.\n- Pon el adhan del Fajr.\nEstos comandos también se pueden usar en tus rutinas de Alexa. Muy pronto llegarán más comandos inshaAllah.`,
@@ -33,12 +33,12 @@ module.exports = {
     selectedMosquePrompt: `Perfecto, %s es ahora tu mezquita favorita.`,
     nextPrayerWithoutMosquePrompt: `La próxima oración es %s a las %s en %s.`,
     iqamaNotEnabledPrompt: "Los tiempos entre el adhan y el iqama no están proporcionados por tu mezquita.",
-    mosqueInfoPrompt: `Tu mezquita es %s. Ubicada en %s, a aproximadamente %s kilómetros de tu ubicación. Además, el Yumuah, la oración del viernes, es a las %s.`,
+    mosqueInfoPrompt: `Tu mezquita es %s. Ubicada en %s, a aproximadamente %s kilómetros de tu ubicación. `,
     mosqueInfoErrorPrompt: "Lo siento, no pude encontrar información para tu mezquita. Por favor, inténtalo de nuevo.",
     allIqamaTimesPrompt: "Para %s, el iqama es a las %s.",
     deleteDataPrompt: `Tus datos han sido eliminados con éxito. Reinicia la aplicación para reutilizar ${process.env.skillName}.`,
     okPrompt: "Ok.",
-    jummaTimePrompt: `El Yumuah, la oración del viernes, es a las %s.`,
+    jummaTimePrompt: `Además, el Yumuah, la oración del viernes, es a las %s.`,
     noJummaTimePrompt: "No hay oración de Yumuah en esta mezquita.",
     none: "Ninguno",
     thankYouPrompt: `Gracias por usar ${process.env.skillName} para obtener los horarios exactos de oración de tu mezquita favorita.`,

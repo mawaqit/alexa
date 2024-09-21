@@ -1,7 +1,7 @@
 module.exports = {
   translation: {
     skillName: process.env.skillName, //new
-    welcomePrompt: `Salam Aleykoum!`,
+    welcomePrompt: `Salam Aleykoum! `,
     chooseMosquePrompt: `Welke moskee wil je kiezen? De dichtstbijzijnde moskeeën zijn: %s. Je kunt kiezen door het nummer van de moskee uit te spreken.`,
     chooseMosqueByTouchPrompt: " of je kunt ook op het scherm op de moskee van jouw keuze klikken.",
     helpPrompt: `Dit zijn de commando's die je kunt gebruiken:\n- Wanneer is het volgende gebed?\n- Je kunt ook vragen naar het tijdstip van elk gebed, bijvoorbeeld door te vragen "Wanneer is het vierde gebed?" voor Maghrib\n- Hoeveel tijd is er nog voor de iqama?\n- Geef me informatie over mijn moskee.\n- Verander mijn favoriete moskee.\n- Geef me de gebedstijden van de dag.\n- Speel de adhan af.\n- Speel de adhan van Fajr af.\nDeze commando's kunnen ook worden gebruikt in je Alexa-routines. Meer commando's komen binnenkort, inshaAllah.`,
@@ -32,13 +32,13 @@ module.exports = {
     selectedMosquePrompt: `Perfect, %s is nu je favoriete moskee!`,
     nextPrayerWithoutMosquePrompt: `Het volgende gebed is %s om %s over %s.`,
     iqamaNotEnabledPrompt: "De tijden tussen de adhan en iqama worden niet verstrekt door jouw moskee.",
-    mosqueInfoPrompt: "Jouw moskee is %s. Gelegen op %s, ongeveer %s kilometer van je locatie. Bovendien is het Jumua-gebed, het vrijdaggebed, om %s.",
+    mosqueInfoPrompt: "Jouw moskee is %s. Gelegen op %s, ongeveer %s kilometer van je locatie. ",
     mosqueInfoErrorPrompt: "Sorry, ik kon geen informatie vinden over jouw moskee. Probeer het alstublieft opnieuw.",
     nextPrayerTimeWithNamePrompt: `Het gebed van %s is om %s over %s.`,
     allIqamaTimesPrompt: "Voor %s, is de iqama om %s.",
     deleteDataPrompt: `Je gegevens zijn succesvol verwijderd. Start de applicatie opnieuw om ${process.env.skillName} opnieuw te gebruiken.`,
     okPrompt: "Oké.",
-    jummaTimePrompt: "Het Jumua-gebed, het vrijdaggebed, is om %s.",
+    jummaTimePrompt: "Bovendien is het Jumua-gebed, het vrijdaggebed, om %s.",
     noJummaTimePrompt: "Er is geen Jumua-gebed in deze moskee.",
     none: "Geen",
     thankYouPrompt: `Bedankt voor het gebruik van ${process.env.skillName} om de exacte gebedstijden van jouw favoriete moskee te ontvangen.`,

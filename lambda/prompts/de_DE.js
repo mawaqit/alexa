@@ -1,7 +1,7 @@
 module.exports = {
   translation: {
     skillName: process.env.skillName, //new
-    welcomePrompt: `Salam Aleykum!`,
+    welcomePrompt: `Salam Aleykum! `,
     chooseMosquePrompt: `Welche Moschee möchten Sie auswählen? Die nächstgelegenen Moscheen sind: %s. Sie können eine auswählen, indem Sie die zugehörige Nummer sagen.`,
     chooseMosqueByTouchPrompt: "oder Sie können auch auf die Moschee Ihrer Wahl auf Ihrem Bildschirm klicken.",
     helpPrompt: `Hier sind die Befehle, die Sie verwenden können:\n- Wann ist das nächste Gebet?\n- Sie können auch die Zeit eines bestimmten Gebets erfragen, indem Sie z.B. fragen: "Wann ist das vierte Gebet?" für Maghrib\n- Wie lange dauert es bis zur Iqama?\n- Geben Sie mir Informationen über meine Moschee.\n- Ändern Sie meine Lieblingsmoschee.\n- Geben Sie mir die Gebetszeiten für den Tag.\n- Spielen Sie den Gebetsruf ab.\n- Spielen Sie den Gebetsruf für Fajr ab.\nDiese Befehle können auch in Ihren Alexa-Routinen verwendet werden. Weitere Befehle folgen inshaAllah bald.`,
@@ -32,13 +32,13 @@ module.exports = {
     selectedMosquePrompt: `Perfekt, %s ist jetzt Ihre Lieblingsmoschee!`,
     nextPrayerWithoutMosquePrompt: `Das nächste Gebet ist %s um %s in %s.`,
     iqamaNotEnabledPrompt: "Die Zeiten zwischen den Adhans und den Iqamas werden von Ihrer Moschee nicht bereitgestellt.",
-    mosqueInfoPrompt: "Ihre Moschee ist %s. Sie befindet sich in %s, etwa %s Kilometer von Ihrem Standort entfernt. Außerdem ist das Jumua, das Freitagsgebet, um %s.",
+    mosqueInfoPrompt: "Ihre Moschee ist %s. Sie befindet sich in %s, etwa %s Kilometer von Ihrem Standort entfernt. ",    
     mosqueInfoErrorPrompt: "Entschuldigung, ich konnte keine Informationen für Ihre Moschee finden. Bitte versuchen Sie es erneut.",
     nextPrayerTimeWithNamePrompt: `Das Gebet %s ist um %s in %s. `,
     allIqamaTimesPrompt: "Für %s ist die Iqama um %s.", 
     deleteDataPrompt: `Ihre Daten wurden erfolgreich gelöscht. Starten Sie die Anwendung neu, um ${process.env.skillName} erneut zu verwenden.`,
     okPrompt: "Ok.",
-    jummaTimePrompt: "Das Jumua, das Freitagsgebet, ist um %s.",
+    jummaTimePrompt: "Außerdem ist das Jumua, das Freitagsgebet, um %s.",
     noJummaTimePrompt: "Es gibt kein Jumua-Gebet in dieser Moschee.",
     none: "Keine",
     thankYouPrompt: `Danke, dass Sie ${process.env.skillName} verwenden, um die genauen Gebetszeiten Ihrer Lieblingsmoschee zu erhalten.`,

@@ -1,10 +1,9 @@
 const Alexa = require("ask-sdk-core");
-const s3 = require("./handlers/s3Handler");
+const backgroundImage = "https://cdn.mawaqit.net/images/background-arabic-calligraphy.png";
 
 const getDataSourceforMosqueList = async (handlerInput, mosqueList) => {
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
-  const backgroundImage = await s3.getS3PreSignedUrl("background.png");
   const logoUrl = requestAttributes.t("logoUrl");
   const title = requestAttributes.t("titleForMosqueList");
   const locale = Alexa.getLocale(handlerInput.requestEnvelope);
@@ -30,7 +29,6 @@ const getDataSourceforMosqueList = async (handlerInput, mosqueList) => {
 const getDataSourceForPrayerTime = async (handlerInput, text) => {
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
-  const backgroundImage = await s3.getS3PreSignedUrl("background.png");
   const logoUrl = requestAttributes.t("logoUrl");
   return {
     longTextTemplateData: {
@@ -61,7 +59,6 @@ const getDataSourceForPrayerTime = async (handlerInput, text) => {
 const getDataSourceforMosqueInfo = async (handlerInput, prayerTimes, mosqueInfo) => {
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
-  const backgroundImage = await s3.getS3PreSignedUrl("background.png");
   const logoUrl = requestAttributes.t("logoUrl");
   return {
     "data": {

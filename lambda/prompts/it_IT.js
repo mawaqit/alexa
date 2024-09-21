@@ -1,7 +1,7 @@
 module.exports = {
   translation: {
     skillName: process.env.skillName, //new
-    welcomePrompt: `Salam Aleykoum !`,
+    welcomePrompt: `Salam Aleykoum ! `,
     chooseMosquePrompt: `Quale moschea vuoi scegliere? Le moschee più vicine sono: %s. Puoi scegliere pronunciando il numero associato alla moschea.`,
     chooseMosqueByTouchPrompt: " oppure puoi anche cliccare sulla moschea di tua scelta sullo schermo.",
     helpPrompt: `Ecco i comandi che puoi utilizzare:\n- Quando è la prossima preghiera?\n- Puoi anche chiedere l'orario di ogni preghiera chiedendo ad esempio "Quando è la quarta preghiera?" per Maghrib\n- Quanto tempo manca prima dell'iqama?\n- Dammi informazioni sulla mia moschea.\n- Cambia la mia moschea preferita.\n- Dammi gli orari delle preghiere della giornata.\n- Metti l'adhan.\n- Metti l'adhan per il Fajr.\nQuesti comandi possono essere utilizzati nelle tue routine Alexa. Altri comandi arriveranno presto, inshaAllah.`,
@@ -32,13 +32,13 @@ module.exports = {
     selectedMosquePrompt: `Perfetto, %s è ora la tua moschea preferita!`,
     nextPrayerWithoutMosquePrompt: `La prossima preghiera è %s alle %s tra %s.`,
     iqamaNotEnabledPrompt: "Gli orari tra adhan e iqama non sono forniti dalla tua moschea.",
-    mosqueInfoPrompt: "La tua moschea è %s. Situata a %s, a circa %s chilometri dalla tua posizione. Inoltre, il Jumua, la preghiera del Venerdì, è alle %s.",
+    mosqueInfoPrompt: "La tua moschea è %s. Situata a %s, a circa %s chilometri dalla tua posizione. ",
     mosqueInfoErrorPrompt: "Mi dispiace, non sono riuscito a trovare informazioni per la tua moschea. Riprova per favore.",
     nextPrayerTimeWithNamePrompt: `La preghiera di %s è alle %s tra %s.`,
     allIqamaTimesPrompt: "Per %s, l'iqama è alle %s.",
     deleteDataPrompt: `I tuoi dati sono stati eliminati correttamente. Riavvia l'applicazione per riutilizzare ${process.env.skillName}.`,
     okPrompt: "Ok.",
-    jummaTimePrompt: "Il Jumua, la preghiera del Venerdì, è alle %s.",
+    jummaTimePrompt: "Inoltre, il Jumua, la preghiera del Venerdì, è alle %s.",
     noJummaTimePrompt: "Non c'è preghiera di Jumua in questa moschea.",
     none: "Nessuno",
     thankYouPrompt: `Grazie per aver utilizzato ${process.env.skillName} per ottenere gli orari esatti delle preghiere della tua moschea preferita.`,

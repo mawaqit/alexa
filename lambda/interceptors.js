@@ -73,6 +73,16 @@ const AddDirectiveResponseInterceptor = {
         };
       }
     }
+    const timestamp = Alexa.getRequest(handlerInput.requestEnvelope)["timestamp"];
+    console.log("Request Timestamp: ", JSON.stringify(timestamp));
+    const requestTimestamp = new Date(timestamp);
+    const responseTimestamp = new Date();
+    console.log("Response Timestamp: ", JSON.stringify(responseTimestamp.toISOString()));
+    const timeDifference = responseTimestamp - requestTimestamp;
+    console.log(`Difference in milliseconds: ${timeDifference}`);
+    console.log("==== RESPONSE ======");
+    console.log(JSON.stringify(response, null, 2));
+
   },
 };
 

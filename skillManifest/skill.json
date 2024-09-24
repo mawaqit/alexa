@@ -129,8 +129,8 @@
           "termsOfUseUrl": "https://mawaqit.net/en/legal-notice"
         },
         "fr-FR": {
-          "privacyPolicyUrl": "https://mawaqit.net/en/legal-notice",
-          "termsOfUseUrl": "https://mawaqit.net/en/legal-notice"
+          "privacyPolicyUrl": "https://mawaqit.net/fr/legal-notice",
+          "termsOfUseUrl": "https://mawaqit.net/fr/legal-notice"
         },
         "ar-SA": {
           "privacyPolicyUrl": "https://mawaqit.net/en/legal-notice",
@@ -204,9 +204,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=64d6e8b53ffa29c80bdcd7f35f542295af984a248ac334d7448d401af11173be",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=402b2f21850872b16be10107be7492a3a15592e3613a8fda4c8fd5581da15b53",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "de-DE": {
@@ -217,9 +217,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=64d6e8b53ffa29c80bdcd7f35f542295af984a248ac334d7448d401af11173be",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=402b2f21850872b16be10107be7492a3a15592e3613a8fda4c8fd5581da15b53",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "en-US": {
@@ -230,9 +230,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=64d6e8b53ffa29c80bdcd7f35f542295af984a248ac334d7448d401af11173be",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=402b2f21850872b16be10107be7492a3a15592e3613a8fda4c8fd5581da15b53",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "en-CA": {
@@ -243,9 +243,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=64d6e8b53ffa29c80bdcd7f35f542295af984a248ac334d7448d401af11173be",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=402b2f21850872b16be10107be7492a3a15592e3613a8fda4c8fd5581da15b53",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "pt-BR": {
@@ -256,9 +256,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=64d6e8b53ffa29c80bdcd7f35f542295af984a248ac334d7448d401af11173be",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=402b2f21850872b16be10107be7492a3a15592e3613a8fda4c8fd5581da15b53",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "en-IN": {
@@ -269,9 +269,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=64d6e8b53ffa29c80bdcd7f35f542295af984a248ac334d7448d401af11173be",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=402b2f21850872b16be10107be7492a3a15592e3613a8fda4c8fd5581da15b53",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "es-ES": {
@@ -282,9 +282,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a35ddcec7de8ae95c8993986f8993e991e5bd6d6b3cc32b9bfb884a49cd3ce20",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172058Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=402b2f21850872b16be10107be7492a3a15592e3613a8fda4c8fd5581da15b53",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "fr-CA": {
@@ -295,9 +295,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a35ddcec7de8ae95c8993986f8993e991e5bd6d6b3cc32b9bfb884a49cd3ce20",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=82bee148f5ed60451e8049ea91196e38302025fbd00027b700ab7b4a9e794503",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "es-MX": {
@@ -308,9 +308,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a35ddcec7de8ae95c8993986f8993e991e5bd6d6b3cc32b9bfb884a49cd3ce20",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=82bee148f5ed60451e8049ea91196e38302025fbd00027b700ab7b4a9e794503",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "it-IT": {
@@ -321,9 +321,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a35ddcec7de8ae95c8993986f8993e991e5bd6d6b3cc32b9bfb884a49cd3ce20",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=82bee148f5ed60451e8049ea91196e38302025fbd00027b700ab7b4a9e794503",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "nl-NL": {
@@ -334,9 +334,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a35ddcec7de8ae95c8993986f8993e991e5bd6d6b3cc32b9bfb884a49cd3ce20",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=82bee148f5ed60451e8049ea91196e38302025fbd00027b700ab7b4a9e794503",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "en-AU": {
@@ -347,9 +347,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a35ddcec7de8ae95c8993986f8993e991e5bd6d6b3cc32b9bfb884a49cd3ce20",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=82bee148f5ed60451e8049ea91196e38302025fbd00027b700ab7b4a9e794503",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "es-US": {
@@ -360,30 +360,30 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a35ddcec7de8ae95c8993986f8993e991e5bd6d6b3cc32b9bfb884a49cd3ce20",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=82bee148f5ed60451e8049ea91196e38302025fbd00027b700ab7b4a9e794503",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         },
         "fr-FR": {
-          "description": "Pour être sûr que la Skill se lance bien, dites plutôt Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de prières de la mosquée de votre choix !\n\nDemandez par exemple quelle est la prochaine prière, à quelle heure est la prière du vendredi, ou encore à quelle heure est la troisième prière ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosquée, de lancer l'Adhan classique ou celui de la première prière de la journée (Fajr).\n\nSi vous avez quelconque retour à nous faire parvenir, n'hésitez pas à nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn espérant que la Skill vous plaise, assalamu aleykoum !",
+          "description": "Pour ├¬tre s├╗r que la Skill se lance bien, dites plut├┤t Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de pri├¿res de la mosqu├⌐e de votre choix !\n\nDemandez par exemple quelle est la prochaine pri├¿re, ├á quelle heure est la pri├¿re du vendredi, ou encore ├á quelle heure est la troisi├¿me pri├¿re ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosqu├⌐e, de lancer l'Adhan classique ou celui de la premi├¿re pri├¿re de la journ├⌐e (Fajr).\n\nPour conna├«tre toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal ├á reconna├«tre les noms de pri├¿re, nous vous conseille de donner le num├⌐ro de la pri├¿re qui vous int├⌐resse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, ├á quelle heure est la premi├¿re pri├¿re ?\".\n\nSi vous avez quelconque retour ├á nous faire parvenir, n'h├⌐sitez pas ├á nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn esp├⌐rant que la Skill vous plaise, assalamu aleykoum !",
           "examplePhrases": [
             "Alexa, ouvre MAWAQIT.",
-            "Alexa, demande à MAWAQIT quand est la prochaine prière.",
-            "Alexa, demande à MAWAQIT quand est la quatrième prière."
+            "Alexa, demande ├á MAWAQIT quand est la prochaine pri├¿re.",
+            "Alexa, demande ├á MAWAQIT quand est la quatri├¿me pri├¿re."
           ],
           "keywords": [
-            "prière",
-            "prières",
-            "mosquée",
-            "mosquées",
+            "pri├¿re",
+            "pri├¿res",
+            "mosqu├⌐e",
+            "mosqu├⌐es",
             "mawaqit",
             "horaires",
             "de",
-            "prière",
+            "pri├¿re",
             "horaire",
             "de",
-            "prière",
+            "pri├¿re",
             "salat",
             "salah",
             "fajr",
@@ -393,10 +393,30 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a35ddcec7de8ae95c8993986f8993e991e5bd6d6b3cc32b9bfb884a49cd3ce20",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=82bee148f5ed60451e8049ea91196e38302025fbd00027b700ab7b4a9e794503",
-          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée."
+          "preview": {
+            "assets": {
+              "mobileRectangle": {
+                "images": [
+                  {
+                    "source": {
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/a01b/a4fb0cde77a14942a3d79d344b837cfd/APP_PREVIEW_IMAGE?versionId=czv4hFRg5BnyL2NWgLr2hgppeJf79lhB&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=31e2150faec1e3fed6aa52c04dd953e0ecb4fd6cc2e3fbc54c75abf297fbff6b",
+                      "type": "URI"
+                    }
+                  },
+                  {
+                    "source": {
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/6cbd/f1a66c67713a44a688a3378c8390997b/APP_PREVIEW_IMAGE?versionId=kT.AXfjmgh9kmhmax4Hl5nm46l1lWvPU&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=29b0ec44cba644cdcd73c31e59a99e44fbe92ea78084696bd9314859d0eb7635",
+                      "type": "URI"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
+          "summary": "MAWAQIT vous permet d'obtenir les heures de pri├¿res de votre mosqu├⌐e."
         },
         "en-GB": {
           "description": "MAWAQIT",
@@ -406,9 +426,9 @@
             "Alexa, start mawaqit"
           ],
           "keywords": [],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a35ddcec7de8ae95c8993986f8993e991e5bd6d6b3cc32b9bfb884a49cd3ce20",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=9541bb8d0eb8c76c2469092a6e59d3cd7a104d56c574727befb38d68cd6259b6",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T172059Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240921%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=82bee148f5ed60451e8049ea91196e38302025fbd00027b700ab7b4a9e794503",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240924T145613Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QIAJPS3KR%2F20240924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8479f534f2064cf5f07671def9c593102b30f9cbabcdd8aede4cd01d061184bf",
           "summary": "MAWAQIT"
         }
       },

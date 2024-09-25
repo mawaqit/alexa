@@ -251,9 +251,9 @@
           "summary": "MAWAQIT ermöglicht es Ihnen, die Gebetszeiten für Ihre Moschee zu erhalten.",
           "description": "Um sicherzustellen, dass die Skill korrekt gestartet wird, sagen Sie bitte Mawakit.\n\nDie MAWAQIT-Skill ermöglicht es Ihnen, die Gebetszeiten für die Moschee Ihrer Wahl zu erhalten!\n\nZum Beispiel können Sie fragen, wann das nächste Gebet ist, wann das Freitagsgebet stattfindet oder um wie viel Uhr das dritte Gebet ('Asr) ist.\nDie Skill bietet Ihnen auch Informationen über Ihre Moschee und ermöglicht es, den klassischen Adhan oder den Adhan für das erste Gebet des Tages (Fajr) abzuspielen.\n\nUm alle verfügbaren Befehle zu erfahren, sagen Sie einfach \"Alexa, welche Befehle sind verfügbar?\".\n\nHinweis: Da Alexa Schwierigkeiten hat, die Namen der Gebete zu erkennen, empfehlen wir, statt des arabischen Namens die Nummer des Gebets zu nennen, das Sie interessiert.\nZum Beispiel, wenn Sie die Zeit des Fajr wissen möchten, sagen Sie \"Alexa, um wie viel Uhr ist das erste Gebet?\".\n\nWenn Sie Feedback für uns haben, können Sie uns gerne kontaktieren, insbesondere auf Twitter/X @MAWAQIT.\n\nWir hoffen, Ihnen gefällt die Skill, assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, öffne MAWAQIT.",
-            "Alexa, frage MAWAQIT, wann das nächste Gebet ist.",
-            "Alexa, frage MAWAQIT, wann das vierte Gebet ist."
+            "Alexa, öffne mawaqit.",
+            "Alexa, frage mawaqit, wann das nächste Gebet ist.",
+            "Alexa, frage mawaqit, wann das vierte Gebet ist."
           ],
           "keywords": [
             "Gebet",
@@ -301,9 +301,9 @@
           "summary": "MAWAQIT permite que você obtenha os horários de oração da sua mesquita.",
           "description": "Para garantir que a Skill inicie corretamente, diga Mawakit.\n\nA skill MAWAQIT permite que você obtenha os horários de oração da mesquita de sua escolha!\n\nPor exemplo, você pode perguntar quando é a próxima oração, a que horas é a oração de sexta-feira ou a que horas é a terceira oração ('Asr).\nA Skill também permite que você obtenha informações sobre sua mesquita, reproduza o Adhan clássico ou o Adhan da primeira oração do dia (Fajr).\n\nPara saber todos os comandos disponíveis, basta dizer \"Alexa, quais são os comandos disponíveis?\".\n\nPS: Como a Alexa tem dificuldade em reconhecer os nomes das orações, recomendamos que você forneça o número da oração que lhe interessa em vez do nome em árabe.\nPor exemplo, se você quiser saber a hora do Fajr, diga \"Alexa, a que horas é a primeira oração?\".\n\nSe você tiver algum feedback para compartilhar conosco, sinta-se à vontade para nos contatar, especialmente no Twitter/X @MAWAQIT.\n\nEsperamos que você goste da Skill, assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, abra MAWAQIT.",
-            "Alexa, pergunte a MAWAQIT quando é a próxima oração.",
-            "Alexa, pergunte a MAWAQIT quando é a quarta oração."
+            "Alexa, abra mawaqit.",
+            "Alexa, pergunte a mawaqit quando é a próxima oração.",
+            "Alexa, pergunte a mawaqit quando é a quarta oração."
           ],
           "keywords": [
             "oração",
@@ -354,9 +354,9 @@
           "summary": "MAWAQIT ti permette di ottenere gli orari delle preghiere della tua moschea.",
           "description": "Per assicurarti che la Skill venga avviata correttamente, per favore dì Mawakit.\n\nLa skill MAWAQIT ti permette di ottenere gli orari delle preghiere per la moschea che preferisci!\n\nAd esempio, puoi chiedere quando sarà la prossima preghiera, a che ora è la preghiera del venerdì, oppure a che ora è la terza preghiera ('Asr).\nLa Skill ti permette anche di ottenere informazioni sulla tua moschea, di riprodurre l'Adhan classico o l'Adhan per la prima preghiera della giornata (Fajr).\n\nPer sapere tutti i comandi disponibili, basta dire \"Alexa, quali sono i comandi disponibili?\".\n\nPS: Poiché Alexa fatica a riconoscere i nomi delle preghiere, ti consigliamo di dare il numero della preghiera che ti interessa invece del nome in arabo.\nAd esempio, se vuoi sapere l'orario del Fajr, dì \"Alexa, a che ora è la prima preghiera?\".\n\nSe hai feedback da condividere con noi, non esitare a contattarci, soprattutto su Twitter/X @MAWAQIT.\n\nSperiamo che la Skill ti piaccia, assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, apri MAWAQIT.",
-            "Alexa, chiedi a MAWAQIT quando è la prossima preghiera.",
-            "Alexa, chiedi a MAWAQIT quando è la quarta preghiera."
+            "Alexa, apri mawaqit.",
+            "Alexa, chiedi a mawaqit quando è la prossima preghiera.",
+            "Alexa, chiedi a mawaqit quando è la quarta preghiera."
           ],
           "keywords": [
             "preghiera",
@@ -403,9 +403,9 @@
           "summary": "MAWAQIT stelt je in staat om de gebedstijden van je moskee te verkrijgen.",
           "description": "Om er zeker van te zijn dat de Skill correct wordt gestart, zeg Mawakit.\n\nDe MAWAQIT-skill stelt je in staat om de gebedstijden te krijgen van de moskee van jouw keuze!\n\nJe kunt bijvoorbeeld vragen wanneer het volgende gebed is, hoe laat het vrijdaggebed is, of hoe laat het derde gebed ('Asr) is.\nDe Skill biedt je ook informatie over je moskee, en kan de klassieke Adhan of de Adhan voor het eerste gebed van de dag (Fajr) afspelen.\n\nOm alle beschikbare commando's te kennen, zeg je gewoon \"Alexa, wat zijn de beschikbare commando's?\".\n\nPS: Aangezien Alexa moeite heeft met het herkennen van de namen van de gebeden, raden we aan het nummer van het gebed te noemen waarin je geïnteresseerd bent, in plaats van de Arabische naam.\nBijvoorbeeld, als je de tijd van Fajr wilt weten, zeg dan \"Alexa, hoe laat is het eerste gebed?\".\n\nAls je feedback hebt die je met ons wilt delen, aarzel dan niet om contact met ons op te nemen, vooral op Twitter/X @MAWAQIT.\n\nWe hopen dat je geniet van de Skill, assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, vraag MAWAQIT wanneer het volgende gebed is.",
-            "Alexa, vraag MAWAQIT wanneer het vierde gebed is."
+            "Alexa, open mawaqit.",
+            "Alexa, vraag mawaqit wanneer het volgende gebed is.",
+            "Alexa, vraag mawaqit wanneer het vierde gebed is."
           ],
           "keywords": [
             "gebed",
@@ -455,9 +455,9 @@
           "summary": "MAWAQIT te permite obtener los horarios de oración de tu mezquita.",
           "description": "Para asegurarte de que la Skill se lance correctamente, por favor di Mawakit.\n\nLa skill MAWAQIT te permite obtener los horarios de oración de la mezquita de tu elección.\n\nPor ejemplo, puedes preguntar cuándo es la próxima oración, a qué hora es la oración del viernes, o a qué hora es la tercera oración ('Asr).\nLa Skill también te permite obtener información sobre tu mezquita, reproducir el Adhan clásico o el Adhan para la primera oración del día (Fajr).\n\nPara conocer todos los comandos disponibles, simplemente di \"Alexa, ¿cuáles son los comandos disponibles?\".\n\nPS: Como Alexa tiene dificultades para reconocer los nombres de las oraciones, te recomendamos dar el número de la oración que te interesa en lugar del nombre en árabe.\nPor ejemplo, si quieres saber la hora del Fajr, di \"Alexa, ¿a qué hora es la primera oración?\".\n\nSi tienes algún comentario que quieras compartir con nosotros, no dudes en contactarnos, especialmente en Twitter/X @MAWAQIT.\n\nEsperamos que disfrutes de la Skill, ¡assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, abre MAWAQIT.",
-            "Alexa, pregunta a MAWAQIT cuándo es la próxima oración.",
-            "Alexa, pregunta a MAWAQIT cuándo es la cuarta oración."
+            "Alexa, abre mawaqit.",
+            "Alexa, pregunta a mawaqit cuándo es la próxima oración.",
+            "Alexa, pregunta a mawaqit cuándo es la cuarta oración."
           ],
           "keywords": [
             "oración",
@@ -508,9 +508,9 @@
           "summary": "MAWAQIT te permite obtener los horarios de oración de tu mezquita.",
           "description": "Para asegurarte de que la Skill se lance correctamente, por favor di Mawakit.\n\nLa skill MAWAQIT te permite obtener los horarios de oración de la mezquita de tu elección.\n\nPor ejemplo, puedes preguntar cuándo es la próxima oración, a qué hora es la oración del viernes, o a qué hora es la tercera oración ('Asr).\nLa Skill también te permite obtener información sobre tu mezquita, reproducir el Adhan clásico o el Adhan para la primera oración del día (Fajr).\n\nPara conocer todos los comandos disponibles, simplemente di \"Alexa, ¿cuáles son los comandos disponibles?\".\n\nPS: Como Alexa tiene dificultades para reconocer los nombres de las oraciones, te recomendamos dar el número de la oración que te interesa en lugar del nombre en árabe.\nPor ejemplo, si quieres saber la hora del Fajr, di \"Alexa, ¿a qué hora es la primera oración?\".\n\nSi tienes algún comentario que quieras compartir con nosotros, no dudes en contactarnos, especialmente en Twitter/X @MAWAQIT.\n\nEsperamos que disfrutes de la Skill, ¡assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, abre MAWAQIT.",
-            "Alexa, pregunta a MAWAQIT cuándo es la próxima oración.",
-            "Alexa, pregunta a MAWAQIT cuándo es la cuarta oración."
+            "Alexa, abre mawaqit.",
+            "Alexa, pregunta a mawaqit cuándo es la próxima oración.",
+            "Alexa, pregunta a mawaqit cuándo es la cuarta oración."
           ],
           "keywords": [
             "oración",
@@ -561,9 +561,9 @@
           "summary": "MAWAQIT te permite obtener los horarios de oración de tu mezquita.",
           "description": "Para asegurarte de que la Skill se lance correctamente, por favor di Mawakit.\n\nLa skill MAWAQIT te permite obtener los horarios de oración de la mezquita de tu elección.\n\nPor ejemplo, puedes preguntar cuándo es la próxima oración, a qué hora es la oración del viernes, o a qué hora es la tercera oración ('Asr).\nLa Skill también te permite obtener información sobre tu mezquita, reproducir el Adhan clásico o el Adhan para la primera oración del día (Fajr).\n\nPara conocer todos los comandos disponibles, simplemente di \"Alexa, ¿cuáles son los comandos disponibles?\".\n\nPS: Como Alexa tiene dificultades para reconocer los nombres de las oraciones, te recomendamos dar el número de la oración que te interesa en lugar del nombre en árabe.\nPor ejemplo, si quieres saber la hora del Fajr, di \"Alexa, ¿a qué hora es la primera oración?\".\n\nSi tienes algún comentario que quieras compartir con nosotros, no dudes en contactarnos, especialmente en Twitter/X @MAWAQIT.\n\nEsperamos que disfrutes de la Skill, ¡assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, abre MAWAQIT.",
-            "Alexa, pregunta a MAWAQIT cuándo es la próxima oración.",
-            "Alexa, pregunta a MAWAQIT cuándo es la cuarta oración."
+            "Alexa, abre mawaqit.",
+            "Alexa, pregunta a mawaqit cuándo es la próxima oración.",
+            "Alexa, pregunta a mawaqit cuándo es la cuarta oración."
           ],
           "keywords": [
             "oración",
@@ -614,9 +614,9 @@
           "summary": "MAWAQIT vous permet d'obtenir les heures de pri├¿res de votre mosqu├⌐e.",
           "description": "Pour ├¬tre s├╗r que la Skill se lance bien, dites plut├┤t Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de pri├¿res de la mosqu├⌐e de votre choix !\n\nDemandez par exemple quelle est la prochaine pri├¿re, ├á quelle heure est la pri├¿re du vendredi, ou encore ├á quelle heure est la troisi├¿me pri├¿re ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosqu├⌐e, de lancer l'Adhan classique ou celui de la premi├¿re pri├¿re de la journ├⌐e (Fajr).\n\nPour conna├«tre toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal ├á reconna├«tre les noms de pri├¿re, nous vous conseille de donner le num├⌐ro de la pri├¿re qui vous int├⌐resse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, ├á quelle heure est la premi├¿re pri├¿re ?\".\n\nSi vous avez quelconque retour ├á nous faire parvenir, n'h├⌐sitez pas ├á nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn esp├⌐rant que la Skill vous plaise, assalamu aleykoum !",
           "examplePhrases": [
-            "Alexa, ouvre MAWAQIT.",
-            "Alexa, demande ├á MAWAQIT quand est la prochaine pri├¿re.",
-            "Alexa, demande ├á MAWAQIT quand est la quatri├¿me pri├¿re."
+            "Alexa, ouvre mawaqit.",
+            "Alexa, demande ├á mawaqit quand est la prochaine pri├¿re.",
+            "Alexa, demande ├á mawaqit quand est la quatri├¿me pri├¿re."
           ],
           "keywords": [
             "pri├¿re",
@@ -667,9 +667,9 @@
           "summary": "MAWAQIT vous permet d'obtenir les heures de pri├¿res de votre mosqu├⌐e.",
           "description": "Pour ├¬tre s├╗r que la Skill se lance bien, dites plut├┤t Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de pri├¿res de la mosqu├⌐e de votre choix !\n\nDemandez par exemple quelle est la prochaine pri├¿re, ├á quelle heure est la pri├¿re du vendredi, ou encore ├á quelle heure est la troisi├¿me pri├¿re ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosqu├⌐e, de lancer l'Adhan classique ou celui de la premi├¿re pri├¿re de la journ├⌐e (Fajr).\n\nPour conna├«tre toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal ├á reconna├«tre les noms de pri├¿re, nous vous conseille de donner le num├⌐ro de la pri├¿re qui vous int├⌐resse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, ├á quelle heure est la premi├¿re pri├¿re ?\".\n\nSi vous avez quelconque retour ├á nous faire parvenir, n'h├⌐sitez pas ├á nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn esp├⌐rant que la Skill vous plaise, assalamu aleykoum !",
           "examplePhrases": [
-            "Alexa, ouvre MAWAQIT.",
-            "Alexa, demande ├á MAWAQIT quand est la prochaine pri├¿re.",
-            "Alexa, demande ├á MAWAQIT quand est la quatri├¿me pri├¿re."
+            "Alexa, ouvre mawaqit.",
+            "Alexa, demande ├á mawaqit quand est la prochaine pri├¿re.",
+            "Alexa, demande ├á mawaqit quand est la quatri├¿me pri├¿re."
           ],
           "keywords": [
             "pri├¿re",
@@ -720,9 +720,9 @@
           "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
           "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when the next prayer is.",
-            "Alexa, ask MAWAQIT when the fourth prayer is."
+            "Alexa, open mawaqit.",
+            "Alexa, ask mawaqit when the next prayer is.",
+            "Alexa, ask mawaqit when the fourth prayer is."
           ],
           "keywords": [
             "prayer",
@@ -772,9 +772,9 @@
           "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
           "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when the next prayer is.",
-            "Alexa, ask MAWAQIT when the fourth prayer is."
+            "Alexa, open mawaqit.",
+            "Alexa, ask mawaqit when the next prayer is.",
+            "Alexa, ask mawaqit when the fourth prayer is."
           ],
           "keywords": [
             "prayer",
@@ -824,9 +824,9 @@
           "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
           "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when the next prayer is.",
-            "Alexa, ask MAWAQIT when the fourth prayer is."
+            "Alexa, open mawaqit.",
+            "Alexa, ask mawaqit when the next prayer is.",
+            "Alexa, ask mawaqit when the fourth prayer is."
           ],
           "keywords": [
             "prayer",
@@ -876,9 +876,9 @@
           "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
           "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when the next prayer is.",
-            "Alexa, ask MAWAQIT when the fourth prayer is."
+            "Alexa, open mawaqit.",
+            "Alexa, ask mawaqit when the next prayer is.",
+            "Alexa, ask mawaqit when the fourth prayer is."
           ],
           "keywords": [
             "prayer",
@@ -928,9 +928,9 @@
           "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
           "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
           "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when the next prayer is.",
-            "Alexa, ask MAWAQIT when the fourth prayer is."
+            "Alexa, open mawaqit.",
+            "Alexa, ask mawaqit when the next prayer is.",
+            "Alexa, ask mawaqit when the fourth prayer is."
           ],
           "keywords": [
             "prayer",

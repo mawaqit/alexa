@@ -3,3 +3,6 @@ ijaz-dev:
 
 dev:
   - alexaSkill: ${file(env.json):dev.mawaqitAlexaSkillId}
+
+prod:
+  - alexaSkill: ${file(env.json):prod.mawaqitAlexaSkillId}

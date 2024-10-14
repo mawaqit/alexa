@@ -37,7 +37,7 @@ module.exports = {
     mosqueInfoErrorPrompt: "عذرًا، لم أتمكن من العثور على معلومات لمسجدك. يرجى المحاولة مرة أخرى.",
     allIqamaTimesPrompt: "بالنسبة لـ %s، الإقامة ستكون في %s.",
     deleteDataPrompt: `تم حذف بياناتك بنجاح. أعد تشغيل التطبيق لاستخدام ${process.env.skillName}.`,
-    okPrompt: "حسنًا.",
+    okPrompt: "حسنًا. ",
     jummaTimePrompt: "بالإضافة إلى ذلك، جمعة، صلاة الجمعة، في %s.",
     noJummaTimePrompt: "لا توجد صلاة جمعة في هذا المسجد.",
     none: "لا يوجد",

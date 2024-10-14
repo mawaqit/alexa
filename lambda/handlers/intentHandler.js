@@ -224,7 +224,7 @@ const NextPrayerTimeIntentWithoutNameHandler = {
       return await helperFunctions.checkForPersistenceData(handlerInput);
     }
     const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), requestAttributes.t("prayerNames"));
-    const speakOutput = requestAttributes.t("nextPrayerWithoutMosquePrompt", prayerTimeDetails.name, prayerTimeDetails.time, prayerTimeDetails.diffInMinutes);
+    const speakOutput = requestAttributes.t("", prayerTimeDetails.name, praynextPrayerWithoutMosquePrompterTimeDetails.time, prayerTimeDetails.diffInMinutes) + requestAttributes.t("doYouNeedAnythingElsePrompt");
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .withShouldEndSession(false)
@@ -257,7 +257,7 @@ const NextIqamaTimeIntentHandler = {
       if(!iqamaEnabled) {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("iqamaNotEnabledPrompt"))
-          .withShouldEndSession(false)
+          .withShouldEndSession(true)
           .getResponse();
       }
       const iqamaCalendar = mosqueTimes.iqamaCalendar;
@@ -284,7 +284,7 @@ const NextIqamaTimeIntentHandler = {
             nextIqamaTime.diffInMinutes
           )
         )
-        .withShouldEndSession(false)
+        .withShouldEndSession(true)
         .getResponse();
     } catch (error) {
       console.log("Error in fetching iqama timings: ", error);
@@ -314,7 +314,7 @@ const PlayAdhanIntentHandler = {
     let speakOutput = `<audio src='${audioUrl}' />`;
     return handlerInput.responseBuilder
       .speak(speakOutput)
-      .withShouldEndSession(false)
+      .withShouldEndSession(true)
       .getResponse();
   },
 };
@@ -389,7 +389,7 @@ const MosqueInfoIntentHandler = {
       }
       return handlerInput.responseBuilder
         .speak(speakOutput)
-        .withShouldEndSession(false)
+        .withShouldEndSession(true)
         .getResponse();
 
     } catch (error) {
@@ -451,7 +451,7 @@ const AllIqamaTimeIntentHandler = {
 
       return handlerInput.responseBuilder
         .speak(allIqamaTimes)
-        .withShouldEndSession(false)
+        .withShouldEndSession(true)
         .getResponse();
     } catch (error) {
       console.log("Error in fetching iqama timings: ", error);
@@ -499,7 +499,7 @@ const AllPrayerTimeIntentHandler = {
 
       return handlerInput.responseBuilder
         .speak(allPrayerTimes)
-        .withShouldEndSession(false)
+        .withShouldEndSession(true)
         .getResponse();
     } catch (error) {
       console.log("Error in fetching iqama timings: ", error);

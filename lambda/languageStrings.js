@@ -8,6 +8,7 @@ const en_CA = require("./prompts/en_CA");
 const en_GB = require("./prompts/en_GB");
 const es_ES = require("./prompts/es_ES");
 const es_US = require("./prompts/es_US");
+const es_MX = require("./prompts/es_MX");
 const it_IT = require("./prompts/it_IT");
 const fr_CA = require("./prompts/fr_CA");
 const nl_NL = require("./prompts/nl_NL");
@@ -27,5 +28,6 @@ module.exports ={
   'it-IT': it_IT,
   'fr-CA': fr_CA,
   'nl-NL': nl_NL,
-  'pt-BR': pt_BR
+  'pt-BR': pt_BR,
+  'es-MX': es_MX
 }

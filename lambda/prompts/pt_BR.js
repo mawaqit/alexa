@@ -1,7 +1,7 @@
 module.exports = {
   translation: {
     skillName: process.env.skillName, //new
-    welcomePrompt: `Salam Aleykoum! `,
+    welcomePrompt: `Salam Aleikum! `,
     chooseMosquePrompt: `Qual mesquita você gostaria de escolher? As mesquitas mais próximas são: %s. Você pode escolher pronunciando o número associado à mesquita.`,
     chooseMosqueByTouchPrompt: " ou você também pode clicar na mesquita de sua escolha na tela.",
     helpPrompt: `Aqui estão os comandos que você pode usar:\n- Quando é a próxima oração?\n- Você também pode perguntar a hora de cada oração, perguntando, por exemplo, "Quando é a quarta oração?" para o Maghrib\n- Quanto tempo falta até o iqama?\n- Me dê informações sobre a minha mesquita.\n- Mude a minha mesquita favorita.\n- Me dê os horários das orações de hoje.\n- Toque o adhan.\n- Toque o adhan do Fajr.\nEsses comandos também podem ser usados nas suas rotinas da Alexa. Mais comandos estarão disponíveis em breve, inshaAllah.`,
@@ -9,7 +9,7 @@ module.exports = {
     errorPrompt: `Desculpe, eu não entendi bem o que você disse. Poderia repetir, por favor?`,
     noDataPrompt: `Desculpe, não encontrei dados para esta solicitação. Tente novamente, por favor.`,
     noCityPrompt: `Desculpe, não encontrei nenhuma mesquita nesta cidade. Tente novamente, por favor.`,
-    requestForGeoLocationPrompt: `Para usar o aplicativo, você precisa me autorizar a acessar sua localização para que eu possa encontrar as mesquitas mais próximas. Abra o aplicativo Alexa no seu telefone para aceitar, por favor.`,
+    requestForGeoLocationPrompt: `Para usar a skill, você precisa me autorizar a acessar sua localização para que eu possa encontrar as mesquitas mais próximas. Abra o aplicativo Alexa no seu telefone para aceitar, por favor.`,
     noAddressPrompt: `Parece que você não definiu seu endereço no Alexa. Você pode fazer isso através do aplicativo Alexa. Isso me permitirá encontrar as mesquitas mais próximas de você.`,
     errorPromptforMosqueList: `Desculpe, não encontrei nenhuma mesquita MAWAQIT perto de você.`,
     logoUrl: "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
@@ -36,8 +36,8 @@ module.exports = {
     mosqueInfoErrorPrompt: "Desculpe, não consegui encontrar informações sobre sua mesquita. Tente novamente, por favor.",
     nextPrayerTimeWithNamePrompt: `A oração de %s é às %s em %s.`,
     allIqamaTimesPrompt: "Para %s, o iqama é às %s.",
-    deleteDataPrompt: `Seus dados foram excluídos com sucesso. Reinicie o aplicativo para reutilizar ${process.env.skillName}.`,
-    okPrompt: "Ok.",
+    deleteDataPrompt: `Seus dados foram excluídos com sucesso. Reinicie a skill para reutilizar ${process.env.skillName}.`,
+    okPrompt: "Ok. ",
     jummaTimePrompt: " Além disso, o Jumua, a oração de sexta-feira, é às %s.",
     noJummaTimePrompt: "Não há oração de Jumua nesta mesquita.",
     none: "Nenhum",

@@ -37,7 +37,7 @@ module.exports = {
     nextPrayerTimeWithNamePrompt: `La preghiera di %s è alle %s tra %s.`,
     allIqamaTimesPrompt: "Per %s, l'iqama è alle %s.",
     deleteDataPrompt: `I tuoi dati sono stati eliminati correttamente. Riavvia l'applicazione per riutilizzare ${process.env.skillName}.`,
-    okPrompt: "Ok.",
+    okPrompt: "Ok. ",
     jummaTimePrompt: "Inoltre, il Jumua, la preghiera del Venerdì, è alle %s.",
     noJummaTimePrompt: "Non c'è preghiera di Jumua in questa moschea.",
     none: "Nessuno",

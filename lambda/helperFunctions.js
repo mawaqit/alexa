@@ -412,7 +412,7 @@ const getPrayerTimeForSpecificPrayer = (
           prayerName,
           prayerTime,
           speakOutput
-        )
+        ) + requestAttributes.t("doYouNeedAnythingElsePrompt")
       )
       .withShouldEndSession(false)
       .getResponse();

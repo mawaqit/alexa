@@ -2,7 +2,7 @@ module.exports = {
   translation: {
     skillName: process.env.skillName, //new
     welcomePrompt: `Salam Aleykoum! `,
-    chooseMosquePrompt: `Which mosque would you like to choose? The nearest mosques are: %s. You can choose by saying the number associated with the mosque.`,
+    chooseMosquePrompt: `Which mosque would you like to choose? The nearest mosques are: %s. You can choose by saying the number associated with the mosque `,
     chooseMosqueByTouchPrompt: "or you can also click on the mosque of your choice on your screen.",
     helpPrompt: `Here are the commands you can use:\n- When is the next prayer?\n- You can also ask for the time of each prayer by asking for example "When is the fourth prayer?" for Maghrib\n- How much time is left before the iqama?\n- Give me information about my mosque.\n- Change my favorite mosque.\n- Give me the prayer times for the day.\n- Play the adhan.\n- Play the Fajr adhan.\nThese commands can also be used in your Alexa routines. More commands coming soon inshaAllah.`,
     stopPrompt: `Goodbye, and may Allah protect you!`,
@@ -29,7 +29,7 @@ module.exports = {
     secondsPrompt: `%s seconds`,
     errorGeoConversionPrompt: `Sorry, I couldn't convert your address to geolocation. Please try again.`,
     nextIqamaTimePrompt: `The iqama for the next prayer %s is in %s.`,
-    selectedMosquePrompt: `Perfect, %s is now your favorite mosque!`,
+    selectedMosquePrompt: `Perfect, %s is now your favorite mosque! `,
     nextPrayerWithoutMosquePrompt: `The next prayer is %s at %s in %s.`,
     iqamaNotEnabledPrompt: `The times between the adhan and iqama are not provided by your mosque.`,
     mosqueInfoPrompt: `Your mosque is %s. Located at %s, about %s kilometers from your location. `,

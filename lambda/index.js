@@ -48,7 +48,7 @@ const HelpIntentHandler = {
   },
   handle(handlerInput) {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    const speakOutput = requestAttributes.t("helpPrompt");
+    const speakOutput = requestAttributes.t("helpPrompt") + requestAttributes.t("doYouNeedAnythingElsePrompt");
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .reprompt(speakOutput)

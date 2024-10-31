@@ -1,0 +1,344 @@
+{
+  "interactionModel": {
+    "dialog": {
+      "intents": [
+        {
+          "slots": [
+            {
+              "name": "selectedMosque",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.140043125844.413753526068"
+              }
+            }
+          ],
+          "name": "SelectMosqueIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "elicitationRequired": true,
+              "type": "prayerName",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.841213483794.24233923236"
+              }
+            }
+          ],
+          "name": "NextPrayerTimeIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "languageModel": {
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": [
+            "إلغاء",
+            "توقف",
+            "أوقف",
+            "تراجع"
+          ]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "ما هي الأوامر المتاحة",
+            "ماذا يمكنني أن أسأل",
+            "ساعدني",
+            "كيف تعمل",
+            "المساعدة",
+            "ماذا يمكنك أن تفعل",
+            "ما هي الخيارات المتاحة",
+            "أظهر لي ما يمكنك فعله"
+          ]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "توقف",
+            "انهاء",
+            "إيقاف"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": [
+            "العودة إلى الرئيسية",
+            "الذهاب إلى القائمة الرئيسية",
+            "الصفحة الرئيسية",
+            "القائمة الرئيسية"
+          ]
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": [
+            "لا أعرف",
+            "لست متأكدا",
+            "لم أفهم",
+            "ما المقصود"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "selectedMosque",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{selectedMosque}",
+                "اختر المسجد رقم {selectedMosque}",
+                "حدد المسجد رقم {selectedMosque}"
+              ]
+            }
+          ],
+          "name": "SelectMosqueIntent",
+          "samples": [
+            "اختر مسجدي",
+            "غير مسجدي",
+            "تغيير المسجد المفضل",
+            "ابحث عن مسجد جديد",
+            "اختر مسجداً آخر"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName",
+              "samples": [
+                "{prayerName}",
+                "متى {prayerName}",
+                "في أي وقت {prayerName}",
+                "متى تبدأ {prayerName}",
+                "ما هو وقت {prayerName}",
+                "متى تبدأ الصلاة {prayerName}"
+              ]
+            }
+          ],
+          "name": "NextPrayerTimeIntent",
+          "samples": [
+            "متى الصلاة القادمة",
+            "متى {prayerName}",
+            "ما هو وقت الصلاة القادمة",
+            "كم تبقى على {prayerName}"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "NextIqamaTimeIntent",
+          "samples": [
+            "متى الإقامة",
+            "كم تبقى على الإقامة",
+            "ما هو وقت الإقامة",
+            "الإقامة القادمة"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName"
+            }
+          ],
+          "name": "PlayAdhanIntent",
+          "samples": [
+            "شغل الأذان {prayerName}",
+            "شغل الأذان",
+            "أذان {prayerName}",
+            "شغل أذان الصلاة",
+            "أذان"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "MosqueInfoIntent",
+          "samples": [
+            "معلومات عن مسجدي",
+            "ما هو اسم مسجدي",
+            "أين يقع مسجدي",
+            "تفاصيل عن مسجدي"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "AllIqamaIntent",
+          "samples": [
+            "ما هي أوقات الإقامة",
+            "أخبرني أوقات الإقامة",
+            "متى الإقامة",
+            "أوقات الإقامة"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "DeleteDataIntent",
+          "samples": [
+            "احذف بياناتي",
+            "احذف معلوماتي",
+            "مسح بياناتي",
+            "مسح مسجدي",
+            "احذف كل شيء"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "LaunchIntent",
+          "samples": [
+            "افتح ماواقِت",
+            "ابدأ ماواقِت",
+            "ماواقِت",
+            "شغل تطبيق ماواقِت"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "AllPrayerTimeIntent",
+          "samples": [
+            "ما هي أوقات الصلاة",
+            "أخبرني أوقات الصلاة",
+            "متى الصلوات",
+            "أوقات الصلوات"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "synonyms": [
+                  "شروق الشمس",
+                  "الشروق"
+                ],
+                "value": "shuruq"
+              },
+              "id": "7"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "عيد",
+                  "عيد الفطر",
+                  "عيد الأضحى"
+                ],
+                "value": "eid"
+              },
+              "id": "6"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "الجمعة",
+                  "صلاة الجمعة",
+                  "الجمعة المباركة"
+                ],
+                "value": "jumma"
+              },
+              "id": "5"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "العشاء",
+                  "آخر صلاة",
+                  "الصلاة الخامسة"
+                ],
+                "value": "isha"
+              },
+              "id": "4"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "المغرب",
+                  "صلاة الإفطار",
+                  "الصلاة الرابعة"
+                ],
+                "value": "magrib"
+              },
+              "id": "3"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "العصر",
+                  "الصلاة الثالثة"
+                ],
+                "value": "Asr"
+              },
+              "id": "2"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "الظهر",
+                  "الصلاة الثانية"
+                ],
+                "value": "dhuhr"
+              },
+              "id": "1"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "الفجر",
+                  "الصلاة الأولى"
+                ],
+                "value": "fajr"
+              },
+              "id": "0"
+            }
+          ],
+          "name": "prayerName"
+        }
+      ],
+      "invocationName": "mawaqit"
+    },
+    "prompts": [
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "يرجى ذكر رقم المسجد الذي اخترته"
+          },
+          {
+            "type": "PlainText",
+            "value": "ما هو رقم المسجد الذي تريد؟"
+          },
+          {
+            "type": "PlainText",
+            "value": "اختر رقم المسجد، من فضلك"
+          }
+        ],
+        "id": "Elicit.Slot.140043125844.413753526068"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "أي صلاة؟"
+          },
+          {
+            "type": "PlainText",
+            "value": "ما هي الصلاة التي تريد معرفتها؟"
+          },
+          {
+            "type": "PlainText",
+            "value": "من فضلك، اختر الصلاة"
+          }
+        ],
+        "id": "Elicit.Slot.841213483794.24233923236"
+      }
+    ]
+  }
+}

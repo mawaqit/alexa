@@ -1,0 +1,46 @@
+service: alexa
+
+frameworkVersion: ">=1.1.0 <4.0.0"
+
+custom:
+  defaultStage: dev
+  defaultRegion: eu-west-3
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: ${opt:stage, self:custom.defaultStage}
+  region: ${opt:region, self:custom.defaultRegion}
+  environment: ${file(env.json):${self:provider.stage}}
+
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - 'ssm:GetParameter'
+        - 'ssm:GetParameters'
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - 'kms:Decrypt'
+      Resource: "*"
+
+
+functions:
+  indexHandler:
+    handler: index.handler
+    memorySize: 128
+    description: MAWAQIT Alexa Backend
+    events: ${file(eventsources.yml):${self:provider.stage}, file(eventsources.yml):dev}

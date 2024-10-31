@@ -15,7 +15,7 @@
         "ask-sdk-dynamodb-persistence-adapter": "^2.9.0",
         "ask-sdk-model": "^1.19.0",
         "aws-sdk": "^2.326.0",
-        "axios": "^1.7.2",
+        "axios": "^1.7.4",
         "i18next": "^15.0.5",
         "i18next-sprintf-postprocessor": "^0.2.2",
         "moment": "^2.29.4",

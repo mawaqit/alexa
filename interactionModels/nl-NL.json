@@ -1,0 +1,372 @@
+{
+  "interactionModel": {
+    "dialog": {
+      "intents": [
+        {
+          "slots": [
+            {
+              "name": "selectedMosque",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.140043125844.413753526068"
+              }
+            }
+          ],
+          "name": "SelectMosqueIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "elicitationRequired": true,
+              "type": "prayerName",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.841213483794.24233923236"
+              }
+            }
+          ],
+          "name": "NextPrayerTimeIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "languageModel": {
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": [
+            "annuleer",
+            "stop",
+            "afbreken",
+            "verlaat",
+            "sluit af"
+          ]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "Welke commando\u0027s kan ik gebruiken",
+            "wat kan ik vragen",
+            "help mij",
+            "hoe werkt het",
+            "wat kan ik doen",
+            "toon mij de opties",
+            "wat zijn de opties",
+            "help"
+          ]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "stop",
+            "einde",
+            "stoppen",
+            "sluit af",
+            "beëindigen"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": [
+            "terug naar startpagina",
+            "hoofdmenu",
+            "naar het hoofdmenu",
+            "home",
+            "startpagina"
+          ]
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": [
+            "ik weet het niet",
+            "ik begrijp het niet",
+            "wat bedoel je",
+            "kan je dat herhalen"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "selectedMosque",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{selectedMosque}",
+                "kies moskee {selectedMosque}",
+                "selecteer moskee nummer {selectedMosque}"
+              ]
+            }
+          ],
+          "name": "SelectMosqueIntent",
+          "samples": [
+            "kies mijn moskee",
+            "selecteer mijn moskee",
+            "verander mijn moskee",
+            "verander mijn favoriete moskee",
+            "ik wil een nieuwe moskee",
+            "zoek een moskee",
+            "zoek naar moskeeën",
+            "verander mijn moskee locatie",
+            "selecteer een andere moskee",
+            "vind een moskee voor mij",
+            "vervang mijn huidige moskee"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName",
+              "samples": [
+                "{prayerName}",
+                "wanneer is {prayerName}",
+                "wat is de tijd van {prayerName}",
+                "hoe laat begint {prayerName}",
+                "hoeveel tijd voor {prayerName}",
+                "hoeveel tijd voor de volgende gebed"
+              ]
+            }
+          ],
+          "name": "NextPrayerTimeIntent",
+          "samples": [
+            "wanneer is het volgende gebed",
+            "wat is de tijd van {prayerName}",
+            "hoe laat is {prayerName}",
+            "geef mij de tijd voor {prayerName}",
+            "volgend gebed {prayerName}",
+            "wanneer is het volgende gebed",
+            "hoeveel tijd voor het volgende gebed"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "NextIqamaTimeIntent",
+          "samples": [
+            "volgende iqama",
+            "hoeveel tijd voor de iqama",
+            "hoe laat is de iqama",
+            "wanneer is de iqama",
+            "tijd van de iqama",
+            "geef mij de tijd van de iqama"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName"
+            }
+          ],
+          "name": "PlayAdhanIntent",
+          "samples": [
+            "speel Adhan {prayerName}",
+            "zet Adhan {prayerName}",
+            "Adhan {prayerName}",
+            "speel het gebedsoproep {prayerName}",
+            "zet het gebedsoproep {prayerName}",
+            "speel het Adhan",
+            "zet het Adhan",
+            "gebedsoproep",
+            "zet het gebedsoproep",
+            "start Adhan",
+            "roep op tot het gebed"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "MosqueInfoIntent",
+          "samples": [
+            "geef mij informatie over mijn moskee",
+            "mijn moskee",
+            "waar is mijn moskee",
+            "locatie van mijn moskee",
+            "informatie over mijn moskee",
+            "details van mijn moskee",
+            "meer informatie over mijn moskee"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "AllIqamaIntent",
+          "samples": [
+            "geef mij de tijden van de iqamas",
+            "wat zijn de tijden van de iqamas",
+            "tijd van de iqamas",
+            "tijd van de ikamas",
+            "iqama tijden",
+            "wanneer zijn de iqamas",
+            "wanneer zijn de ikamas"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "DeleteDataIntent",
+          "samples": [
+            "verwijder mijn gegevens",
+            "wis mijn gegevens",
+            "verwijder mijn moskee",
+            "wis mijn moskee",
+            "verwijder alles",
+            "wis alles"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "LaunchIntent",
+          "samples": [
+            "open MAWAQIT",
+            "start MAWAQIT",
+            "MAWAQIT",
+            "open de applicatie MAWAQIT",
+            "start de applicatie MAWAQIT"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "AllPrayerTimeIntent",
+          "samples": [
+            "geef mij de gebedstijden",
+            "wat zijn de tijden van het gebed",
+            "tijd voor het gebed",
+            "geef alle gebedstijden",
+            "wanneer zijn de gebeden",
+            "gebedstijden van vandaag"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "synonyms": [
+                  "zonsopgang",
+                  "shuruk",
+                  "shourouk"
+                ],
+                "value": "shuruq"
+              }
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "Suikerfeest",
+                  "Offerfeest",
+                  "Aïd"
+                ],
+                "value": "eid"
+              }
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "Jumuah",
+                  "Vrijdaggebed",
+                  "Jumah",
+                  "Vrijdag"
+                ],
+                "value": "jumma"
+              }
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "laatste gebed",
+                  "Isha",
+                  "isha\u0027a"
+                ],
+                "value": "isha"
+              }
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "vierde gebed",
+                  "Maghreb",
+                  "zonsondergang"
+                ],
+                "value": "magrib"
+              }
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "derde gebed",
+                  "Asr",
+                  "Asser"
+                ],
+                "value": "asr"
+              }
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "tweede gebed",
+                  "Dhohr",
+                  "Dhuhr"
+                ],
+                "value": "dhuhr"
+              }
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "eerste gebed",
+                  "Fajr",
+                  "ochtendgebed"
+                ],
+                "value": "fajr"
+              }
+            }
+          ],
+          "name": "prayerName"
+        }
+      ],
+      "invocationName": "mawaqit"
+    },
+    "prompts": [
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Gelieve het nummer van uw moskee te zeggen"
+          },
+          {
+            "type": "PlainText",
+            "value": "Wat is het nummer van uw moskee?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Kies het nummer van uw moskee alstublieft"
+          }
+        ],
+        "id": "Elicit.Slot.140043125844.413753526068"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Welk gebed?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Om welk gebed gaat het?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Welk gebed wilt u weten?"
+          }
+        ],
+        "id": "Elicit.Slot.841213483794.24233923236"
+      }
+    ]
+  }
+}

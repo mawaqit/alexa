@@ -1,0 +1,60 @@
+{
+    "type": "APL",
+    "version": "2024.2",
+    "license": "Copyright 2024 Amazon.com, Inc. or its affiliates. All Rights Reserved.\nSPDX-License-Identifier: LicenseRef-.amazon.com.-AmznSL-1.0\nLicensed under the Amazon Software License  http://aws.amazon.com/asl/",
+    "theme": "dark",
+    "import": [
+        {
+            "name": "alexa-layouts",
+            "version": "1.7.0"
+        }
+    ],
+    "mainTemplate": {
+        "parameters": [
+            "payload"
+        ],
+        "item": [
+            {
+                "type": "Container",
+                "height": "100vh",
+                "items": [
+                    {
+                        "type": "AlexaBackground",
+                        "backgroundImageSource": "${payload.longTextTemplateData.properties.backgroundImage.sources[0].url}",
+                        "backgroundScale": "best-fill"
+                    },
+                    {
+                        "type": "Container",
+                        "height": "100vh",
+                        "width": "100vw",
+                        "items": [
+                            {
+                                "type": "AlexaHeader",
+                                "headerTitle": "${payload.longTextTemplateData.properties.title}",
+                                "headerAttributionImage": "${payload.longTextTemplateData.properties.logoUrl}",
+                                "headerDivider": false
+                            },
+                            {
+                                "type": "ScrollView",
+                                "grow": 1,
+                                "paddingTop": "@spacingMedium",
+                                "paddingBottom": "${@spacing3XLarge + @spacingXSmall}",
+                                "paddingLeft": "@marginHorizontal",
+                                "paddingRight": "@marginHorizontal",
+                                "items": [
+                                    {
+                                        "type": "Text",
+                                        "id": "plantContent",
+                                        "style": "textStyleDisplay4",
+                                        "text": "${payload.longTextTemplateData.properties.textContent.primaryText.text}",
+                                        "textAlign": "left"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,389 @@
+{
+  "interactionModel": {
+    "dialog": {
+      "intents": [
+        {
+          "slots": [
+            {
+              "name": "selectedMosque",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.140043125844.413753526068"
+              }
+            }
+          ],
+          "name": "SelectMosqueIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "elicitationRequired": true,
+              "type": "prayerName",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.841213483794.24233923236"
+              }
+            }
+          ],
+          "name": "NextPrayerTimeIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "languageModel": {
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": [
+            "abbrechen",
+            "stopp",
+            "aufhören",
+            "abbrechen bitte"
+          ]
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "Welche Befehle gibt es",
+            "Was kann ich fragen",
+            "Hilfe bitte",
+            "Wie funktioniert das",
+            "Hilfe",
+            "Was kann ich tun",
+            "Welche Optionen habe ich",
+            "Zeig mir was du kannst",
+            "Hilf mir mit den Befehlen",
+            "Welche Möglichkeiten gibt es"
+          ]
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "stopp",
+            "aufhören",
+            "beenden",
+            "halt"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": [
+            "zurück zum Start",
+            "Hauptmenü",
+            "zurück zum Menü",
+            "Startseite",
+            "Hauptseite"
+          ]
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": [
+            "ich weiß nicht",
+            "ich bin nicht sicher",
+            "ich verstehe nicht",
+            "Was bedeutet das",
+            "Kannst du das wiederholen"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "selectedMosque",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{selectedMosque}",
+                "wähle Moschee {selectedMosque}",
+                "wähle die Moschee Nummer {selectedMosque}"
+              ]
+            }
+          ],
+          "name": "SelectMosqueIntent",
+          "samples": [
+            "wähle meine Moschee",
+            "ändere meine Moschee",
+            "ändere meine Lieblingsmoschee",
+            "Ich möchte die Moschee wechseln",
+            "neue Moschee auswählen",
+            "Moschee suchen",
+            "ändere meine Moschee-Position",
+            "wähle eine andere Moschee",
+            "meine Moschee ändern",
+            "finde eine Moschee für mich",
+            "ersetze meine aktuelle Moschee"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName",
+              "samples": [
+                "{prayerName}",
+                "Wann ist {prayerName}",
+                "Um welche Uhrzeit ist {prayerName}",
+                "Wann ist das Gebet {prayerName}",
+                "Wann beginnt {prayerName}",
+                "Wann endet {prayerName}"
+              ]
+            }
+          ],
+          "name": "NextPrayerTimeIntent",
+          "samples": [
+            "Wann ist {prayerName}",
+            "Wann ist das nächste Gebet",
+            "{prayerName}",
+            "Wann ist die nächste Gebetszeit",
+            "Um welche Zeit ist {prayerName}",
+            "Wann ist die nächste Gebetszeit",
+            "Wie viel Zeit bis {prayerName}",
+            "Wie viel Zeit bis zum nächsten Gebet",
+            "Gebetszeit für {prayerName}",
+            "Gib mir die Zeit für {prayerName}"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "NextIqamaTimeIntent",
+          "samples": [
+            "nächste Iqama",
+            "Wie viel Zeit bis zur Iqama",
+            "Wann ist Iqama",
+            "Wie spät ist die Iqama",
+            "nächste Ikama",
+            "Zeit für Iqama",
+            "Gib mir die Zeit der Iqama"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName"
+            }
+          ],
+          "name": "PlayAdhanIntent",
+          "samples": [
+            "spiele Adhan {prayerName}",
+            "spiele Azan {prayerName}",
+            "Adhan {prayerName}",
+            "spiele Azan",
+            "spiele Adhan",
+            "spiele das Gebetsruf",
+            "spiele das Gebetsruf {prayerName}",
+            "spiele das Adhan",
+            "lasse den Adhan ertönen",
+            "spiele den Gebetsruf"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "MosqueInfoIntent",
+          "samples": [
+            "Gib mir Informationen über meine Moschee",
+            "Meine Moschee",
+            "Wo ist meine Moschee",
+            "Moschee-Details",
+            "Moschee-Infos",
+            "Adresse meiner Moschee"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "AllIqamaIntent",
+          "samples": [
+            "Gib mir alle Iqama-Zeiten",
+            "Nenne mir die Iqama-Zeiten",
+            "Iqama-Zeiten",
+            "Wann sind die Iqama-Zeiten",
+            "Uhrzeiten der Iqama"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "DeleteDataIntent",
+          "samples": [
+            "Lösche meine Daten",
+            "Lösche meine Moschee",
+            "Daten löschen",
+            "alles löschen",
+            "lösche alle Einstellungen",
+            "lösche meine Konfiguration"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "LaunchIntent",
+          "samples": [
+            "Öffne Mawaqit",
+            "Starte Mawaqit",
+            "Mawaqit öffnen",
+            "Öffne die Mawaqit App",
+            "Mawaqit starten"
+          ]
+        },
+        {
+          "slots": [],
+          "name": "AllPrayerTimeIntent",
+          "samples": [
+            "Gib mir alle Gebetszeiten für heute",
+            "Wann sind die Gebete heute",
+            "Gebetszeiten heute",
+            "Wann sind die Gebetszeiten",
+            "Wann sind die Gebete",
+            "Heutige Gebetszeiten"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "synonyms": [
+                  "Shuruk",
+                  "Chourouk",
+                  "Sonnenaufgang"
+                ],
+                "value": "shuruq"
+              },
+              "id": "7"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "Eid",
+                  "Eid al-Fitr",
+                  "Eid al-Adha"
+                ],
+                "value": "eid"
+              },
+              "id": "6"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "Jumu\u0027ah",
+                  "Freitagsgebet",
+                  "Freitag"
+                ],
+                "value": "jumma"
+              },
+              "id": "5"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "Isha\u0027a",
+                  "letztes Gebet des Tages",
+                  "Nachtgebet"
+                ],
+                "value": "isha"
+              },
+              "id": "4"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "Maghrib",
+                  "Iftar",
+                  "Sonnenuntergang"
+                ],
+                "value": "magrib"
+              },
+              "id": "3"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "Asr",
+                  "Nachmittagsgebet"
+                ],
+                "value": "asr"
+              },
+              "id": "2"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "Dhuhr",
+                  "Mittagsgebet"
+                ],
+                "value": "dhuhr"
+              },
+              "id": "1"
+            },
+            {
+              "name": {
+                "synonyms": [
+                  "Fajr",
+                  "Morgengebet"
+                ],
+                "value": "fajr"
+              },
+              "id": "0"
+            }
+          ],
+          "name": "prayerName"
+        }
+      ],
+      "invocationName": "mawaqit"
+    },
+    "prompts": [
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Bitte nenne die Nummer deiner Moschee"
+          },
+          {
+            "type": "PlainText",
+            "value": "Wie lautet die Nummer deiner Moschee?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Bitte gib die Nummer deiner Moschee an"
+          },
+          {
+            "type": "PlainText",
+            "value": "Wähle die Nummer deiner Moschee"
+          }
+        ],
+        "id": "Elicit.Slot.140043125844.413753526068"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Welches Gebet?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Für welches Gebet?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Bitte nenne das Gebet"
+          },
+          {
+            "type": "PlainText",
+            "value": "Welches Gebet möchtest du wissen?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Über welches Gebet sprichst du?"
+          }
+        ],
+        "id": "Elicit.Slot.841213483794.24233923236"
+      }
+    ]
+  }
+}

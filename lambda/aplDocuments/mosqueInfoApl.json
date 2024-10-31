@@ -1,0 +1,353 @@
+{
+    "type": "APL",
+    "version": "1.8",
+    "import": [
+        {
+            "name": "alexa-layouts",
+            "version": "1.5.0"
+        }
+    ],
+    "resources": [],
+    "layouts": {
+        "BandButton": {
+            "parameters": [
+                {
+                    "name": "primaryAction",
+                    "type": "any"
+                },
+                {
+                    "name": "primaryText",
+                    "type": "string"
+                },
+                {
+                    "name": "secondaryText",
+                    "type": "string"
+                },
+                {
+                    "name": "ternaryText",
+                    "type": "string"
+                },
+                {
+                    "name": "backgroundImageSource",
+                    "type": "string"
+                }
+            ],
+            "width": "100%",
+            "items": [
+                {
+                    "type": "Container",
+                    "width": "100%",
+                    "when": "${primaryText}",
+                    "items": [
+                        {
+                            "type": "AlexaBackground",
+                            "backgroundImageSource": "${backgroundImageSource}"
+                        },
+                        {
+                            "text": "${primaryText}",
+                            "textAlign": "left",
+                            "type": "Text",
+                            "style": "baseSub",
+                            "paddingLeft": "10dp"
+                        },
+                        {
+                            "text": "${secondaryText}",
+                            "type": "Text",
+                            "style": "baseText",
+                            "when": "${secondaryText}"
+                        },
+                        {
+                            "when": "${ternaryText}",
+                            "type": "Text",
+                            "style": "baseSmall",
+                            "text": "${ternaryText}"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "mainTemplate": {
+        "parameters": [
+            "payload"
+        ],
+        "items": [
+            {
+                "type": "Container",
+                "width": "100%",
+                "height": "100%",
+                "items": [
+                    {
+                        "type": "AlexaBackground",
+                        "backgroundImageSource": "${payload.data.properties.backgroundImageUrl}",
+                        "paddingTop": "0",
+                        "paddingBottom": "0"
+                    },
+                    {
+                        "type": "GridSequence",
+                        "width": "100%",
+                        "height": "100%",
+                        "scrollDirection": "vertical",
+                        "childWidth": [
+                            "${viewport.width > 600 ? '22%' : '48%'}",
+                            "auto",
+                            "${viewport.width > 600 ? '22%' : '48%'}"
+                        ],
+                        "childHeight": "auto",
+                        "item": [
+                            {
+                                "type": "Container",
+                                "opacity": 0.9,
+                                "height": "auto",
+                                "width": "100%",
+                                "paddingTop": "@spacingSmall",
+                                "paddingLeft": "0",
+                                "paddingRight": "0",
+                                "items": [
+                                    {
+                                        "scrollDirection": "vertical",
+                                        "type": "Sequence",
+                                        "data": "${Array.slice(payload.data.properties.prayerTimes, 0, 5)}",
+                                        "height": "100%",
+                                        "width": "100%",
+                                        "items": [
+                                            {
+                                                "type": "Container",
+                                                "items": [
+                                                    {
+                                                        "type": "BandButton",
+                                                        "backgroundImageSource": "https://chriscastle.com/alexa/ars/images/marble.jpg",
+                                                        "primaryText": "${data.primaryText}",
+                                                        "secondaryText": "${data.secondaryText}",
+                                                        "ternaryText": "${data.ternaryText}",
+                                                        "id": "buttonCriticalApproval"
+                                                    },
+                                                    {
+                                                        "type": "Frame",
+                                                        "height": "${viewport.width > 600 ? '10dp' : '2dp'}",
+                                                        "width": "300dp"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Frame",
+                                "borderRadius": 0,
+                                "width": "auto",
+                                "height": "100%",
+                                "borderColor": "#ccc",
+                                "borderWidth": "0",
+                                "item": [
+                                    {
+                                        "alignItems": "center",
+                                        "type": "Container",
+                                        "height": "100%",
+                                        "width": "100%",
+                                        "items": [
+                                            {
+                                                "type": "Frame",
+                                                "borderRadius": 0,
+                                                "width": "92%",
+                                                "height": "90%",
+                                                "borderColor": "#9E9E9E",
+                                                "borderWidth": "2",
+                                                "item": [
+                                                    {
+                                                        "type": "Container",
+                                                        "width": "100%",
+                                                        "height": "100%",
+                                                        "paddingTop": "@spacingSmall",
+                                                        "items": [
+                                                            {
+                                                                "paddingTop": "0",
+                                                                "paddingBottom": "0",
+                                                                "type": "AlexaBackground",
+                                                                "opacity": 0.9,
+                                                                "backgroundColor": "white",
+                                                                "backgroundBlur": false,
+                                                                "videoAutoPlay": true,
+                                                                "videoAudioTrack": "none"
+                                                            },
+                                                            {
+                                                                "type": "Container",
+                                                                "height": "100%",
+                                                                "width": "100%",
+                                                                "paddingLeft": "5dp",
+                                                                "paddingRight": "5dp",
+                                                                "items": [
+                                                                    {
+                                                                        "source": "https://cdn.mawaqit.net/images/backend/mosque_default_picture.png",
+                                                                        "scale": "best-fit",
+                                                                        "type": "Image",
+                                                                        "height": "50%",
+                                                                        "width": "100%"
+                                                                    },
+                                                                    {
+                                                                        "type": "Container",
+                                                                        "height": "50%",
+                                                                        "width": "100%",
+                                                                        "paddingTop": "16dp",
+                                                                        "paddingLeft": "16dp",
+                                                                        "paddingRight": "16dp",
+                                                                        "paddingBottom": "16dp",
+                                                                        "items": [
+                                                                            {
+                                                                                "color": "#000000",
+                                                                                "fontSize": "@fontSizeMedium",
+                                                                                "text": "${payload.data.properties.mosqueTitle}",
+                                                                                "textAlign": "center",
+                                                                                "type": "Text",
+                                                                                "width": "100%"
+                                                                            },
+                                                                            {
+                                                                                "item": [
+                                                                                    {
+                                                                                        "text": "${payload.data.properties.mosqueDescription}",
+                                                                                        "color": "#000000",
+                                                                                        "fontSize": "@fontSizeSmall",
+                                                                                        "textAlign": "center",
+                                                                                        "type": "Text",
+                                                                                        "paddingTop": "12dp",
+                                                                                        "paddingBottom": "12dp"
+                                                                                    }
+                                                                                ],
+                                                                                "type": "ScrollView",
+                                                                                "width": "100%"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Container",
+                                "opacity": 0.9,
+                                "height": "auto",
+                                "width": "100%",
+                                "paddingTop": "@spacingSmall",
+                                "paddingLeft": "0",
+                                "paddingRight": "0",
+                                "items": [
+                                    {
+                                        "scrollDirection": "vertical",
+                                        "type": "Sequence",
+                                        "data": "${Array.slice(payload.data.properties.prayerTimes, 5,8)}",
+                                        "height": "100%",
+                                        "width": "100%",
+                                        "items": [
+                                            {
+                                                "type": "Container",
+                                                "items": [
+                                                    {
+                                                        "type": "BandButton",
+                                                        "id": "buttonCriticalApproval",
+                                                        "backgroundImageSource": "https://chriscastle.com/alexa/ars/images/marble.jpg",
+                                                        "primaryText": "${data.primaryText}",
+                                                        "secondaryText": "${data.secondaryText}",
+                                                        "ternaryText": "${data.ternaryText}"
+                                                    },
+                                                    {
+                                                        "type": "Frame",
+                                                        "height": "${viewport.width > 600 ? '10dp' : '2dp'}",
+                                                        "width": "300dp"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "styles": {
+        "baseText": {
+            "values": [
+                {
+                    "width": "100%",
+                    "paddingBottom": "5dp",
+                    "fontSize": "${viewport.height > 480 ? 24 : 12}",
+                    "fontWeight": 600,
+                    "fontFamily": "Amazon Ember",
+                    "color": "#000000",
+                    "maxLines": 1,
+                    "textAlign": "center",
+                    "textAlignVertical": "center"
+                }
+            ]
+        },
+        "baseSub": {
+            "extends": "baseText",
+            "values": [
+                {
+                    "width": "100%",
+                    "paddingTop": "5dp",
+                    "fontWeight": 400,
+                    "fontSize": "${viewport.width > 480 ? 20 : 12}",
+                    "color": "#000000",
+                    "maxLines": 2,
+                    "textAlign": "center",
+                    "textAlignVertical": "center"
+                }
+            ]
+        },
+        "mainContent": {
+            "extends": "baseText",
+            "values": [
+                {
+                    "fontWeight": 200,
+                    "fontSize": "${viewport.width > 480 ? 20 : 12}"
+                }
+            ]
+        },
+        "baseSmall": {
+            "extends": "baseText",
+            "values": [
+                {
+                    "width": "100%",
+                    "paddingBottom": "5dp",
+                    "fontWeight": 400,
+                    "fontSize": "${viewport.width > 480 ? 12 : 6}",
+                    "color": "#000000",
+                    "maxLines": 1,
+                    "textAlign": "center",
+                    "textAlignVertical": "center"
+                }
+            ]
+        },
+        "labelSmall": {
+            "extends": "baseText",
+            "values": [
+                {
+                    "width": "auto",
+                    "fontSize": "${viewport.width > 480 ? 12 : 6}",
+                    "color": "#FFFAFA",
+                    "maxLines": 1,
+                    "textAlign": "left",
+                    "textAlignVertical": "center"
+                }
+            ]
+        },
+        "title": {
+            "values": [
+                {
+                    "fontWeight": 700,
+                    "fontSize": "${viewport.height > 480 ? 48 : 24}"
+                }
+            ]
+        }
+    }
+}

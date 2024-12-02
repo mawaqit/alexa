@@ -36,7 +36,7 @@ const AddDirectiveResponseInterceptor = {
         )
       : false;
     console.log("APL Directive: ", JSON.stringify(aplDirective));      
-    const ssmlText = response.outputSpeech.ssml;      
+    const ssmlText = response && response.outputSpeech && response.outputSpeech.ssml ? response.outputSpeech.ssml : null;      
     console.log("SSML Text: ", ssmlText);
     if (
       Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[

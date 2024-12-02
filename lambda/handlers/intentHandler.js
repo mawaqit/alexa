@@ -1,6 +1,6 @@
 const Alexa = require("ask-sdk-core");
 const helperFunctions = require("../helperFunctions.js");
-const { getPrayerTimings, getMosqueList } = require("./apiHandler.js");
+const { getPrayerTimings } = require("./apiHandler.js");
 const moment = require("moment-timezone");
 const { getS3PreSignedUrl } = require("./s3Handler.js");
 const { getDataSourceforMosqueInfo } = require("../datasources.js");

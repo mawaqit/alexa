@@ -35,6 +35,23 @@
           "delegationStrategy": "SKILL_RESPONSE",
           "confirmationRequired": false,
           "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "favouriteReciter",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.102046521153.828952134948"
+              }
+            }
+          ],
+          "name": "FavoriteAdhaanReciterIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
         }
       ],
       "delegationStrategy": "ALWAYS"
@@ -89,9 +106,9 @@
         {
           "name": "AMAZON.FallbackIntent",
           "samples": [
-            "I don\u0027t know",
-            "I\u0027m not sure",
-            "I don\u0027t understand",
+            "I don't know",
+            "I'm not sure",
+            "I don't understand",
             "What does that mean",
             "Can you repeat"
           ]
@@ -142,6 +159,10 @@
           ],
           "name": "NextPrayerTimeIntent",
           "samples": [
+            "the {prayerName} is",
+            "the {prayerName} prayer is ",
+            "the next prayer is",
+            "is the next prayer",
             "when is the next prayer",
             "{prayerName}",
             "when is the {prayerName}",
@@ -245,13 +266,36 @@
           "slots": [],
           "name": "AllPrayerTimeIntent",
           "samples": [
-            "give me today\u0027s prayer times",
+            "give me today's prayer times",
             "what are the prayer times",
             "prayer schedule",
             "what time are the prayers",
-            "times for today\u0027s prayers",
+            "times for today's prayers",
             "prayer times for today"
           ]
+        },
+        {
+          "slots": [
+            {
+              "name": "favouriteReciter",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{favouriteReciter}"
+              ]
+            }
+          ],
+          "name": "FavoriteAdhaanReciterIntent",
+          "samples": [
+            "choose my adhaan reciter"
+          ]
+        },
+        {
+          "name": "AMAZON.PauseIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.ResumeIntent",
+          "samples": []
         }
       ],
       "types": [
@@ -283,7 +327,7 @@
             {
               "name": {
                 "synonyms": [
-                  "Jumu\u0027ah",
+                  "Jumu'ah",
                   "Friday prayer",
                   "Friday"
                 ],
@@ -404,6 +448,15 @@
           }
         ],
         "id": "Elicit.Slot.841213483794.24233923236"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Kindly say the sumber"
+          }
+        ],
+        "id": "Elicit.Slot.102046521153.828952134948"
       }
     ]
   }

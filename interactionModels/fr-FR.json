@@ -35,6 +35,22 @@
           "delegationStrategy": "SKILL_RESPONSE",
           "confirmationRequired": false,
           "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "favouriteReciter",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.198201778994.270095032972"
+              }
+            }
+          ],
+          "name": "FavoriteAdhaanReciterIntent",
+          "confirmationRequired": false,
+          "prompts": {}
         }
       ],
       "delegationStrategy": "ALWAYS"
@@ -54,12 +70,12 @@
           "name": "AMAZON.HelpIntent",
           "samples": [
             "Quelles sont les commandes disponibles",
-            "qu\u0027est-ce que je peux te demander",
+            "qu'est-ce que je peux te demander",
             "aide-moi",
             "comment ça marche",
             "aide",
             "que puis-je te demander",
-            "qu\u0027est-ce que tu sais faire",
+            "qu'est-ce que tu sais faire",
             "aide-moi avec les commandes",
             "quelles sont les options",
             "montre-moi ce que tu sais faire"
@@ -78,11 +94,11 @@
         {
           "name": "AMAZON.NavigateHomeIntent",
           "samples": [
-            "retour à l\u0027accueil",
+            "retour à l'accueil",
             "menu principal",
             "retourner au menu",
             "accueil",
-            "page d\u0027accueil"
+            "page d'accueil"
           ]
         },
         {
@@ -91,7 +107,7 @@
             "je ne sais pas",
             "je ne suis pas sûr",
             "je ne comprends pas",
-            "qu\u0027est-ce que ça signifie",
+            "qu'est-ce que ça signifie",
             "peux-tu répéter"
           ]
         },
@@ -118,7 +134,7 @@
             "nouvelle mosquée",
             "cherche une mosquée",
             "cherche des mosquées",
-            "change l\u0027emplacement de ma mosquée",
+            "change l'emplacement de ma mosquée",
             "sélectionne une autre mosquée",
             "modifie ma mosquée",
             "trouve une mosquée pour moi",
@@ -132,30 +148,30 @@
               "type": "prayerName",
               "samples": [
                 "{prayerName}",
-                "c\u0027est quand {prayerName}",
+                "c'est quand {prayerName}",
                 "à quelle heure est {prayerName}",
-                "quand est-ce que c\u0027est {prayerName}",
-                "quelle est l\u0027heure de {prayerName}",
+                "quand est-ce que c'est {prayerName}",
+                "quelle est l'heure de {prayerName}",
                 "quand commence {prayerName}",
                 "à quelle heure commence {prayerName}",
                 "à quelle heure se termine {prayerName}",
-                "quelle est l\u0027heure pour {prayerName}"
+                "quelle est l'heure pour {prayerName}"
               ]
             }
           ],
           "name": "NextPrayerTimeIntent",
           "samples": [
-            "c\u0027est quand {prayerName}",
-            "quand est-ce que c\u0027est la prochaine prière",
+            "c'est quand {prayerName}",
+            "quand est-ce que c'est la prochaine prière",
             "{prayerName}",
-            "c\u0027est quand le {prayerName}",
-            "c\u0027est quand la prochaine prière",
+            "c'est quand le {prayerName}",
+            "c'est quand la prochaine prière",
             "à quelle heure est {prayerName}",
             "à quelle heure est la prochaine prière",
             "combien de temps avant {prayerName}",
             "combien de temps avant la prochaine prière",
-            "l\u0027heure de la prière {prayerName}",
-            "donne-moi l\u0027heure de {prayerName}",
+            "l'heure de la prière {prayerName}",
+            "donne-moi l'heure de {prayerName}",
             "heure pour {prayerName}",
             "prière suivante {prayerName}"
           ]
@@ -165,17 +181,17 @@
           "name": "NextIqamaTimeIntent",
           "samples": [
             "prochain iqama",
-            "Combien de temps avant l\u0027iqama",
-            "Combien de temps avant l\u0027ikama",
-            "à quelle heure est l\u0027iqama",
-            "quand est l\u0027iqama",
-            "quand est l\u0027ikama",
+            "Combien de temps avant l'iqama",
+            "Combien de temps avant l'ikama",
+            "à quelle heure est l'iqama",
+            "quand est l'iqama",
+            "quand est l'ikama",
             "prochaine ikama",
             "temps avant iqama",
             "temps avant ikama",
-            "heure de l\u0027iqama",
-            "heure de l\u0027ikama",
-            "donne-moi l\u0027heure de l\u0027iqama"
+            "heure de l'iqama",
+            "heure de l'ikama",
+            "donne-moi l'heure de l'iqama"
           ]
         },
         {
@@ -199,16 +215,16 @@
             "mets adhaan",
             "mets azaan",
             "Adhan",
-            "Mets l\u0027appel à la prière",
+            "Mets l'appel à la prière",
             "appel à la prière",
             "Adhan {prayerName}",
-            "mets l\u0027appel à la prière de {prayerName}",
+            "mets l'appel à la prière de {prayerName}",
             "joue Adhan {prayerName}",
-            "joue l\u0027appel à la prière de {prayerName}",
-            "lance l\u0027adhan",
-            "lance l\u0027appel à la prière",
-            "fais retentir l\u0027adhan",
-            "fais retentir l\u0027appel à la prière"
+            "joue l'appel à la prière de {prayerName}",
+            "lance l'adhan",
+            "lance l'appel à la prière",
+            "fais retentir l'adhan",
+            "fais retentir l'appel à la prière"
           ]
         },
         {
@@ -223,7 +239,7 @@
             "localisation de ma mosquée",
             "info sur ma mosquée",
             "détails sur ma mosquée",
-            "plus d\u0027infos sur ma mosquée",
+            "plus d'infos sur ma mosquée",
             "adresse de ma mosquée",
             "informations sur ma mosquée"
           ]
@@ -277,9 +293,9 @@
             "lance mawakit",
             "mawakit",
             "démarre mawaqit",
-            "lance l\u0027application mawaqit",
-            "démarre l\u0027application mawaqit",
-            "ouvre l\u0027application mawaqit",
+            "lance l'application mawaqit",
+            "démarre l'application mawaqit",
+            "ouvre l'application mawaqit",
             "lance le programme mawaqit",
             "ouvre le programme mawaqit"
           ]
@@ -289,7 +305,7 @@
           "name": "AllPrayerTimeIntent",
           "samples": [
             "donne moi les prières du jour",
-            "dis moi les prières d\u0027aujourd\u0027hui",
+            "dis moi les prières d'aujourd'hui",
             "les horaires de prière",
             "horaires des prières",
             "temps des prières",
@@ -299,8 +315,28 @@
             "quelles sont les heures de prière",
             "quels sont les horaires de prière",
             "quand sont les prières",
-            "heures de prière d\u0027aujourd\u0027hui",
-            "horaires des prières aujourd\u0027hui"
+            "heures de prière d'aujourd'hui",
+            "horaires des prières aujourd'hui"
+          ]
+        },
+        {
+          "name": "AMAZON.ResumeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PauseIntent",
+          "samples": []
+        },
+        {
+          "slots": [
+            {
+              "name": "favouriteReciter",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "name": "FavoriteAdhaanReciterIntent",
+          "samples": [
+            "choose my adhaan reciter"
           ]
         }
       ],
@@ -351,7 +387,7 @@
                   "dernière prière",
                   "dernière prière du jour",
                   "icha",
-                  "isha\u0027a"
+                  "isha'a"
                 ],
                 "value": "isha"
               },
@@ -431,7 +467,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "S\u0027il vous plaît, dites le nombre associé à votre mosquée"
+            "value": "S'il vous plaît, dites le nombre associé à votre mosquée"
           },
           {
             "type": "PlainText",
@@ -447,7 +483,7 @@
           },
           {
             "type": "PlainText",
-            "value": "Choisissez le numéro de votre mosquée, s\u0027il vous plaît"
+            "value": "Choisissez le numéro de votre mosquée, s'il vous plaît"
           }
         ],
         "id": "Elicit.Slot.140043125844.413753526068"
@@ -464,7 +500,7 @@
           },
           {
             "type": "PlainText",
-            "value": "Indiquez la prière, s\u0027il vous plaît"
+            "value": "Indiquez la prière, s'il vous plaît"
           },
           {
             "type": "PlainText",
@@ -476,6 +512,15 @@
           }
         ],
         "id": "Elicit.Slot.841213483794.24233923236"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Kindly say the sumber"
+          }
+        ],
+        "id": "Elicit.Slot.198201778994.270095032972"
       }
     ]
   }

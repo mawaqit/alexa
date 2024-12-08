@@ -45,6 +45,11 @@ module.exports = {
       globalErrorPrompt: "Entschuldigung, ich habe nicht verstanden, was Sie gesagt haben. Bitte wiederholen Sie es.",
       fallbackPrompt: "Entschuldigung, ich habe nicht verstanden, was Sie gesagt haben. Bitte wiederholen Sie es.",
       allPrayerTimesPrompt: "%s ist um %s. ",
-      doYouNeedAnythingElsePrompt: ` Brauchen Sie noch etwas?`
+      doYouNeedAnythingElsePrompt: ` Brauchen Sie noch etwas?`,
+      adhanReciterPrompt: `Which recitation would you like to set as favourite for the adhan? You can choose between %s. You can choose by saying the number associated with the recitation `,
+      adhanReciterErrorPrompt: `Sorry, I couldn't find any recitations for the adhan. Please try again.`,
+      adhanReciterSuccessPrompt: `Perfect, %s is now your favorite recitation for the adhan! `,
+      titleForAdhaanReciterList: `Adhan Reciters`,
+      chooseAdhaanByTouchPrompt: "or you can also click on the recitation of your choice on your screen.",
     },
   };

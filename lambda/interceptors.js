@@ -91,7 +91,7 @@ const LocalizationInterceptor = {
   async process(handlerInput) {
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
     console.log("Request Type: ", requestType);
-    if(requestType === "AlexaSkillEvent.SkillDisabled"){
+    if(isValidRequestType(requestType)){
       //should not localize the response when the skill is disabled
       return;
     }
@@ -134,7 +134,7 @@ const SavePersistenceAttributesToSession = {
     console.log("SavePersistenceAttributesToSession Interceptor");
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
     console.log("Request Type: ", requestType);
-    if(requestType === "AlexaSkillEvent.SkillDisabled"){
+    if(isValidRequestType(requestType)){
       //should not localize the response when the skill is disabled
       return;
     }
@@ -176,26 +176,20 @@ const SetApiKeysAsEnvironmentVaraibleFromAwsSsm = {
     console.log("SetApiKeysAsEnvironmentVaraibleFromAwsSsm Interceptor");
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
     console.log("Request Type: ", requestType);
-    if(requestType === "AlexaSkillEvent.SkillDisabled"){
+    if(isValidRequestType(requestType)){
       //should not localize the response when the skill is disabled
       return;
     }
     const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
-    if (isNewSession){
-      const { attributesManager } = handlerInput;
-      const requestAttributes = attributesManager.getRequestAttributes();
-      await helperFunctions
-        .callDirectiveService(
-          handlerInput,
-          requestAttributes.t("welcomePrompt")
-        )
-        .catch((error) => {
-          console.log("Error while calling directive service: ", error);
-        });
+    if (isNewSession) {
       await awsSsmHandler.handler();
     }      
   },
 };
+
+function isValidRequestType(requestType) {
+  return requestType === "AlexaSkillEvent.SkillDisabled" || requestType.startsWith("AudioPlayer.") || requestType.startsWith("PlaybackController");
+}
 
 module.exports = {
   LogResponseInterceptor,
@@ -205,3 +199,4 @@ module.exports = {
   AddDirectiveResponseInterceptor,
   SetApiKeysAsEnvironmentVaraibleFromAwsSsm
 };
+

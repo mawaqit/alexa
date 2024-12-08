@@ -141,7 +141,6 @@
             "Wann ist {prayerName}",
             "Wann ist das nächste Gebet",
             "{prayerName}",
-            "Wann ist die nächste Gebetszeit",
             "Um welche Zeit ist {prayerName}",
             "Wann ist die nächste Gebetszeit",
             "Wie viel Zeit bis {prayerName}",
@@ -241,6 +240,14 @@
             "Wann sind die Gebete",
             "Heutige Gebetszeiten"
           ]
+        },
+        {
+          "name": "AMAZON.ResumeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PauseIntent",
+          "samples": []
         }
       ],
       "types": [
@@ -271,7 +278,7 @@
             {
               "name": {
                 "synonyms": [
-                  "Jumu\u0027ah",
+                  "Jumu'ah",
                   "Freitagsgebet",
                   "Freitag"
                 ],
@@ -282,7 +289,7 @@
             {
               "name": {
                 "synonyms": [
-                  "Isha\u0027a",
+                  "Isha'a",
                   "letztes Gebet des Tages",
                   "Nachtgebet"
                 ],

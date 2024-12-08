@@ -21,9 +21,19 @@ const {
   MosqueInfoIntentHandler,
   AllIqamaTimeIntentHandler,
   DeleteDataIntentHandler,
-  AllPrayerTimeIntentHandler
+  AllPrayerTimeIntentHandler,
+  FavoriteAdhaanReciterStartedHandler,
+  FavoriteAdhaanReciterIntentHandler
 } = require("./handlers/intentHandler.js");
-const { MosqueListTouchEventHandler } = require("./handlers/touchHandler.js");
+const {
+  MosqueListTouchEventHandler,
+  AdhaanRecitationTouchEventHandler,
+} = require("./handlers/touchHandler.js");
+const {
+  AudioPlayerEventHandler,
+  PlaybackCommandHandler,
+  AudioIntentHandler
+} = require("./handlers/audioPlayerHandler.js");
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -34,6 +44,13 @@ const LaunchRequestHandler = {
     );
   },
   async handle(handlerInput) {
+    const { attributesManager } = handlerInput;
+    const requestAttributes = attributesManager.getRequestAttributes();
+    await helperFunctions
+      .callDirectiveService(handlerInput, requestAttributes.t("welcomePrompt"))
+      .catch((error) => {
+        console.log("Error while calling directive service: ", error);
+      });
     return await helperFunctions.checkForPersistenceData(handlerInput);
   },
 };
@@ -172,6 +189,9 @@ exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
     HelpIntentHandler,
+    AudioPlayerEventHandler,
+    PlaybackCommandHandler,
+    AudioIntentHandler,
     MosqueInfoIntentHandler,
     AllIqamaTimeIntentHandler,
     NextPrayerTimeIntentWithoutNameHandler,
@@ -180,9 +200,12 @@ exports.handler = Alexa.SkillBuilders.custom()
     AllPrayerTimeIntentHandler,
     PlayAdhanIntentHandler,
     SelectMosqueIntentStartedHandler,
-    SelectMosqueIntentAfterSelectingMosqueHandler,
+    SelectMosqueIntentAfterSelectingMosqueHandler,    
+    FavoriteAdhaanReciterStartedHandler,
+    FavoriteAdhaanReciterIntentHandler,
     DeleteDataIntentHandler,
     MosqueListTouchEventHandler,
+    AdhaanRecitationTouchEventHandler,
     SkillEventHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,

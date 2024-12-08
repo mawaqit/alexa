@@ -27,7 +27,8 @@ const LogResponseInterceptor = {
 };
 
 const AddDirectiveResponseInterceptor = {
-  async process(handlerInput, response) {    
+  async process(handlerInput, response) {   
+    if(!response) return;
     const { directives } = response;
     const aplDirective = directives
       ? directives.find(
@@ -87,7 +88,13 @@ const AddDirectiveResponseInterceptor = {
 };
 
 const LocalizationInterceptor = {
-  process(handlerInput) {
+  async process(handlerInput) {
+    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
+    console.log("Request Type: ", requestType);
+    if(requestType === "AlexaSkillEvent.SkillDisabled"){
+      //should not localize the response when the skill is disabled
+      return;
+    }
     let locale = Alexa.getLocale(handlerInput.requestEnvelope);
     // Gets the locale from the request and initializes i18next.
     const localizationClient = i18n.use(sprintf).init({
@@ -124,6 +131,13 @@ const LocalizationInterceptor = {
 
 const SavePersistenceAttributesToSession = {
   async process(handlerInput) {
+    console.log("SavePersistenceAttributesToSession Interceptor");
+    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
+    console.log("Request Type: ", requestType);
+    if(requestType === "AlexaSkillEvent.SkillDisabled"){
+      //should not localize the response when the skill is disabled
+      return;
+    }
     const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
     if (isNewSession) {
       console.log("New Session");
@@ -159,9 +173,27 @@ const SavePersistenceAttributesToSession = {
 
 const SetApiKeysAsEnvironmentVaraibleFromAwsSsm = {
   async process(handlerInput) {
+    console.log("SetApiKeysAsEnvironmentVaraibleFromAwsSsm Interceptor");
+    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
+    console.log("Request Type: ", requestType);
+    if(requestType === "AlexaSkillEvent.SkillDisabled"){
+      //should not localize the response when the skill is disabled
+      return;
+    }
     const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
-    if (isNewSession)
+    if (isNewSession){
+      const { attributesManager } = handlerInput;
+      const requestAttributes = attributesManager.getRequestAttributes();
+      await helperFunctions
+        .callDirectiveService(
+          handlerInput,
+          requestAttributes.t("welcomePrompt")
+        )
+        .catch((error) => {
+          console.log("Error while calling directive service: ", error);
+        });
       await awsSsmHandler.handler();
+    }      
   },
 };
 

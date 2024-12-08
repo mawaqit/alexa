@@ -28,13 +28,12 @@ const { MosqueListTouchEventHandler } = require("./handlers/touchHandler.js");
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest" || 
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest" ||
       (Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-        Alexa.getIntentName(handlerInput.requestEnvelope) ===
-          "LaunchIntent")
+        Alexa.getIntentName(handlerInput.requestEnvelope) === "LaunchIntent")
     );
   },
-  async handle(handlerInput) {    
+  async handle(handlerInput) {
     return await helperFunctions.checkForPersistenceData(handlerInput);
   },
 };
@@ -191,10 +190,10 @@ exports.handler = Alexa.SkillBuilders.custom()
     IntentReflectorHandler
   )
   .addRequestInterceptors(
-    LogRequestInterceptor,
+    LogRequestInterceptor,         
+    LocalizationInterceptor,
     SetApiKeysAsEnvironmentVaraibleFromAwsSsm,
-    SavePersistenceAttributesToSession,
-    LocalizationInterceptor
+    SavePersistenceAttributesToSession, 
   )
   .addResponseInterceptors(
     LogResponseInterceptor,

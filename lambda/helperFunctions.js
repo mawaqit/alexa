@@ -82,9 +82,9 @@ const checkForPersistenceData = async (handlerInput) => {
   console.log("Persisted Data: ", persistentAttributes);
   const requestAttributes = attributesManager.getRequestAttributes();
   if (persistentAttributes) {
-    return await getPrayerTimingsForMosque(handlerInput, mosqueTimes, requestAttributes.t("welcomePrompt"));
+    return await getPrayerTimingsForMosque(handlerInput, mosqueTimes, "");
   }
-  return await getListOfMosque(handlerInput, requestAttributes.t("welcomePrompt") + requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt"));
+  return await getListOfMosque(handlerInput, requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt"));
 };
 
 const getPrayerTimingsForMosque = async (
@@ -463,6 +463,29 @@ const translateText = async (text, toLang) => {
   }
 }
 
+async function callDirectiveService(handlerInput, speakOutput) {
+  console.log("Call Directive Service");
+  const requestEnvelope = handlerInput.requestEnvelope;
+  const directiveServiceClient = handlerInput.serviceClientFactory.getDirectiveServiceClient();
+
+  const requestId = requestEnvelope.request.requestId;
+  const directive = {
+    header: {
+      requestId,
+    },
+    directive: {
+      type: 'VoicePlayer.Speak',
+      speech: speakOutput,
+    },
+  };
+
+  return await directiveServiceClient.enqueue(directive);
+}
+
+function sleep(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve(), milliseconds));
+}
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -479,5 +502,7 @@ module.exports = {
   calculateMinutes,
   getPrayerTimeForSpecificPrayer,
   generateNextPrayerTime,
-  translateText
+  translateText,
+  callDirectiveService,
+  sleep
 };

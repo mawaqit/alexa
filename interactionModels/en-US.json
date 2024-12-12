@@ -296,6 +296,14 @@
         {
           "name": "AMAZON.ResumeIntent",
           "samples": []
+        },
+        {
+          "slots": [],
+          "name": "HadithIntent",
+          "samples": [
+            "random hadith",
+            "hadith"
+          ]
         }
       ],
       "types": [

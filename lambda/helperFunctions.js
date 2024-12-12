@@ -449,7 +449,7 @@ const generateMomentObject = (time, now) => {
 
 const translateText = async (text, toLang) => {
   try {    
-    toLang = toLang.split("-")[0];
+    toLang = splitLanguage(toLang);
     console.log("Text to convert: ", text);
     const detectedLanguage = await detectLanguage(text);
     if (detectedLanguage === toLang) {
@@ -488,8 +488,8 @@ async function callDirectiveService(handlerInput, speakOutput) {
   }
 }
 
-function sleep(milliseconds) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
+const splitLanguage = (locale) => {
+  return locale.split("-")[0];
 }
 
 module.exports = {
@@ -510,5 +510,5 @@ module.exports = {
   generateNextPrayerTime,
   translateText,
   callDirectiveService,
-  sleep
+  splitLanguage
 };

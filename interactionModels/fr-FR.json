@@ -342,6 +342,14 @@
             "définir mon récitant préféré",
             "configurer mon récitant d'adhan"
           ]
+        },
+        {
+          "slots": [],
+          "name": "HadithIntent",
+          "samples": [
+            "random hadith",
+            "hadith"
+          ]
         }
       ],
       "types": [

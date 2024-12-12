@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { lang } = require("moment");
 const mawaqitBaseUrl = process.env.baseUrl;
 
 const getMosqueList = async (
@@ -69,6 +70,25 @@ const getPrayerTimings = async (mosqueUuid) => {
     });
 };
 
+const getRandomHadith = async (lang = "ar") => {
+  const config = getConfig("get", `/hadith/random?lang=${lang}`, "2.0");
+  console.log("Config: ", JSON.stringify(config, null, 2).replace(/Bearer \w+/g, "Bearer ****"));
+  return await axios
+    .request(config)
+    .then((response) => {
+      console.log("Hadith: ", JSON.stringify(response.data));
+      if (!response || !response.data || !response.data.text) {
+        throw "Received Empty Response";
+      }
+
+      return response.data.text;
+    })
+    .catch((error) => {
+      console.log("Error while fetching Hadith: ", error);
+      throw error;
+    });
+}
+
 const getConfig = (httpMethod, url, apiVersion = "3.0") => {
   const apiKey = "Bearer " + process.env.mawaqitApiKey;
   const headers = {
@@ -85,4 +105,5 @@ const getConfig = (httpMethod, url, apiVersion = "3.0") => {
 module.exports = {
   getMosqueList,
   getPrayerTimings,
+  getRandomHadith
 };

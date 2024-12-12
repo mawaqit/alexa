@@ -248,6 +248,14 @@
         {
           "name": "AMAZON.PauseIntent",
           "samples": []
+        },
+        {
+          "slots": [],
+          "name": "HadithIntent",
+          "samples": [
+            "random hadith",
+            "hadith"
+          ]
         }
       ],
       "types": [

@@ -1,8 +1,7 @@
 const Alexa = require("ask-sdk-core");
 const helperFunctions = require("../helperFunctions.js");
-const { getPrayerTimings } = require("./apiHandler.js");
+const { getPrayerTimings, getRandomHadith } = require("./apiHandler.js");
 const moment = require("moment-timezone");
-const { getS3PreSignedUrl } = require("./s3Handler.js");
 const {
   getDataSourceforMosqueInfo,
   adhaanRecitation,
@@ -682,6 +681,29 @@ const FavoriteAdhaanReciterIntentHandler = {
   },
 }
 
+const HadithIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "HadithIntent"
+    );
+  },
+  async handle(handlerInput) {
+    console.log("In HadithIntentHandler");
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const locale = helperFunctions.splitLanguage(Alexa.getLocale(handlerInput.requestEnvelope));
+    const hadith = await getRandomHadith(locale).catch((error) => {{
+      console.log("Error in fetching hadith: ", error);
+      return requestAttributes.t("hadithErrorPrompt");
+    }});
+
+    return handlerInput.responseBuilder
+      .speak(hadith)
+      .withShouldEndSession(false)
+      .getResponse();
+  },
+};
+
 module.exports = {
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
@@ -694,5 +716,6 @@ module.exports = {
   DeleteDataIntentHandler,
   AllPrayerTimeIntentHandler,
   FavoriteAdhaanReciterStartedHandler,
-  FavoriteAdhaanReciterIntentHandler
+  FavoriteAdhaanReciterIntentHandler,
+  HadithIntentHandler
 };

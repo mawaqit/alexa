@@ -51,5 +51,6 @@ module.exports = {
     adhanReciterSuccessPrompt: `Perfect, %s is now your favorite recitation for the adhan! `,
     titleForAdhaanReciterList: `Adhan Reciters`,
     chooseAdhaanByTouchPrompt: "or you can also click on the recitation of your choice on your screen.",
+    hadithErrorPrompt: `Sorry, I couldn't find any hadiths. Please try again.`,
   },
 };

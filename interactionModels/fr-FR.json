@@ -336,7 +336,11 @@
           ],
           "name": "FavoriteAdhaanReciterIntent",
           "samples": [
-            "choose my adhaan reciter"
+            "choisir mon récitant d'adhan",
+            "sélectionner mon récitant",
+            "changer de récitant",
+            "définir mon récitant préféré",
+            "configurer mon récitant d'adhan"
           ]
         }
       ],
@@ -517,7 +521,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Kindly say the sumber"
+            "value": "Veuillez dire le numéro"
           }
         ],
         "id": "Elicit.Slot.198201778994.270095032972"

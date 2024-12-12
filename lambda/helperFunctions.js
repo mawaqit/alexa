@@ -465,25 +465,31 @@ const translateText = async (text, toLang) => {
 
 async function callDirectiveService(handlerInput, speakOutput) {
   console.log("Call Directive Service");
-  const requestEnvelope = handlerInput.requestEnvelope;
-  const directiveServiceClient = handlerInput.serviceClientFactory.getDirectiveServiceClient();
+  try {
+    const requestEnvelope = handlerInput.requestEnvelope;
+    const directiveServiceClient = handlerInput.serviceClientFactory.getDirectiveServiceClient();
 
-  const requestId = requestEnvelope.request.requestId;
-  const directive = {
-    header: {
-      requestId,
-    },
-    directive: {
-      type: 'VoicePlayer.Speak',
-      speech: speakOutput,
-    },
-  };
+    const requestId = requestEnvelope.request.requestId;
+    const directive = {
+      header: {
+        requestId,
+      },
+      directive: {
+        type: 'VoicePlayer.Speak',
+        speech: speakOutput,
+      },
+    };
 
-  return await directiveServiceClient.enqueue(directive);
+    return await directiveServiceClient.enqueue(directive);
+  } catch (error) {
+    console.error('Error calling directive service:', error);
+    // Continue skill flow without progressive response
+    return Promise.resolve();
+  }
 }
 
 function sleep(milliseconds) {
-  return new Promise(resolve => setTimeout(resolve(), milliseconds));
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
 module.exports = {

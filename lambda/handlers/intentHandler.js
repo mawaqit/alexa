@@ -316,7 +316,7 @@ const PlayAdhanIntentHandler = {
     const { persistentAttributes } = sessionAttributes;    
     let audioName = "Adhaan";
     let audioUrl = prayerName === "0"? adhaanRecitation[0].fajrUrl : adhaanRecitation[0].otherUrl;
-    if(persistentAttributes && persistentAttributes.favouriteAdhaan){
+    if(persistentAttributes?.favouriteAdhaan){
       const { primaryText } = persistentAttributes.favouriteAdhaan;
       audioName = primaryText;
       audioUrl = prayerName === "0"?  persistentAttributes.favouriteAdhaan.fajrUrl : persistentAttributes.favouriteAdhaan.otherUrl;
@@ -656,7 +656,12 @@ const FavoriteAdhaanReciterIntentHandler = {
       "favouriteReciter"
     );
     console.log("Favourite Reciter: ", favouriteReciter);
-    const adhaanReciter = adhaanRecitation[parseInt(favouriteReciter) - 1];
+    const reciterIndex = parseInt(favouriteReciter) - 1;
+    if (Number.isNaN(reciterIndex) || reciterIndex < 0 || reciterIndex >= adhaanRecitation.length) {
+      await helperFunctions.callDirectiveService(handlerInput, requestAttributes.t("adhanReciterErrorPrompt"));
+      return await FavoriteAdhaanReciterStartedHandler.handle(handlerInput);
+    }
+    const adhaanReciter = adhaanRecitation[reciterIndex];
     if(!adhaanReciter){
       await helperFunctions.callDirectiveService(handlerInput, requestAttributes.t("adhanReciterErrorPrompt"));
       return await FavoriteAdhaanReciterStartedHandler.handle(handlerInput);

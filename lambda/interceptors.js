@@ -37,7 +37,7 @@ const AddDirectiveResponseInterceptor = {
         )
       : false;
     console.log("APL Directive: ", JSON.stringify(aplDirective));      
-    const ssmlText = response && response.outputSpeech && response.outputSpeech.ssml ? response.outputSpeech.ssml : null;      
+    const ssmlText = response?.outputSpeech?.ssml || null;      
     console.log("SSML Text: ", ssmlText);
     if (
       Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
@@ -171,9 +171,9 @@ const SavePersistenceAttributesToSession = {
   },
 };
 
-const SetApiKeysAsEnvironmentVaraibleFromAwsSsm = {
+const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(handlerInput) {
-    console.log("SetApiKeysAsEnvironmentVaraibleFromAwsSsm Interceptor");
+    console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
     console.log("Request Type: ", requestType);
     if(isValidRequestType(requestType)){
@@ -197,6 +197,6 @@ module.exports = {
   LocalizationInterceptor,
   SavePersistenceAttributesToSession,
   AddDirectiveResponseInterceptor,
-  SetApiKeysAsEnvironmentVaraibleFromAwsSsm
+  SetApiKeysAsEnvironmentVariableFromAwsSsm
 };
 

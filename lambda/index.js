@@ -7,7 +7,7 @@ const {
   LogResponseInterceptor,
   SavePersistenceAttributesToSession,
   AddDirectiveResponseInterceptor,
-  SetApiKeysAsEnvironmentVaraibleFromAwsSsm
+  SetApiKeysAsEnvironmentVariableFromAwsSsm
 } = require("./interceptors.js");
 const helperFunctions = require("./helperFunctions.js");
 const { SkillEventHandler } = require("./handlers/skillEventHandler.js");
@@ -215,7 +215,7 @@ exports.handler = Alexa.SkillBuilders.custom()
   .addRequestInterceptors(
     LogRequestInterceptor,         
     LocalizationInterceptor,
-    SetApiKeysAsEnvironmentVaraibleFromAwsSsm,
+    SetApiKeysAsEnvironmentVariableFromAwsSsm,
     SavePersistenceAttributesToSession, 
   )
   .addResponseInterceptors(

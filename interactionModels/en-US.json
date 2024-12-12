@@ -453,7 +453,7 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "Kindly say the sumber"
+            "value": "Kindly say the number"
           }
         ],
         "id": "Elicit.Slot.102046521153.828952134948"

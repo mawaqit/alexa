@@ -6,6 +6,8 @@ const AudioPlayerEventHandler = {
     return Alexa.getRequestType(handlerInput.requestEnvelope).startsWith("AudioPlayer.");
   },
   async handle(handlerInput) {
+    const audioPlayerEvent = Alexa.getRequestType(handlerInput.requestEnvelope);
++   console.log("Audio Player Event:", audioPlayerEvent);
     return handlerInput.responseBuilder.getResponse();
   },
 };
@@ -37,8 +39,8 @@ const AudioIntentHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.ResumeIntent" ||
-        Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.PauseIntent"
+      (Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.ResumeIntent" ||
+       Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.PauseIntent")
     );
   },
   async handle(handlerInput) {

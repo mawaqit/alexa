@@ -150,6 +150,7 @@ const NextPrayerTimeIntentHandler = {
         // Find the first non-null Jumu'ah time
         const firstNonNullJumua = jumuaTimes.filter((time) => time !== null && time !== undefined).join(", ");
         if (firstNonNullJumua) {
+          helperFunctions.checkForCharacterDisplay(handlerInput, firstNonNullJumua);
           return handlerInput.responseBuilder
             .speak(
               requestAttributes.t(
@@ -175,6 +176,7 @@ const NextPrayerTimeIntentHandler = {
         // Find the first non-null Eid time
         const firstNonNullEid = eidTimes.filter((time) => time !== null && time !== undefined).join(", ");
         if (firstNonNullEid) {
+          helperFunctions.checkForCharacterDisplay(handlerInput, firstNonNullEid);
           return handlerInput.responseBuilder
             .speak(
               requestAttributes.t(
@@ -229,6 +231,7 @@ const NextPrayerTimeIntentWithoutNameHandler = {
       return await helperFunctions.checkForPersistenceData(handlerInput);
     }
     const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), requestAttributes.t("prayerNames"));
+    helperFunctions.checkForCharacterDisplay(handlerInput, prayerTimeDetails.time);
     const speakOutput = requestAttributes.t("nextPrayerWithoutMosquePrompt", prayerTimeDetails.name, prayerTimeDetails.time, prayerTimeDetails.diffInMinutes) + requestAttributes.t("doYouNeedAnythingElsePrompt");
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -281,6 +284,7 @@ const NextIqamaTimeIntentHandler = {
         iqamaTimes
       );
       console.log("Next Iqama Time: ", nextIqamaTime);
+      helperFunctions.checkForCharacterDisplay(handlerInput, nextIqamaTime.diffInMinutes);
       return handlerInput.responseBuilder
         .speak(
           requestAttributes.t(
@@ -692,10 +696,10 @@ const HadithIntentHandler = {
     console.log("In HadithIntentHandler");
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const locale = helperFunctions.splitLanguage(Alexa.getLocale(handlerInput.requestEnvelope));
-    const hadith = await getRandomHadith(locale).catch((error) => {{
+    const hadith = await getRandomHadith(locale).catch((error) => {
       console.log("Error in fetching hadith: ", error);
       return requestAttributes.t("hadithErrorPrompt");
-    }});
+    });
 
     return handlerInput.responseBuilder
       .speak(hadith)

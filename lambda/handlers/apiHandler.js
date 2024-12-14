@@ -1,5 +1,4 @@
 const axios = require("axios");
-const { lang } = require("moment");
 const mawaqitBaseUrl = process.env.baseUrl;
 
 const getMosqueList = async (

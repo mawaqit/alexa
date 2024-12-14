@@ -92,7 +92,6 @@ const LocalizationInterceptor = {
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
     console.log("Request Type: ", requestType);
     if(isValidRequestType(requestType)){
-      //should not localize the response when the skill is disabled
       return;
     }
     let locale = Alexa.getLocale(handlerInput.requestEnvelope);
@@ -135,7 +134,6 @@ const SavePersistenceAttributesToSession = {
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
     console.log("Request Type: ", requestType);
     if(isValidRequestType(requestType)){
-      //should not localize the response when the skill is disabled
       return;
     }
     const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
@@ -177,7 +175,6 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
     console.log("Request Type: ", requestType);
     if(isValidRequestType(requestType)){
-      //should not localize the response when the skill is disabled
       return;
     }
     const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
@@ -188,6 +185,7 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
 };
 
 function isValidRequestType(requestType) {
+  //skip processing for skill disabled events and audio player requests
   return requestType === "AlexaSkillEvent.SkillDisabled" || requestType.startsWith("AudioPlayer.") || requestType.startsWith("PlaybackController");
 }
 

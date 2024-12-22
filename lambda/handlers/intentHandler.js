@@ -307,9 +307,13 @@ const NextIqamaTimeIntentHandler = {
 
 const PlayAdhanIntentHandler = {
   canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      Alexa.getIntentName(handlerInput.requestEnvelope) === "PlayAdhanIntent"
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "PlayAdhanIntent" ||
+      (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
+        && request.task 
+        && request.task.name === "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan")
     );
   },
   async handle(handlerInput) {

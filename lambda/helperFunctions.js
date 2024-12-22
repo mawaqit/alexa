@@ -6,6 +6,7 @@ const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
 const moment = require("moment-timezone");
 const { getLatLng } = require("./handlers/googleGeoApiHandler.js");
 const { translate, detectLanguage } = require('./handlers/googleTranslateHandler.js');
+const prayerTimeApl = require("./aplDocuments/characterDisplayApl.json");
 
 const getPersistedData = async (handlerInput) => {
   try {
@@ -28,9 +29,9 @@ const checkForConsentTokenToAccessDeviceLocation = (handlerInput) => {
   );
 };
 
-const createDirectivePayload = (aplDocument, dataSources = {}) => {
+const createDirectivePayload = (aplDocument, dataSources = {}, type = "Alexa.Presentation.APL.RenderDocument") => {
   return {
-    type: "Alexa.Presentation.APL.RenderDocument",
+    type: type,
     token: uuidv4(),
     document: aplDocument,
     datasources: dataSources,
@@ -82,9 +83,9 @@ const checkForPersistenceData = async (handlerInput) => {
   console.log("Persisted Data: ", persistentAttributes);
   const requestAttributes = attributesManager.getRequestAttributes();
   if (persistentAttributes) {
-    return await getPrayerTimingsForMosque(handlerInput, mosqueTimes, requestAttributes.t("welcomePrompt"));
+    return await getPrayerTimingsForMosque(handlerInput, mosqueTimes, "");
   }
-  return await getListOfMosque(handlerInput, requestAttributes.t("welcomePrompt") + requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt"));
+  return await getListOfMosque(handlerInput, requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt"));
 };
 
 const getPrayerTimingsForMosque = async (
@@ -92,7 +93,7 @@ const getPrayerTimingsForMosque = async (
   mosqueTimes,
   speakOutput
 ) => {
-  const { responseBuilder, attributesManager } = handlerInput;
+  const { attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
   const persistedData =
     attributesManager.getSessionAttributes().persistentAttributes;
@@ -112,7 +113,8 @@ const getPrayerTimingsForMosque = async (
       nextPrayerTime.time,
       nextPrayerTime.diffInMinutes
     );
-    return responseBuilder.speak(speakOutput).withShouldEndSession(false).getResponse();
+    checkForCharacterDisplay(handlerInput, nextPrayerTime.time);
+    return handlerInput.responseBuilder.speak(speakOutput).withShouldEndSession(false).getResponse();
   } catch (error) {
     console.log("Error in fetching prayer timings: ", error);
     if (error === "Mosque not found") {
@@ -294,6 +296,14 @@ const getUserTimezone = async (handlerInput) => {
   return userTimeZone;
 };
 
+function checkForCharacterDisplay(handlerInput, nextPrayerTime) {
+  if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)["Alexa.Presentation.APLT"]) {
+    const dataSource = createDataSourceForPrayerTiming(nextPrayerTime);
+    const aplDirective = createDirectivePayload(prayerTimeApl, dataSource, "Alexa.Presentation.APLT.RenderDocument");
+    handlerInput.responseBuilder.addDirective(aplDirective);
+  }
+}
+
 function calculateMinutes(requestAttributes, start, end) {
   // Create Date objects from the input strings
   const startDate = new Date(start);
@@ -405,6 +415,7 @@ const getPrayerTimeForSpecificPrayer = (
         minutesDiff
       );
     }
+    checkForCharacterDisplay(handlerInput, prayerTime);
     return handlerInput.responseBuilder
       .speak(
         requestAttributes.t(
@@ -449,7 +460,7 @@ const generateMomentObject = (time, now) => {
 
 const translateText = async (text, toLang) => {
   try {    
-    toLang = toLang.split("-")[0];
+    toLang = splitLanguage(toLang);
     console.log("Text to convert: ", text);
     const detectedLanguage = await detectLanguage(text);
     if (detectedLanguage === toLang) {
@@ -461,6 +472,43 @@ const translateText = async (text, toLang) => {
     console.log("Error in converting text to english: ", error);
     return text;
   }
+}
+
+async function callDirectiveService(handlerInput, speakOutput) {
+  console.log("Call Directive Service");
+  try {
+    const requestEnvelope = handlerInput.requestEnvelope;
+    const directiveServiceClient = handlerInput.serviceClientFactory.getDirectiveServiceClient();
+
+    const requestId = requestEnvelope.request.requestId;
+    const directive = {
+      header: {
+        requestId,
+      },
+      directive: {
+        type: 'VoicePlayer.Speak',
+        speech: speakOutput,
+      },
+    };
+
+    return await directiveServiceClient.enqueue(directive);
+  } catch (error) {
+    console.error('Error calling directive service:', error);
+    // Continue skill flow without progressive response
+    return Promise.resolve();
+  }
+}
+
+const splitLanguage = (locale) => {
+  return locale.split("-")[0];
+}
+
+const createDataSourceForPrayerTiming = (time) => {
+  return {
+    "data": {
+        "text": time
+    }
+}
 }
 
 module.exports = {
@@ -479,5 +527,9 @@ module.exports = {
   calculateMinutes,
   getPrayerTimeForSpecificPrayer,
   generateNextPrayerTime,
-  translateText
+  translateText,
+  callDirectiveService,
+  splitLanguage,
+  createDataSourceForPrayerTiming,
+  checkForCharacterDisplay
 };

@@ -1,0 +1,40 @@
+{
+    "name": "Play Adhaan",
+    "display": {
+        "title": "Play Adhaan",
+        "description": "Alexa will play Adhaan",
+        "iconUrl": "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA"
+    },
+    "parameters": [
+        {
+            "name": "Play Adhaan",
+            "schema": {
+                "type": "enum",
+                "values": [
+                    {
+                        "value": "playAdhaan",
+                        "display": {
+                            "title": "Play Adhaan",
+                            "description": "Alexa will play Adhaan",
+                            "iconUrl": "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA"
+                        }
+                    }
+                ]
+            },
+            "display": {
+                "title": "Play Adhaan",
+                "description": "Alexa will play Adhaan",
+                "iconUrl": "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA"
+            }
+        }
+    ],
+    "delivery": "UNICAST",
+    "accountLinkingRequired": "NOT_REQUIRED",
+    "displayCategories": [
+        "HEALTH_AND_WELLNESS"
+    ],
+    "keywords": [
+        "play adhaan",
+        "adhaan"
+    ]
+}

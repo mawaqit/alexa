@@ -48,6 +48,12 @@ module.exports = {
     globalErrorPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
     fallbackPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
     allPrayerTimesPrompt: "%s est à %s. ",
-    doYouNeedAnythingElsePrompt: " Voulez-vous autre chose ?"
+    doYouNeedAnythingElsePrompt: " Voulez-vous autre chose ?",    
+    adhanReciterPrompt: `Quelle récitation souhaitez-vous définir comme favorite pour l'adhan ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la récitation `,
+    adhanReciterErrorPrompt: `Désolé, je n'ai trouvé aucune récitation pour l'adhan. Veuillez réessayer.`,
+    adhanReciterSuccessPrompt: `Parfait, %s est maintenant votre récitation favorite pour l'adhan ! `,
+    titleForAdhaanReciterList: `Récitateurs d'Adhan`,
+    chooseAdhaanByTouchPrompt: "ou vous pouvez aussi cliquer sur la récitation de votre choix sur votre écran.",
+    hadithErrorPrompt: `Désolé, je n'ai trouvé aucun hadith. Veuillez réessayer.`,
   },
 };

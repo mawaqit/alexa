@@ -4,10 +4,12 @@ const { getPrayerTimings } = require("./apiHandler.js");
 
 const MosqueListTouchEventHandler = {
   canHandle(handlerInput) {
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.Presentation.APL.UserEvent" &&
-      handlerInput.requestEnvelope.request.arguments[0] === "ListItemSelected"
+      handlerInput.requestEnvelope.request.arguments[0] === "ListItemSelected" &&
+      handlerInput.requestEnvelope.request.arguments[1] === requestAttributes.t("titleForMosqueList")
     );
   },
   async handle(handlerInput) {
@@ -16,7 +18,7 @@ const MosqueListTouchEventHandler = {
       JSON.stringify(handlerInput.requestEnvelope.request)
     );
     const locale = Alexa.getLocale(handlerInput.requestEnvelope);
-    const selectedMosque = handlerInput.requestEnvelope.request.arguments[1];
+    const selectedMosque = handlerInput.requestEnvelope.request.arguments[2];
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
@@ -50,6 +52,37 @@ const MosqueListTouchEventHandler = {
   },
 };
 
+const AdhaanRecitationTouchEventHandler = {
+  canHandle(handlerInput) {
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) ===
+        "Alexa.Presentation.APL.UserEvent" &&
+      handlerInput.requestEnvelope.request.arguments[0] === "ListItemSelected" &&
+      handlerInput.requestEnvelope.request.arguments[1] === requestAttributes.t("titleForAdhaanReciterList")
+    );
+  },
+  async handle(handlerInput) {
+    console.log(
+      "Request Log in AdhaanRecitationTouchEventHandler: ",
+      JSON.stringify(handlerInput.requestEnvelope.request)
+    );
+    const selectedRecitation = handlerInput.requestEnvelope.request.arguments[2];
+    const sessionAttributes =
+      handlerInput.attributesManager.getSessionAttributes();
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    sessionAttributes.persistentAttributes.favouriteAdhaan = selectedRecitation;
+    handlerInput.attributesManager.setPersistentAttributes(
+      sessionAttributes.persistentAttributes
+    );
+    await handlerInput.attributesManager.savePersistentAttributes();
+    return handlerInput.responseBuilder
+      .speak(requestAttributes.t("adhanReciterSuccessPrompt", selectedRecitation.primaryText))
+      .getResponse();
+  },
+}
+
 module.exports = {
   MosqueListTouchEventHandler,
+  AdhaanRecitationTouchEventHandler
 };

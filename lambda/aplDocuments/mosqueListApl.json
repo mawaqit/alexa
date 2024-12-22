@@ -29,6 +29,7 @@
             "componentId": "plantList",
             "arguments": [
               "ListItemSelected",
+              "${payload.imageListData.title}",
               "${payload.imageListData.listItems[ordinal-1]}"
             ]
           },

@@ -1,11 +1,43 @@
 const Alexa = require("ask-sdk-core");
 const backgroundImage = "https://cdn.mawaqit.net/images/background-arabic-calligraphy.png";
+const adhaanRecitation = [
+  {
+    primaryText: "Afassy",
+    fajrUrl: "https://mawaqit.net/static/mp3/adhan-afassy-fajr.mp3",
+    otherUrl: "https://mawaqit.net/static/mp3/adhan-afassy.mp3"
+  },
+  {
+    primaryText: "Algeria",
+    fajrUrl: "https://mawaqit.net/static/mp3/adhan-algeria-fajr.mp3",
+    otherUrl: "https://mawaqit.net/static/mp3/adhan-algeria.mp3"
+  },
+  {
+    primaryText: "Egypt",
+    fajrUrl: "https://mawaqit.net/static/mp3/adhan-egypt-fajr.mp3",
+    otherUrl: "https://mawaqit.net/static/mp3/adhan-egypt.mp3"
+  },
+  {
+    primaryText: "Madina",
+    fajrUrl: "https://mawaqit.net/static/mp3/adhan-madina-fajr.mp3",
+    otherUrl: "https://mawaqit.net/static/mp3/adhan-madina.mp3"
+  },
+  {
+    primaryText: "Maquah",
+    fajrUrl: "https://mawaqit.net/static/mp3/adhan-maquah-fajr.mp3",
+    otherUrl: "https://mawaqit.net/static/mp3/adhan-maquah.mp3"
+  },
+  {
+    primaryText: "Quds",
+    fajrUrl: "https://mawaqit.net/static/mp3/adhan-quds-fajr.mp3",
+    otherUrl: "https://mawaqit.net/static/mp3/adhan-quds.mp3"
+  }
+]
 
-const getDataSourceforMosqueList = async (handlerInput, mosqueList) => {
+const getDataSourceforMosqueList = async (handlerInput, listItems, title = "titleForMosqueList") => {
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
   const logoUrl = requestAttributes.t("logoUrl");
-  const title = requestAttributes.t("titleForMosqueList");
+  const aplTitle = requestAttributes.t(title);
   const locale = Alexa.getLocale(handlerInput.requestEnvelope);
   return {
     imageListData: {
@@ -16,12 +48,12 @@ const getDataSourceforMosqueList = async (handlerInput, mosqueList) => {
         largeSourceUrl: backgroundImage,
         sources: backgroundImage,
       },
-      title: title,
-      listItems: mosqueList,
+      title: aplTitle,
+      listItems: listItems,
       headerBackButton: false,
       logoUrl: logoUrl,
       locale: locale,
-      layoutDirection: requestAttributes.t("layoutDirection"),
+      layoutDirection: requestAttributes.t("layoutDirection")
     },
   };
 };
@@ -75,8 +107,41 @@ const getDataSourceforMosqueInfo = async (handlerInput, prayerTimes, mosqueInfo)
 }
 }
 
+const getDataSourceForAdhaanReciter = async (handlerInput, adhaanRecitation) => {
+    return getDataSourceforMosqueList(handlerInput, adhaanRecitation, "titleForAdhaanReciterList");
+};
+
+const getMetadata = (handlerInput, title) => {
+  const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
+  let albumArtImage = requestAttributes.t("logoUrl");
+  let metadata = {
+    title: title,
+    subtitle: requestAttributes.t("skillName"),
+    art: {
+      sources: [
+        {
+          url: albumArtImage,
+        },
+      ],
+    },
+    backgroundImage: {
+      sources: [
+        {
+          url: backgroundImage,
+        },
+      ],
+    },
+  };
+  console.log("Metadata: ", JSON.stringify(metadata));
+  return metadata;
+};
+
 module.exports = {
   getDataSourceforMosqueList,
   getDataSourceForPrayerTime,
-  getDataSourceforMosqueInfo
+  getDataSourceforMosqueInfo,
+  adhaanRecitation,
+  getDataSourceForAdhaanReciter,
+  getMetadata
 };

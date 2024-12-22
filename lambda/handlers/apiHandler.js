@@ -77,7 +77,7 @@ const getRandomHadith = async (lang = "ar") => {
     .then((response) => {
       console.log("Hadith: ", JSON.stringify(response.data));
       if (!response || !response.data || !response.data.text) {
-        throw "Received Empty Response";
+        throw new Error("No hadith text found in response");
       }
 
       return response.data.text;

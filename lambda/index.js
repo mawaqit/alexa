@@ -40,11 +40,10 @@ const {
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest" ||
-      !handlerInput.requestEnvelope.request.task
-    )(
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-        Alexa.getIntentName(handlerInput.requestEnvelope) === "LaunchIntent"
+      (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest" &&
+        !handlerInput.requestEnvelope.request.task) ||
+      (Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+        Alexa.getIntentName(handlerInput.requestEnvelope) === "LaunchIntent")
     );
   },
   async handle(handlerInput) {

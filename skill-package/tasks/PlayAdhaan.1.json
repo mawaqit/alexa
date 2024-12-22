@@ -6,7 +6,7 @@
       "x-amzn-alexa-access-scope": "public",
       "x-amzn-display-details": {
         "en-US": {
-          "title": "Play Adhaan ",
+          "title": "Play Adhaan",
           "description": "Alexa will play Adhaan"
         },
         "en-AU": {
@@ -27,11 +27,11 @@
         },
         "fr-FR": {
           "title": "Play Adhaan ",
-          "description": "Alexa will play Adhaan"
+          "description": "Alexa jouera l'Adhaan"
         },
         "fr-CA": {
           "title": "Play Adhaan",
-          "description": "Alexa will play Adhaan"
+          "description": "Alexa jouera l'Adhaan"
         }
       }
     },
@@ -39,14 +39,19 @@
     "paths": {
       "/PlayAdhaan": {
         "summary": "Play Adhaan",
-        "description": " Alexa will play Adhaan",
+        "description": "Alexa will play Adhaan",
         "post": {
           "requestBody": {
             "content": {
               "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "This endpoint requires no parameters as it simply triggers the Adhaan playback"
+                },
                 "examples": {
                   "sampleInput": {
-                    "description": "No Input required",
+                    "description": "Simple trigger with no parameters required",
                     "value": {}
                   }
                 }

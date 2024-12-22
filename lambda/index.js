@@ -24,7 +24,8 @@ const {
   AllPrayerTimeIntentHandler,
   FavoriteAdhaanReciterStartedHandler,
   FavoriteAdhaanReciterIntentHandler,
-  HadithIntentHandler
+  HadithIntentHandler,
+  RoutinesTriggerHandler
 } = require("./handlers/intentHandler.js");
 const {
   MosqueListTouchEventHandler,
@@ -202,6 +203,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     NextIqamaTimeIntentHandler,
     AllPrayerTimeIntentHandler,
     HadithIntentHandler,
+    RoutinesTriggerHandler,
     PlayAdhanIntentHandler,
     SelectMosqueIntentStartedHandler,
     SelectMosqueIntentAfterSelectingMosqueHandler,    

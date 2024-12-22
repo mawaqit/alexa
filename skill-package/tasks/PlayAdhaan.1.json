@@ -1,0 +1,90 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Play Adhaan",
+      "version": "1",
+      "x-amzn-alexa-access-scope": "public",
+      "x-amzn-display-details": {
+        "en-US": {
+          "title": "Play Adhaan ",
+          "description": "Alexa will play Adhaan"
+        },
+        "en-AU": {
+          "title": "Play Adhaan",
+          "description": "Alexa will play Adhaan"
+        },
+        "en-CA": {
+          "title": "Play Adhaan",
+          "description": "Alexa will play Adhaan"
+        },
+        "en-GB": {
+          "title": "Play Adhaan",
+          "description": "Alexa will play Adhaan"
+        },
+        "en-IN": {
+          "title": "Play Adhaan",
+          "description": "Alexa will play Adhaan"
+        },
+        "fr-FR": {
+          "title": "Play Adhaan ",
+          "description": "Alexa will play Adhaan"
+        },
+        "fr-CA": {
+          "title": "Play Adhaan",
+          "description": "Alexa will play Adhaan"
+        }
+      }
+    },
+    "tags": [{"name": "Play Adhaan"}],
+    "paths": {
+      "/PlayAdhaan": {
+        "summary": "Play Adhaan",
+        "description": " Alexa will play Adhaan",
+        "post": {
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "sampleInput": {
+                    "description": "No Input required",
+                    "value": {}
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "When the task finishes successfully",  
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SuccessfulResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "When the given parameters fail validations"
+            },
+            "500": {
+              "description": "When the task fulfillment fails"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "SuccessfulResponse": {
+          "type": "object",
+          "properties": {
+            "endTime": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    }
+  }

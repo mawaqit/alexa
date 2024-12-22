@@ -712,6 +712,21 @@ const HadithIntentHandler = {
   },
 };
 
+const RoutinesTriggerHandler = {
+  canHandle(handlerInput) {
+      const request = handlerInput.requestEnvelope.request;
+      return request.type === 'Routines.Trigger.Create'
+      || request.type === 'Routines.Trigger.Delete';
+  },
+  handle(handlerInput) {
+      const requestType = handlerInput.requestEnvelope.request.type;
+      console.log(`In RoutinesTriggerHandler : ${requestType}`);
+      console.log(JSON.stringify(handlerInput.requestEnvelope.request));
+      return handlerInput.responseBuilder
+          .getResponse();
+  },
+};
+
 module.exports = {
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
@@ -725,5 +740,6 @@ module.exports = {
   AllPrayerTimeIntentHandler,
   FavoriteAdhaanReciterStartedHandler,
   FavoriteAdhaanReciterIntentHandler,
-  HadithIntentHandler
+  HadithIntentHandler,
+  RoutinesTriggerHandler
 };

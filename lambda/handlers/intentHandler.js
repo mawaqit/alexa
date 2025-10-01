@@ -320,6 +320,8 @@ const PlayAdhanIntentHandler = {
     const prayerName = helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName");    
     const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
+    const requestAttributes =
+        handlerInput.attributesManager.getRequestAttributes();
     const { persistentAttributes } = sessionAttributes;    
     let audioName = "Adhaan";
     let audioUrl = prayerName === "0"? adhaanRecitation[0].fajrUrl : adhaanRecitation[0].otherUrl;
@@ -331,12 +333,22 @@ const PlayAdhanIntentHandler = {
     console.log("Audio URL: ", audioUrl);
     const playBehavior = "REPLACE_ALL";
     const metadataInfo = getMetadata(handlerInput,audioName)
+    const supportedInterfaces = Alexa.getSupportedInterfaces(
+      handlerInput.requestEnvelope
+    );
+    if(!supportedInterfaces['AudioPlayer']){
+      console.log("Audio Player is not supported on this device");
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("adhaanErrorPrompt"))
+        .withShouldEndSession(false)
+        .getResponse();
+    }
     return handlerInput.responseBuilder
       .withShouldEndSession(true)
       .addAudioPlayerPlayDirective(
         playBehavior,
         audioUrl,
-        audioName+"-"+prayerName,
+        audioName,
         0,
         null,
         metadataInfo
@@ -598,12 +610,12 @@ const FavoriteAdhaanReciterStartedHandler = {
     let adhaanRecitationList = adhaanRecitation;
     try {
       adhaanRecitationList = await Promise.all(
-        adhaanRecitationList.map(async (adhaan) => {
-          adhaan.primaryText = await helperFunctions.translateText(
+        adhaanRecitation.map(async (adhaan) => {
+          const translatedText = await helperFunctions.translateText(
             adhaan.primaryText,
             locale
           );
-          return adhaan;
+          return { ...adhaan, primaryText: translatedText };
         })
       );
     } catch (error) {

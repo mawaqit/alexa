@@ -1,17 +1,19 @@
 service: alexa
 
-frameworkVersion: ">=1.1.0 <4.0.0"
+frameworkVersion: ^4.0.0
 
 custom:
   defaultStage: dev
   defaultRegion: eu-west-3
+  alias: ${self:provider.stage}
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs20.x
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${opt:region, self:custom.defaultRegion}
   environment: ${file(env.json):${self:provider.stage}}
+  lambdaHashingVersion: 20201221
 
 
   iamRoleStatements:
@@ -41,6 +43,8 @@ provider:
 functions:
   indexHandler:
     handler: index.handler
+    timeout: 8
     memorySize: 128
     description: MAWAQIT Alexa Backend
     events: ${file(eventsources.yml):${self:provider.stage}, file(eventsources.yml):dev}
+    versionFunction: false

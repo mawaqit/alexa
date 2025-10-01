@@ -35,6 +35,23 @@
           "delegationStrategy": "SKILL_RESPONSE",
           "confirmationRequired": false,
           "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "favouriteReciter",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.102046521153.828952134948"
+              }
+            }
+          ],
+          "name": "FavoriteAdhaanReciterIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
         }
       ],
       "delegationStrategy": "ALWAYS"
@@ -46,7 +63,7 @@
           "samples": [
             "abbrechen",
             "stopp",
-            "aufhören",
+            "aufh├╢ren",
             "abbrechen bitte"
           ]
         },
@@ -62,24 +79,52 @@
             "Welche Optionen habe ich",
             "Zeig mir was du kannst",
             "Hilf mir mit den Befehlen",
-            "Welche Möglichkeiten gibt es"
+            "Welche M├╢glichkeiten gibt es"
           ]
         },
         {
           "name": "AMAZON.StopIntent",
           "samples": [
             "stopp",
-            "aufhören",
+            "aufh├╢ren",
             "beenden",
             "halt"
           ]
         },
         {
+          "slots": [
+            {
+              "name": "favouriteReciter",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{favouriteReciter}"
+              ]
+            }
+          ],
+          "name": "FavoriteAdhaanReciterIntent",
+          "samples": [
+            "w├ñhle meinen Adhan-Rezitator",
+            "setze meinen Adhan-Rezitator",
+            "├ñndere meinen Adhan-Rezitator",
+            "ich m├╢chte einen Adhan-Rezitator ausw├ñhlen",
+            "w├ñhle meinen Adhan-Rezitator aus",
+            "lass mich einen Adhan-Rezitator w├ñhlen",
+            "such meinen Adhan-Rezitator aus",
+            "ich m├╢chte einen anderen Adhan-Rezitator",
+            "├ñndere den Adhan-Rezitator",
+            "setze einen neuen Adhan-Rezitator",
+            "aktualisiere meinen Adhan-Rezitator",
+            "wer ist mein Adhan-Rezitator",
+            "w├ñhle einen Rezitator f├╝r mich",
+            "ich m├╢chte den Rezitator ├ñndern"
+          ]
+        },
+        {
           "name": "AMAZON.NavigateHomeIntent",
           "samples": [
-            "zurück zum Start",
-            "Hauptmenü",
-            "zurück zum Menü",
+            "zur├╝ck zum Start",
+            "Hauptmen├╝",
+            "zur├╝ck zum Men├╝",
             "Startseite",
             "Hauptseite"
           ]
@@ -87,7 +132,7 @@
         {
           "name": "AMAZON.FallbackIntent",
           "samples": [
-            "ich weiß nicht",
+            "ich wei├ƒ nicht",
             "ich bin nicht sicher",
             "ich verstehe nicht",
             "Was bedeutet das",
@@ -101,23 +146,23 @@
               "type": "AMAZON.NUMBER",
               "samples": [
                 "{selectedMosque}",
-                "wähle Moschee {selectedMosque}",
-                "wähle die Moschee Nummer {selectedMosque}"
+                "w├ñhle Moschee {selectedMosque}",
+                "w├ñhle die Moschee Nummer {selectedMosque}"
               ]
             }
           ],
           "name": "SelectMosqueIntent",
           "samples": [
-            "wähle meine Moschee",
-            "ändere meine Moschee",
-            "ändere meine Lieblingsmoschee",
-            "Ich möchte die Moschee wechseln",
-            "neue Moschee auswählen",
+            "w├ñhle meine Moschee",
+            "├ñndere meine Moschee",
+            "├ñndere meine Lieblingsmoschee",
+            "Ich m├╢chte die Moschee wechseln",
+            "neue Moschee ausw├ñhlen",
             "Moschee suchen",
-            "ändere meine Moschee-Position",
-            "wähle eine andere Moschee",
-            "meine Moschee ändern",
-            "finde eine Moschee für mich",
+            "├ñndere meine Moschee-Position",
+            "w├ñhle eine andere Moschee",
+            "meine Moschee ├ñndern",
+            "finde eine Moschee f├╝r mich",
             "ersetze meine aktuelle Moschee"
           ]
         },
@@ -139,26 +184,26 @@
           "name": "NextPrayerTimeIntent",
           "samples": [
             "Wann ist {prayerName}",
-            "Wann ist das nächste Gebet",
+            "Wann ist das n├ñchste Gebet",
             "{prayerName}",
             "Um welche Zeit ist {prayerName}",
-            "Wann ist die nächste Gebetszeit",
+            "Wann ist die n├ñchste Gebetszeit",
             "Wie viel Zeit bis {prayerName}",
-            "Wie viel Zeit bis zum nächsten Gebet",
-            "Gebetszeit für {prayerName}",
-            "Gib mir die Zeit für {prayerName}"
+            "Wie viel Zeit bis zum n├ñchsten Gebet",
+            "Gebetszeit f├╝r {prayerName}",
+            "Gib mir die Zeit f├╝r {prayerName}"
           ]
         },
         {
           "slots": [],
           "name": "NextIqamaTimeIntent",
           "samples": [
-            "nächste Iqama",
+            "n├ñchste Iqama",
             "Wie viel Zeit bis zur Iqama",
             "Wann ist Iqama",
-            "Wie spät ist die Iqama",
-            "nächste Ikama",
-            "Zeit für Iqama",
+            "Wie sp├ñt ist die Iqama",
+            "n├ñchste Ikama",
+            "Zeit f├╝r Iqama",
             "Gib mir die Zeit der Iqama"
           ]
         },
@@ -179,7 +224,7 @@
             "spiele das Gebetsruf",
             "spiele das Gebetsruf {prayerName}",
             "spiele das Adhan",
-            "lasse den Adhan ertönen",
+            "lasse den Adhan ert├╢nen",
             "spiele den Gebetsruf"
           ]
         },
@@ -187,7 +232,7 @@
           "slots": [],
           "name": "MosqueInfoIntent",
           "samples": [
-            "Gib mir Informationen über meine Moschee",
+            "Gib mir Informationen ├╝ber meine Moschee",
             "Meine Moschee",
             "Wo ist meine Moschee",
             "Moschee-Details",
@@ -210,22 +255,22 @@
           "slots": [],
           "name": "DeleteDataIntent",
           "samples": [
-            "Lösche meine Daten",
-            "Lösche meine Moschee",
-            "Daten löschen",
-            "alles löschen",
-            "lösche alle Einstellungen",
-            "lösche meine Konfiguration"
+            "L├╢sche meine Daten",
+            "L├╢sche meine Moschee",
+            "Daten l├╢schen",
+            "alles l├╢schen",
+            "l├╢sche alle Einstellungen",
+            "l├╢sche meine Konfiguration"
           ]
         },
         {
           "slots": [],
           "name": "LaunchIntent",
           "samples": [
-            "Öffne Mawaqit",
+            "├ûffne Mawaqit",
             "Starte Mawaqit",
-            "Mawaqit öffnen",
-            "Öffne die Mawaqit App",
+            "Mawaqit ├╢ffnen",
+            "├ûffne die Mawaqit App",
             "Mawaqit starten"
           ]
         },
@@ -233,7 +278,7 @@
           "slots": [],
           "name": "AllPrayerTimeIntent",
           "samples": [
-            "Gib mir alle Gebetszeiten für heute",
+            "Gib mir alle Gebetszeiten f├╝r heute",
             "Wann sind die Gebete heute",
             "Gebetszeiten heute",
             "Wann sind die Gebetszeiten",
@@ -253,8 +298,20 @@
           "slots": [],
           "name": "HadithIntent",
           "samples": [
-            "random hadith",
-            "hadith"
+            "spiele einen Hadith",
+            "spiele einen zuf├ñlligen Hadith",
+            "zuf├ñlliger Hadith",
+            "Hadith",
+            "erz├ñhle mir einen Hadith",
+            "sag einen Hadith",
+            "rezitiere einen Hadith",
+            "gib mir einen Hadith",
+            "teile einen Hadith",
+            "ich m├╢chte einen Hadith h├╢ren",
+            "lies einen Hadith",
+            "Hadith des Tages",
+            "erz├ñhle einen zuf├ñlligen Hadith",
+            "inspiriere mich mit einem Hadith"
           ]
         }
       ],
@@ -369,7 +426,7 @@
           },
           {
             "type": "PlainText",
-            "value": "Wähle die Nummer deiner Moschee"
+            "value": "W├ñhle die Nummer deiner Moschee"
           }
         ],
         "id": "Elicit.Slot.140043125844.413753526068"
@@ -382,7 +439,7 @@
           },
           {
             "type": "PlainText",
-            "value": "Für welches Gebet?"
+            "value": "F├╝r welches Gebet?"
           },
           {
             "type": "PlainText",
@@ -390,14 +447,23 @@
           },
           {
             "type": "PlainText",
-            "value": "Welches Gebet möchtest du wissen?"
+            "value": "Welches Gebet m├╢chtest du wissen?"
           },
           {
             "type": "PlainText",
-            "value": "Über welches Gebet sprichst du?"
+            "value": "├£ber welches Gebet sprichst du?"
           }
         ],
         "id": "Elicit.Slot.841213483794.24233923236"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Kindly say the number"
+          }
+        ],
+        "id": "Elicit.Slot.102046521153.828952134948"
       }
     ]
   }

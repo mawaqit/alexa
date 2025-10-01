@@ -22,5 +22,8 @@
         "moment-timezone": "^0.5.4",
         "util": "^0.12.5",
         "uuid": "^10.0.0"
+    },
+    "devDependencies": {
+        "serverless-aws-alias": "^1.8.0"
     }
 }

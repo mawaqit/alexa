@@ -1,8 +1,8 @@
 module.exports = {
     translation: {
-      skillName: process.env.skillName, //new
+      skillName: process.env.skillName, 
       welcomePrompt: `Salam Aleykum! `,
-      chooseMosquePrompt: `Welche Moschee möchten Sie auswählen? Die nächstgelegenen Moscheen sind: %s. Sie können eine auswählen, indem Sie die zugehörige Nummer sagen.`,
+      chooseMosquePrompt: `Welche Moschee möchten Sie auswählen? Die nächstgelegenen Moscheen sind: %s, Sie können eine auswählen, indem Sie die zugehörige Nummer sagen.`,
       chooseMosqueByTouchPrompt: "oder Sie können auch auf die Moschee Ihrer Wahl auf Ihrem Bildschirm klicken.",
       helpPrompt: `Hier sind die Befehle, die Sie verwenden können:\n- Wann ist das nächste Gebet?\n- Sie können auch die Zeit eines bestimmten Gebets erfragen, indem Sie z.B. fragen: "Wann ist das vierte Gebet?" für Maghrib\n- Wie lange dauert es bis zur Iqama?\n- Geben Sie mir Informationen über meine Moschee.\n- Ändern Sie meine Lieblingsmoschee.\n- Geben Sie mir die Gebetszeiten für den Tag.\n- Spielen Sie den Gebetsruf ab.\n- Spielen Sie den Gebetsruf für Fajr ab.\nDiese Befehle können auch in Ihren Alexa-Routinen verwendet werden. Weitere Befehle folgen inshaAllah bald.`,
       stopPrompt: `Auf Wiedersehen und möge Allah Sie schützen!`,
@@ -19,7 +19,7 @@ module.exports = {
       nextPrayerTimePrompt: "Um %s ist das nächste Gebet %s um %s in %s. Möchten Sie noch etwas wissen?",
       prayerNames: ["<phoneme alphabet=\"ipa\" ph=\"fadʒr\">Fajr</phoneme>", " <phoneme alphabet=\"ipa\" ph=\"duhr\">Duhr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕa.sˤr\">Asr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"maɣ.rɪb\">Maghrib</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʔɪʃaːʔ\">Isha</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"dʒumʕa\">Jumma</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕiːd\">Eid</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʃu.ruːq\">Shuruq</phoneme>"],
       unableToFindMosquePrompt: `Entschuldigung, ich konnte die Moschee, die Sie suchen, nicht finden. Bitte wählen Sie eine gültige Option.`,
-      mosqueNotRegisteredPrompt: `Sie haben keine Moschee registriert, um diese Anfrage zu stellen. Bitte registrieren Sie zuerst eine Moschee.`,
+      mosqueNotRegisteredPrompt: `Sie haben keine Moschee registriert, um diese Anfrage zu stellen. Bitte registrieren Sie zuerst eine Moschee. `,
       mosqueSearchWordPrompt: `Für welchen Ort möchten Sie eine Moschee suchen? Sie können den Namen der Stadt sagen.`,
       noPrayerTimePrompt: `Entschuldigung, es gibt keine Gebetszeiten für %s in dieser Moschee.`,
       hoursAndMinutesPrompt: "%s Stunden und %s Minuten",
@@ -41,7 +41,7 @@ module.exports = {
       jummaTimePrompt: "Außerdem ist das Jumua, das Freitagsgebet, um %s.",
       noJummaTimePrompt: "Es gibt kein Jumua-Gebet in dieser Moschee.",
       none: "Keine",
-      thankYouPrompt: `Danke, dass Sie ${process.env.skillName} verwenden, um die genauen Gebetszeiten Ihrer Lieblingsmoschee zu erhalten.`,
+      thankYouPrompt: `Danke, dass Sie ${process.env.skillName} verwenden, um die genauen Gebetszeiten Ihrer Lieblingsmoschee zu erhalten. `,
       globalErrorPrompt: "Entschuldigung, ich habe nicht verstanden, was Sie gesagt haben. Bitte wiederholen Sie es.",
       fallbackPrompt: "Entschuldigung, ich habe nicht verstanden, was Sie gesagt haben. Bitte wiederholen Sie es.",
       allPrayerTimesPrompt: "%s ist um %s. ",
@@ -51,6 +51,8 @@ module.exports = {
       adhanReciterSuccessPrompt: `Perfekt, %s ist jetzt Ihre Lieblingsrezitation für den Adhan! `,
       titleForAdhaanReciterList: `Adhan-Rezitatoren`,
       chooseAdhaanByTouchPrompt: "oder Sie können auch auf die Rezitation Ihrer Wahl auf Ihrem Bildschirm klicken.",
-      hadithErrorPrompt: `Sorry, I couldn't find any hadiths. Please try again.`,
+      hadithErrorPrompt: `Entschuldigung, ich konnte keine Hadithe finden. Bitte versuche es noch einmal.`,
+      adhaanErrorPrompt: `Entschuldigung, derzeit unterstütze ich das Abspielen des Adhans nicht. Bitte versuchen Sie es später erneut.`,
+      selectMosquePrompt: `Um eine Moschee zu registrieren, können Sie "wähle meine Moschee" oder "ändere meine Moschee". `,
     },
   };

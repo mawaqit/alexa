@@ -85,6 +85,15 @@ const checkForPersistenceData = async (handlerInput) => {
   if (persistentAttributes) {
     return await getPrayerTimingsForMosque(handlerInput, mosqueTimes, "");
   }
+  const isLaunchRequest = Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest";
+  if (isLaunchRequest) {
+    console.log("No persistent data found, prompting user to select mosque.");
+    const speakOutput = requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt") + requestAttributes.t("selectMosquePrompt");
+    return handlerInput.responseBuilder
+      .speak(speakOutput)
+      .reprompt(speakOutput)
+      .getResponse();
+  }
   return await getListOfMosque(handlerInput, requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt"));
 };
 
@@ -188,6 +197,15 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
   } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
   const sessionAttributes = attributesManager.getSessionAttributes();
+  const consentToken =
+    requestEnvelope.context.System.user.permissions &&
+    requestEnvelope.context.System.user.permissions.consentToken;
+  if (!consentToken) {
+    return responseBuilder
+      .speak(requestAttributes.t("requestForGeoLocationPrompt"))
+      .withAskForPermissionsConsentCard(["read::alexa:device:all:address"])
+      .getResponse();
+  }
   try {
     const deviceId = Alexa.getDeviceId(requestEnvelope);
     const deviceAddressServiceClient =
@@ -460,16 +478,16 @@ const generateMomentObject = (time, now) => {
 
 const translateText = async (text, toLang) => {
   try {    
-    toLang = splitLanguage(toLang);
-    console.log("Text to convert: ", text);
+    toLang = splitLanguage(toLang);    
+    // console.log("Text to convert: ", text);
     const detectedLanguage = await detectLanguage(text);
     if (detectedLanguage === toLang) {
       return text;
     }
     const translatedText = await translate(text, toLang);
     return translatedText ? translatedText : text;
-  } catch (error) {
-    console.log("Error in converting text to english: ", error);
+  } catch (error) {    
+    console.log("Error in converting %s to %s: %s", text,toLang, error);
     return text;
   }
 }

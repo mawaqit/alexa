@@ -26,8 +26,21 @@ const LogResponseInterceptor = {
   },
 };
 
+const ResponseTimeCalculationInterceptor = {
+  process(handlerInput, response) {
+   const timestamp = Alexa.getRequest(handlerInput.requestEnvelope)["timestamp"];
+    // console.log("Request Timestamp: ", JSON.stringify(timestamp));
+    const requestTimestamp = new Date(timestamp);
+    const responseTimestamp = new Date();
+    // console.log("Response Timestamp: ", JSON.stringify(responseTimestamp.toISOString()));
+    const timeDifference = responseTimestamp - requestTimestamp;
+    console.log(`Response Time: ${parseFloat(timeDifference).toFixed(2)/1000} seconds`);
+  },
+};
+
 const AddDirectiveResponseInterceptor = {
-  async process(handlerInput, response) {    
+  async process(handlerInput, response) {   
+    if(!response) return;
     const { directives } = response;
     const aplDirective = directives
       ? directives.find(
@@ -35,9 +48,9 @@ const AddDirectiveResponseInterceptor = {
             directive.type === "Alexa.Presentation.APL.RenderDocument"
         )
       : false;
-    console.log("APL Directive: ", JSON.stringify(aplDirective));      
-    const ssmlText = response.outputSpeech.ssml;      
-    console.log("SSML Text: ", ssmlText);
+    // console.log("APL Directive: ", JSON.stringify(aplDirective));      
+    const ssmlText = response?.outputSpeech?.ssml || null;      
+    console.log("APL Directive: %s \n SSML Text: %s", JSON.stringify(aplDirective), ssmlText);
     if (
       Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
         "Alexa.Presentation.APL"
@@ -48,7 +61,7 @@ const AddDirectiveResponseInterceptor = {
           console.log("Adding APL Directive");
           const text = ssmlText.replace(/<\/?[^>]+(>|$)/g, "")
           const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
-          console.log("Data Source: ", JSON.stringify(dataSource));
+          // console.log("Data Source: ", JSON.stringify(dataSource));
           const directive = helperFunctions.createDirectivePayload(
             prayerTimeApl,
             dataSource
@@ -64,7 +77,7 @@ const AddDirectiveResponseInterceptor = {
     } else {
       console.log("APL not supported");
       if (ssmlText && !ssmlText.includes("audio src=")) {
-        console.log("Adding APL Directive");
+        console.log("Adding Simple Card");
         const text = ssmlText.replace(/<\/?[^>]+(>|$)/g, "");
         response.card = {
           type: "Simple",
@@ -73,21 +86,16 @@ const AddDirectiveResponseInterceptor = {
         };
       }
     }
-    const timestamp = Alexa.getRequest(handlerInput.requestEnvelope)["timestamp"];
-    console.log("Request Timestamp: ", JSON.stringify(timestamp));
-    const requestTimestamp = new Date(timestamp);
-    const responseTimestamp = new Date();
-    console.log("Response Timestamp: ", JSON.stringify(responseTimestamp.toISOString()));
-    const timeDifference = responseTimestamp - requestTimestamp;
-    console.log(`Difference in milliseconds: ${timeDifference}`);
-    console.log("==== RESPONSE ======");
-    console.log(JSON.stringify(response, null, 2));
-
   },
 };
 
 const LocalizationInterceptor = {
-  process(handlerInput) {
+  async process(handlerInput) {
+    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
+    console.log("Request Type: ", requestType);
+    if(isValidRequestType(requestType)){
+      return;
+    }
     let locale = Alexa.getLocale(handlerInput.requestEnvelope);
     // Gets the locale from the request and initializes i18next.
     const localizationClient = i18n.use(sprintf).init({
@@ -124,6 +132,11 @@ const LocalizationInterceptor = {
 
 const SavePersistenceAttributesToSession = {
   async process(handlerInput) {
+    console.log("SavePersistenceAttributesToSession Interceptor");
+    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
+    if(isValidRequestType(requestType)){
+      return;
+    }
     const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
     if (isNewSession) {
       console.log("New Session");
@@ -157,19 +170,32 @@ const SavePersistenceAttributesToSession = {
   },
 };
 
-const SetApiKeysAsEnvironmentVaraibleFromAwsSsm = {
+const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(handlerInput) {
+    console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
+    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
+    if(isValidRequestType(requestType)){
+      return;
+    }
     const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
-    if (isNewSession)
+    if (isNewSession) {
       await awsSsmHandler.handler();
+    }      
   },
 };
+
+function isValidRequestType(requestType) {
+  //skip processing for skill disabled events and audio player requests
+  return requestType === "AlexaSkillEvent.SkillDisabled" || requestType.startsWith("AudioPlayer.") || requestType.startsWith("PlaybackController");
+}
 
 module.exports = {
   LogResponseInterceptor,
   LogRequestInterceptor,
   LocalizationInterceptor,
+  ResponseTimeCalculationInterceptor,
   SavePersistenceAttributesToSession,
   AddDirectiveResponseInterceptor,
-  SetApiKeysAsEnvironmentVaraibleFromAwsSsm
+  SetApiKeysAsEnvironmentVariableFromAwsSsm
 };
+

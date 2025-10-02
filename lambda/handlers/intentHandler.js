@@ -1,9 +1,14 @@
 const Alexa = require("ask-sdk-core");
 const helperFunctions = require("../helperFunctions.js");
-const { getPrayerTimings, getMosqueList } = require("./apiHandler.js");
+const { getPrayerTimings, getRandomHadith } = require("./apiHandler.js");
 const moment = require("moment-timezone");
-const { getS3PreSignedUrl } = require("./s3Handler.js");
-const { getDataSourceforMosqueInfo } = require("../datasources.js");
+const {
+  getDataSourceforMosqueInfo,
+  adhaanRecitation,
+  getDataSourceForAdhaanReciter,
+  getMetadata,
+} = require("../datasources.js");
+const listApl = require("../aplDocuments/mosqueListApl.json");
 
 const SelectMosqueIntentStartedHandler = {
   canHandle(handlerInput) {
@@ -145,6 +150,7 @@ const NextPrayerTimeIntentHandler = {
         // Find the first non-null Jumu'ah time
         const firstNonNullJumua = jumuaTimes.filter((time) => time !== null && time !== undefined).join(", ");
         if (firstNonNullJumua) {
+          helperFunctions.checkForCharacterDisplay(handlerInput, firstNonNullJumua);
           return handlerInput.responseBuilder
             .speak(
               requestAttributes.t(
@@ -170,6 +176,7 @@ const NextPrayerTimeIntentHandler = {
         // Find the first non-null Eid time
         const firstNonNullEid = eidTimes.filter((time) => time !== null && time !== undefined).join(", ");
         if (firstNonNullEid) {
+          helperFunctions.checkForCharacterDisplay(handlerInput, firstNonNullEid);
           return handlerInput.responseBuilder
             .speak(
               requestAttributes.t(
@@ -224,6 +231,7 @@ const NextPrayerTimeIntentWithoutNameHandler = {
       return await helperFunctions.checkForPersistenceData(handlerInput);
     }
     const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), requestAttributes.t("prayerNames"));
+    helperFunctions.checkForCharacterDisplay(handlerInput, prayerTimeDetails.time);
     const speakOutput = requestAttributes.t("nextPrayerWithoutMosquePrompt", prayerTimeDetails.name, prayerTimeDetails.time, prayerTimeDetails.diffInMinutes) + requestAttributes.t("doYouNeedAnythingElsePrompt");
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -276,6 +284,7 @@ const NextIqamaTimeIntentHandler = {
         iqamaTimes
       );
       console.log("Next Iqama Time: ", nextIqamaTime);
+      helperFunctions.checkForCharacterDisplay(handlerInput, nextIqamaTime.diffInMinutes);
       return handlerInput.responseBuilder
         .speak(
           requestAttributes.t(
@@ -298,23 +307,52 @@ const NextIqamaTimeIntentHandler = {
 
 const PlayAdhanIntentHandler = {
   canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      Alexa.getIntentName(handlerInput.requestEnvelope) === "PlayAdhanIntent"
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "PlayAdhanIntent" ||
+      (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest"
+        && request.task 
+        && request.task.name === "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan")
     );
   },
   async handle(handlerInput) {
     const prayerName = helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName");    
-    let audioToFetch = "converted-adhan.mp3";
-    if(prayerName === "0"){
-      audioToFetch = "converted-adhan-fajr.mp3";
-    }
-    let audioUrl = Alexa.escapeXmlCharacters(await getS3PreSignedUrl(audioToFetch));
+    const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+    const requestAttributes =
+        handlerInput.attributesManager.getRequestAttributes();
+    const { persistentAttributes } = sessionAttributes;    
+    let audioName = "Adhaan";
+    let audioUrl = prayerName === "0"? adhaanRecitation[0].fajrUrl : adhaanRecitation[0].otherUrl;
+    if(persistentAttributes?.favouriteAdhaan){
+      const { primaryText } = persistentAttributes.favouriteAdhaan;
+      audioName = primaryText;
+      audioUrl = prayerName === "0"?  persistentAttributes.favouriteAdhaan.fajrUrl : persistentAttributes.favouriteAdhaan.otherUrl;
+    } 
     console.log("Audio URL: ", audioUrl);
-    let speakOutput = `<audio src='${audioUrl}' />`;
+    const playBehavior = "REPLACE_ALL";
+    const metadataInfo = getMetadata(handlerInput,audioName)
+    const supportedInterfaces = Alexa.getSupportedInterfaces(
+      handlerInput.requestEnvelope
+    );
+    if(!supportedInterfaces['AudioPlayer']){
+      console.log("Audio Player is not supported on this device");
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("adhaanErrorPrompt"))
+        .withShouldEndSession(false)
+        .getResponse();
+    }
     return handlerInput.responseBuilder
-      .speak(speakOutput)
       .withShouldEndSession(true)
+      .addAudioPlayerPlayDirective(
+        playBehavior,
+        audioUrl,
+        audioName,
+        0,
+        null,
+        metadataInfo
+      )
       .getResponse();
   },
 };
@@ -540,6 +578,167 @@ const DeleteDataIntentHandler = {
   },
 };
 
+const FavoriteAdhaanReciterStartedHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "FavoriteAdhaanReciterIntent" &&
+      !Alexa.getSlotValue(handlerInput.requestEnvelope, "favouriteReciter")
+    );
+  },
+  async handle(handlerInput) {
+    console.log("In FavoriteAdhaanReciterStartedHandler");
+    const { responseBuilder, attributesManager } = handlerInput;
+    const requestAttributes = attributesManager.getRequestAttributes();
+    const locale = Alexa.getLocale(handlerInput.requestEnvelope);
+    let speechPrompt = "";
+    responseBuilder.addDirective({
+      type: "Dialog.ElicitSlot",
+      slotToElicit: "favouriteReciter",
+      updatedIntent: {
+        name: "FavoriteAdhaanReciterIntent",
+        confirmationStatus: "NONE",
+        slots: {
+          favouriteReciter: {
+            name: "favouriteReciter",
+            confirmationStatus: "NONE",
+          },
+        },
+      },
+    });
+    let adhaanRecitationList = adhaanRecitation;
+    try {
+      adhaanRecitationList = await Promise.all(
+        adhaanRecitation.map(async (adhaan) => {
+          const translatedText = await helperFunctions.translateText(
+            adhaan.primaryText,
+            locale
+          );
+          return { ...adhaan, primaryText: translatedText };
+        })
+      );
+    } catch (error) {
+      console.log("Error in getting adhaan reciter list: ", error);
+    }
+
+    console.log("Adhaan Recitation List: ", adhaanRecitationList);
+    const adhaanListPrompt = adhaanRecitationList
+      .map((adhaan, index) => `${index + 1}. ${adhaan.primaryText}`)
+      .join(", ");
+    console.log("Adhaan List Prompt: ", adhaanListPrompt);
+    speechPrompt += requestAttributes.t("adhanReciterPrompt", adhaanListPrompt);
+    if (
+      Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
+        "Alexa.Presentation.APL"
+      ]
+    ) {
+      try {
+        const dataSource = await getDataSourceForAdhaanReciter(
+          handlerInput,
+          adhaanRecitationList
+        );
+        console.log("Data Source: ", JSON.stringify(dataSource));
+        const aplDirective = helperFunctions.createDirectivePayload(
+          listApl,
+          dataSource
+        );
+        console.log("APL Directive: ", JSON.stringify(aplDirective));
+        responseBuilder.addDirective(aplDirective);
+        speechPrompt += requestAttributes.t("chooseAdhaanByTouchPrompt");
+      } catch (error) {
+        console.log("Error in creating APL Directive: ", error);
+      }
+    }
+
+    return responseBuilder
+      .speak(speechPrompt)
+      .withShouldEndSession(false)
+      .getResponse();
+  },
+};
+
+const FavoriteAdhaanReciterIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "FavoriteAdhaanReciterIntent" &&
+      Alexa.getSlotValue(handlerInput.requestEnvelope, "favouriteReciter")
+    );
+  },
+  async handle(handlerInput) {
+    const { responseBuilder, attributesManager } = handlerInput;
+    const requestAttributes = attributesManager.getRequestAttributes();
+    const favouriteReciter = Alexa.getSlotValue(
+      handlerInput.requestEnvelope,
+      "favouriteReciter"
+    );
+    console.log("Favourite Reciter: ", favouriteReciter);
+    const reciterIndex = parseInt(favouriteReciter) - 1;
+    if (Number.isNaN(reciterIndex) || reciterIndex < 0 || reciterIndex >= adhaanRecitation.length) {
+      await helperFunctions.callDirectiveService(handlerInput, requestAttributes.t("adhanReciterErrorPrompt"));
+      return await FavoriteAdhaanReciterStartedHandler.handle(handlerInput);
+    }
+    const adhaanReciter = adhaanRecitation[reciterIndex];
+    if(!adhaanReciter){
+      await helperFunctions.callDirectiveService(handlerInput, requestAttributes.t("adhanReciterErrorPrompt"));
+      return await FavoriteAdhaanReciterStartedHandler.handle(handlerInput);
+    }
+    console.log("Selected Adhaan Reciter: ", adhaanReciter);
+    const sessionAttributes =
+      handlerInput.attributesManager.getSessionAttributes();
+    sessionAttributes.persistentAttributes.favouriteAdhaan = adhaanReciter;
+    handlerInput.attributesManager.setPersistentAttributes(
+      sessionAttributes.persistentAttributes
+    );
+    const speechOutput = requestAttributes.t("adhanReciterSuccessPrompt", adhaanReciter.primaryText);
+    await attributesManager.savePersistentAttributes();
+    return responseBuilder
+      .speak(speechOutput)
+      .withShouldEndSession(false)
+      .getResponse();
+  },
+}
+
+const HadithIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "HadithIntent"
+    );
+  },
+  async handle(handlerInput) {
+    console.log("In HadithIntentHandler");
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const locale = helperFunctions.splitLanguage(Alexa.getLocale(handlerInput.requestEnvelope));
+    const hadith = await getRandomHadith(locale).catch((error) => {
+      console.log("Error in fetching hadith: ", error);
+      return requestAttributes.t("hadithErrorPrompt");
+    });
+
+    return handlerInput.responseBuilder
+      .speak(hadith)
+      .withShouldEndSession(false)
+      .getResponse();
+  },
+};
+
+const RoutinesTriggerHandler = {
+  canHandle(handlerInput) {
+      const request = handlerInput.requestEnvelope.request;
+      return request.type === 'Routines.Trigger.Create'
+      || request.type === 'Routines.Trigger.Delete';
+  },
+  handle(handlerInput) {
+      const requestType = handlerInput.requestEnvelope.request.type;
+      console.log(`In RoutinesTriggerHandler : ${requestType}`);
+      console.log(JSON.stringify(handlerInput.requestEnvelope.request));
+      return handlerInput.responseBuilder
+          .getResponse();
+  },
+};
+
 module.exports = {
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
@@ -550,5 +749,9 @@ module.exports = {
   MosqueInfoIntentHandler,
   AllIqamaTimeIntentHandler,
   DeleteDataIntentHandler,
-  AllPrayerTimeIntentHandler
+  AllPrayerTimeIntentHandler,
+  FavoriteAdhaanReciterStartedHandler,
+  FavoriteAdhaanReciterIntentHandler,
+  HadithIntentHandler,
+  RoutinesTriggerHandler
 };

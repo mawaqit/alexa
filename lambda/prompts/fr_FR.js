@@ -3,7 +3,7 @@ module.exports = {
   translation: {
     skillName: process.env.skillName, //new
     welcomePrompt: `Salam Aleykoum ! `,
-    chooseMosquePrompt: `Quelle mosquée voulez-vous choisir ? Les mosquées les plus proches sont : %s. Vous pouvez choisir en prononçant le numéro associé à la mosquée `,
+    chooseMosquePrompt: `Quelle mosquée voulez-vous choisir ? Les mosquées les plus proches sont : %s, Vous pouvez choisir en prononçant le numéro associé à la mosquée `,
     chooseMosqueByTouchPrompt: " ou vous pouvez aussi cliquer sur la mosquée de votre choix sur votre écran.",
     helpPrompt: `Voici les commandes que vous pouvez utiliser :\n- Quand est la prochaine prière ?\n- Tu peux aussi demander l'heure de chaque prière en demandant par exemple "Quand est la quatrième prière ?" pour Maghrib\n- Combien de temps reste-t-il avant l'iqama ?\n- Donne moi des informations sur ma mosquée.\n- Change ma mosquée favorite.\n- Donne moi les heures de prière de la journée.\n- Mets l'appel à la prière.\n- Mets l'appel à la prière du Fajr.\nCes commandes peuvent notamment être utilisées dans vos routines Alexa. D'autres commandes arrivent très bientôt inshaAllah.`,
     stopPrompt: `Au revoir et qu'Allah vous préserve !`,
@@ -48,6 +48,14 @@ module.exports = {
     globalErrorPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
     fallbackPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
     allPrayerTimesPrompt: "%s est à %s. ",
-    doYouNeedAnythingElsePrompt: " Voulez-vous autre chose ?"
+    doYouNeedAnythingElsePrompt: " Voulez-vous autre chose ?",    
+    adhanReciterPrompt: `Quelle récitation souhaitez-vous définir comme favorite pour l'adhan ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la récitation `,
+    adhanReciterErrorPrompt: `Désolé, je n'ai trouvé aucune récitation pour l'adhan. Veuillez réessayer.`,
+    adhanReciterSuccessPrompt: `Parfait, %s est maintenant votre récitation favorite pour l'adhan ! `,
+    titleForAdhaanReciterList: `Récitateurs d'Adhan`,
+    chooseAdhaanByTouchPrompt: "ou vous pouvez aussi cliquer sur la récitation de votre choix sur votre écran.",
+    hadithErrorPrompt: `Désolé, je n'ai trouvé aucun hadith. Veuillez réessayer.`,
+    adhaanErrorPrompt: `Désolé, actuellement, je ne supporte pas la lecture de l'adhan. Veuillez réessayer plus tard.`,
+    selectMosquePrompt: `Pour enregistrer une mosquée, vous pouvez dire "sélectionne ma mosquée" ou "choisis ma mosquée". `,
   },
 };

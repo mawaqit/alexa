@@ -7,7 +7,8 @@ const {
   LogResponseInterceptor,
   SavePersistenceAttributesToSession,
   AddDirectiveResponseInterceptor,
-  SetApiKeysAsEnvironmentVaraibleFromAwsSsm
+  SetApiKeysAsEnvironmentVariableFromAwsSsm,
+  ResponseTimeCalculationInterceptor
 } = require("./interceptors.js");
 const helperFunctions = require("./helperFunctions.js");
 const { SkillEventHandler } = require("./handlers/skillEventHandler.js");
@@ -21,20 +22,39 @@ const {
   MosqueInfoIntentHandler,
   AllIqamaTimeIntentHandler,
   DeleteDataIntentHandler,
-  AllPrayerTimeIntentHandler
+  AllPrayerTimeIntentHandler,
+  FavoriteAdhaanReciterStartedHandler,
+  FavoriteAdhaanReciterIntentHandler,
+  HadithIntentHandler,
+  RoutinesTriggerHandler
 } = require("./handlers/intentHandler.js");
-const { MosqueListTouchEventHandler } = require("./handlers/touchHandler.js");
+const {
+  MosqueListTouchEventHandler,
+  AdhaanRecitationTouchEventHandler,
+} = require("./handlers/touchHandler.js");
+const {
+  AudioPlayerEventHandler,
+  PlaybackCommandHandler,
+  AudioIntentHandler
+} = require("./handlers/audioPlayerHandler.js");
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return (
-      Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest" || 
+      (Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest" &&
+        !handlerInput.requestEnvelope.request.task) ||
       (Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-        Alexa.getIntentName(handlerInput.requestEnvelope) ===
-          "LaunchIntent")
+        Alexa.getIntentName(handlerInput.requestEnvelope) === "LaunchIntent")
     );
   },
-  async handle(handlerInput) {    
+  async handle(handlerInput) {
+    const { attributesManager } = handlerInput;
+    const requestAttributes = attributesManager.getRequestAttributes();
+    await helperFunctions
+      .callDirectiveService(handlerInput, requestAttributes.t("welcomePrompt"))
+      .catch((error) => {
+        console.log("Error while calling directive service: ", error);
+      });
     return await helperFunctions.checkForPersistenceData(handlerInput);
   },
 };
@@ -173,17 +193,25 @@ exports.handler = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
     HelpIntentHandler,
+    AudioPlayerEventHandler,
+    PlaybackCommandHandler,
+    AudioIntentHandler,
     MosqueInfoIntentHandler,
     AllIqamaTimeIntentHandler,
     NextPrayerTimeIntentWithoutNameHandler,
     NextPrayerTimeIntentHandler,
     NextIqamaTimeIntentHandler,
     AllPrayerTimeIntentHandler,
+    HadithIntentHandler,
+    RoutinesTriggerHandler,
     PlayAdhanIntentHandler,
     SelectMosqueIntentStartedHandler,
-    SelectMosqueIntentAfterSelectingMosqueHandler,
+    SelectMosqueIntentAfterSelectingMosqueHandler,    
+    FavoriteAdhaanReciterStartedHandler,
+    FavoriteAdhaanReciterIntentHandler,
     DeleteDataIntentHandler,
     MosqueListTouchEventHandler,
+    AdhaanRecitationTouchEventHandler,
     SkillEventHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,
@@ -191,14 +219,15 @@ exports.handler = Alexa.SkillBuilders.custom()
     IntentReflectorHandler
   )
   .addRequestInterceptors(
-    LogRequestInterceptor,
-    SetApiKeysAsEnvironmentVaraibleFromAwsSsm,
-    SavePersistenceAttributesToSession,
-    LocalizationInterceptor
+    LogRequestInterceptor,         
+    LocalizationInterceptor,
+    SetApiKeysAsEnvironmentVariableFromAwsSsm,
+    SavePersistenceAttributesToSession, 
   )
   .addResponseInterceptors(
+    AddDirectiveResponseInterceptor,
     LogResponseInterceptor,
-    AddDirectiveResponseInterceptor
+    ResponseTimeCalculationInterceptor
   )
   .addErrorHandlers(ErrorHandler)
   .withPersistenceAdapter(

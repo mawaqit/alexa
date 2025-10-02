@@ -4,17 +4,17 @@ const { Translate } = require("@google-cloud/translate").v2;
 module.exports.translate = async (text, targetLanguage = "en") => {
   try {
     const [translation] = await createTranslateInstance().translate(text, targetLanguage);
-    console.log("Translated text: ", translation);
+    // console.log("Translated text: ", translation);
     return translation ? translation : text;
   } catch (error) {
-    console.error("Error while translating text:", error);
+    console.error("Error while translating %s: %s", text, error);
     return text;
   }
 };
 
 module.exports.detectLanguage = async (text) => {
   const [detections] = await createTranslateInstance().detect(text);
-  console.log("Detected language: ", detections);
+  // console.log("Detected language: ", detections);
   return detections && detections.language ? detections.language : "en";
 };
 

@@ -2,7 +2,7 @@ module.exports = {
   translation: {
     skillName: process.env.skillName, //new
     welcomePrompt: `Salam Aleykoum! `,
-    chooseMosquePrompt: `Which mosque would you like to choose? The nearest mosques are: %s. You can choose by saying the number associated with the mosque `,
+    chooseMosquePrompt: `Which mosque would you like to choose? The nearest mosques are: %s, You can choose by saying the number associated with the mosque `,
     chooseMosqueByTouchPrompt: "or you can also click on the mosque of your choice on your screen.",
     helpPrompt: `Here are the commands you can use:\n- When is the next prayer?\n- You can also ask for the time of each prayer by asking for example "When is the fourth prayer?" for Maghrib\n- How much time is left before the iqama?\n- Give me information about my mosque.\n- Change my favorite mosque.\n- Give me the prayer times for the day.\n- Play the adhan.\n- Play the Fajr adhan.\nThese commands can also be used in your Alexa routines. More commands coming soon inshaAllah.`,
     stopPrompt: `Goodbye, and may Allah protect you!`,
@@ -19,7 +19,7 @@ module.exports = {
     nextPrayerTimePrompt: `At %s, the next prayer is %s at %s in %s. Do you need anything else?`,
     prayerNames: ["<phoneme alphabet=\"ipa\" ph=\"fadʒr\">Fajr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"duhr\">Dhuhr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕa.sˤr\">Asr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"maɣ.rɪb\">Maghrib</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʔɪʃaːʔ\">Isha</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"dʒumʕa\">Jumma</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕiːd\">Eid</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʃu.ruːq\">Shuruq</phoneme>"],
     unableToFindMosquePrompt: `Sorry, I couldn't find the mosque you are looking for. Please choose a valid option.`,
-    mosqueNotRegisteredPrompt: `You have not registered a mosque to make this request. Please register a mosque first.`,
+    mosqueNotRegisteredPrompt: `You have not registered a mosque to make this request. Please register a mosque first. `,
     mosqueSearchWordPrompt: `Which location would you like to search for a mosque? You can say the name of the city.`,
     noPrayerTimePrompt: `Sorry, there is no schedule for %s at this mosque.`,
     hoursAndMinutesPrompt: `%s hours and %s minutes`,
@@ -41,10 +41,18 @@ module.exports = {
     jummaTimePrompt: `Additionally, Jumua, the Friday prayer, is at %s.`,
     noJummaTimePrompt: `There is no Jumua prayer at this mosque.`,
     none: `None`,
-    thankYouPrompt: `Thank you for using ${process.env.skillName} to get the exact prayer times of your favorite mosque.`,
+    thankYouPrompt: `Thank you for using ${process.env.skillName} to get the exact prayer times of your favorite mosque. `,
     globalErrorPrompt: `Sorry, I didn't quite understand what you said. Please repeat.`,
     fallbackPrompt: `Sorry, I didn't quite understand what you said. Please repeat.`,
     allPrayerTimesPrompt: `%s is at %s.`,
-    doYouNeedAnythingElsePrompt: ` Do you need anything else?`
+    doYouNeedAnythingElsePrompt: ` Do you need anything else?`,
+    adhanReciterPrompt: `Which recitation would you like to set as favourite for the adhan? You can choose between %s. You can choose by saying the number associated with the recitation `,
+    adhanReciterErrorPrompt: `Sorry, I couldn't find any recitations for the adhan. Please try again.`,
+    adhanReciterSuccessPrompt: `Perfect, %s is now your favorite recitation for the adhan! `,
+    titleForAdhaanReciterList: `Adhan Reciters`,
+    chooseAdhaanByTouchPrompt: "or you can also click on the recitation of your choice on your screen.",
+    hadithErrorPrompt: `Sorry, I couldn't find any hadiths. Please try again.`,
+    adhaanErrorPrompt: `Sorry, Currently, I don't support playing the adhan. Please try again later.`,
+    selectMosquePrompt: `To register a mosque, you can say "select my mosque" or "choose my mosque". `,
   },
 };

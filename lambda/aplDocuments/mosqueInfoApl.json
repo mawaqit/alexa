@@ -89,9 +89,9 @@
                         "height": "100%",
                         "scrollDirection": "vertical",
                         "childWidth": [
-                            "${viewport.width > 600 ? '22%' : '48%'}",
-                            "auto",
-                            "${viewport.width > 600 ? '22%' : '48%'}"
+                            "22%",
+                            "56%",
+                            "22%"
                         ],
                         "childHeight": "auto",
                         "item": [

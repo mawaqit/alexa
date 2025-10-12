@@ -27,10 +27,17 @@ function constructAddress(addressJson) {
 
 // Function to fetch geocoding results from Google API
 async function fetchGeocodingResults(address) {
+  const googleApiKey = getGoogleApiKey();
+  if (!googleApiKey) {
+    throw new Error("Google API key is not set in environment variables.");
+  }
   const url =
-    googleBaseUrl + `?address=${encodeURIComponent(address)}&key=${getGoogleApiKey()}`;
-  const response = await axios.get(url);
-  return response.data.results;
+    googleBaseUrl + `?address=${encodeURIComponent(address)}&key=${googleApiKey}`;
+  const response = await axios.get(url).catch((error) => {
+    console.error("Error fetching geocoding results:", error);
+    throw "GeoConversionError: No results found";
+  })
+  return response?.data?.results;
 }
 
 // Function to calculate the matching score for each result
@@ -85,15 +92,21 @@ async function getLatLng(addressJson) {
   console.log(`Found geocoding results: ${JSON.stringify(results)}`);
   const desiredComponents = {
     postal_code: addressJson.postalCode || '',
-    locality: addressJson.city ? addressJson.city.split(',').pop().trim() : '',
+    locality: addressJson.city?.split(',').pop()?.trim() || '',
     sublocality: addressJson.addressLine2 ? extractSublocality(addressJson.addressLine2) : "",
     route: addressJson.addressLine1 || ''
 };
 
   const bestResult = findBestResult(results, desiredComponents);
-  const lat = bestResult.geometry.location.lat;
-  const lng = bestResult.geometry.location.lng;
-  if(!lat || !lng) throw "GeoConversionError: No latitude or longitude found";
+  const location = bestResult?.geometry?.location;
+  if (!location) {
+    throw "GeoConversionError: No location found in results";
+  }
+  const lat = location.lat;
+  const lng = location.lng;
+  if(lat === null || lat === undefined || lng === null || lng === undefined) {
+    throw "GeoConversionError: No latitude or longitude found";
+  }
   return { lat, lng };
 }
 

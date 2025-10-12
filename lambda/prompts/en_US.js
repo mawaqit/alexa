@@ -54,5 +54,6 @@ module.exports = {
     hadithErrorPrompt: `Sorry, I couldn't find any hadiths. Please try again.`,
     adhaanErrorPrompt: `Sorry, Currently, I don't support playing the adhan. Please try again later.`,
     selectMosquePrompt: `To register a mosque, you can say "select my mosque" or "choose my mosque". `,
+    unableToResolvePrayerNamePrompt: `Sorry, I couldn't resolve the prayer name. Please try again.`,
   },
 };

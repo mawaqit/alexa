@@ -236,7 +236,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
     return await createResponseDirectiveForMosqueList(handlerInput, mosqueList, speakOutput);
   } catch (error) {
     console.log("Error in retrieving address: ", error);
-    if (error && error.startsWith("GeoConversionError")) {
+    if (error && typeof error === 'string' && error.startsWith("GeoConversionError")) {
       return responseBuilder
         .speak(requestAttributes.t("errorGeoConversionPrompt"))
         .withShouldEndSession(true)
@@ -529,6 +529,52 @@ const createDataSourceForPrayerTiming = (time) => {
 }
 }
 
+function getSlotValues(filledSlots) {
+  const slotValues = {};
+  console.log(`The filled slots: ${JSON.stringify(filledSlots)}`);
+
+  Object.keys(filledSlots || {}).forEach((key) => {
+    const slot = filledSlots[key];
+    const name = slot?.name || key;
+    const resAuth = slot?.resolutions?.resolutionsPerAuthority?.[0];
+    const status = resAuth?.status?.code;
+    const valueObj = resAuth?.values?.[0]?.value;
+
+    if (status === "ER_SUCCESS_MATCH" && valueObj) {
+      slotValues[name] = {
+        synonym: slot?.value,
+        value: valueObj.name,
+        id: valueObj.id ?? null,
+        isValidated: true,
+      };
+      return;
+    }
+
+    if (status === "ER_SUCCESS_NO_MATCH") {
+      slotValues[name] = {
+        synonym: slot?.value,
+        value: slot?.value,
+        id: null,
+        isValidated: false,
+      };
+      return;
+    }
+
+    slotValues[name] = {
+      synonym: slot?.value,
+      value: slot?.value,
+      id: slot?.id ?? null,
+      isValidated: false,
+    };
+  });
+
+  return slotValues;
+}
+
+function getIntentName(handlerInput) {
+  return handlerInput?.requestEnvelope?.request?.intent?.name || null;
+}
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -549,5 +595,7 @@ module.exports = {
   callDirectiveService,
   splitLanguage,
   createDataSourceForPrayerTiming,
-  checkForCharacterDisplay
+  checkForCharacterDisplay,
+  getSlotValues,
+  getIntentName
 };

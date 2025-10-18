@@ -25,7 +25,12 @@ function constructAddress(addressJson) {
     .join(", ");
 }
 
-// Function to fetch geocoding results from Google API
+/**
+ * Retrieve Google Geocoding API results for a given address.
+ * @param {string} address - The full address string to geocode.
+ * @returns {Array|undefined} An array of geocoding result objects from the Google API, or `undefined` if the request failed or no results were returned.
+ * @throws {Error} If the Google API key is not configured in environment variables.
+ */
 async function fetchGeocodingResults(address) {
   const googleApiKey = getGoogleApiKey();
   if (!googleApiKey) {

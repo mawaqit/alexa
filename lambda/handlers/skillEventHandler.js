@@ -12,6 +12,8 @@ const SkillEventHandler = {
         .catch((error) => {
           console.error(`Error while deleting data: ${error}`);
         });
+      return handlerInput.responseBuilder
+        .getResponse();
     },
   };
 

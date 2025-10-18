@@ -49,17 +49,21 @@ const AddDirectiveResponseInterceptor = {
         )
       : false;
     // console.log("APL Directive: ", JSON.stringify(aplDirective));      
-    const ssmlText = response?.outputSpeech?.ssml || null;      
+    const ssmlText = response?.outputSpeech?.ssml || null;
+    const text = ssmlText ? ssmlText.replace(/<\/?[^>]+(>|$)/g, "").trim() : "";
+    const hasAudio = ssmlText ? /<audio\b/i.test(ssmlText) : false;           
     console.log("APL Directive: %s \n SSML Text: %s", JSON.stringify(aplDirective), ssmlText);
+    if (ssmlText && !hasAudio) {
+      response["outputSpeech"]["ssml"] = "<speak>" + Alexa.escapeXmlCharacters(text) + "</speak>";
+    }
     if (
       Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
         "Alexa.Presentation.APL"
       ]
     ) {
       if (!aplDirective) {
-        if (ssmlText && !ssmlText.includes("audio src=")) {
+        if (ssmlText && !hasAudio) {
           console.log("Adding APL Directive");
-          const text = ssmlText.replace(/<\/?[^>]+(>|$)/g, "")
           const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
           // console.log("Data Source: ", JSON.stringify(dataSource));
           const directive = helperFunctions.createDirectivePayload(
@@ -76,9 +80,8 @@ const AddDirectiveResponseInterceptor = {
       }
     } else {
       console.log("APL not supported");
-      if (ssmlText && !ssmlText.includes("audio src=")) {
+      if (ssmlText && !hasAudio) {
         console.log("Adding Simple Card");
-        const text = ssmlText.replace(/<\/?[^>]+(>|$)/g, "");
         response.card = {
           type: "Simple",
           title: process.env.skillName,
@@ -93,9 +96,6 @@ const LocalizationInterceptor = {
   async process(handlerInput) {
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
     console.log("Request Type: ", requestType);
-    if(isValidRequestType(requestType)){
-      return;
-    }
     let locale = Alexa.getLocale(handlerInput.requestEnvelope);
     // Gets the locale from the request and initializes i18next.
     const localizationClient = i18n.use(sprintf).init({
@@ -134,10 +134,10 @@ const SavePersistenceAttributesToSession = {
   async process(handlerInput) {
     console.log("SavePersistenceAttributesToSession Interceptor");
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
-    if(isValidRequestType(requestType)){
+    if(shouldSkipProcessing(requestType)){
       return;
     }
-    const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
+    const isNewSession = isPlaybackControllerRequest(requestType)? false : Alexa.isNewSession(handlerInput.requestEnvelope);
     if (isNewSession) {
       console.log("New Session");
       const sessionAttributes =
@@ -174,19 +174,33 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(handlerInput) {
     console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
     const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
-    if(isValidRequestType(requestType)){
+    if(shouldSkipProcessing(requestType)){
       return;
     }
-    const isNewSession = Alexa.isNewSession(handlerInput.requestEnvelope);
+    const isNewSession = isPlaybackControllerRequest(requestType)? false : Alexa.isNewSession(handlerInput.requestEnvelope);
     if (isNewSession) {
       await awsSsmHandler.handler();
     }      
   },
 };
 
-function isValidRequestType(requestType) {
+/**
+ * Determines whether interceptor processing should be skipped for a given Alexa request type.
+ * @param {string} requestType - The request type string from the Alexa request envelope.
+ * @returns {boolean} `true` if the request is `AlexaSkillEvent.SkillDisabled` or starts with `AudioPlayer.`, `false` otherwise.
+ */
+function shouldSkipProcessing(requestType) {
   //skip processing for skill disabled events and audio player requests
-  return requestType === "AlexaSkillEvent.SkillDisabled" || requestType.startsWith("AudioPlayer.") || requestType.startsWith("PlaybackController");
+  return requestType === "AlexaSkillEvent.SkillDisabled" || requestType.startsWith("AudioPlayer.");
+}
+
+/**
+ * Determines whether a request type corresponds to a PlaybackController request.
+ * @param {string} requestType - The Alexa request type to evaluate.
+ * @returns {boolean} `true` if `requestType` starts with `"PlaybackController."`, `false` otherwise.
+ */
+function isPlaybackControllerRequest(requestType) {
+  return requestType.startsWith("PlaybackController.");
 }
 
 module.exports = {
@@ -198,4 +212,3 @@ module.exports = {
   AddDirectiveResponseInterceptor,
   SetApiKeysAsEnvironmentVariableFromAwsSsm
 };
-

@@ -54,5 +54,6 @@ module.exports = {
       hadithErrorPrompt: `Entschuldigung, ich konnte keine Hadithe finden. Bitte versuche es noch einmal.`,
       adhaanErrorPrompt: `Entschuldigung, derzeit unterstütze ich das Abspielen des Adhans nicht. Bitte versuchen Sie es später erneut.`,
       selectMosquePrompt: `Um eine Moschee zu registrieren, können Sie "wähle meine Moschee" oder "ändere meine Moschee". `,
+      unableToResolvePrayerNamePrompt: `Entschuldigung, ich konnte den Namen des Gebets nicht auflösen. Bitte versuchen Sie es erneut.`,
     },
   };

@@ -7,31 +7,28 @@ const AudioPlayerEventHandler = {
   },
   async handle(handlerInput) {
     const audioPlayerEvent = Alexa.getRequestType(handlerInput.requestEnvelope);
-+   console.log("Audio Player Event:", audioPlayerEvent);
-    return handlerInput.responseBuilder.getResponse();
+    console.log("Audio Player Event:", audioPlayerEvent);
+    return handlerInput.responseBuilder
+      .getResponse();
   },
 };
 
 const PlaybackCommandHandler = {
   canHandle(handlerInput) {
-    return (
-      Alexa.getRequestType(handlerInput.requestEnvelope).startsWith("PlaybackController")
+    return Alexa.getRequestType(handlerInput.requestEnvelope).startsWith(
+      "PlaybackController"
     );
   },
   async handle(handlerInput) {
     const playback = Alexa.getRequestType(handlerInput.requestEnvelope);
     console.log("Playback Command: ", playback);
-    switch (playback) {
-      case "PlaybackController.PlayCommandIssued":        
-      case "PlaybackController.NextCommandIssued":
-      case "PlaybackController.PreviousCommandIssued":
-        return await intentHandler.PlayAdhanIntentHandler.handle(handlerInput);
-      default:
-        return handlerInput.responseBuilder
-            .addAudioPlayerStopDirective()
-            .withShouldEndSession(true)
-            .getResponse()
+    if (playback === "PlaybackController.PauseCommandIssued") {
+      return handlerInput.responseBuilder
+        .addAudioPlayerStopDirective()
+        .withShouldEndSession(true)
+        .getResponse();
     }
+    return handlerInput.responseBuilder.getResponse();
   },
 };
 

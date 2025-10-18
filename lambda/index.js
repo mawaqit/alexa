@@ -37,6 +37,11 @@ const {
   PlaybackCommandHandler,
   AudioIntentHandler
 } = require("./handlers/audioPlayerHandler.js");
+const {
+    CFIRWithoutSlotsHandler,
+    CFIRSelectMosqueAndFavoriteAdhaanReciterIntentHandler,
+    CFIRNextPrayerTimeAndPlayAdhaanIntentHandler
+} = require("./handlers/CFIRHandler.js");
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -190,8 +195,11 @@ const ErrorHandler = {
  * defined are included below. The order matters - they're processed top to bottom
  * */
 exports.handler = Alexa.SkillBuilders.custom()
-  .addRequestHandlers(
-    LaunchRequestHandler,
+  .addRequestHandlers(       
+    CFIRWithoutSlotsHandler,
+    CFIRSelectMosqueAndFavoriteAdhaanReciterIntentHandler,
+    CFIRNextPrayerTimeAndPlayAdhaanIntentHandler,
+    LaunchRequestHandler, 
     HelpIntentHandler,
     AudioPlayerEventHandler,
     PlaybackCommandHandler,

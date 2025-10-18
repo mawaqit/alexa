@@ -57,5 +57,6 @@ module.exports = {
     hadithErrorPrompt: `Désolé, je n'ai trouvé aucun hadith. Veuillez réessayer.`,
     adhaanErrorPrompt: `Désolé, actuellement, je ne supporte pas la lecture de l'adhan. Veuillez réessayer plus tard.`,
     selectMosquePrompt: `Pour enregistrer une mosquée, vous pouvez dire "sélectionne ma mosquée" ou "choisis ma mosquée". `,
+    unableToResolvePrayerNamePrompt: `Désolé, je n'ai pas pu résoudre le nom de la prière. Veuillez réessayer.`,
   },
 };

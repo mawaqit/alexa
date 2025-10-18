@@ -118,6 +118,12 @@ const NextPrayerTimeIntentHandler = {
       "prayerName"
     );
     console.log("Prayer Name Resolved Id: ", prayerNameResolvedId);
+    if(!prayerNameResolvedId){
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))  
+        .withShouldEndSession(false)
+        .getResponse();
+    }
     const prayerNameFromData = requestAttributes.t("prayerNames")[parseInt(prayerNameResolvedId)];
     console.log("Prayer Name: ", prayerName);
     const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);

@@ -236,7 +236,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
     return await createResponseDirectiveForMosqueList(handlerInput, mosqueList, speakOutput);
   } catch (error) {
     console.log("Error in retrieving address: ", error);
-    if (error && error.startsWith("GeoConversionError")) {
+    if (error && typeof error === 'string' && error.startsWith("GeoConversionError")) {
       return responseBuilder
         .speak(requestAttributes.t("errorGeoConversionPrompt"))
         .withShouldEndSession(true)
@@ -529,6 +529,69 @@ const createDataSourceForPrayerTiming = (time) => {
 }
 }
 
+/**
+ * Normalize intent filled slots into a consistent map of resolved slot values and validation state.
+ *
+ * Processes Alexa slot resolution data to produce, for each slot, the original synonym, the resolved value (or the raw value if unresolved), an optional resolution id, and a boolean indicating whether the slot matched a value in the interaction model.
+ *
+ * @param {Object} filledSlots - The `request.intent.slots` object from an Alexa request.
+ * @returns {Object} An object mapping slot names to `{ synonym, value, id, isValidated }`:
+ *  - `synonym` {string|undefined} — the raw slot value spoken by the user.
+ *  - `value` {string|undefined} — the resolved slot value name when available, otherwise the raw slot value.
+ *  - `id` {string|null} — the resolved value id when available, otherwise `null` (or the slot's id if present and unresolved).
+ *  - `isValidated` {boolean} — `true` when the slot resolution returned `ER_SUCCESS_MATCH`, `false` otherwise.
+ */
+function getSlotValues(filledSlots) {
+  const slotValues = {};
+  console.log(`The filled slots: ${JSON.stringify(filledSlots)}`);
+
+  Object.keys(filledSlots || {}).forEach((key) => {
+    const slot = filledSlots[key];
+    const name = slot?.name || key;
+    const resAuth = slot?.resolutions?.resolutionsPerAuthority?.[0];
+    const status = resAuth?.status?.code;
+    const valueObj = resAuth?.values?.[0]?.value;
+
+    if (status === "ER_SUCCESS_MATCH" && valueObj) {
+      slotValues[name] = {
+        synonym: slot?.value,
+        value: valueObj.name,
+        id: valueObj.id ?? null,
+        isValidated: true,
+      };
+      return;
+    }
+
+    if (status === "ER_SUCCESS_NO_MATCH") {
+      slotValues[name] = {
+        synonym: slot?.value,
+        value: slot?.value,
+        id: null,
+        isValidated: false,
+      };
+      return;
+    }
+
+    slotValues[name] = {
+      synonym: slot?.value,
+      value: slot?.value,
+      id: slot?.id ?? null,
+      isValidated: false,
+    };
+  });
+
+  return slotValues;
+}
+
+/**
+ * Extracts the intent name from the request envelope.
+ *
+ * @returns {string|null} The intent name if present, otherwise `null`.
+ */
+function getIntentName(handlerInput) {
+  return handlerInput?.requestEnvelope?.request?.intent?.name || null;
+}
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -549,5 +612,7 @@ module.exports = {
   callDirectiveService,
   splitLanguage,
   createDataSourceForPrayerTiming,
-  checkForCharacterDisplay
+  checkForCharacterDisplay,
+  getSlotValues,
+  getIntentName
 };

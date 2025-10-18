@@ -9,7 +9,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs20.x
+  runtime: nodejs22.x
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${opt:region, self:custom.defaultRegion}
   environment: ${file(env.json):${self:provider.stage}}
@@ -43,7 +43,7 @@ provider:
 functions:
   indexHandler:
     handler: index.handler
-    timeout: 8
+    timeout: 9
     memorySize: 128
     description: MAWAQIT Alexa Backend
     events: ${file(eventsources.yml):${self:provider.stage}, file(eventsources.yml):dev}

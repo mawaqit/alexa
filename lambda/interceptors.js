@@ -184,11 +184,21 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   },
 };
 
+/**
+ * Determines whether interceptor processing should be skipped for a given Alexa request type.
+ * @param {string} requestType - The request type string from the Alexa request envelope.
+ * @returns {boolean} `true` if the request is `AlexaSkillEvent.SkillDisabled` or starts with `AudioPlayer.`, `false` otherwise.
+ */
 function shouldSkipProcessing(requestType) {
   //skip processing for skill disabled events and audio player requests
   return requestType === "AlexaSkillEvent.SkillDisabled" || requestType.startsWith("AudioPlayer.");
 }
 
+/**
+ * Determines whether a request type corresponds to a PlaybackController request.
+ * @param {string} requestType - The Alexa request type to evaluate.
+ * @returns {boolean} `true` if `requestType` starts with `"PlaybackController."`, `false` otherwise.
+ */
 function isPlaybackControllerRequest(requestType) {
   return requestType.startsWith("PlaybackController.");
 }
@@ -202,4 +212,3 @@ module.exports = {
   AddDirectiveResponseInterceptor,
   SetApiKeysAsEnvironmentVariableFromAwsSsm
 };
-

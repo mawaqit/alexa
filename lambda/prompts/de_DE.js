@@ -55,5 +55,13 @@ module.exports = {
       adhaanErrorPrompt: `Entschuldigung, derzeit unterstütze ich das Abspielen des Adhans nicht. Bitte versuchen Sie es später erneut.`,
       selectMosquePrompt: `Um eine Moschee zu registrieren, können Sie "wähle meine Moschee" oder "ändere meine Moschee". `,
       unableToResolvePrayerNamePrompt: `Entschuldigung, ich konnte den Namen des Gebets nicht auflösen. Bitte versuchen Sie es erneut.`,
+      prayerNamePrompt: "Für welches Gebet möchten Sie eine Routine erstellen? Sie können zwischen %s wählen. Sie können wählen, indem Sie die zugehörige Nummer sagen",
+      prayerNameTouchPrompt: "oder Sie können auch auf das Gebet Ihrer Wahl auf Ihrem Bildschirm klicken.",
+      routineCreatedPrompt: `Perfekt, die Routine wurde erfolgreich erstellt! `,
+      routineErrorPrompt: "Entschuldigung, ein Fehler ist bei der Erstellung einer Routine aufgetreten. Bitte versuchen Sie es später erneut.",
+      routineRejected: "Um eine andere Routine zu erstellen, können Sie sagen, erstelle eine Routine.",
+      routineAlreadyEnabled: "Diese Routine wurde bereits erstellt. Sie können diese Routine in der Alexa-App bearbeiten. Ich kann eine andere Routine erstellen, Sie können sagen, erstelle eine Routine.",
+      titleForPrayerTimeList: `Gebetszeiten`,
+      invalidPrayerIndexPrompt: `Entschuldigung, der von Ihnen angegebene Gebetsindex ist ungültig. Bitte versuchen Sie es erneut. Sie können zwischen 1 und %s wählen.`,
     },
   };

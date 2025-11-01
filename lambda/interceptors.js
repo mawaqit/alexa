@@ -54,7 +54,7 @@ const AddDirectiveResponseInterceptor = {
     const hasAudio = ssmlText ? /<audio\b/i.test(ssmlText) : false;           
     console.log("APL Directive: %s \n SSML Text: %s", JSON.stringify(aplDirective), ssmlText);
     if (ssmlText && !hasAudio) {
-      response["outputSpeech"]["ssml"] = "<speak>" + Alexa.escapeXmlCharacters(text) + "</speak>";
+      response["outputSpeech"]["ssml"] = helperFunctions.smartEscapeSSML(ssmlText);
     }
     if (
       Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[

@@ -111,6 +111,10 @@ const getDataSourceForAdhaanReciter = async (handlerInput, adhaanRecitation) => 
     return getDataSourceforMosqueList(handlerInput, adhaanRecitation, "titleForAdhaanReciterList");
 };
 
+const getDataSourceForRoutine = async (handlerInput, prayerNameAndTime) => {
+    return getDataSourceforMosqueList(handlerInput, prayerNameAndTime, "titleForPrayerTimeList");
+};
+
 const getMetadata = (handlerInput, title) => {
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
@@ -143,5 +147,6 @@ module.exports = {
   getDataSourceforMosqueInfo,
   adhaanRecitation,
   getDataSourceForAdhaanReciter,
-  getMetadata
+  getMetadata,
+  getDataSourceForRoutine
 };

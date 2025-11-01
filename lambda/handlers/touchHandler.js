@@ -82,7 +82,42 @@ const AdhaanRecitationTouchEventHandler = {
   },
 }
 
+const RoutineListTouchEventHandler = {
+  canHandle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) ===
+        "Alexa.Presentation.APL.UserEvent" &&
+      handlerInput.requestEnvelope.request.arguments[0] ===
+        "ListItemSelected" &&
+      handlerInput.requestEnvelope.request.arguments[1] ===
+        requestAttributes.t("titleForPrayerTimeList")
+    );
+  },
+  async handle(handlerInput) {
+    console.log(
+      "Request Log in RoutineListTouchEventHandler: ",
+      JSON.stringify(handlerInput.requestEnvelope.request)
+    );
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const selectedRoutine = handlerInput.requestEnvelope.request.arguments[2];
+    const prayerNames = requestAttributes.t("prayerNames");
+    const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+    const automationDirective = helperFunctions.offerAutomation(
+      userTimeZone,
+      selectedRoutine.time,
+      selectedRoutine.name,
+      selectedRoutine.namePhoneme === prayerNames[5],
+    );
+    return handlerInput.responseBuilder
+      .addDirective(automationDirective)
+      .getResponse();
+  },
+};
+
 module.exports = {
   MosqueListTouchEventHandler,
-  AdhaanRecitationTouchEventHandler
+  AdhaanRecitationTouchEventHandler,
+  RoutineListTouchEventHandler
 };

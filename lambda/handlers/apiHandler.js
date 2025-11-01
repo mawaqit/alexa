@@ -46,15 +46,21 @@ const getMosqueList = async (
     });
 };
 
-const getPrayerTimings = async (mosqueUuid) => {
+const getPrayerTimings = async (mosqueUuid, isIqamaCalendarRequired = false, isPrayerCalendarRequired = false) => {
   const config = getConfig("get", `/mosque/${mosqueUuid}/times`);
   console.log("Config: ", JSON.stringify(config, null, 2).replace(/Bearer \w+/g, "Bearer ****"));
   return await axios
     .request(config)
     .then((response) => {
       console.log("Mosque Timings: ", JSON.stringify(response.data));
-      if (!response || !response.data || !response.data.times) {
+      if (!response?.data?.times) {
         throw "Received Empty Response";
+      }
+      if (!isIqamaCalendarRequired) {
+        delete response.data.iqamaCalendar;
+      }
+      if (!isPrayerCalendarRequired) {
+        delete response.data.calendar;
       }
 
       return response.data;

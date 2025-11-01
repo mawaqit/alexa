@@ -26,11 +26,15 @@ const {
   FavoriteAdhaanReciterStartedHandler,
   FavoriteAdhaanReciterIntentHandler,
   HadithIntentHandler,
-  RoutinesTriggerHandler
+  PlayAdhanTaskHandler,
+  CreateRoutineStartedHandler,
+  CreateRoutineIntentHandler,
+  SessionResumedRequestHandler
 } = require("./handlers/intentHandler.js");
 const {
   MosqueListTouchEventHandler,
   AdhaanRecitationTouchEventHandler,
+  RoutineListTouchEventHandler
 } = require("./handlers/touchHandler.js");
 const {
   AudioPlayerEventHandler,
@@ -195,11 +199,11 @@ const ErrorHandler = {
  * defined are included below. The order matters - they're processed top to bottom
  * */
 exports.handler = Alexa.SkillBuilders.custom()
-  .addRequestHandlers(       
+  .addRequestHandlers(
     CFIRWithoutSlotsHandler,
     CFIRSelectMosqueAndFavoriteAdhaanReciterIntentHandler,
     CFIRNextPrayerTimeAndPlayAdhaanIntentHandler,
-    LaunchRequestHandler, 
+    LaunchRequestHandler,
     HelpIntentHandler,
     AudioPlayerEventHandler,
     PlaybackCommandHandler,
@@ -211,15 +215,19 @@ exports.handler = Alexa.SkillBuilders.custom()
     NextIqamaTimeIntentHandler,
     AllPrayerTimeIntentHandler,
     HadithIntentHandler,
-    RoutinesTriggerHandler,
     PlayAdhanIntentHandler,
+    PlayAdhanTaskHandler,
     SelectMosqueIntentStartedHandler,
-    SelectMosqueIntentAfterSelectingMosqueHandler,    
+    SelectMosqueIntentAfterSelectingMosqueHandler,
     FavoriteAdhaanReciterStartedHandler,
     FavoriteAdhaanReciterIntentHandler,
+    CreateRoutineStartedHandler,
+    CreateRoutineIntentHandler,
+    SessionResumedRequestHandler,
     DeleteDataIntentHandler,
     MosqueListTouchEventHandler,
     AdhaanRecitationTouchEventHandler,
+    RoutineListTouchEventHandler,
     SkillEventHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,
@@ -227,10 +235,10 @@ exports.handler = Alexa.SkillBuilders.custom()
     IntentReflectorHandler
   )
   .addRequestInterceptors(
-    LogRequestInterceptor,         
+    LogRequestInterceptor,
     LocalizationInterceptor,
     SetApiKeysAsEnvironmentVariableFromAwsSsm,
-    SavePersistenceAttributesToSession, 
+    SavePersistenceAttributesToSession
   )
   .addResponseInterceptors(
     AddDirectiveResponseInterceptor,

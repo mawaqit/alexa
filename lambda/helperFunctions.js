@@ -350,58 +350,15 @@ function calculateMinutes(requestAttributes, start, end) {
 
 //Provides resolved slot value
 function getResolvedValue(requestEnvelope, slotName) {
-  if (
-    requestEnvelope &&
-    requestEnvelope.request &&
-    requestEnvelope.request.intent &&
-    requestEnvelope.request.intent.slots &&
-    requestEnvelope.request.intent.slots[slotName] &&
-    requestEnvelope.request.intent.slots[slotName].resolutions &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0] &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values[0] &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values[0].value &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values[0].value.name
-  ) {
-    return requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values[0].value.name;
-  }
-  return undefined;
+  return requestEnvelope?.request?.intent?.slots?.[slotName]
+    ?.resolutions?.resolutionsPerAuthority?.[0]
+    ?.values?.[0]?.value?.name;
 }
 
 //Provides resolved slot id
 function getResolvedId(requestEnvelope, slotName) {
-  if (
-    requestEnvelope &&
-    requestEnvelope.request &&
-    requestEnvelope.request.intent &&
-    requestEnvelope.request.intent.slots &&
-    requestEnvelope.request.intent.slots[slotName] &&
-    requestEnvelope.request.intent.slots[slotName].resolutions &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0] &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values[0] &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values[0].value &&
-    requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values[0].value.id
-  ) {
-    return requestEnvelope.request.intent.slots[slotName].resolutions
-      .resolutionsPerAuthority[0].values[0].value.id;
-  }
-  return undefined;
+  return requestEnvelope?.request?.intent?.slots?.[slotName]
+    ?.resolutions?.resolutionsPerAuthority?.[0]?.values?.[0]?.value?.id;
 }
 
 const getPrayerTimeForSpecificPrayer = (
@@ -592,6 +549,207 @@ function getIntentName(handlerInput) {
   return handlerInput?.requestEnvelope?.request?.intent?.name || null;
 }
 
+const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
+  const userTimeZone = await getUserTimezone(handlerInput);
+  const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
+  console.log("User Timezone: ", userTimeZone);
+  const prayerNames = requestAttributes.t("prayerNames");
+  let allPrayerTimes = "";
+  const currentDateTime = new Date(
+    new Date().toLocaleString("en-US", { timeZone: userTimeZone })
+  );
+  prayerNames.forEach((prayer, index) => {
+    const prayerTime = mosqueTimes.times[index];
+    if (prayerTime) {
+      const prayerDetails = generateNextPrayerTime(
+        requestAttributes,
+        prayerTime,
+        moment(currentDateTime),
+        prayer
+      );
+      console.log("Prayer Details for %s: ", prayer, prayerDetails);
+      allPrayerTimes += requestAttributes.t(
+        "allPrayerTimesPrompt",
+        prayer,
+        prayerDetails.time.format("HH:mm")
+      );
+    }
+  });
+  return allPrayerTimes;
+};
+
+const offerAutomation = (timezone, time, prayerName, isJumma = false) => {
+  return {
+    type: "Connections.StartConnection",
+    uri: "connection://AMAZON.OfferAutomation/1",
+    onCompletion: "RESUME_SESSION",
+    token: generateOperationId(time, prayerName),
+    input: {
+      automation: {
+        trigger: {
+          type: "Alexa.Automation.Trigger.Schedule.AbsoluteTime",
+          version: "1.0",
+          payload: {
+            schedule: {
+              triggerTime: generateRoutineTime(time),
+              timeZoneId: timezone,
+              recurrence: isJumma
+                ? "RRULE:FREQ=WEEKLY;BYDAY=FR"
+                :
+                "RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU,MO,TU,WE,TH,FR,SA",
+            },
+          },
+        },
+        operations: {
+          serial: [
+            {
+              operation: {
+                type: "Alexa.Automation.Operation.Skill.StartConnection",
+                version: "1.0",
+                operationId: generateOperationId(time, prayerName),
+                payload: {
+                  connectionRequest: {
+                    uri: "connection://amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan/1?provider=amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506",
+                    input: {}
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      renderingData: {
+        operations: generateRenderingData(time, prayerName),
+      },
+    },
+  };
+};
+
+const generateRoutineTime = (time) => {
+  let timeArr = time.split(":");
+  return `${timeArr[0]}` + `${timeArr[1]}` + `00`;
+};
+
+const generateRenderingData = (time, prayerName) => {
+  let key = generateOperationId(time, prayerName);
+  let data = {};
+  data[`${key}`] = {
+    descriptionPrompt: "Play Adhaan",
+  };
+  return data;
+};
+
+const generateOperationId = (time, prayerName) =>
+  "PlayAdhaan_" + prayerName + "_" + generateRoutineTime(time);
+
+function extractPhonemeText(phonemeArray) {
+  return phonemeArray.map(phoneme => {
+    // Match text between > and <
+    const match = phoneme.match(/>([^<]+)</);
+    return match ? match[1] : phoneme;
+  });
+}
+
+const generateRoutineErrorMessage = (message) => {
+  switch (message) {
+    case "REJECTED_BY_CUSTOMER":
+      return "routineRejected";
+    case "AUTOMATION_ALREADY_ENABLED":
+      return "routineAlreadyEnabled";
+    default:
+      return "routineErrorPrompt";
+  }
+};
+
+/**
+ * Escapes only unsafe characters in text nodes within SSML,
+ * preserving valid tags like <phoneme>, <break>, etc.
+ */
+function smartEscapeSSML(ssml) {
+  if (!ssml) return '';
+
+  // Step 1: Escape ampersands not already part of entities
+  ssml = ssml.replace(/&(?!amp;|lt;|gt;|quot;|apos;)/g, '&amp;');
+
+  // Step 2: Escape < and > only if they're outside of tag brackets
+  // Split the SSML by tags and escape only the text segments
+  return ssml
+    .split(/(<[^>]+>)/g) // keep tags separate
+    .map(segment => {
+      if (segment.startsWith('<')) return segment; // it's a tag — keep as is
+      // escape stray < and > in text only
+      return segment.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    })
+    .join('');
+}
+
+async function generatePrayerNameDetailsForRoutine(handlerInput) {
+  const { attributesManager } = handlerInput;
+  const sessionAttributes = attributesManager.getSessionAttributes();
+  const requestAttributes = attributesManager.getRequestAttributes();
+  const mosqueTimes = sessionAttributes.mosqueTimes;
+  console.log("Mosque Times: ", JSON.stringify(mosqueTimes));
+  const prayerNames = requestAttributes.t("prayerNames");
+  const prayerNamesForApl = extractPhonemeText(prayerNames);
+  const userTimeZone = await getUserTimezone(handlerInput);
+  const currentDateTime = new Date(
+    new Date().toLocaleString("en-US", { timeZone: userTimeZone })
+  );
+  const prayerNameDetails = prayerNames
+    .map((prayer, index) => {
+      const prayerTime = mosqueTimes.times[index];
+      if (prayerTime) {
+        const prayerDetails = generateNextPrayerTime(
+          requestAttributes,
+          prayerTime,
+          moment(currentDateTime),
+          prayer
+        );
+        console.log("Prayer Details for %s: ", prayer, prayerDetails);
+        const time = prayerDetails.time.format("HH:mm");
+        const prayerName = prayerNamesForApl[index];
+        return {
+          primaryText: prayerName + " " + time,
+          time: time,
+          name: prayerName,
+          namePhoneme: prayer,
+        };
+      }
+    })
+    .filter((detail) => detail !== undefined && detail !== null);
+  // Extract only the Jumu'ah times
+  const jumuaTimes = [
+    mosqueTimes.jumua,
+    mosqueTimes.jumua2,
+    mosqueTimes.jumua3,
+  ];
+  // Find the first non-null Jumu'ah time
+  const firstNonNullJumua = jumuaTimes.filter(
+    (time) => time !== null && time !== undefined
+  );
+  if (firstNonNullJumua.length > 0) {
+    firstNonNullJumua.forEach((jumuaTime) => {
+      const prayerName = prayerNamesForApl[5];
+      prayerNameDetails.push({
+        primaryText: `${prayerName} ${jumuaTime}`,
+        time: jumuaTime,
+        name: prayerName,
+        namePhoneme: prayerNames[5],
+      });
+    });
+  }
+  sessionAttributes.prayerNameDetails = prayerNameDetails;
+  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+  console.log(
+    "Final Prayer Name Details: ",
+    JSON.stringify(prayerNameDetails)
+  );
+  return prayerNameDetails;
+}
+
+
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -614,5 +772,11 @@ module.exports = {
   createDataSourceForPrayerTiming,
   checkForCharacterDisplay,
   getSlotValues,
-  getIntentName
+  getIntentName,
+  getAllPrayerTimesSpeechoutput,
+  offerAutomation,
+  extractPhonemeText,
+  generateRoutineErrorMessage,
+  smartEscapeSSML,
+  generatePrayerNameDetailsForRoutine
 };

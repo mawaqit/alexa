@@ -3,7 +3,7 @@
     "apis": {
       "custom": {
         "endpoint": {
-          "uri": "arn:aws:lambda:eu-west-3:275854128200:function:alexa-prod-indexHandler:live"
+          "uri": "arn:aws:lambda:eu-west-3:275854128200:function:alexa-dev-indexHandler:dev"
         },
         "interfaces": [
           {
@@ -158,10 +158,6 @@
           "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
         }
       },
-      "shoppingKit": {
-        "isAmazonAssociatesOnAlexaEnabled": false,
-        "isShoppingActionsEnabled": false
-      },
       "usesPersonalInfo": false
     },
     "publishingInformation": {
@@ -174,9 +170,6 @@
             "source": "fr-FR"
           }
         ]
-      },
-      "automaticDistribution": {
-        "isActive": false
       },
       "category": "RELIGION_AND_SPIRITUALITY",
       "distributionCountries": [],
@@ -210,7 +203,7 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195614Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8e8d00a1dfb6009022c910567525ce94fa575d8eff43958d3d37b8a912edaa62",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=eb15ed2a92ae1a5f8f7dcb40a4b6573c4d55e1c979bce80ceb4d2b17c5975a31",
           "name": "MAWAQIT",
           "preview": {
             "assets": {
@@ -218,7 +211,7 @@
                 "images": [
                   {
                     "source": {
-                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b91f27c1a172b5cfb9a405086be84b224694a5e7b5288019bc648ae10ccabe4f",
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a73490787bdee811213bd5f23c2f5c14eadcdfe4dc5c841d4461945d019ae8dc",
                       "type": "URI"
                     }
                   }
@@ -226,7 +219,7 @@
               }
             }
           },
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195614Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=5f6a1195faf448ade68b9871fb40fee1aa41adde23727002cdf58e92e054168d",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=6c26409172e4145e536f1eb89736745db2d25a44d59609e4ef60dff9b63486f9",
           "summary": "MAWAQIT allows you to get the prayer times for your mosque."
         },
         "en-CA": {
@@ -256,7 +249,7 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195614Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8e8d00a1dfb6009022c910567525ce94fa575d8eff43958d3d37b8a912edaa62",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=eb15ed2a92ae1a5f8f7dcb40a4b6573c4d55e1c979bce80ceb4d2b17c5975a31",
           "name": "MAWAQIT",
           "preview": {
             "assets": {
@@ -264,7 +257,7 @@
                 "images": [
                   {
                     "source": {
-                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b91f27c1a172b5cfb9a405086be84b224694a5e7b5288019bc648ae10ccabe4f",
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a73490787bdee811213bd5f23c2f5c14eadcdfe4dc5c841d4461945d019ae8dc",
                       "type": "URI"
                     }
                   }
@@ -272,7 +265,7 @@
               }
             }
           },
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195614Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=5f6a1195faf448ade68b9871fb40fee1aa41adde23727002cdf58e92e054168d",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=6c26409172e4145e536f1eb89736745db2d25a44d59609e4ef60dff9b63486f9",
           "summary": "MAWAQIT allows you to get the prayer times for your mosque."
         },
         "en-IN": {
@@ -302,7 +295,7 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=967de239c0c05110cd73c18b5ab0fd71234ebe5aff354fc46e107cab293c363f",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=eb15ed2a92ae1a5f8f7dcb40a4b6573c4d55e1c979bce80ceb4d2b17c5975a31",
           "name": "MAWAQIT",
           "preview": {
             "assets": {
@@ -310,7 +303,7 @@
                 "images": [
                   {
                     "source": {
-                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b91f27c1a172b5cfb9a405086be84b224694a5e7b5288019bc648ae10ccabe4f",
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a73490787bdee811213bd5f23c2f5c14eadcdfe4dc5c841d4461945d019ae8dc",
                       "type": "URI"
                     }
                   }
@@ -318,7 +311,7 @@
               }
             }
           },
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195614Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=5f6a1195faf448ade68b9871fb40fee1aa41adde23727002cdf58e92e054168d",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=6c26409172e4145e536f1eb89736745db2d25a44d59609e4ef60dff9b63486f9",
           "summary": "MAWAQIT allows you to get the prayer times for your mosque."
         },
         "en-AU": {
@@ -348,7 +341,7 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=967de239c0c05110cd73c18b5ab0fd71234ebe5aff354fc46e107cab293c363f",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=eb15ed2a92ae1a5f8f7dcb40a4b6573c4d55e1c979bce80ceb4d2b17c5975a31",
           "name": "MAWAQIT",
           "preview": {
             "assets": {
@@ -356,7 +349,7 @@
                 "images": [
                   {
                     "source": {
-                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b91f27c1a172b5cfb9a405086be84b224694a5e7b5288019bc648ae10ccabe4f",
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7199&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=da84cc8d3a36cb8fac0e8df4d1e892d927f5bda7105ef3cc04006a1ca3715840",
                       "type": "URI"
                     }
                   }
@@ -364,28 +357,28 @@
               }
             }
           },
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=393fa4d2e2999484280ff5c777c94f1f49a289e0111360f27ac4dd4ba1cff771",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=6c26409172e4145e536f1eb89736745db2d25a44d59609e4ef60dff9b63486f9",
           "summary": "MAWAQIT allows you to get the prayer times for your mosque."
         },
         "fr-FR": {
-          "description": "Pour être sûr que la Skill se lance bien, dites plutôt Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de prières de la mosquée de votre choix !\n\nDemandez par exemple quelle est la prochaine prière, à quelle heure est la prière du vendredi, ou encore à quelle heure est la troisième prière ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosquée, de lancer l'Adhan classique ou celui de la première prière de la journée (Fajr).\n\nPour connaître toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal à reconnaître les noms de prière, nous vous conseillons de donner le numéro de la prière qui vous intéresse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, à quelle heure est la première prière ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour à nous faire parvenir, n'hésitez pas à nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn espérant que la Skill vous plaise, assalamu aleykoum !",
+          "description": "Pour ├¬tre s├╗r que la Skill se lance bien, dites plut├┤t Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de pri├¿res de la mosqu├⌐e de votre choix !\n\nDemandez par exemple quelle est la prochaine pri├¿re, ├á quelle heure est la pri├¿re du vendredi, ou encore ├á quelle heure est la troisi├¿me pri├¿re ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosqu├⌐e, de lancer l'Adhan classique ou celui de la premi├¿re pri├¿re de la journ├⌐e (Fajr).\n\nPour conna├«tre toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal ├á reconna├«tre les noms de pri├¿re, nous vous conseillons de donner le num├⌐ro de la pri├¿re qui vous int├⌐resse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, ├á quelle heure est la premi├¿re pri├¿re ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour ├á nous faire parvenir, n'h├⌐sitez pas ├á nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn esp├⌐rant que la Skill vous plaise, assalamu aleykoum !",
           "examplePhrases": [
             "Alexa, ouvre MAWAQIT.",
-            "Alexa, demande à MAWAQIT quand est la prochaine prière.",
-            "Alexa, demande à MAWAQIT quand est la quatrième prière."
+            "Alexa, demande ├á MAWAQIT quand est la prochaine pri├¿re.",
+            "Alexa, demande ├á MAWAQIT quand est la quatri├¿me pri├¿re."
           ],
           "keywords": [
-            "prière",
-            "prières",
-            "mosquée",
-            "mosquées",
+            "pri├¿re",
+            "pri├¿res",
+            "mosqu├⌐e",
+            "mosqu├⌐es",
             "MAWAQIT",
             "horaires",
             "de",
-            "prière",
+            "pri├¿re",
             "horaire",
             "de",
-            "prière",
+            "pri├¿re",
             "salat",
             "salah",
             "fajr",
@@ -395,7 +388,7 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=967de239c0c05110cd73c18b5ab0fd71234ebe5aff354fc46e107cab293c363f",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=eb15ed2a92ae1a5f8f7dcb40a4b6573c4d55e1c979bce80ceb4d2b17c5975a31",
           "name": "MAWAQIT",
           "preview": {
             "assets": {
@@ -403,7 +396,7 @@
                 "images": [
                   {
                     "source": {
-                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/8fec/04d0e27e6d30496a939b986ff1af9adb/APP_PREVIEW_IMAGE?versionId=dTLpqT_tmd99Dzzt4h4mybNzS.3wTWzO&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=65dfd9751eb04ecd36d557e6c0d549426ed25e31ce04e49d92b692a06740a6b5",
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/8fec/04d0e27e6d30496a939b986ff1af9adb/APP_PREVIEW_IMAGE?versionId=dTLpqT_tmd99Dzzt4h4mybNzS.3wTWzO&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=d68fd4b022faae8626cc649b3f09cea81f227357c177e7e4059fe1bf478df00f",
                       "type": "URI"
                     }
                   }
@@ -411,28 +404,28 @@
               }
             }
           },
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=393fa4d2e2999484280ff5c777c94f1f49a289e0111360f27ac4dd4ba1cff771",
-          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée."
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=6c26409172e4145e536f1eb89736745db2d25a44d59609e4ef60dff9b63486f9",
+          "summary": "MAWAQIT vous permet d'obtenir les heures de pri├¿res de votre mosqu├⌐e."
         },
         "fr-CA": {
-          "description": "Pour être sûr que la Skill se lance bien, dites plutôt Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de prières de la mosquée de votre choix !\n\nDemandez par exemple quelle est la prochaine prière, à quelle heure est la prière du vendredi, ou encore à quelle heure est la troisième prière ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosquée, de lancer l'Adhan classique ou celui de la première prière de la journée (Fajr).\n\nPour connaître toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal à reconnaître les noms de prière, nous vous conseillons de donner le numéro de la prière qui vous intéresse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, à quelle heure est la première prière ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour à nous faire parvenir, n'hésitez pas à nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn espérant que la Skill vous plaise, assalamu aleykoum !",
+          "description": "Pour ├¬tre s├╗r que la Skill se lance bien, dites plut├┤t Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de pri├¿res de la mosqu├⌐e de votre choix !\n\nDemandez par exemple quelle est la prochaine pri├¿re, ├á quelle heure est la pri├¿re du vendredi, ou encore ├á quelle heure est la troisi├¿me pri├¿re ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosqu├⌐e, de lancer l'Adhan classique ou celui de la premi├¿re pri├¿re de la journ├⌐e (Fajr).\n\nPour conna├«tre toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal ├á reconna├«tre les noms de pri├¿re, nous vous conseillons de donner le num├⌐ro de la pri├¿re qui vous int├⌐resse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, ├á quelle heure est la premi├¿re pri├¿re ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour ├á nous faire parvenir, n'h├⌐sitez pas ├á nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn esp├⌐rant que la Skill vous plaise, assalamu aleykoum !",
           "examplePhrases": [
             "Alexa, ouvre MAWAQIT.",
-            "Alexa, demande à MAWAQIT quand est la prochaine prière.",
-            "Alexa, demande à MAWAQIT quand est la quatrième prière."
+            "Alexa, demande ├á MAWAQIT quand est la prochaine pri├¿re.",
+            "Alexa, demande ├á MAWAQIT quand est la quatri├¿me pri├¿re."
           ],
           "keywords": [
-            "prière",
-            "prières",
-            "mosquée",
-            "mosquées",
+            "pri├¿re",
+            "pri├¿res",
+            "mosqu├⌐e",
+            "mosqu├⌐es",
             "MAWAQIT",
             "horaires",
             "de",
-            "prière",
+            "pri├¿re",
             "horaire",
             "de",
-            "prière",
+            "pri├¿re",
             "salat",
             "salah",
             "fajr",
@@ -442,7 +435,7 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=967de239c0c05110cd73c18b5ab0fd71234ebe5aff354fc46e107cab293c363f",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=eb15ed2a92ae1a5f8f7dcb40a4b6573c4d55e1c979bce80ceb4d2b17c5975a31",
           "name": "MAWAQIT",
           "preview": {
             "assets": {
@@ -450,7 +443,7 @@
                 "images": [
                   {
                     "source": {
-                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/8fec/04d0e27e6d30496a939b986ff1af9adb/APP_PREVIEW_IMAGE?versionId=dTLpqT_tmd99Dzzt4h4mybNzS.3wTWzO&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=65dfd9751eb04ecd36d557e6c0d549426ed25e31ce04e49d92b692a06740a6b5",
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/8fec/04d0e27e6d30496a939b986ff1af9adb/APP_PREVIEW_IMAGE?versionId=dTLpqT_tmd99Dzzt4h4mybNzS.3wTWzO&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=d68fd4b022faae8626cc649b3f09cea81f227357c177e7e4059fe1bf478df00f",
                       "type": "URI"
                     }
                   }
@@ -458,8 +451,8 @@
               }
             }
           },
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=393fa4d2e2999484280ff5c777c94f1f49a289e0111360f27ac4dd4ba1cff771",
-          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée."
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=6c26409172e4145e536f1eb89736745db2d25a44d59609e4ef60dff9b63486f9",
+          "summary": "MAWAQIT vous permet d'obtenir les heures de pri├¿res de votre mosqu├⌐e."
         },
         "en-GB": {
           "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
@@ -488,7 +481,7 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=967de239c0c05110cd73c18b5ab0fd71234ebe5aff354fc46e107cab293c363f",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=eb15ed2a92ae1a5f8f7dcb40a4b6573c4d55e1c979bce80ceb4d2b17c5975a31",
           "name": "MAWAQIT",
           "preview": {
             "assets": {
@@ -496,7 +489,7 @@
                 "images": [
                   {
                     "source": {
-                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b91f27c1a172b5cfb9a405086be84b224694a5e7b5288019bc648ae10ccabe4f",
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=a73490787bdee811213bd5f23c2f5c14eadcdfe4dc5c841d4461945d019ae8dc",
                       "type": "URI"
                     }
                   }
@@ -504,11 +497,11 @@
               }
             }
           },
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251001T195615Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251001%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=393fa4d2e2999484280ff5c777c94f1f49a289e0111360f27ac4dd4ba1cff771",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20251028T162210Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QMHLDJPFK%2F20251028%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=6c26409172e4145e536f1eb89736745db2d25a44d59609e4ef60dff9b63486f9",
           "summary": "MAWAQIT allows you to get the prayer times for your mosque."
         }
       },
-      "testingInstructions": "{\"ask_dist_username\":\"\",\"ask_dist_password\":\"\",\"ask_dist_testing_instructions\":\"Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\\n\\nWe have specific permission to use the trademark/brand \\\"Mawaqit\\\". Kindly refer the above links. \\nWe would like to use 'mawaqit' as invocation word in all locales. \\n\\nFor testing purposes, \\nIf there is no mosque nearby your location, Kindly set a location/address of the device which is near France where there are lot of mosques to choose. \\n\\nIn a real-world scenario, if no mosque is found nearby, the user will receive a prompt informing them accordingly.\\n\\nKindly set your Alexa echo device location to:\\nStreet Address: GRANDE MOSQUÉE DE PARIS\\nTown/City: France\\nCountry/Region: Paris\\nZipCode/Pincode: 75005\\n\\nRegarding PlayAdhanIntent,\\nThe sound of the Azan will be in Arabic irrespective of the customer's locale. \\n\\nFor every language saying mawakit instead of mawaqit it will better skill recognition as mentioned in skill description.\\n\\nFor French locales say ikama instead of iqama it will work better for NextIqamaTimeIntent.\\n\"}"
+      "testingInstructions": "{\"ask_dist_username\":\"\",\"ask_dist_password\":\"\",\"ask_dist_testing_instructions\":\" Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\\nWe have specific permission to use the trademark/brand \\\"Mawaqit\\\". Kindly refer the above links. \\nWe would like to use 'mawaqit' as invocation word in all locales. \\n\\nFor testing purposes, \\nIf there is no mosque nearby your location, Kindly set a location/address of the device which is near France where there are lot of mosques to choose. \\n\\nIn a real-world scenario, if no mosque is found nearby, the user will receive a prompt informing them accordingly.\\n\\nRegarding PlayAdhanIntent,\\nThe sound of the Azan will be in Arabic irrespective of the customer's locale. \\n\\nFor every language saying mawakit instead of mawaqit it will better skill recognition as mentioned in skill description.\\n\\nFor French locales say ikama instead of iqama it will work better for NextIqamaTimeIntent.\\n\\n Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\"}"
     }
   }
 }

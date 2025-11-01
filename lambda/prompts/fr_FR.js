@@ -58,5 +58,13 @@ module.exports = {
     adhaanErrorPrompt: `Désolé, actuellement, je ne supporte pas la lecture de l'adhan. Veuillez réessayer plus tard.`,
     selectMosquePrompt: `Pour enregistrer une mosquée, vous pouvez dire "sélectionne ma mosquée" ou "choisis ma mosquée". `,
     unableToResolvePrayerNamePrompt: `Désolé, je n'ai pas pu résoudre le nom de la prière. Veuillez réessayer.`,
+    prayerNamePrompt: "Quelle prière souhaitez-vous créer une routine pour ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la prière",
+    prayerNameTouchPrompt: "ou vous pouvez aussi cliquer sur la prière de votre choix sur votre écran.",
+    routineCreatedPrompt: `Parfait, la routine a été créée avec succès ! `,
+    routineErrorPrompt: "Désolé, une erreur s'est produite lors de la création de la routine. Veuillez réessayer plus tard.",
+    routineRejected: "Pour créer une autre routine, vous pouvez dire, créer une routine.",
+    routineAlreadyEnabled: "Cette routine a déjà été créée. Vous pouvez éditer cette routine dans l'application Alexa. Je peux créer une autre routine, vous pouvez dire, créer une routine.",
+    titleForPrayerTimeList: `Heures de prière`, 
+    invalidPrayerIndexPrompt: `Désolé, l'index de prière que vous avez fourni est invalide. Veuillez réessayer. Vous pouvez choisir entre 1 et %s.`,
   },
 };

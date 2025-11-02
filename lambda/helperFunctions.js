@@ -7,6 +7,7 @@ const moment = require("moment-timezone");
 const { getLatLng } = require("./handlers/googleGeoApiHandler.js");
 const { translate, detectLanguage } = require('./handlers/googleTranslateHandler.js');
 const prayerTimeApl = require("./aplDocuments/characterDisplayApl.json");
+const SKILL_ID = process.env.mawaqitAlexaSkillId || "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506";
 
 const getPersistedData = async (handlerInput) => {
   try {
@@ -610,7 +611,7 @@ const offerAutomation = (timezone, time, prayerName, isJumma = false) => {
                 operationId: generateOperationId(time, prayerName),
                 payload: {
                   connectionRequest: {
-                    uri: "connection://amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan/1?provider=amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506",
+                    uri: `connection://${SKILL_ID}.PlayAdhaan/1?provider=${SKILL_ID}`,
                     input: {}
                   },
                 },
@@ -644,7 +645,8 @@ const generateOperationId = (time, prayerName) =>
   "PlayAdhaan_" + prayerName + "_" + generateRoutineTime(time);
 
 function extractPhonemeText(phonemeArray) {
-  return phonemeArray.map(phoneme => {
+  return phonemeArray.map((phoneme) => {
+    if (typeof phoneme !== 'string') return phoneme;
     // Match text between > and <
     const match = phoneme.match(/>([^<]+)</);
     return match ? match[1] : phoneme;

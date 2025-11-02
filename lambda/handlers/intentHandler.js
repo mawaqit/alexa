@@ -258,6 +258,8 @@ const NextIqamaTimeIntentHandler = {
     );
   },
   async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
     try {
       const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
@@ -265,8 +267,6 @@ const NextIqamaTimeIntentHandler = {
       if (!persistentAttributes?.uuid) {
         return helperFunctions.checkForPersistenceData(handlerInput);
       }
-      const requestAttributes =
-        handlerInput.attributesManager.getRequestAttributes();
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       console.log("User Timezone: ", userTimeZone);
       const prayerNames = requestAttributes.t("prayerNames");
@@ -463,6 +463,8 @@ const AllIqamaTimeIntentHandler = {
     );
   },
   async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
     try {
       const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
@@ -470,8 +472,6 @@ const AllIqamaTimeIntentHandler = {
       if (!persistentAttributes || !persistentAttributes.uuid) {
         return helperFunctions.checkForPersistenceData(handlerInput);
       }
-      const requestAttributes =
-        handlerInput.attributesManager.getRequestAttributes();
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       console.log("User Timezone: ", userTimeZone);
       const prayerNames = requestAttributes.t("prayerNames");
@@ -479,7 +479,7 @@ const AllIqamaTimeIntentHandler = {
       if(!iqamaEnabled) {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("iqamaNotEnabledPrompt"))
-          .withShouldEndSession(false)
+          .withShouldEndSession(false) 
           .getResponse();
       }
       mosqueTimes.iqamaCalendar = await getPrayerTimings(
@@ -744,7 +744,24 @@ const PlayAdhanTaskHandler = {
         handlerInput.attributesManager.getSessionAttributes();
     const requestAttributes =
         handlerInput.attributesManager.getRequestAttributes();
-    const { persistentAttributes, mosqueTimes } = sessionAttributes; 
+    const { persistentAttributes } = sessionAttributes; 
+    if (!persistentAttributes?.uuid) {
+      return helperFunctions.checkForPersistenceData(handlerInput);
+    }
+    let { mosqueTimes } = sessionAttributes;
+    if (!mosqueTimes?.times) {
+      try {
+        mosqueTimes = await getPrayerTimings(persistentAttributes.uuid);
+        sessionAttributes.mosqueTimes = mosqueTimes;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+      } catch (error) {
+        console.log("Unable to hydrate mosque times for routine playback: ", error);
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("routineErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+    }
     let audioName = "Adhaan";
     const prayerNames = requestAttributes.t("prayerNames");
     const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), prayerNames);
@@ -945,21 +962,24 @@ const SessionResumedRequestHandler = {
     );
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
-    let speakOutput = "";
     switch (code) {
       case 200:
         return handlerInput.responseBuilder
-          .speak(requestAttributes.t("routineCreatedPrompt") + requestAttributes.t("doYouNeedAnythingElsePrompt"))
+          .speak(
+            requestAttributes.t("routineCreatedPrompt") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt")
+          )
           .withShouldEndSession(false)
           .getResponse();
-      case 204:
+      case 204: {
         const error =
-          handlerInput.requestEnvelope.request?.cause?.result?.offerAutomationResponse?.reason;
-        speakOutput = helperFunctions.generateRoutineErrorMessage(error);
+          handlerInput.requestEnvelope.request?.cause?.result
+            ?.offerAutomationResponse?.reason;
         return handlerInput.responseBuilder
-          .speak(requestAttributes.t(speakOutput))
+          .speak(requestAttributes.t(helperFunctions.generateRoutineErrorMessage(error)))
           .withShouldEndSession(false)
           .getResponse();
+      }
       default:
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("routineErrorPrompt"))

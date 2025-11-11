@@ -25,8 +25,8 @@ const getPersistedData = async (handlerInput) => {
 
 const checkForConsentTokenToAccessDeviceLocation = (handlerInput) => {
   return (
-    handlerInput.requestEnvelope.context.System.user.permissions &&
-    handlerInput.requestEnvelope.context.System.user.permissions.consentToken
+    handlerInput.requestEnvelope.context.System.user.permissions?.consentToken 
+    && handlerInput.requestEnvelope.context.System?.apiAccessToken
   );
 };
 
@@ -71,7 +71,7 @@ const getNextPrayerTime = (requestAttributes, times, timezone, prayerNames, iqam
       diffInMinutes: calculateMinutes(
         requestAttributes,
         now.format("YYYY-MM-DDTHH:mm"),
-        `${now.add(1, "days").format("YYYY-MM-DD")}T${times[0]}`
+        `${moment(now).add(1, "days").format("YYYY-MM-DD")}T${times[0]}`
       ),
     };
   }
@@ -127,7 +127,7 @@ const getPrayerTimingsForMosque = async (
     return handlerInput.responseBuilder.speak(speakOutput).withShouldEndSession(false).getResponse();
   } catch (error) {
     console.log("Error in fetching prayer timings: ", error);
-    if (error === "Mosque not found") {
+    if (error?.message === "Mosque not found") {
       return await getListOfMosque(handlerInput, speakOutput);
     }
     return handlerInput.responseBuilder
@@ -198,9 +198,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
   } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
   const sessionAttributes = attributesManager.getSessionAttributes();
-  const consentToken =
-    requestEnvelope.context.System.user.permissions &&
-    requestEnvelope.context.System.user.permissions.consentToken;
+  const consentToken = checkForConsentTokenToAccessDeviceLocation(handlerInput);
   if (!consentToken) {
     return responseBuilder
       .speak(requestAttributes.t("requestForGeoLocationPrompt"))
@@ -212,6 +210,12 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
     const deviceAddressServiceClient =
       serviceClientFactory.getDeviceAddressServiceClient();
     const address = await deviceAddressServiceClient.getFullAddress(deviceId);
+    if(!address){
+      return responseBuilder
+        .speak(requestAttributes.t("noAddressPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
     console.log(
       "Address successfully retrieved, now responding to user : ",
       address
@@ -237,11 +241,17 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
     return await createResponseDirectiveForMosqueList(handlerInput, mosqueList, speakOutput);
   } catch (error) {
     console.log("Error in retrieving address: ", error);
-    if (error && typeof error === 'string' && error.startsWith("GeoConversionError")) {
+    if (error?.message?.startsWith("GeoConversionError")) {
       return responseBuilder
         .speak(requestAttributes.t("errorGeoConversionPrompt"))
         .withShouldEndSession(true)
         .getResponse();
+    }
+    if (error?.statusCode === 403) {
+      return responseBuilder
+      .speak(requestAttributes.t("requestForGeoLocationPrompt"))
+      .withAskForPermissionsConsentCard(["read::alexa:device:all:address"])
+      .getResponse();
     }
     return responseBuilder
       .speak(requestAttributes.t("errorPromptforMosqueList"))
@@ -341,7 +351,7 @@ function calculateMinutes(requestAttributes, start, end) {
     const minutes = Math.floor(diffInMinutes % 60);
     result = requestAttributes.t("hoursAndMinutesPrompt", hours, minutes);
   } else if (diffInMinutes < 1) {
-    const diffInSeconds = diffInMilliseconds / 1000;
+    const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
     result = requestAttributes.t("secondsPrompt", diffInSeconds);
   } else {
     result = requestAttributes.t("minutesPrompt", diffInMinutes);
@@ -382,7 +392,7 @@ const getPrayerTimeForSpecificPrayer = (
     const hoursDiff = timeDifference.hours();
     const minutesDiff = timeDifference.minutes();
     let speakOutput;
-    if (minutesDiff < 59 && hoursDiff < 1) {
+    if (minutesDiff <= 59 && hoursDiff < 1) {
       speakOutput = requestAttributes.t("minutesPrompt", minutesDiff);
     } else {
       speakOutput = requestAttributes.t(
@@ -416,8 +426,7 @@ const getPrayerTimeForSpecificPrayer = (
 
 const generateNextPrayerTime = (requestAttributes, prayerTime, now, prayerName, iqamaTime) => {
   const currentMoment = now.format("YYYY-MM-DDTHH:mm");
-  const minutesToAdd = iqamaTime? iqamaTime: 0;
-  const timeMoment = iqamaTime && iqamaTime.includes(":")? generateMomentObject(iqamaTime, now) : generateMomentObject(prayerTime, now).add(parseInt(minutesToAdd), "minutes");
+  const timeMoment = resolveIqamaMoment(iqamaTime, now, prayerTime);
   return {
     name: prayerName,
     time: timeMoment,
@@ -427,6 +436,15 @@ const generateNextPrayerTime = (requestAttributes, prayerTime, now, prayerName, 
       timeMoment.format("YYYY-MM-DDTHH:mm")
     ),
   };
+};
+
+const resolveIqamaMoment = (iqamaTime, now, prayerTime) => {
+  if (iqamaTime && iqamaTime.includes(":")) {
+    return generateMomentObject(iqamaTime, now);
+  } else {
+    const minutesToAdd = parseInt(iqamaTime || 0);
+    return generateMomentObject(prayerTime, now).add(minutesToAdd, "minutes");
+  }
 };
 
 const generateMomentObject = (time, now) => {
@@ -687,6 +705,7 @@ function smartEscapeSSML(ssml) {
 }
 
 async function generatePrayerNameDetailsForRoutine(handlerInput) {
+  const JUMUA_PRAYER_INDEX = 5;
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const requestAttributes = attributesManager.getRequestAttributes();
@@ -732,12 +751,12 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   );
   if (firstNonNullJumua.length > 0) {
     firstNonNullJumua.forEach((jumuaTime) => {
-      const prayerName = prayerNamesForApl[5];
+      const prayerName = prayerNamesForApl[JUMUA_PRAYER_INDEX];
       prayerNameDetails.push({
         primaryText: `${prayerName} ${jumuaTime}`,
         time: jumuaTime,
         name: prayerName,
-        namePhoneme: prayerNames[5],
+        namePhoneme: prayerNames[JUMUA_PRAYER_INDEX],
       });
     });
   }

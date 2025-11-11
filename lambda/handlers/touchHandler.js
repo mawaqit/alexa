@@ -41,7 +41,7 @@ const MosqueListTouchEventHandler = {
       );
     } catch (error) {
       console.log("Error in fetching prayer timings: ", error);
-      if (error === "Mosque not found") {
+      if (error?.message === "Mosque not found") {
         return await helperFunctions.getListOfMosque(handlerInput, requestAttributes.t("mosqueNotRegisteredPrompt"));
       }
       return handlerInput.responseBuilder

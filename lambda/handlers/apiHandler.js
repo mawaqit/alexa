@@ -21,8 +21,8 @@ const getMosqueList = async (
     .request(config)
     .then((response) => {
       console.log("Mosque List: ", JSON.stringify(response.data));
-      if (!response || !response.data || !response.data.length) {
-        throw "Received Empty Response";
+      if (!response?.data?.length) {
+        throw new Error("Received Empty Response");
       }
 
       return response.data
@@ -54,12 +54,12 @@ const getPrayerTimings = async (mosqueUuid, isIqamaCalendarRequired = false, isP
     .then((response) => {
       console.log("Mosque Timings: ", JSON.stringify(response.data));
       if (!response?.data?.times) {
-        throw "Received Empty Response";
+        throw new Error("Received Empty Response");
       }
-      if (!isIqamaCalendarRequired) {
+      if (!isIqamaCalendarRequired && response?.data?.iqamaCalendar) {
         delete response.data.iqamaCalendar;
       }
-      if (!isPrayerCalendarRequired) {
+      if (!isPrayerCalendarRequired && response?.data?.calendar) {
         delete response.data.calendar;
       }
 
@@ -67,9 +67,9 @@ const getPrayerTimings = async (mosqueUuid, isIqamaCalendarRequired = false, isP
     })
     .catch((error) => {
       console.log("Error while fetching mosque Timings: ", error);
-      if (error.response && error.response.status === 404) {
+      if (error?.response?.status === 404) {
         console.log("Mosque not found: ", error.response.status);
-        throw "Mosque not found";
+        throw new Error("Mosque not found");
       }
       throw error;
     });
@@ -82,7 +82,7 @@ const getRandomHadith = async (lang = "ar") => {
     .request(config)
     .then((response) => {
       console.log("Hadith: ", JSON.stringify(response.data));
-      if (!response || !response.data || !response.data.text) {
+      if (!response?.data?.text) {
         throw new Error("No hadith text found in response");
       }
 

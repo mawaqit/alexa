@@ -81,7 +81,7 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       );
     } catch (error) {
       console.log("Error in fetching prayer timings: ", error);
-      if (error === "Mosque not found") {
+      if (error?.message === "Mosque not found") {
         return await helperFunctions.getListOfMosque(handlerInput, requestAttributes.t("mosqueNotRegisteredPrompt"));
       }
       return handlerInput.responseBuilder
@@ -814,7 +814,7 @@ const CreateRoutineStartedHandler = {
       const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes } = sessionAttributes;
-      if (!persistentAttributes || !persistentAttributes.uuid) {
+      if (!persistentAttributes?.uuid) {
         return helperFunctions.checkForPersistenceData(handlerInput);
       }
       const requestAttributes =
@@ -891,13 +891,13 @@ const CreateRoutineIntentHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const { persistentAttributes } = sessionAttributes;
+    if (!persistentAttributes?.uuid) {
+      return helperFunctions.checkForPersistenceData(handlerInput);
+    }
     const prayerNameDetails =
       sessionAttributes.prayerNameDetails ||
       (await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput));
     const prayerNames = requestAttributes.t("prayerNames");
-    if (!persistentAttributes?.uuid) {
-      return helperFunctions.checkForPersistenceData(handlerInput);
-    }
     if (prayerNameResolvedId !== undefined && prayerNameResolvedId !== null) {
       prayerIndex = parseInt(prayerNameResolvedId) + 1; // Adjusting index to match the slot value
     }

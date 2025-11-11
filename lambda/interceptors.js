@@ -34,8 +34,7 @@ const ResponseTimeCalculationInterceptor = {
     const responseTimestamp = new Date();
     // console.log("Response Timestamp: ", JSON.stringify(responseTimestamp.toISOString()));
     const timeDifference = responseTimestamp - requestTimestamp;
-    console.log(`Response Time: ${parseFloat(timeDifference).toFixed(2)/1000} seconds`);
-  },
+    console.log(`Response Time: ${(timeDifference / 1000).toFixed(2)} seconds`);  },
 };
 
 const AddDirectiveResponseInterceptor = {
@@ -45,7 +44,7 @@ const AddDirectiveResponseInterceptor = {
     const aplDirective = directives
       ? directives.find(
           (directive) =>
-            directive.type === "Alexa.Presentation.APL.RenderDocument"
+            directive.type === "Alexa.Presentation.APL.RenderDocument" || directive.type === "Alexa.Presentation.APLT.RenderDocument"
         )
       : false;
     // console.log("APL Directive: ", JSON.stringify(aplDirective));      
@@ -56,13 +55,14 @@ const AddDirectiveResponseInterceptor = {
     if (ssmlText && !hasAudio) {
       response["outputSpeech"]["ssml"] = helperFunctions.smartEscapeSSML(ssmlText);
     }
+    const supportsAPL = Alexa.getSupportedInterfaces(
+      handlerInput.requestEnvelope
+    );
     if (
-      Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
-        "Alexa.Presentation.APL"
-      ]
+      supportsAPL["Alexa.Presentation.APL"] || supportsAPL["Alexa.Presentation.APLT"]
     ) {
       if (!aplDirective) {
-        if (ssmlText && !hasAudio) {
+        if (ssmlText && !hasAudio && supportsAPL["Alexa.Presentation.APL"]) {
           console.log("Adding APL Directive");
           const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
           // console.log("Data Source: ", JSON.stringify(dataSource));
@@ -111,7 +111,7 @@ const LocalizationInterceptor = {
       const args = arguments;
       let values = [];
 
-      for (var i = 1; i < args.length; i++) {
+      for (let i = 1; i < args.length; i++) {
         values.push(args[i]);
       }
       const value = i18n.t(args[0], {
@@ -161,7 +161,7 @@ const SavePersistenceAttributesToSession = {
           );
         } catch (error) {
           console.log("Error while fetching mosque list: ", error);
-          if (error === "Mosque not found") {
+          if (error?.message === "Mosque not found") {
             await handlerInput.attributesManager.deletePersistentAttributes();
           }
         }
@@ -180,7 +180,7 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
     const isNewSession = isPlaybackControllerRequest(requestType)? false : Alexa.isNewSession(handlerInput.requestEnvelope);
     if (isNewSession) {
       await awsSsmHandler.handler();
-    }      
+    }        
   },
 };
 

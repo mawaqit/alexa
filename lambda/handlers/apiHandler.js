@@ -21,8 +21,8 @@ const getMosqueList = async (
     .request(config)
     .then((response) => {
       console.log("Mosque List: ", JSON.stringify(response.data));
-      if (!response || !response.data || !response.data.length) {
-        throw "Received Empty Response";
+      if (!response?.data?.length) {
+        throw new Error("Received Empty Response");
       }
 
       return response.data
@@ -46,24 +46,30 @@ const getMosqueList = async (
     });
 };
 
-const getPrayerTimings = async (mosqueUuid) => {
+const getPrayerTimings = async (mosqueUuid, isIqamaCalendarRequired = false, isPrayerCalendarRequired = false) => {
   const config = getConfig("get", `/mosque/${mosqueUuid}/times`);
   console.log("Config: ", JSON.stringify(config, null, 2).replace(/Bearer \w+/g, "Bearer ****"));
   return await axios
     .request(config)
     .then((response) => {
       console.log("Mosque Timings: ", JSON.stringify(response.data));
-      if (!response || !response.data || !response.data.times) {
-        throw "Received Empty Response";
+      if (!response?.data?.times) {
+        throw new Error("Received Empty Response");
+      }
+      if (!isIqamaCalendarRequired && response?.data?.iqamaCalendar) {
+        delete response.data.iqamaCalendar;
+      }
+      if (!isPrayerCalendarRequired && response?.data?.calendar) {
+        delete response.data.calendar;
       }
 
       return response.data;
     })
     .catch((error) => {
       console.log("Error while fetching mosque Timings: ", error);
-      if (error.response && error.response.status === 404) {
+      if (error?.response?.status === 404) {
         console.log("Mosque not found: ", error.response.status);
-        throw "Mosque not found";
+        throw new Error("Mosque not found");
       }
       throw error;
     });
@@ -76,7 +82,7 @@ const getRandomHadith = async (lang = "ar") => {
     .request(config)
     .then((response) => {
       console.log("Hadith: ", JSON.stringify(response.data));
-      if (!response || !response.data || !response.data.text) {
+      if (!response?.data?.text) {
         throw new Error("No hadith text found in response");
       }
 

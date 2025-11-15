@@ -41,7 +41,7 @@ async function fetchGeocodingResults(address) {
     googleBaseUrl + `?address=${encodeURIComponent(address)}&key=${googleApiKey}`;
   const response = await axios.get(url).catch((error) => {
     console.error("Error fetching geocoding results:", error);
-    throw "GeoConversionError: No results found";
+    throw new Error("GeoConversionError: No results found");
   })
   return response?.data?.results;
 }
@@ -93,8 +93,8 @@ async function getLatLng(addressJson) {
   const address = constructAddress(addressJson);
   console.log(`Fetching geocoding results for address: ${address}`);
   const results = await fetchGeocodingResults(address);
-  if (!results || !results.length)
-    throw "GeoConversionError: No results found";
+  if (!results?.length)
+    throw new Error("GeoConversionError: No results found");
   console.log(`Found geocoding results: ${JSON.stringify(results)}`);
   const desiredComponents = {
     postal_code: addressJson.postalCode || '',
@@ -106,12 +106,12 @@ async function getLatLng(addressJson) {
   const bestResult = findBestResult(results, desiredComponents);
   const location = bestResult?.geometry?.location;
   if (!location) {
-    throw "GeoConversionError: No location found in results";
+    throw new Error("GeoConversionError: No location found in results");
   }
   const lat = location.lat;
   const lng = location.lng;
   if(lat === null || lat === undefined || lng === null || lng === undefined) {
-    throw "GeoConversionError: No latitude or longitude found";
+    throw new Error("GeoConversionError: No latitude or longitude found");
   }
   return { lat, lng };
 }

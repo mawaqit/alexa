@@ -182,7 +182,7 @@ const ErrorHandler = {
   },
   handle(handlerInput, error) {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    const speakOutput = requestAttributes.t("globalErrorPrompt");
+    const speakOutput = requestAttributes.t("errorPrompt");
     console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
 
     return handlerInput.responseBuilder

@@ -7,7 +7,7 @@ module.exports = {
     chooseMosqueByTouchPrompt: " ou vous pouvez aussi cliquer sur la mosquée de votre choix sur votre écran.",
     helpPrompt: `Voici les commandes que vous pouvez utiliser :\n- Quand est la prochaine prière ?\n- Tu peux aussi demander l'heure de chaque prière en demandant par exemple "Quand est la quatrième prière ?" pour Maghrib\n- Combien de temps reste-t-il avant l'iqama ?\n- Donne moi des informations sur ma mosquée.\n- Change ma mosquée favorite.\n- Donne moi les heures de prière de la journée.\n- Mets l'appel à la prière.\n- Mets l'appel à la prière du Fajr.\nCes commandes peuvent notamment être utilisées dans vos routines Alexa. D'autres commandes arrivent très bientôt inshaAllah.`,
     stopPrompt: `Au revoir et qu'Allah vous préserve !`,
-    errorPrompt: `Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.`,
+    errorPrompt: `Désolé, une erreur est survenue. Veuillez réessayer plus tard.`,
     noDataPrompt: `Désolé, je n'ai pu trouver aucune donnée pour cette requête. Veuillez réessayer s'il vous plaît.`,
     noCityPrompt: `Désolé, je n'ai pu trouver aucune mosuée pour cette ville. Veuillez réessayer s'il vous plaît.`,
     requestForGeoLocationPrompt: `Pour utiliser la skill, vous devez m'autoriser à accéder à votre localisation pour que je puisse trouver les mosquées les plus proches de vous. Ouvrez l'application Alexa sur votre téléphone pour accepter s'il vous plaît.`,
@@ -66,5 +66,6 @@ module.exports = {
     routineAlreadyEnabled: "Cette routine a déjà été créée. Vous pouvez éditer cette routine dans l'application Alexa. Je peux créer une autre routine, vous pouvez dire : « créer une routine ».",    
     titleForPrayerTimeList: `Heures de prière`, 
     invalidPrayerIndexPrompt: `Désolé, l'index de prière que vous avez fourni est invalide. Veuillez réessayer. Vous pouvez choisir entre 1 et %s.`,
+    timezoneErrorPrompt: `Désolé, je n'ai pas pu récupérer votre fuseau horaire. Veuillez vérifier vos paramètres de localisation dans l'application Alexa et réessayer.`,
   },
 };

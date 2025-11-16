@@ -16,7 +16,7 @@ module.exports = {
       titleForMosqueList: `Moscheen ${process.env.skillName}`,
       layoutDirection: "LTR",
       nextPrayerTimeErrorPrompt: `Entschuldigung, ich konnte die Zeit für das nächste Gebet in Ihrer Moschee nicht finden. Bitte versuchen Sie es erneut.`,
-      nextPrayerTimePrompt: "Um %s ist das nächste Gebet %s um %s in %s. Möchten Sie noch etwas wissen?",
+      nextPrayerTimePrompt: "Um %s ist das nächste Gebet %s um %s in %s. ",
       prayerNames: ["<phoneme alphabet=\"ipa\" ph=\"fadʒr\">Fajr</phoneme>", " <phoneme alphabet=\"ipa\" ph=\"duhr\">Duhr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕa.sˤr\">Asr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"maɣ.rɪb\">Maghrib</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʔɪʃaːʔ\">Isha</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"dʒumʕa\">Jumma</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕiːd\">Eid</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʃu.ruːq\">Shuruq</phoneme>"],
       unableToFindMosquePrompt: `Entschuldigung, ich konnte die Moschee, die Sie suchen, nicht finden. Bitte wählen Sie eine gültige Option.`,
       mosqueNotRegisteredPrompt: `Sie haben keine Moschee registriert, um diese Anfrage zu stellen. Bitte registrieren Sie zuerst eine Moschee. `,
@@ -64,5 +64,6 @@ module.exports = {
       titleForPrayerTimeList: `Gebetszeiten`,
       invalidPrayerIndexPrompt: `Entschuldigung, der von Ihnen angegebene Gebetsindex ist ungültig. Bitte versuchen Sie es erneut. Sie können zwischen 1 und %s wählen.`,
       timezoneErrorPrompt: `Entschuldigung, ich konnte Ihre Zeitzone nicht abrufen. Bitte überprüfen Sie Ihre Standort-Einstellungen in der Alexa-App und versuchen Sie es erneut.`,
+      requestRoutinePrompt: "Möchten Sie eine Routine für dieses Gebet einrichten?",
     },
   };

@@ -218,6 +218,11 @@ const NextPrayerTimeIntentHandler = {
             .speak(requestAttributes.t("noPrayerTimePrompt", prayerNameFromData) + requestAttributes.t("doYouNeedAnythingElsePrompt"))
             .withShouldEndSession(false)
             .getResponse();
+        default:
+          return handlerInput.responseBuilder
+            .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))
+            .withShouldEndSession(false)
+            .getResponse();      
       }
     } catch (error) {
       console.log("Error in NextPrayerTimeIntentHandler: ", error);
@@ -293,7 +298,7 @@ const NextIqamaTimeIntentHandler = {
         handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes, mosqueTimes } = sessionAttributes;
       if (!persistentAttributes?.uuid) {
-        return helperFunctions.checkForPersistenceData(handlerInput);
+        return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       console.log("User Timezone: ", userTimeZone);
@@ -419,7 +424,7 @@ const MosqueInfoIntentHandler = {
         handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes, mosqueTimes } = sessionAttributes;
       if (!persistentAttributes || !persistentAttributes.uuid) {
-        return helperFunctions.checkForPersistenceData(handlerInput);
+        return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       const requestAttributes =
         handlerInput.attributesManager.getRequestAttributes();
@@ -504,7 +509,7 @@ const AllIqamaTimeIntentHandler = {
         handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes, mosqueTimes } = sessionAttributes;
       if (!persistentAttributes || !persistentAttributes.uuid) {
-        return helperFunctions.checkForPersistenceData(handlerInput);
+        return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       console.log("User Timezone: ", userTimeZone);
@@ -580,7 +585,7 @@ const AllPrayerTimeIntentHandler = {
         handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes, mosqueTimes } = sessionAttributes;
       if (!persistentAttributes?.uuid) {
-        return helperFunctions.checkForPersistenceData(handlerInput);
+        return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       return handlerInput.responseBuilder
         .speak(
@@ -797,7 +802,7 @@ const PlayAdhanTaskHandler = {
     try {
       const { persistentAttributes } = sessionAttributes; 
       if (!persistentAttributes?.uuid) {
-        return helperFunctions.checkForPersistenceData(handlerInput);
+        return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       let { mosqueTimes } = sessionAttributes;
       if (!mosqueTimes?.times) {
@@ -881,7 +886,7 @@ const CreateRoutineStartedHandler = {
         handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes } = sessionAttributes;
       if (!persistentAttributes?.uuid) {
-        return helperFunctions.checkForPersistenceData(handlerInput);
+        return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       const prayerNameDetails =
         await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput);
@@ -962,7 +967,7 @@ const CreateRoutineIntentHandler = {
         handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes } = sessionAttributes;
       if (!persistentAttributes?.uuid) {
-        return helperFunctions.checkForPersistenceData(handlerInput);
+        return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       const prayerNameDetails =
         sessionAttributes.prayerNameDetails ||
@@ -1003,6 +1008,10 @@ const CreateRoutineIntentHandler = {
       }
       const selectedPrayer = prayerNameDetails[prayerIndex - 1];
       console.log("Selected Prayer: ", selectedPrayer);
+      await helperFunctions.saveRequestedRoutinePrayer(
+        handlerInput,
+        selectedPrayer
+      );
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       const automationDirective = helperFunctions.offerAutomation(
         userTimeZone,
@@ -1036,7 +1045,7 @@ const SessionResumedRequestHandler = {
       "SessionResumedRequest"
     );
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     const status = handlerInput.requestEnvelope.request?.cause?.status;
     const code = parseInt(status.code);
     const message = status.message;
@@ -1045,8 +1054,17 @@ const SessionResumedRequestHandler = {
     );
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
+    
+    const prayerNameDetails = helperFunctions.getRequestedRoutinePrayer(handlerInput);
+    await helperFunctions.deleteRequestedRoutinePrayer(handlerInput);
     switch (code) {
       case 200:
+        if (prayerNameDetails) {
+          await helperFunctions.logRoutineCreation(
+            handlerInput,
+            prayerNameDetails
+          );
+        }
         return handlerInput.responseBuilder
           .speak(
             requestAttributes.t("routineCreatedPrompt") +
@@ -1058,8 +1076,18 @@ const SessionResumedRequestHandler = {
         const error =
           handlerInput.requestEnvelope.request?.cause?.result
             ?.offerAutomationResponse?.reason;
+        if (error === "AUTOMATION_ALREADY_ENABLED" && prayerNameDetails) {
+          await helperFunctions.logRoutineCreation(
+            handlerInput,
+            prayerNameDetails
+          );
+        }
         return handlerInput.responseBuilder
-          .speak(requestAttributes.t(helperFunctions.generateRoutineErrorMessage(error)))
+          .speak(
+            requestAttributes.t(
+              helperFunctions.generateRoutineErrorMessage(error)
+            )
+          )
           .withShouldEndSession(false)
           .getResponse();
       }
@@ -1070,6 +1098,74 @@ const SessionResumedRequestHandler = {
           .getResponse();
     }
   },
+};
+
+const YesIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.YesIntent"
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    try {
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const { persistentAttributes } = sessionAttributes;
+      if (!persistentAttributes?.uuid) {
+        return await helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      const prayerNameDetails = helperFunctions.getRequestedRoutinePrayer(handlerInput);
+      if (!prayerNameDetails || !prayerNameDetails.time || !prayerNameDetails.name) {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("helpPrompt"))
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      const automationDirective = helperFunctions.offerAutomation(
+        userTimeZone,
+        prayerNameDetails.time,
+        prayerNameDetails.name,
+        prayerNameDetails.namePhoneme === requestAttributes.t("prayerNames")[5]
+      );
+      return handlerInput.responseBuilder
+        .addDirective(automationDirective)
+        .getResponse();
+    } catch (error) {
+      console.log("Error in YesIntentHandler:", error);
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("errorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  }
+};
+
+const NoIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.NoIntent"
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    await helperFunctions.deleteRequestedRoutinePrayer(handlerInput);
+    return handlerInput.responseBuilder
+      .speak(requestAttributes.t("stopPrompt"))
+      .withShouldEndSession(false)
+      .getResponse();
+  }
 };
 
 
@@ -1091,5 +1187,7 @@ module.exports = {
   HadithIntentHandler,
   CreateRoutineStartedHandler,
   CreateRoutineIntentHandler,
-  SessionResumedRequestHandler
+  SessionResumedRequestHandler,
+  YesIntentHandler,
+  NoIntentHandler,
 };

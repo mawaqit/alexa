@@ -16,7 +16,7 @@ module.exports = {
     titleForMosqueList: `${process.env.skillName} Mosques`,
     layoutDirection: "LTR",
     nextPrayerTimeErrorPrompt: `Sorry, I couldn't find the time for the next prayer at your mosque. Please try again.`,
-    nextPrayerTimePrompt: `At %s, the next prayer is %s at %s in %s. Do you need anything else?`,
+    nextPrayerTimePrompt: `At %s, the next prayer is %s at %s in %s. `,
     prayerNames: ["<phoneme alphabet=\"ipa\" ph=\"fadʒr\">Fajr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"duhr\">Dhuhr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕa.sˤr\">Asr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"maɣ.rɪb\">Maghrib</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʔɪʃaːʔ\">Isha</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"dʒumʕa\">Jumma</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕiːd\">Eid</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʃu.ruːq\">Shuruq</phoneme>"],
     unableToFindMosquePrompt: `Sorry, I couldn't find the mosque you are looking for. Please choose a valid option.`,
     mosqueNotRegisteredPrompt: `You have not registered a mosque to make this request. Please register a mosque first. `,
@@ -64,5 +64,6 @@ module.exports = {
     titleForPrayerTimeList: `Prayer Times`, 
     invalidPrayerIndexPrompt: `Sorry, the prayer index you provided is invalid. Please try again. You can choose between 1 and %s.`,
     timezoneErrorPrompt: `Sorry, I couldn't retrieve your timezone. Please check your location settings in the Alexa app and try again.`,
+    requestRoutinePrompt: "Would you like to set up a routine for this prayer?",
   },
 };

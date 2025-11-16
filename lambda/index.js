@@ -29,7 +29,9 @@ const {
   PlayAdhanTaskHandler,
   CreateRoutineStartedHandler,
   CreateRoutineIntentHandler,
-  SessionResumedRequestHandler
+  SessionResumedRequestHandler,
+  YesIntentHandler,
+  NoIntentHandler
 } = require("./handlers/intentHandler.js");
 const {
   MosqueListTouchEventHandler,
@@ -80,7 +82,7 @@ const HelpIntentHandler = {
     const speakOutput = requestAttributes.t("helpPrompt") + requestAttributes.t("doYouNeedAnythingElsePrompt");
     return handlerInput.responseBuilder
       .speak(speakOutput)
-      .reprompt(speakOutput)
+      .withShouldEndSession(false)
       .getResponse();
   },
 };
@@ -124,7 +126,7 @@ const FallbackIntentHandler = {
 
     return handlerInput.responseBuilder
       .speak(speakOutput)
-      .reprompt(speakOutput)
+      .withShouldEndSession(false)
       .getResponse();
   },
 };
@@ -187,7 +189,6 @@ const ErrorHandler = {
 
     return handlerInput.responseBuilder
       .speak(speakOutput)
-      .reprompt(speakOutput)
       .withShouldEndSession(false)
       .getResponse();
   },
@@ -221,6 +222,8 @@ exports.handler = Alexa.SkillBuilders.custom()
     SelectMosqueIntentAfterSelectingMosqueHandler,
     FavoriteAdhaanReciterStartedHandler,
     FavoriteAdhaanReciterIntentHandler,
+    YesIntentHandler,
+    NoIntentHandler,
     CreateRoutineStartedHandler,
     CreateRoutineIntentHandler,
     SessionResumedRequestHandler,

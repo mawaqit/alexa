@@ -115,108 +115,122 @@ const NextPrayerTimeIntentHandler = {
     );
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
-    const mosqueTimesData = mosqueTimes;
-    const prayerNameResolvedId = helperFunctions.getResolvedId(
-      handlerInput.requestEnvelope,
-      "prayerName"
-    );
-    console.log("Prayer Name Resolved Id: ", prayerNameResolvedId);
-    if(!prayerNameResolvedId){
-      return handlerInput.responseBuilder
-        .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))  
-        .withShouldEndSession(false)
-        .getResponse();
-    }
-    const prayerNameFromData = requestAttributes.t("prayerNames")[parseInt(prayerNameResolvedId)];
-    console.log("Prayer Name: ", prayerName);
-    const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-    const currentDateTime = new Date(
-      new Date().toLocaleString("en-US", { timeZone: userTimeZone })
-    );
-    const now = moment(currentDateTime);
-    const currentMoment = moment(now.format("YYYY-MM-DDTHH:mm"));
-    console.log("Now: ", JSON.stringify(now));
-    console.log("Prayer Name From Data: ", prayerNameFromData);
-    if (parseInt(prayerNameResolvedId) < 5) {
-      const timeForNextPrayer =
-        mosqueTimesData.times[parseInt(prayerNameResolvedId)];
-      return helperFunctions.getPrayerTimeForSpecificPrayer(
-        handlerInput,
-        timeForNextPrayer,
-        currentMoment,
-        now,
-        prayerNameFromData
+    try {
+      const mosqueTimesData = mosqueTimes;
+      const prayerNameResolvedId = helperFunctions.getResolvedId(
+        handlerInput.requestEnvelope,
+        "prayerName"
       );
-    }
-    switch (parseInt(prayerNameResolvedId)) {
-      case 5:
-        // Extract only the Jumu'ah times
-        const jumuaTimes = [
-          mosqueTimesData.jumua,
-          mosqueTimesData.jumua2,
-          mosqueTimesData.jumua3,
-        ];
-        // Find the first non-null Jumu'ah time
-        const firstNonNullJumua = jumuaTimes.filter((time) => time !== null && time !== undefined).join(", ");
-        if (firstNonNullJumua) {
-          helperFunctions.checkForCharacterDisplay(handlerInput, firstNonNullJumua);
-          return handlerInput.responseBuilder
-            .speak(
-              requestAttributes.t(
-                "nextPrayerTimeSpecificPrompt",
-                primaryText,
-                prayerNameFromData,
-                firstNonNullJumua
+      console.log("Prayer Name Resolved Id: ", prayerNameResolvedId);
+      if(!prayerNameResolvedId){
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))  
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      const prayerNameFromData = requestAttributes.t("prayerNames")[parseInt(prayerNameResolvedId)];
+      console.log("Prayer Name: ", prayerName);
+      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      const currentDateTime = new Date(
+        new Date().toLocaleString("en-US", { timeZone: userTimeZone })
+      );
+      const now = moment(currentDateTime);
+      const currentMoment = moment(now.format("YYYY-MM-DDTHH:mm"));
+      console.log("Now: ", JSON.stringify(now));
+      console.log("Prayer Name From Data: ", prayerNameFromData);
+      if (parseInt(prayerNameResolvedId) < 5) {
+        const timeForNextPrayer =
+          mosqueTimesData.times[parseInt(prayerNameResolvedId)];
+        return helperFunctions.getPrayerTimeForSpecificPrayer(
+          handlerInput,
+          timeForNextPrayer,
+          currentMoment,
+          now,
+          prayerNameFromData
+        );
+      }
+      switch (parseInt(prayerNameResolvedId)) {
+        case 5:
+          // Extract only the Jumu'ah times
+          const jumuaTimes = [
+            mosqueTimesData.jumua,
+            mosqueTimesData.jumua2,
+            mosqueTimesData.jumua3,
+          ];
+          // Find the first non-null Jumu'ah time
+          const firstNonNullJumua = jumuaTimes.filter((time) => time !== null && time !== undefined).join(", ");
+          if (firstNonNullJumua) {
+            helperFunctions.checkForCharacterDisplay(handlerInput, firstNonNullJumua);
+            return handlerInput.responseBuilder
+              .speak(
+                requestAttributes.t(
+                  "nextPrayerTimeSpecificPrompt",
+                  primaryText,
+                  prayerNameFromData,
+                  firstNonNullJumua
+                )
               )
-            )
+              .withShouldEndSession(false)
+              .getResponse();
+          }
+          return handlerInput.responseBuilder
+            .speak(requestAttributes.t("noPrayerTimePrompt", prayerNameFromData) + requestAttributes.t("doYouNeedAnythingElsePrompt"))
             .withShouldEndSession(false)
             .getResponse();
-        }
-        return handlerInput.responseBuilder
-          .speak(requestAttributes.t("noPrayerTimePrompt", prayerNameFromData) + requestAttributes.t("doYouNeedAnythingElsePrompt"))
-          .withShouldEndSession(false)
-          .getResponse();
-      case 6:
-        // Extract only the Eid times
-        const eidTimes = [
-          mosqueTimesData.aidPrayerTime,
-          mosqueTimesData.aidPrayerTime2,
-        ];
-        // Find the first non-null Eid time
-        const firstNonNullEid = eidTimes.filter((time) => time !== null && time !== undefined).join(", ");
-        if (firstNonNullEid) {
-          helperFunctions.checkForCharacterDisplay(handlerInput, firstNonNullEid);
-          return handlerInput.responseBuilder
-            .speak(
-              requestAttributes.t(
-                "nextPrayerTimeSpecificPrompt",
-                primaryText,
-                prayerNameFromData,
-                firstNonNullEid
+        case 6:
+          // Extract only the Eid times
+          const eidTimes = [
+            mosqueTimesData.aidPrayerTime,
+            mosqueTimesData.aidPrayerTime2,
+          ];
+          // Find the first non-null Eid time
+          const firstNonNullEid = eidTimes.filter((time) => time !== null && time !== undefined).join(", ");
+          if (firstNonNullEid) {
+            helperFunctions.checkForCharacterDisplay(handlerInput, firstNonNullEid);
+            return handlerInput.responseBuilder
+              .speak(
+                requestAttributes.t(
+                  "nextPrayerTimeSpecificPrompt",
+                  primaryText,
+                  prayerNameFromData,
+                  firstNonNullEid
+                )
               )
-            )
+              .withShouldEndSession(false)
+              .getResponse();
+          }
+          return handlerInput.responseBuilder
+            .speak(requestAttributes.t("noPrayerTimePrompt", prayerNameFromData) + requestAttributes.t("doYouNeedAnythingElsePrompt"))
             .withShouldEndSession(false)
             .getResponse();
-        }
+        case 7:
+          const firstNonNullShuruq = mosqueTimesData.shuruq;
+          if (firstNonNullShuruq) {
+            return helperFunctions.getPrayerTimeForSpecificPrayer(
+              handlerInput,
+              firstNonNullShuruq,
+              currentMoment,
+              now,
+              prayerNameFromData
+            );
+          }
+          return handlerInput.responseBuilder
+            .speak(requestAttributes.t("noPrayerTimePrompt", prayerNameFromData) + requestAttributes.t("doYouNeedAnythingElsePrompt"))
+            .withShouldEndSession(false)
+            .getResponse();
+      }
+    } catch (error) {
+      console.log("Error in NextPrayerTimeIntentHandler: ", error);
+      if( error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
-          .speak(requestAttributes.t("noPrayerTimePrompt", prayerNameFromData) + requestAttributes.t("doYouNeedAnythingElsePrompt"))
-          .withShouldEndSession(false)
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
           .getResponse();
-      case 7:
-        const firstNonNullShuruq = mosqueTimesData.shuruq;
-        if (firstNonNullShuruq) {
-          return helperFunctions.getPrayerTimeForSpecificPrayer(
-            handlerInput,
-            firstNonNullShuruq,
-            currentMoment,
-            now,
-            prayerNameFromData
-          );
-        }
-        return handlerInput.responseBuilder
-          .speak(requestAttributes.t("noPrayerTimePrompt", prayerNameFromData) + requestAttributes.t("doYouNeedAnythingElsePrompt"))
-          .withShouldEndSession(false)
-          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
     }
   },
 };
@@ -239,13 +253,27 @@ const NextPrayerTimeIntentWithoutNameHandler = {
     if (!persistentAttributes || !persistentAttributes.uuid) {
       return await helperFunctions.checkForPersistenceData(handlerInput);
     }
-    const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), requestAttributes.t("prayerNames"));
-    helperFunctions.checkForCharacterDisplay(handlerInput, prayerTimeDetails.time);
-    const speakOutput = requestAttributes.t("nextPrayerWithoutMosquePrompt", prayerTimeDetails.name, prayerTimeDetails.time, prayerTimeDetails.diffInMinutes) + requestAttributes.t("doYouNeedAnythingElsePrompt");
-    return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .withShouldEndSession(false)
-      .getResponse();
+    try {
+      const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), requestAttributes.t("prayerNames"));
+      helperFunctions.checkForCharacterDisplay(handlerInput, prayerTimeDetails.time);
+      const speakOutput = requestAttributes.t("nextPrayerWithoutMosquePrompt", prayerTimeDetails.name, prayerTimeDetails.time, prayerTimeDetails.diffInMinutes) + requestAttributes.t("doYouNeedAnythingElsePrompt");
+      return handlerInput.responseBuilder
+        .speak(speakOutput)
+        .withShouldEndSession(false)
+        .getResponse();
+    } catch (error) {
+      console.log("Error in NextPrayerTimeIntentWithoutNameHandler: ", error);
+      if( error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
   }
 };
 
@@ -315,6 +343,12 @@ const NextIqamaTimeIntentHandler = {
         .getResponse();
     } catch (error) {
       console.log("Error in fetching next iqama timings: ", error);
+      if( error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
         .withShouldEndSession(true)
@@ -516,6 +550,12 @@ const AllIqamaTimeIntentHandler = {
         .getResponse();
     } catch (error) {
       console.log("Error in fetching iqama timings: ", error);
+      if( error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
         .withShouldEndSession(true)
@@ -533,22 +573,32 @@ const AllPrayerTimeIntentHandler = {
     );
   },
   async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
     try {
       const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes, mosqueTimes } = sessionAttributes;
-      if (!persistentAttributes || !persistentAttributes.uuid) {
+      if (!persistentAttributes?.uuid) {
         return helperFunctions.checkForPersistenceData(handlerInput);
       }
-      const requestAttributes =
-        handlerInput.attributesManager.getRequestAttributes();
-
       return handlerInput.responseBuilder
-        .speak(await helperFunctions.getAllPrayerTimesSpeechoutput(handlerInput, mosqueTimes) + requestAttributes.t("doYouNeedAnythingElsePrompt"))
+        .speak(
+          (await helperFunctions.getAllPrayerTimesSpeechoutput(
+            handlerInput,
+            mosqueTimes
+          )) + requestAttributes.t("doYouNeedAnythingElsePrompt")
+        )
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
       console.log("Error in fetching Prayer timings: ", error);
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
         .withShouldEndSession(true)
@@ -744,58 +794,72 @@ const PlayAdhanTaskHandler = {
         handlerInput.attributesManager.getSessionAttributes();
     const requestAttributes =
         handlerInput.attributesManager.getRequestAttributes();
-    const { persistentAttributes } = sessionAttributes; 
-    if (!persistentAttributes?.uuid) {
-      return helperFunctions.checkForPersistenceData(handlerInput);
-    }
-    let { mosqueTimes } = sessionAttributes;
-    if (!mosqueTimes?.times) {
-      try {
-        mosqueTimes = await getPrayerTimings(persistentAttributes.uuid);
-        sessionAttributes.mosqueTimes = mosqueTimes;
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-      } catch (error) {
-        console.log("Unable to hydrate mosque times for routine playback: ", error);
+    try {
+      const { persistentAttributes } = sessionAttributes; 
+      if (!persistentAttributes?.uuid) {
+        return helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      let { mosqueTimes } = sessionAttributes;
+      if (!mosqueTimes?.times) {
+        try {
+          mosqueTimes = await getPrayerTimings(persistentAttributes.uuid);
+          sessionAttributes.mosqueTimes = mosqueTimes;
+          handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        } catch (error) {
+          console.log("Unable to hydrate mosque times for routine playback: ", error);
+          return handlerInput.responseBuilder
+            .speak(requestAttributes.t("routineErrorPrompt"))
+            .withShouldEndSession(true)
+            .getResponse();
+        }
+      }
+      let audioName = "Adhaan";
+      const prayerNames = requestAttributes.t("prayerNames");
+      const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), prayerNames);
+      const isFajrPrayer = prayerTimeDetails.name === prayerNames[0];
+      let audioUrl = isFajrPrayer ? adhaanRecitation[0].fajrUrl : adhaanRecitation[0].otherUrl;
+      if(persistentAttributes?.favouriteAdhaan){
+        const { primaryText } = persistentAttributes.favouriteAdhaan;
+        audioName = primaryText;
+        audioUrl = isFajrPrayer ?  persistentAttributes.favouriteAdhaan.fajrUrl : persistentAttributes.favouriteAdhaan.otherUrl;
+      } 
+      console.log("Audio URL: ", audioUrl);
+      const playBehavior = "REPLACE_ALL";
+      const metadataInfo = getMetadata(handlerInput,audioName)
+      const supportedInterfaces = Alexa.getSupportedInterfaces(
+        handlerInput.requestEnvelope
+      );
+      if(!supportedInterfaces['AudioPlayer']){
+        console.log("Audio Player is not supported on this device");
         return handlerInput.responseBuilder
-          .speak(requestAttributes.t("routineErrorPrompt"))
+          .speak(requestAttributes.t("adhaanErrorPrompt"))
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .withShouldEndSession(true)
+        .addAudioPlayerPlayDirective(
+          playBehavior,
+          audioUrl,
+          audioName + "-" + uuidv4(),
+          0,
+          null,
+          metadataInfo
+        )
+        .getResponse();
+    } catch (error) {
+      console.log("Error in PlayAdhanTaskHandler: ", error);
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
           .withShouldEndSession(true)
           .getResponse();
       }
-    }
-    let audioName = "Adhaan";
-    const prayerNames = requestAttributes.t("prayerNames");
-    const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), prayerNames);
-    const isFajrPrayer = prayerTimeDetails.name === prayerNames[0];
-    let audioUrl = isFajrPrayer ? adhaanRecitation[0].fajrUrl : adhaanRecitation[0].otherUrl;
-    if(persistentAttributes?.favouriteAdhaan){
-      const { primaryText } = persistentAttributes.favouriteAdhaan;
-      audioName = primaryText;
-      audioUrl = isFajrPrayer ?  persistentAttributes.favouriteAdhaan.fajrUrl : persistentAttributes.favouriteAdhaan.otherUrl;
-    } 
-    console.log("Audio URL: ", audioUrl);
-    const playBehavior = "REPLACE_ALL";
-    const metadataInfo = getMetadata(handlerInput,audioName)
-    const supportedInterfaces = Alexa.getSupportedInterfaces(
-      handlerInput.requestEnvelope
-    );
-    if(!supportedInterfaces['AudioPlayer']){
-      console.log("Audio Player is not supported on this device");
       return handlerInput.responseBuilder
-        .speak(requestAttributes.t("adhaanErrorPrompt"))
-        .withShouldEndSession(false)
+        .speak(requestAttributes.t("errorPrompt"))
+        .withShouldEndSession(true)
         .getResponse();
     }
-    return handlerInput.responseBuilder
-      .withShouldEndSession(true)
-      .addAudioPlayerPlayDirective(
-        playBehavior,
-        audioUrl,
-        audioName + "-" + uuidv4(),
-        0,
-        null,
-        metadataInfo
-      )
-      .getResponse();
   },
 };
 
@@ -810,6 +874,8 @@ const CreateRoutineStartedHandler = {
     );
   },
   async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
     try {
       const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
@@ -817,9 +883,8 @@ const CreateRoutineStartedHandler = {
       if (!persistentAttributes?.uuid) {
         return helperFunctions.checkForPersistenceData(handlerInput);
       }
-      const requestAttributes =
-        handlerInput.attributesManager.getRequestAttributes();
-      const prayerNameDetails = await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput);
+      const prayerNameDetails =
+        await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput);
       const prayerNameTimePrompt = prayerNameDetails.map(
         (prayer, index) => `${index + 1}. ${prayer.namePhoneme} ${prayer.time}`
       );
@@ -858,8 +923,12 @@ const CreateRoutineStartedHandler = {
         .getResponse();
     } catch (error) {
       console.log("Error in CreateRoutineStartedHandler: ", error);
-      const requestAttributes =
-        handlerInput.attributesManager.getRequestAttributes();
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("routineErrorPrompt"))
         .withShouldEndSession(true)
@@ -878,71 +947,85 @@ const CreateRoutineIntentHandler = {
     );
   },
   async handle(handlerInput) {
-    const prayerNameResolvedId = helperFunctions.getResolvedId(
-      handlerInput.requestEnvelope,
-      "prayerName"
-    );
-    let prayerIndex =
-      parseInt(
-        Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex")
-      ) || 0;
-    const sessionAttributes =
-      handlerInput.attributesManager.getSessionAttributes();
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
-    const { persistentAttributes } = sessionAttributes;
-    if (!persistentAttributes?.uuid) {
-      return helperFunctions.checkForPersistenceData(handlerInput);
-    }
-    const prayerNameDetails =
-      sessionAttributes.prayerNameDetails ||
-      (await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput));
-    const prayerNames = requestAttributes.t("prayerNames");
-    if (prayerNameResolvedId !== undefined && prayerNameResolvedId !== null) {
-      prayerIndex = parseInt(prayerNameResolvedId) + 1; // Adjusting index to match the slot value
-    }
-    if (prayerIndex < 1 || prayerIndex > prayerNameDetails.length) {
-      console.log("Invalid prayer index: ", prayerIndex);
-      return handlerInput.responseBuilder
-        .speak(
-          requestAttributes.t(
-            "invalidPrayerIndexPrompt",
-            prayerNameDetails.length
+    try {      
+      const prayerNameResolvedId = helperFunctions.getResolvedId(
+        handlerInput.requestEnvelope,
+        "prayerName"
+      );
+      let prayerIndex =
+        parseInt(
+          Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex")
+        ) || 0;
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const { persistentAttributes } = sessionAttributes;
+      if (!persistentAttributes?.uuid) {
+        return helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      const prayerNameDetails =
+        sessionAttributes.prayerNameDetails ||
+        (await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput));
+      const prayerNames = requestAttributes.t("prayerNames");
+      if (prayerNameResolvedId !== undefined && prayerNameResolvedId !== null) {
+        prayerIndex = parseInt(prayerNameResolvedId) + 1; // Adjusting index to match the slot value
+      }
+      if (prayerIndex < 1 || prayerIndex > prayerNameDetails.length) {
+        console.log("Invalid prayer index: ", prayerIndex);
+        return handlerInput.responseBuilder
+          .speak(
+            requestAttributes.t(
+              "invalidPrayerIndexPrompt",
+              prayerNameDetails.length
+            )
           )
-        )
-        .addDirective({
-          type: "Dialog.ElicitSlot",
-          slotToElicit: "prayerIndex",
-          updatedIntent: {
-            name: "CreateRoutineIntent",
-            confirmationStatus: "NONE",
-            slots: {
-              prayerIndex: {
-                name: "prayerIndex",
-                confirmationStatus: "NONE",
-              },
-              prayerName: {
-                name: "prayerName",
-                confirmationStatus: "NONE",
+          .addDirective({
+            type: "Dialog.ElicitSlot",
+            slotToElicit: "prayerIndex",
+            updatedIntent: {
+              name: "CreateRoutineIntent",
+              confirmationStatus: "NONE",
+              slots: {
+                prayerIndex: {
+                  name: "prayerIndex",
+                  confirmationStatus: "NONE",
+                },
+                prayerName: {
+                  name: "prayerName",
+                  confirmationStatus: "NONE",
+                },
               },
             },
-          },
-        })
-        .withShouldEndSession(false)
+          })
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      const selectedPrayer = prayerNameDetails[prayerIndex - 1];
+      console.log("Selected Prayer: ", selectedPrayer);
+      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      const automationDirective = helperFunctions.offerAutomation(
+        userTimeZone,
+        selectedPrayer.time,
+        selectedPrayer.name,
+        selectedPrayer.namePhoneme === prayerNames[5]
+      );
+      return handlerInput.responseBuilder
+        .addDirective(automationDirective)
+        .getResponse();
+    } catch (error) {
+      console.log("Error in CreateRoutineIntentHandler:", error);
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("routineErrorPrompt"))
+        .withShouldEndSession(true)
         .getResponse();
     }
-    const selectedPrayer = prayerNameDetails[prayerIndex - 1];
-    console.log("Selected Prayer: ", selectedPrayer);
-    const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-    const automationDirective = helperFunctions.offerAutomation(
-      userTimeZone,
-      selectedPrayer.time,
-      selectedPrayer.name,
-      selectedPrayer.namePhoneme === prayerNames[5]
-    );
-    return handlerInput.responseBuilder
-      .addDirective(automationDirective)
-      .getResponse();
   },
 };
 

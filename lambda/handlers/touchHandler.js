@@ -101,18 +101,32 @@ const RoutineListTouchEventHandler = {
       JSON.stringify(handlerInput.requestEnvelope.request)
     );
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    const selectedRoutine = handlerInput.requestEnvelope.request.arguments[2];
-    const prayerNames = requestAttributes.t("prayerNames");
-    const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-    const automationDirective = helperFunctions.offerAutomation(
-      userTimeZone,
-      selectedRoutine.time,
-      selectedRoutine.name,
-      selectedRoutine.namePhoneme === prayerNames[5],
-    );
-    return handlerInput.responseBuilder
-      .addDirective(automationDirective)
-      .getResponse();
+    try {
+      const selectedRoutine = handlerInput.requestEnvelope.request.arguments[2];
+      const prayerNames = requestAttributes.t("prayerNames");
+      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      const automationDirective = helperFunctions.offerAutomation(
+        userTimeZone,
+        selectedRoutine.time,
+        selectedRoutine.name,
+        selectedRoutine.namePhoneme === prayerNames[5],
+      );
+      return handlerInput.responseBuilder
+        .addDirective(automationDirective)
+        .getResponse();
+    } catch (error) {
+      console.log("Error in RoutineListTouchEventHandler: ", error);
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("routineErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
   },
 };
 

@@ -130,6 +130,12 @@ const getPrayerTimingsForMosque = async (
     if (error?.message === "Mosque not found") {
       return await getListOfMosque(handlerInput, speakOutput);
     }
+    if (error?.message === "Unable to fetch user timezone") {
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("timezoneErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
     return handlerInput.responseBuilder
       .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
       .withShouldEndSession(true)
@@ -320,7 +326,7 @@ const getUserTimezone = async (handlerInput) => {
     })
     .catch((error) => {
       console.log("Error in fetching user timezone: ", error);
-      return "America/Los_Angeles";
+      throw new Error("Unable to fetch user timezone");
     });
   return userTimeZone;
 };

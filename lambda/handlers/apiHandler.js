@@ -107,8 +107,67 @@ const getConfig = (httpMethod, url, apiVersion = "3.0") => {
   };
 };
 
+/* *
+ * Helper function to generate an access token with the scope alexa::datastore. 
+ * AlexaClientID and AlexaClientSecret are fetched from the Permissions page
+ * */
+const getAccessToken = async () => {
+  let config = {
+    method: "post",
+    url: "https://api.amazon.com/auth/o2/token",
+    timeout: 3000,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      charset: "utf-8",
+    },
+    params: {
+      grant_type: "client_credentials",
+      client_id: process.env.AlexaClientID,
+      client_secret: process.env.AlexaClientSecret,
+      scope: "alexa::datastore"
+    }
+  };
+
+  return await axios(config)
+    .then(function (response) {
+      return response.data;
+    })
+    .catch(function (error) {
+      console.log("Error while fetching access token: ", error);
+      throw error;
+    });
+}
+
+const updateDatastore = async (token, commands, target, apiEndpoint = "https://api.eu.amazonalexa.com") => {
+  const config = {
+    method: "post",
+    url: `${apiEndpoint}/v1/datastore/commands`,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `${token.token_type} ${token.access_token}`
+    },
+    data: {
+      commands: commands,
+      target: target
+    }
+  };
+  console.log("Datastore Config: ", JSON.stringify(config, null, 2).replace(/Bearer \w+/g, "Bearer ****"));
+
+  return await axios(config)
+    .then(function (response) {
+      console.log("Datastore Response: ", JSON.stringify(response.data));
+      return response.data;
+    })
+    .catch(function (error) {
+      console.log("Error while updating Datastore: ", error);
+      throw error;
+    });
+}
+
 module.exports = {
   getMosqueList,
   getPrayerTimings,
-  getRandomHadith
+  getRandomHadith,
+  updateDatastore,
+  getAccessToken
 };

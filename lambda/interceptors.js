@@ -38,8 +38,11 @@ const ResponseTimeCalculationInterceptor = {
 };
 
 const AddDirectiveResponseInterceptor = {
-  async process(handlerInput, response) {   
-    if(!response) return;
+  async process(handlerInput, response) {
+    if (!response || (Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.Presentation.APL.UserEvent" &&
+      handlerInput.requestEnvelope.request.arguments[0] === "READ_HADITH")) {
+      return;
+    };
     const { directives } = response;
     const aplDirective = directives
       ? directives.find(
@@ -196,7 +199,7 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
  */
 function shouldSkipProcessing(requestType) {
   //skip processing for skill disabled events and audio player requests
-  return requestType === "AlexaSkillEvent.SkillDisabled" || requestType.startsWith("AudioPlayer.");
+  return requestType === "AlexaSkillEvent.SkillDisabled" || requestType.startsWith("AudioPlayer.") || requestType.startsWith("Alexa.DataStore.PackageManager") || requestType.startsWith("System.ExceptionEncountered") || requestType.startsWith("Alexa.Authorization.Grant");
 }
 
 /**

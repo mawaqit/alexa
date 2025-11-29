@@ -65,5 +65,7 @@ module.exports = {
     invalidPrayerIndexPrompt: `Sorry, the prayer index you provided is invalid. Please try again. You can choose between 1 and %s.`,
     timezoneErrorPrompt: `Sorry, I couldn't retrieve your timezone. Please check your location settings in the Alexa app and try again.`,
     requestRoutinePrompt: "Would you like to set up a routine for this prayer?",
+    hadithWidgetTitle: "Hadith of the day",
+    hadithWidgetDescription: "Loading..."
   },
 };

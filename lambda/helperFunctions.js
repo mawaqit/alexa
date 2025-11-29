@@ -865,6 +865,10 @@ const logRoutineCreation = async (handlerInput, routineDetails) => {
   await attributesManager.savePersistentAttributes();
 };
 
+const getApiEndpoint = (handlerInput) => {
+  return handlerInput.requestEnvelope.context?.System?.apiEndpoint;
+};
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -898,5 +902,6 @@ module.exports = {
   getRequestedRoutinePrayer,
   deleteRequestedRoutinePrayer,
   checkForRoutinePrayerAlreadyExists,
-  logRoutineCreation
+  logRoutineCreation,
+  getApiEndpoint
 };

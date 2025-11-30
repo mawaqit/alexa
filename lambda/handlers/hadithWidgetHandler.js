@@ -5,7 +5,8 @@ const helperFunctions = require("../helperFunctions");
 
 const InstallWidgetRequestHandler = {
     canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UsagesInstalled";
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UsagesInstalled"
+        && helperFunctions.getPackageId(handlerInput) === "RandomHadith";
     },
     async handle(handlerInput) {
         const { attributesManager } = handlerInput;
@@ -14,6 +15,10 @@ const InstallWidgetRequestHandler = {
         const description = requestAttributes.t("hadithWidgetDescription");
         const attributes = await attributesManager.getPersistentAttributes() || {};
         const locale = helperFunctions.splitLanguage(Alexa.getLocale(handlerInput.requestEnvelope));
+        const currentTime = new Date();
+        const updateInterval = (process.env.UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS || 1) * 60 * 60 * 1000;
+        const nextUpdateTime = currentTime.getTime() + updateInterval;
+
         try {
             const hadith = await getRandomHadith(locale);
             const commands = [
@@ -23,7 +28,8 @@ const InstallWidgetRequestHandler = {
                     key: "hadith",
                     content: {
                         title: title,
-                        randomHadith: hadith || description
+                        randomHadith: hadith || description,
+                        nextUpdateTime: nextUpdateTime
                     }
                 }
             ];
@@ -36,14 +42,17 @@ const InstallWidgetRequestHandler = {
             const apiEndpoint = helperFunctions.getApiEndpoint(handlerInput);
             await apiHandler.updateDatastore(tokenResponse, commands, target, apiEndpoint);
             attributes.lastHadithWidgetUpdate = new Date().toISOString();
+            attributes.isHadithWidgetInstalled = true;
         } catch (error) {
+            attributes.isHadithWidgetInstalled = false;
             console.log("Error while installing hadith: ", error);
         }      
-        attributes.isHadithWidgetInstalled = true;
         attributesManager.setPersistentAttributes(attributes);
         await attributesManager.savePersistentAttributes();
 
-        return handlerInput.responseBuilder.getResponse();
+        return handlerInput.responseBuilder
+        .withShouldEndSession(true)
+        .getResponse();
     }
 };
 
@@ -52,7 +61,8 @@ const InstallWidgetRequestHandler = {
  * */
 const RemoveWidgetRequestHandler = {
     canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UsagesRemoved";
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UsagesRemoved"
+        && helperFunctions.getPackageId(handlerInput) === "RandomHadith";
     },
     async handle(handlerInput) {
         const { attributesManager } = handlerInput;
@@ -73,7 +83,8 @@ const RemoveWidgetRequestHandler = {
  * */
 const UpdateWidgetRequestHandler = {
     canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UpdateRequest";
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UpdateRequest"
+        && helperFunctions.getPackageId(handlerInput) === "RandomHadith";
     },
     async handle(handlerInput) {
         /* for now this information is not needed by this sample skill. 
@@ -93,9 +104,10 @@ const WidgetInstallationErrorHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.InstallationError";
     },
     async handle(handlerInput) {
-        console.log("Error Type: " + handlerInput.requestEnvelope.request.error.type);
+        console.log("Error Type: " + handlerInput.requestEnvelope.request?.error?.type);
+        const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+        const speakOutput = requestAttributes.t("widgetInstallationErrorPrompt");
 
-        const speakOutput = "Sorry, there was an error installing the widget. Please try again later";
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
@@ -110,70 +122,25 @@ const WidgetInstallationErrorHandler = {
 const UpdateHadithAPLEventHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.Presentation.APL.UserEvent" &&
-            handlerInput.requestEnvelope.request.arguments?.[0] === "FETCH_NEW_HADITH";
+            helperFunctions.getAplArgument(handlerInput, 0) === "FETCH_NEW_HADITH";
     },
     async handle(handlerInput) {
-        const locale = helperFunctions.splitLanguage(Alexa.getLocale(handlerInput.requestEnvelope));
-        const { attributesManager } = handlerInput;
-        const requestAttributes = attributesManager.getRequestAttributes();
-        const description = requestAttributes.t("hadithWidgetDescription");
-        const title = requestAttributes.t("hadithWidgetTitle");
-        const attributes = await attributesManager.getPersistentAttributes() || {};
-        const currentTime = new Date();
-        const lastUpdate = attributes.lastHadithWidgetUpdate ? new Date(attributes.lastHadithWidgetUpdate) : new Date(0);
-        const timeDiff = currentTime - lastUpdate;
-        const updateInterval = (process.env.UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS || 24) * 60 * 60 * 1000;
-
-        if (timeDiff < updateInterval) {
-            console.log("Hadith widget already updated: ", attributes.lastHadithWidgetUpdate, timeDiff, lastUpdate);
-            return handlerInput.responseBuilder.withShouldEndSession(true).getResponse();
-        }
-        console.log("Fetching new hadith...");
-        const hadith = await getRandomHadith(locale).catch((error) => {
-            console.log("Error while fetching hadith: ", error);
-            throw error;
-        });
-
-        // propagate update to DataStore to send it down to all the devices of a user to reflect in their widgets
-        const commands = [
-            {
-                type: "PUT_OBJECT",
-                namespace: "hadithOfTheDay",
-                key: "hadith",
-                content: {
-                    title: title,
-                    randomHadith: hadith || description
-                }
-            }
-        ];
-
-        const target = {
-            type: "DEVICES",
-            items: [Alexa.getDeviceId(handlerInput.requestEnvelope)]
-        };
-
-        const tokenResponse = await apiHandler.getAccessToken();
-        const apiEndpoint = helperFunctions.getApiEndpoint(handlerInput);
-        await apiHandler.updateDatastore(tokenResponse, commands, target, apiEndpoint);
-        attributes.lastHadithWidgetUpdate = currentTime.toISOString();
-        attributesManager.setPersistentAttributes(attributes);
-        await attributesManager.savePersistentAttributes();
-
-        return handlerInput.responseBuilder
-            .withShouldEndSession(true)
-            .getResponse();
+        return InstallWidgetRequestHandler.handle(handlerInput);
     },
 };
 
 const ReadHadithAPLEventHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.Presentation.APL.UserEvent" &&
-            handlerInput.requestEnvelope.request.arguments?.[0] === "READ_HADITH";
+            helperFunctions.getAplArgument(handlerInput, 0) === "READ_HADITH";
     },
     handle(handlerInput) {
         const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-        const hadith = handlerInput.requestEnvelope.request.arguments?.[1] || requestAttributes.t("hadithWidgetDescription");
-
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes() || {};
+        const hadith = helperFunctions.getAplArgument(handlerInput, 1) || requestAttributes.t("hadithWidgetDescription");
+        sessionAttributes.skipAplDirective = true;
+        sessionAttributes.skipCardDirective = true;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
         return handlerInput.responseBuilder
             .speak(hadith)
             .withShouldEndSession(true)

@@ -151,7 +151,7 @@ const updateDatastore = async (token, commands, target, apiEndpoint = "https://a
       target: target
     }
   };
-  console.log("Datastore Config: ", JSON.stringify(config, null, 2).replace(/Bearer \w+/g, "Bearer ****"));
+  console.log("Datastore Config: ", JSON.stringify(config, null, 2).replace(/Authorization":\s*"[^"]+"/g, 'Authorization": "****"'));
 
   return await axios(config)
     .then(function (response) {

@@ -66,6 +66,7 @@ module.exports = {
     timezoneErrorPrompt: `Sorry, I couldn't retrieve your timezone. Please check your location settings in the Alexa app and try again.`,
     requestRoutinePrompt: "Would you like to set up a routine for this prayer?",
     hadithWidgetTitle: "Hadith of the day",
-    hadithWidgetDescription: "Loading..."
+    hadithWidgetDescription: "Loading...",
+    widgetInstallationErrorPrompt: "Sorry, an error occurred while installing the widget. Please try again later.",
   },
 };

@@ -869,6 +869,18 @@ const getApiEndpoint = (handlerInput) => {
   return handlerInput.requestEnvelope.context?.System?.apiEndpoint;
 };
 
+const getPackageId = (handlerInput) => {
+  return handlerInput.requestEnvelope.request?.payload?.packageId;
+};
+
+const getAplArgument = (handlerInput, argument) => {
+  return handlerInput.requestEnvelope.request?.payload?.arguments?.[argument];
+};
+
+const isNewSession = (handlerInput) => {
+  return handlerInput.requestEnvelope?.session?.new;
+};
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -903,5 +915,8 @@ module.exports = {
   deleteRequestedRoutinePrayer,
   checkForRoutinePrayerAlreadyExists,
   logRoutineCreation,
-  getApiEndpoint
+  getApiEndpoint,
+  getPackageId,
+  getAplArgument,
+  isNewSession
 };

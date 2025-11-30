@@ -68,6 +68,7 @@ module.exports = {
     timezoneErrorPrompt: `Désolé, je n'ai pas pu récupérer votre fuseau horaire. Veuillez vérifier vos paramètres de localisation dans l'application Alexa et réessayer.`,
     requestRoutinePrompt: "Souhaitez-vous configurer une routine pour cette prière ?",
     hadithWidgetTitle: "Hadith du jour",
-    hadithWidgetDescription: "Chargement..."
+    hadithWidgetDescription: "Chargement...",
+    widgetInstallationErrorPrompt: "Désolé, une erreur s'est produite lors de l'installation du widget. Veuillez réessayer plus tard.",
   },
 };

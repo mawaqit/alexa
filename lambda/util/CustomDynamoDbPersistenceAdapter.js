@@ -23,14 +23,13 @@ class CustomDynamoDbPersistenceAdapter extends DynamoDbPersistenceAdapter {
 
         // 3. Add the extra columns to the Item if they exist in the session attributes
         // These will be saved as top-level attributes in the DynamoDB table
-        if (attributes.emailId) {
+        if (attributes.emailId && typeof attributes.emailId === 'string') {
             item.emailId = attributes.emailId;
         }
 
-        if (attributes.uuid) {
+        if (attributes.uuid && typeof attributes.uuid === 'string') {
             item.mosqueId = attributes.uuid;
         }
-
         // 4. Construct the Put parameters
         const putParams = {
             TableName: this.tableName,

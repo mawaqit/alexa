@@ -40,7 +40,8 @@ const ResponseTimeCalculationInterceptor = {
 
 const AddDirectiveResponseInterceptor = {
   async process(handlerInput, response) {
-    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes() || {};
+    console.log("AddDirectiveResponseInterceptor");
+    const sessionAttributes = handlerInput.requestEnvelope?.session? handlerInput.attributesManager.getSessionAttributes() : {};
     const { skipAplDirective, skipCardDirective } = sessionAttributes;
     if (!response) {
       return;
@@ -63,9 +64,11 @@ const AddDirectiveResponseInterceptor = {
     } else {
       handleNoAplSupport(response, ssmlText, hasAudio, text, skipCardDirective);
     }
-    delete sessionAttributes.skipAplDirective;
-    delete sessionAttributes.skipCardDirective;
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    if (handlerInput.requestEnvelope?.session && (sessionAttributes?.skipAplDirective || sessionAttributes?.skipCardDirective)) {
+      delete sessionAttributes.skipAplDirective;
+      delete sessionAttributes.skipCardDirective;
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    }
   },
 };
 
@@ -74,7 +77,7 @@ function getAplDirective(directives) {
     ? directives.find(
       (directive) =>
         directive?.type && (directive.type.startsWith("Alexa.Presentation.APL"))
-    )
+    ) || false
     : false;
 }
 

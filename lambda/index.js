@@ -49,13 +49,20 @@ const {
   CFIRNextPrayerTimeAndPlayAdhaanIntentHandler
 } = require("./handlers/CFIRHandler.js");
 const {
-  InstallWidgetRequestHandler,
-  RemoveWidgetRequestHandler,
-  UpdateWidgetRequestHandler,
+  InstallHadithWidgetRequestHandler,
+  RemoveHadithWidgetRequestHandler,
+  UpdateHadithWidgetRequestHandler,
   WidgetInstallationErrorHandler,
   UpdateHadithAPLEventHandler,
   ReadHadithAPLEventHandler
 } = require("./handlers/hadithWidgetHandler.js");
+const {
+  InstallPrayerTimeWidgetRequestHandler,
+  RemovePrayerTimeWidgetRequestHandler,
+  UpdatePrayerTimeWidgetRequestHandler,
+  UpdatePrayerTimeAPLEventHandler,
+  ReadPrayerTimeAPLEventHandler
+} = require("./handlers/prayerTimeWidgetHandler.js");
 const { AuthHandler } = require("./handlers/authHandler.js");
 
 const LaunchRequestHandler = {
@@ -231,12 +238,17 @@ exports.handler = Alexa.SkillBuilders.custom()
     CFIRSelectMosqueAndFavoriteAdhaanReciterIntentHandler,
     CFIRNextPrayerTimeAndPlayAdhaanIntentHandler,
     AuthHandler,
-    InstallWidgetRequestHandler,
-    RemoveWidgetRequestHandler,
-    UpdateWidgetRequestHandler,
+    InstallHadithWidgetRequestHandler,
+    RemoveHadithWidgetRequestHandler,
+    UpdateHadithWidgetRequestHandler,
     WidgetInstallationErrorHandler,
     UpdateHadithAPLEventHandler,
     ReadHadithAPLEventHandler,
+    InstallPrayerTimeWidgetRequestHandler,
+    RemovePrayerTimeWidgetRequestHandler,
+    UpdatePrayerTimeWidgetRequestHandler,
+    UpdatePrayerTimeAPLEventHandler,
+    ReadPrayerTimeAPLEventHandler,
     LaunchRequestHandler,
     ExceptionEncounteredHandler,
     HelpIntentHandler,

@@ -261,7 +261,7 @@ const NextPrayerTimeIntentWithoutNameHandler = {
     try {
       const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), requestAttributes.t("prayerNames"));
       helperFunctions.checkForCharacterDisplay(handlerInput, prayerTimeDetails.time);
-      const speakOutput = requestAttributes.t("nextPrayerWithoutMosquePrompt", prayerTimeDetails.name, prayerTimeDetails.time, prayerTimeDetails.diffInMinutes) + requestAttributes.t("doYouNeedAnythingElsePrompt");
+      const speakOutput = requestAttributes.t("nextPrayerWithoutMosquePrompt", prayerTimeDetails.name, prayerTimeDetails.time, prayerTimeDetails.diffInMinutesPrompt) + requestAttributes.t("doYouNeedAnythingElsePrompt");
       return handlerInput.responseBuilder
         .speak(speakOutput)
         .withShouldEndSession(false)
@@ -335,13 +335,13 @@ const NextIqamaTimeIntentHandler = {
         iqamaTimes
       );
       console.log("Next Iqama Time: ", nextIqamaTime);
-      helperFunctions.checkForCharacterDisplay(handlerInput, nextIqamaTime.diffInMinutes);
+      helperFunctions.checkForCharacterDisplay(handlerInput, nextIqamaTime.diffInMinutesPrompt);
       return handlerInput.responseBuilder
         .speak(
           requestAttributes.t(
             "nextIqamaTimePrompt",
             nextIqamaTime.name,
-            nextIqamaTime.diffInMinutes
+            nextIqamaTime.diffInMinutesPrompt
           ) + requestAttributes.t("doYouNeedAnythingElsePrompt")
         )
         .withShouldEndSession(false)

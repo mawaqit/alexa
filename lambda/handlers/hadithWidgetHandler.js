@@ -3,7 +3,7 @@ const apiHandler = require("./apiHandler");
 const { getRandomHadith } = require("./apiHandler");
 const helperFunctions = require("../helperFunctions");
 
-const InstallWidgetRequestHandler = {
+const InstallHadithWidgetRequestHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UsagesInstalled"
         && helperFunctions.getPackageId(handlerInput) === "RandomHadith";
@@ -59,7 +59,7 @@ const InstallWidgetRequestHandler = {
 /* *
  * UsagesRemoved triggers when a user removes your widget package on their device.  
  * */
-const RemoveWidgetRequestHandler = {
+const RemoveHadithWidgetRequestHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UsagesRemoved"
         && helperFunctions.getPackageId(handlerInput) === "RandomHadith";
@@ -81,7 +81,7 @@ const RemoveWidgetRequestHandler = {
  * UpdateRequest triggers when a user receives an widget update on their device
  * Your skill receives this event if your widget manifest has updateStateChanges set to INFORM  
  * */
-const UpdateWidgetRequestHandler = {
+const UpdateHadithWidgetRequestHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UpdateRequest"
         && helperFunctions.getPackageId(handlerInput) === "RandomHadith";
@@ -125,7 +125,7 @@ const UpdateHadithAPLEventHandler = {
             helperFunctions.getAplArgument(handlerInput, 0) === "FETCH_NEW_HADITH";
     },
     async handle(handlerInput) {
-        return InstallWidgetRequestHandler.handle(handlerInput);
+        return InstallHadithWidgetRequestHandler.handle(handlerInput);
     },
 };
 
@@ -149,9 +149,9 @@ const ReadHadithAPLEventHandler = {
 };
 
 module.exports = {
-    InstallWidgetRequestHandler,
-    RemoveWidgetRequestHandler,
-    UpdateWidgetRequestHandler,
+    InstallHadithWidgetRequestHandler,
+    RemoveHadithWidgetRequestHandler,
+    UpdateHadithWidgetRequestHandler,
     WidgetInstallationErrorHandler,
     UpdateHadithAPLEventHandler,
     ReadHadithAPLEventHandler

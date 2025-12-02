@@ -25,7 +25,7 @@ const getPersistedData = async (handlerInput) => {
 
 const checkForConsentTokenToAccessDeviceLocation = (handlerInput) => {
   return (
-    handlerInput.requestEnvelope.context.System.user.permissions?.consentToken 
+    handlerInput.requestEnvelope.context.System.user.permissions?.consentToken
     && handlerInput.requestEnvelope.context.System?.apiAccessToken
   );
 };
@@ -61,18 +61,28 @@ const getNextPrayerTime = (requestAttributes, times, timezone, prayerNames, iqam
     return {
       name: nextTime.name,
       time: nextTime.time.format("HH:mm"),
-      diffInMinutes: nextTime.diffInMinutes,
+      diffInMinutesPrompt: nextTime.diffInMinutesPrompt,
+      diffInMinutes: nextTime.diffInMinutes
     };
   } else {
     console.log("No time is greater than or equal to current time: ", times[0]);
+    const nextTime = times[0];
+    const nextTimeMoment = `${moment(now).add(1, "days").format("YYYY-MM-DD")}T${nextTime}`;
+    const currentTime = now.format("YYYY-MM-DDTHH:mm");
+    const diffInMinutesPrompt = calculateMinutes(
+      requestAttributes,
+      currentTime,
+      nextTimeMoment
+    );
+    const diffInMinutes = getDifferenceInMinutes(
+      currentTime,
+      nextTimeMoment
+    );
     return {
       name: prayerNames[0],
       time: times[0],
-      diffInMinutes: calculateMinutes(
-        requestAttributes,
-        now.format("YYYY-MM-DDTHH:mm"),
-        `${moment(now).add(1, "days").format("YYYY-MM-DD")}T${times[0]}`
-      ),
+      diffInMinutesPrompt: diffInMinutesPrompt,
+      diffInMinutes: diffInMinutes
     };
   }
 };
@@ -104,7 +114,7 @@ const getPrayerTimingsForMosque = async (
   speakOutput
 ) => {
   const { attributesManager } = handlerInput;
-  const requestAttributes = attributesManager.getRequestAttributes();  
+  const requestAttributes = attributesManager.getRequestAttributes();
   const { persistentAttributes } = attributesManager.getSessionAttributes();
   try {
     const userTimeZone = await getUserTimezone(handlerInput);
@@ -114,13 +124,13 @@ const getPrayerTimingsForMosque = async (
       mosqueTimes.times,
       userTimeZone,
       prayerNames
-    );    
+    );
     speakOutput += requestAttributes.t(
       "nextPrayerTimePrompt",
       persistentAttributes.primaryText,
       nextPrayerTime.name,
       nextPrayerTime.time,
-      nextPrayerTime.diffInMinutes
+      nextPrayerTime.diffInMinutesPrompt
     );
     const routinePrayerDetails = { ...nextPrayerTime };
     const phonemeText = extractPhonemeText([nextPrayerTime.name])[0];
@@ -163,7 +173,7 @@ const getListOfMosque = async (handlerInput, speakOutput) => {
       checkForConsentTokenToAccessDeviceLocation(handlerInput);
     if (!consentToken) {
       return responseBuilder
-        .speak( speakOutput + requestAttributes.t("requestForGeoLocationPrompt"))
+        .speak(speakOutput + requestAttributes.t("requestForGeoLocationPrompt"))
         .withAskForPermissionsConsentCard(["read::alexa:device:all:address"])
         .getResponse();
     }
@@ -226,7 +236,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
     const deviceAddressServiceClient =
       serviceClientFactory.getDeviceAddressServiceClient();
     const address = await deviceAddressServiceClient.getFullAddress(deviceId);
-    if(!address){
+    if (!address) {
       return responseBuilder
         .speak(requestAttributes.t("noAddressPrompt"))
         .withShouldEndSession(true)
@@ -265,9 +275,9 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
     }
     if (error?.statusCode === 403) {
       return responseBuilder
-      .speak(requestAttributes.t("requestForGeoLocationPrompt"))
-      .withAskForPermissionsConsentCard(["read::alexa:device:all:address"])
-      .getResponse();
+        .speak(requestAttributes.t("requestForGeoLocationPrompt"))
+        .withAskForPermissionsConsentCard(["read::alexa:device:all:address"])
+        .getResponse();
     }
     return responseBuilder
       .speak(requestAttributes.t("errorPromptforMosqueList"))
@@ -297,22 +307,22 @@ const createResponseDirectiveForMosqueList = async (
         },
       },
     },
-  });  
+  });
   mosqueList = await Promise.all(
     mosqueList.map(async (mosque) => {
-      mosque.primaryText = await translateText(mosque.primaryText, locale);  
+      mosque.primaryText = await translateText(mosque.primaryText, locale);
       return mosque;
     })
   )
   console.log("Mosque List: ", mosqueList);
   const mosqueListPrompt = mosqueList
-  .map((mosque, index) => `${index + 1}. ${mosque.primaryText}`)
-  .join(", ");
-  console.log("Mosque List Prompt: ", mosqueListPrompt);  
+    .map((mosque, index) => `${index + 1}. ${mosque.primaryText}`)
+    .join(", ");
+  console.log("Mosque List Prompt: ", mosqueListPrompt);
   speechPrompt += requestAttributes.t("chooseMosquePrompt", mosqueListPrompt);
   if (
     Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
-      "Alexa.Presentation.APL"
+    "Alexa.Presentation.APL"
     ]
   ) {
     const dataSource = await getDataSourceforMosqueList(handlerInput, mosqueList);
@@ -349,16 +359,16 @@ function checkForCharacterDisplay(handlerInput, nextPrayerTime) {
   }
 }
 
-function calculateMinutes(requestAttributes, start, end) {
-  // Create Date objects from the input strings
+const getDifferenceInMinutes = (start, end) => {
   const startDate = new Date(start);
   const endDate = new Date(end);
 
-  // Calculate the difference in milliseconds
   const diffInMilliseconds = endDate - startDate;
+  return diffInMilliseconds / 1000 / 60;
+}
 
-  // Convert the difference to minutes
-  const diffInMinutes = diffInMilliseconds / 1000 / 60;
+function calculateMinutes(requestAttributes, start, end) {
+  const diffInMinutes = getDifferenceInMinutes(start, end);
 
   let result;
 
@@ -367,7 +377,7 @@ function calculateMinutes(requestAttributes, start, end) {
     const minutes = Math.floor(diffInMinutes % 60);
     result = requestAttributes.t("hoursAndMinutesPrompt", hours, minutes);
   } else if (diffInMinutes < 1) {
-    const diffInSeconds = Math.floor(diffInMilliseconds / 1000);
+    const diffInSeconds = Math.floor(diffInMinutes * 60);
     result = requestAttributes.t("secondsPrompt", diffInSeconds);
   } else {
     result = requestAttributes.t("minutesPrompt", diffInMinutes);
@@ -446,11 +456,12 @@ const generateNextPrayerTime = (requestAttributes, prayerTime, now, prayerName, 
   return {
     name: prayerName,
     time: timeMoment,
-    diffInMinutes: calculateMinutes(
+    diffInMinutesPrompt: calculateMinutes(
       requestAttributes,
       currentMoment,
       timeMoment.format("YYYY-MM-DDTHH:mm")
     ),
+    diffInMinutes: getDifferenceInMinutes(currentMoment, timeMoment.format("YYYY-MM-DDTHH:mm")),
   };
 };
 
@@ -469,8 +480,8 @@ const generateMomentObject = (time, now) => {
 };
 
 const translateText = async (text, toLang) => {
-  try {    
-    toLang = splitLanguage(toLang);    
+  try {
+    toLang = splitLanguage(toLang);
     // console.log("Text to convert: ", text);
     const detectedLanguage = await detectLanguage(text);
     if (detectedLanguage === toLang) {
@@ -478,8 +489,8 @@ const translateText = async (text, toLang) => {
     }
     const translatedText = await translate(text, toLang);
     return translatedText ? translatedText : text;
-  } catch (error) {    
-    console.log("Error in converting %s to %s: %s", text,toLang, error);
+  } catch (error) {
+    console.log("Error in converting %s to %s: %s", text, toLang, error);
     return text;
   }
 }
@@ -516,9 +527,9 @@ const splitLanguage = (locale) => {
 const createDataSourceForPrayerTiming = (time) => {
   return {
     "data": {
-        "text": time
+      "text": time
     }
-}
+  }
 }
 
 /**
@@ -631,8 +642,7 @@ const offerAutomation = (timezone, time, prayerName, isJumma = false) => {
               timeZoneId: timezone,
               recurrence: isJumma
                 ? "RRULE:FREQ=WEEKLY;BYDAY=FR"
-                :
-                "RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU,MO,TU,WE,TH,FR,SA",
+                : "RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=SU,MO,TU,WE,TH,FR,SA",
             },
           },
         },
@@ -813,18 +823,18 @@ const getRequestedRoutinePrayer = (handlerInput) => {
   return sessionAttributes?.persistentAttributes?.requestedRoutinePrayer;
 }
 
-const checkForRoutinePrayerAlreadyExists = async (handlerInput, prayerDetails) => {  
+const checkForRoutinePrayerAlreadyExists = async (handlerInput, prayerDetails) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
   const existingRoutines = persistentAttributes.routinePrayers || [];
-  if(existingRoutines.length === 0) {
+  if (existingRoutines.length === 0) {
     return false;
   }
   const index = existingRoutines.findIndex((routine) =>
     routine.name === prayerDetails.name
   );
-  
+
   if (index !== -1) {
     // Found a routine with the same name
     if (existingRoutines[index].time === prayerDetails.time) {
@@ -844,7 +854,7 @@ const checkForRoutinePrayerAlreadyExists = async (handlerInput, prayerDetails) =
   );
   attributesManager.setSessionAttributes(sessionAttributes);
   await attributesManager.savePersistentAttributes();
-  
+
   // No routine with this name exists
   return false;
 };
@@ -874,7 +884,7 @@ const getPackageId = (handlerInput) => {
 };
 
 const getAplArgument = (handlerInput, argument) => {
-  return handlerInput.requestEnvelope.request?.payload?.arguments?.[argument];
+  return handlerInput.requestEnvelope.request?.arguments?.[argument];
 };
 
 const isNewSession = (handlerInput) => {
@@ -918,5 +928,7 @@ module.exports = {
   getApiEndpoint,
   getPackageId,
   getAplArgument,
-  isNewSession
+  isNewSession,
+  resolveIqamaMoment,
+  getDifferenceInMinutes
 };

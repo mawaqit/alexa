@@ -115,7 +115,7 @@ const getAccessToken = async () => {
   let config = {
     method: "post",
     url: "https://api.amazon.com/auth/o2/token",
-    timeout: 3000,
+    timeout: 10000, 
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       charset: "utf-8",
@@ -133,7 +133,7 @@ const getAccessToken = async () => {
       return response.data;
     })
     .catch(function (error) {
-      console.log("Error while fetching access token: ", error);
+      console.log("Error while fetching access token: ", error.message, "Status:", error?.response?.status);
       throw error;
     });
 }
@@ -142,6 +142,7 @@ const updateDatastore = async (token, commands, target, apiEndpoint = "https://a
   const config = {
     method: "post",
     url: `${apiEndpoint}/v1/datastore/commands`,
+    timeout: 10000,
     headers: {
       "Content-Type": "application/json",
       Authorization: `${token.token_type} ${token.access_token}`
@@ -150,8 +151,7 @@ const updateDatastore = async (token, commands, target, apiEndpoint = "https://a
       commands: commands,
       target: target
     }
-  };
-  console.log("Datastore Config: ", JSON.stringify(config, null, 2).replace(/Authorization":\s*"[^"]+"/g, 'Authorization": "****"'));
+  }; console.log("Datastore Config: ", JSON.stringify(config, null, 2).replace(/Authorization":\s*"[^"]+"/g, 'Authorization": "****"'));
 
   return await axios(config)
     .then(function (response) {
@@ -159,8 +159,7 @@ const updateDatastore = async (token, commands, target, apiEndpoint = "https://a
       return response.data;
     })
     .catch(function (error) {
-      console.log("Error while updating Datastore: ", error);
-      throw error;
+      console.log("Error while updating Datastore: ", error.message, "Status:", error?.response?.status); throw error;
     });
 }
 

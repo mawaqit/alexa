@@ -70,5 +70,6 @@ module.exports = {
     hadithWidgetTitle: "Hadith du jour",
     hadithWidgetDescription: "Chargement...",
     widgetInstallationErrorPrompt: "Désolé, une erreur s'est produite lors de l'installation du widget. Veuillez réessayer plus tard.",
+    nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s."
   },
 };

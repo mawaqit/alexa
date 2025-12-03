@@ -136,11 +136,7 @@ const ReadHadithAPLEventHandler = {
     },
     handle(handlerInput) {
         const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes() || {};
         const hadith = helperFunctions.getAplArgument(handlerInput, 1) || requestAttributes.t("hadithWidgetDescription");
-        sessionAttributes.skipAplDirective = true;
-        sessionAttributes.skipCardDirective = true;
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
         return handlerInput.responseBuilder
             .speak(hadith)
             .withShouldEndSession(true)

@@ -122,8 +122,8 @@ const getAccessToken = async () => {
     },
     params: {
       grant_type: "client_credentials",
-      client_id: process.env.AlexaClientID,
-      client_secret: process.env.AlexaClientSecret,
+      client_id: process.env.clientId,
+      client_secret: process.env.clientSecret,
       scope: "alexa::datastore"
     }
   };

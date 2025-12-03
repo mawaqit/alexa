@@ -880,7 +880,7 @@ const getApiEndpoint = (handlerInput) => {
 };
 
 const getPackageId = (handlerInput) => {
-  return handlerInput.requestEnvelope.request?.payload?.packageId;
+  return handlerInput.requestEnvelope.request?.payload?.packageId || handlerInput.requestEnvelope.request?.packageId;
 };
 
 const getAplArgument = (handlerInput, argument) => {

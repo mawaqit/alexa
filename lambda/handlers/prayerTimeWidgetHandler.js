@@ -27,7 +27,7 @@ const InstallPrayerTimeWidgetRequestHandler = {
                 userTimeZone,
                 prayerNames
             );
-            const prayerTime = requestAttributes.t("nextPrayerWithoutMosquePrompt", nextPrayerTime.name, nextPrayerTime.time, nextPrayerTime.diffInMinutesPrompt);
+            const prayerTime = requestAttributes.t("nextPrayerWithoutMosqueAndTimePrompt", nextPrayerTime.name, nextPrayerTime.time);
             const mosqueName = persistentAttributes.primaryText;
             const title = requestAttributes.t("skillName");
             const currentDateTime = new Date(
@@ -43,6 +43,7 @@ const InstallPrayerTimeWidgetRequestHandler = {
                     content: {
                         title,
                         prayerTime,
+                        nextPrayerTime,
                         mosqueName,
                         nextUpdateTime: nextPrayerTimeInMillis
                     }

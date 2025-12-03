@@ -198,9 +198,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
 const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(handlerInput) {
     console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
-    if (helperFunctions.isNewSession(handlerInput)) {
-      await awsSsmHandler.handler();
-    }
+    await awsSsmHandler.handler();
   },
 };
 

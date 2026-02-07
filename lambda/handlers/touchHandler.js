@@ -8,8 +8,8 @@ const MosqueListTouchEventHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.Presentation.APL.UserEvent" &&
-      handlerInput.requestEnvelope.request.arguments[0] === "ListItemSelected" &&
-      handlerInput.requestEnvelope.request.arguments[1] === requestAttributes.t("titleForMosqueList")
+      helperFunctions.getAplArgument(handlerInput, 0) === "ListItemSelected" &&
+      helperFunctions.getAplArgument(handlerInput, 1) === requestAttributes.t("titleForMosqueList")
     );
   },
   async handle(handlerInput) {
@@ -18,7 +18,7 @@ const MosqueListTouchEventHandler = {
       JSON.stringify(handlerInput.requestEnvelope.request)
     );
     const locale = Alexa.getLocale(handlerInput.requestEnvelope);
-    const selectedMosque = handlerInput.requestEnvelope.request.arguments[2];
+    const selectedMosque = helperFunctions.getAplArgument(handlerInput, 2);
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
@@ -58,8 +58,8 @@ const AdhaanRecitationTouchEventHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.Presentation.APL.UserEvent" &&
-      handlerInput.requestEnvelope.request.arguments[0] === "ListItemSelected" &&
-      handlerInput.requestEnvelope.request.arguments[1] === requestAttributes.t("titleForAdhaanReciterList")
+      helperFunctions.getAplArgument(handlerInput, 0) === "ListItemSelected" &&
+      helperFunctions.getAplArgument(handlerInput, 1) === requestAttributes.t("titleForAdhaanReciterList")
     );
   },
   async handle(handlerInput) {
@@ -67,7 +67,7 @@ const AdhaanRecitationTouchEventHandler = {
       "Request Log in AdhaanRecitationTouchEventHandler: ",
       JSON.stringify(handlerInput.requestEnvelope.request)
     );
-    const selectedRecitation = handlerInput.requestEnvelope.request.arguments[2];
+    const selectedRecitation = helperFunctions.getAplArgument(handlerInput, 2);
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
@@ -89,9 +89,9 @@ const RoutineListTouchEventHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.Presentation.APL.UserEvent" &&
-      handlerInput.requestEnvelope.request.arguments[0] ===
+      helperFunctions.getAplArgument(handlerInput, 0) ===
         "ListItemSelected" &&
-      handlerInput.requestEnvelope.request.arguments[1] ===
+      helperFunctions.getAplArgument(handlerInput, 1) ===
         requestAttributes.t("titleForPrayerTimeList")
     );
   },
@@ -102,7 +102,7 @@ const RoutineListTouchEventHandler = {
     );
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     try {
-      const selectedRoutine = handlerInput.requestEnvelope.request.arguments[2];
+      const selectedRoutine = helperFunctions.getAplArgument(handlerInput, 2);
       const prayerNames = requestAttributes.t("prayerNames");
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       const automationDirective = helperFunctions.offerAutomation(

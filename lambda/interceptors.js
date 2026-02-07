@@ -28,69 +28,94 @@ const LogResponseInterceptor = {
 
 const ResponseTimeCalculationInterceptor = {
   process(handlerInput, response) {
-   const timestamp = Alexa.getRequest(handlerInput.requestEnvelope)["timestamp"];
+    const timestamp = Alexa.getRequest(handlerInput.requestEnvelope)["timestamp"];
     // console.log("Request Timestamp: ", JSON.stringify(timestamp));
     const requestTimestamp = new Date(timestamp);
     const responseTimestamp = new Date();
     // console.log("Response Timestamp: ", JSON.stringify(responseTimestamp.toISOString()));
     const timeDifference = responseTimestamp - requestTimestamp;
-    console.log(`Response Time: ${(timeDifference / 1000).toFixed(2)} seconds`);  },
+    console.log(`Response Time: ${(timeDifference / 1000).toFixed(2)} seconds`);
+  },
 };
 
 const AddDirectiveResponseInterceptor = {
-  async process(handlerInput, response) {   
-    if(!response) return;
+  async process(handlerInput, response) {
+    console.log("AddDirectiveResponseInterceptor");
+    const sessionAttributes = handlerInput.requestEnvelope?.session? handlerInput.attributesManager.getSessionAttributes() : {};
+    const { skipAplDirective, skipCardDirective } = sessionAttributes;
+    if (!response) {
+      return;
+    }
+
     const { directives } = response;
-    const aplDirective = directives
-      ? directives.find(
-          (directive) =>
-            directive.type === "Alexa.Presentation.APL.RenderDocument" || directive.type === "Alexa.Presentation.APLT.RenderDocument"
-        )
-      : false;
-    // console.log("APL Directive: ", JSON.stringify(aplDirective));      
-    const ssmlText = response?.outputSpeech?.ssml || null;
-    const text = ssmlText ? ssmlText.replace(/<\/?[^>]+(>|$)/g, "").trim() : "";
-    const hasAudio = ssmlText ? /<audio\b/i.test(ssmlText) : false;           
+    const aplDirective = getAplDirective(directives);
+    const { ssmlText, text, hasAudio } = getSsmlInfo(response);
+
     console.log("APL Directive: %s \n SSML Text: %s", JSON.stringify(aplDirective), ssmlText);
+
     if (ssmlText && !hasAudio) {
       response["outputSpeech"]["ssml"] = helperFunctions.smartEscapeSSML(ssmlText);
     }
-    const supportsAPL = Alexa.getSupportedInterfaces(
-      handlerInput.requestEnvelope
-    );
-    if (
-      supportsAPL["Alexa.Presentation.APL"] || supportsAPL["Alexa.Presentation.APLT"]
-    ) {
-      if (!aplDirective) {
-        if (ssmlText && !hasAudio && supportsAPL["Alexa.Presentation.APL"]) {
-          console.log("Adding APL Directive");
-          const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
-          // console.log("Data Source: ", JSON.stringify(dataSource));
-          const directive = helperFunctions.createDirectivePayload(
-            prayerTimeApl,
-            dataSource
-          );
 
-          if (!directives) {
-            response.directives = [directive];
-          } else {
-            response.directives.push(directive);
-          }
-        }
-      }
+    const supportsAPL = Alexa.getSupportedInterfaces(handlerInput.requestEnvelope);
+
+    if (!skipAplDirective && (supportsAPL["Alexa.Presentation.APL"] || supportsAPL["Alexa.Presentation.APLT"])) {
+      await handleAplSupport(handlerInput, response, aplDirective, ssmlText, hasAudio, text, supportsAPL);
     } else {
-      console.log("APL not supported");
-      if (ssmlText && !hasAudio) {
-        console.log("Adding Simple Card");
-        response.card = {
-          type: "Simple",
-          title: process.env.skillName,
-          content: text,
-        };
-      }
+      handleNoAplSupport(response, ssmlText, hasAudio, text, skipCardDirective);
+    }
+    if (handlerInput.requestEnvelope?.session && (sessionAttributes?.skipAplDirective || sessionAttributes?.skipCardDirective)) {
+      delete sessionAttributes.skipAplDirective;
+      delete sessionAttributes.skipCardDirective;
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
     }
   },
 };
+
+function getAplDirective(directives) {
+  return directives
+    ? directives.find(
+      (directive) =>
+        directive?.type && (directive.type.startsWith("Alexa.Presentation.APL"))
+    ) || false
+    : false;
+}
+
+function getSsmlInfo(response) {
+  const ssmlText = response?.outputSpeech?.ssml || null;
+  const text = ssmlText ? ssmlText.replace(/<\/?[^>]+(>|$)/g, "").trim() : "";
+  const hasAudio = ssmlText ? /<audio\b/i.test(ssmlText) : false;
+  return { ssmlText, text, hasAudio };
+}
+
+async function handleAplSupport(handlerInput, response, aplDirective, ssmlText, hasAudio, text, supportsAPL) {
+  if (!aplDirective && ssmlText && !hasAudio && supportsAPL["Alexa.Presentation.APL"]) {
+    console.log("Adding APL Directive");
+    const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
+    const directive = helperFunctions.createDirectivePayload(
+      prayerTimeApl,
+      dataSource
+    );
+
+    if (!response.directives) {
+      response.directives = [directive];
+    } else {
+      response.directives.push(directive);
+    }
+  }
+}
+
+function handleNoAplSupport(response, ssmlText, hasAudio, text, skipCardDirective) {
+  console.log("APL not supported");
+  if (ssmlText && !hasAudio && !skipCardDirective) {
+    console.log("Adding Simple Card");
+    response.card = {
+      type: "Simple",
+      title: process.env.skillName,
+      content: text,
+    };
+  }
+}
 
 const LocalizationInterceptor = {
   async process(handlerInput) {
@@ -133,80 +158,49 @@ const LocalizationInterceptor = {
 const SavePersistenceAttributesToSession = {
   async process(handlerInput) {
     console.log("SavePersistenceAttributesToSession Interceptor");
-    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
-    if(shouldSkipProcessing(requestType)){
-      return;
-    }
-    const isNewSession = isPlaybackControllerRequest(requestType)? false : Alexa.isNewSession(handlerInput.requestEnvelope);
-    if (isNewSession) {
-      console.log("New Session");
-      const sessionAttributes =
-        handlerInput.attributesManager.getSessionAttributes();
-      const persistentAttributes = await helperFunctions.getPersistedData(
-        handlerInput
-      );
-      if (persistentAttributes?.uuid) {
-        console.log(
-          "Persistent Attributes: ",
-          JSON.stringify(persistentAttributes)
-        );
-        delete persistentAttributes.requestedRoutinePrayer;
-        handlerInput.attributesManager.setPersistentAttributes(
-          persistentAttributes
-        );
-        await handlerInput.attributesManager.savePersistentAttributes();
-        try {
-          const mosqueTimes = await apiHandler.getPrayerTimings(
-            persistentAttributes.uuid
-          );
-          sessionAttributes.mosqueTimes = mosqueTimes;
-          sessionAttributes.persistentAttributes = persistentAttributes;
-          handlerInput.attributesManager.setSessionAttributes(
-            sessionAttributes
-          );
-        } catch (error) {
-          console.log("Error while fetching mosque list: ", error);
-          if (error?.message === "Mosque not found") {
-            await handlerInput.attributesManager.deletePersistentAttributes();
-          }
-        }
-      }
+    if (helperFunctions.isNewSession(handlerInput)) {
+      await handleNewSession(handlerInput);
     }
   },
 };
+
+async function handleNewSession(handlerInput) {
+  console.log("New Session");
+  const persistentAttributes = await helperFunctions.getPersistedData(handlerInput);
+
+  if (persistentAttributes?.uuid) {
+    await processPersistentAttributes(handlerInput, persistentAttributes);
+  }
+}
+
+async function processPersistentAttributes(handlerInput, persistentAttributes) {
+  console.log("Persistent Attributes: ", JSON.stringify(persistentAttributes));
+
+  delete persistentAttributes.requestedRoutinePrayer;
+  handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+  await handlerInput.attributesManager.savePersistentAttributes();
+
+  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+
+  try {
+    const mosqueTimes = await apiHandler.getPrayerTimings(persistentAttributes.uuid);
+    sessionAttributes.mosqueTimes = mosqueTimes;
+    sessionAttributes.persistentAttributes = persistentAttributes;
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+  } catch (error) {
+    console.log("Error while fetching mosque list: ", error);
+    if (error?.message === "Mosque not found") {
+      await handlerInput.attributesManager.deletePersistentAttributes();
+    }
+  }
+}
 
 const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(handlerInput) {
     console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
-    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
-    if(shouldSkipProcessing(requestType)){
-      return;
-    }
-    const isNewSession = isPlaybackControllerRequest(requestType)? false : Alexa.isNewSession(handlerInput.requestEnvelope);
-    if (isNewSession) {
-      await awsSsmHandler.handler();
-    }        
+    await awsSsmHandler.handler();
   },
 };
-
-/**
- * Determines whether interceptor processing should be skipped for a given Alexa request type.
- * @param {string} requestType - The request type string from the Alexa request envelope.
- * @returns {boolean} `true` if the request is `AlexaSkillEvent.SkillDisabled` or starts with `AudioPlayer.`, `false` otherwise.
- */
-function shouldSkipProcessing(requestType) {
-  //skip processing for skill disabled events and audio player requests
-  return requestType === "AlexaSkillEvent.SkillDisabled" || requestType.startsWith("AudioPlayer.");
-}
-
-/**
- * Determines whether a request type corresponds to a PlaybackController request.
- * @param {string} requestType - The Alexa request type to evaluate.
- * @returns {boolean} `true` if `requestType` starts with `"PlaybackController."`, `false` otherwise.
- */
-function isPlaybackControllerRequest(requestType) {
-  return requestType.startsWith("PlaybackController.");
-}
 
 module.exports = {
   LogResponseInterceptor,

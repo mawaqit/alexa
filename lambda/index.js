@@ -44,10 +44,26 @@ const {
   AudioIntentHandler
 } = require("./handlers/audioPlayerHandler.js");
 const {
-    CFIRWithoutSlotsHandler,
-    CFIRSelectMosqueAndFavoriteAdhaanReciterIntentHandler,
-    CFIRNextPrayerTimeAndPlayAdhaanIntentHandler
+  CFIRWithoutSlotsHandler,
+  CFIRSelectMosqueAndFavoriteAdhaanReciterIntentHandler,
+  CFIRNextPrayerTimeAndPlayAdhaanIntentHandler
 } = require("./handlers/CFIRHandler.js");
+const {
+  InstallHadithWidgetRequestHandler,
+  RemoveHadithWidgetRequestHandler,
+  UpdateHadithWidgetRequestHandler,
+  WidgetInstallationErrorHandler,
+  UpdateHadithAPLEventHandler,
+  ReadHadithAPLEventHandler
+} = require("./handlers/hadithWidgetHandler.js");
+const {
+  InstallPrayerTimeWidgetRequestHandler,
+  RemovePrayerTimeWidgetRequestHandler,
+  UpdatePrayerTimeWidgetRequestHandler,
+  UpdatePrayerTimeAPLEventHandler,
+  ReadPrayerTimeAPLEventHandler
+} = require("./handlers/prayerTimeWidgetHandler.js");
+const { AuthHandler } = require("./handlers/authHandler.js");
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -94,7 +110,7 @@ const CancelAndStopIntentHandler = {
       (Alexa.getIntentName(handlerInput.requestEnvelope) ===
         "AMAZON.CancelIntent" ||
         Alexa.getIntentName(handlerInput.requestEnvelope) ===
-          "AMAZON.StopIntent")
+        "AMAZON.StopIntent")
     );
   },
   handle(handlerInput) {
@@ -117,7 +133,7 @@ const FallbackIntentHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
       Alexa.getIntentName(handlerInput.requestEnvelope) ===
-        "AMAZON.FallbackIntent"
+      "AMAZON.FallbackIntent"
     );
   },
   handle(handlerInput) {
@@ -194,6 +210,23 @@ const ErrorHandler = {
   },
 };
 
+const ExceptionEncounteredHandler = {
+  canHandle(handlerInput) {
+    return Alexa.getRequestType(handlerInput.requestEnvelope) === "System.ExceptionEncountered";
+  },
+  handle(handlerInput) {
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const speakOutput = requestAttributes.t("errorPrompt") || "I'm sorry, I can't understand the command. Please try again.";
+    const error = handlerInput.requestEnvelope.request?.error;
+    console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
+
+    return handlerInput.responseBuilder
+      .speak(speakOutput)
+      .withShouldEndSession(true)
+      .getResponse();
+  },
+};
+
 /**
  * This handler acts as the entry point for your skill, routing all request and response
  * payloads to the handlers above. Make sure any new handlers or interceptors you've
@@ -204,7 +237,20 @@ exports.handler = Alexa.SkillBuilders.custom()
     CFIRWithoutSlotsHandler,
     CFIRSelectMosqueAndFavoriteAdhaanReciterIntentHandler,
     CFIRNextPrayerTimeAndPlayAdhaanIntentHandler,
+    AuthHandler,
+    InstallHadithWidgetRequestHandler,
+    RemoveHadithWidgetRequestHandler,
+    UpdateHadithWidgetRequestHandler,
+    WidgetInstallationErrorHandler,
+    UpdateHadithAPLEventHandler,
+    ReadHadithAPLEventHandler,
+    InstallPrayerTimeWidgetRequestHandler,
+    RemovePrayerTimeWidgetRequestHandler,
+    UpdatePrayerTimeWidgetRequestHandler,
+    UpdatePrayerTimeAPLEventHandler,
+    ReadPrayerTimeAPLEventHandler,
     LaunchRequestHandler,
+    ExceptionEncounteredHandler,
     HelpIntentHandler,
     AudioPlayerEventHandler,
     PlaybackCommandHandler,

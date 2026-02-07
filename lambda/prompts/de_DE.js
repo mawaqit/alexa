@@ -65,5 +65,9 @@ module.exports = {
       invalidPrayerIndexPrompt: `Entschuldigung, der von Ihnen angegebene Gebetsindex ist ungültig. Bitte versuchen Sie es erneut. Sie können zwischen 1 und %s wählen.`,
       timezoneErrorPrompt: `Entschuldigung, ich konnte Ihre Zeitzone nicht abrufen. Bitte überprüfen Sie Ihre Standort-Einstellungen in der Alexa-App und versuchen Sie es erneut.`,
       requestRoutinePrompt: "Möchten Sie eine Routine für dieses Gebet einrichten?",
+      hadithWidgetTitle: "Hadith des Tages",
+      hadithWidgetDescription: "Laden...",
+      widgetInstallationErrorPrompt: "Entschuldigung, ein Fehler ist bei der Installation des Widgets aufgetreten. Bitte versuchen Sie es später erneut.",
+      nextPrayerWithoutMosqueAndTimePrompt: "Das nächste Gebet ist %s um %s."
     },
   };

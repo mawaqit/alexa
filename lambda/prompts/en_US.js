@@ -1,9 +1,10 @@
 module.exports = {
   translation: {
-    skillName: process.env.skillName, //new
+    skillName: process.env.SKILL_NAME, //new
     welcomePrompt: `Salam Aleykoum! `,
     chooseMosquePrompt: `Which mosque would you like to choose? The nearest mosques are: %s, You can choose by saying the number associated with the mosque `,
-    chooseMosqueByTouchPrompt: "or you can also click on the mosque of your choice on your screen.",
+    chooseMosqueByTouchPrompt:
+      "or you can also click on the mosque of your choice on your screen.",
     helpPrompt: `Here are the commands you can use:\n- When is the next prayer?\n- You can also ask for the time of each prayer by asking for example "When is the fourth prayer?" for Maghrib\n- How much time is left before the iqama?\n- Give me information about my mosque.\n- Change my favorite mosque.\n- Give me the prayer times for the day.\n- Play the adhan.\n- Play the Fajr adhan.\nThese commands can also be used in your Alexa routines. More commands coming soon inshaAllah.`,
     stopPrompt: `Goodbye, and may Allah protect you!`,
     errorPrompt: `Sorry, an error occurred. Please try again later.`,
@@ -12,12 +13,22 @@ module.exports = {
     requestForGeoLocationPrompt: `To use this skill, you need to allow me access to your location so I can find the mosques closest to you. Please open the Alexa app on your phone to grant permission.`,
     noAddressPrompt: `It seems you haven't set your address on Alexa. You can do so from the Alexa app. This will allow me to find mosques near you.`,
     errorPromptforMosqueList: `I'm sorry, I couldn't find any MAWAQIT mosques near you.`,
-    logoUrl: "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
-    titleForMosqueList: `${process.env.skillName} Mosques`,
+    logoUrl:
+      "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
+    titleForMosqueList: `${process.env.SKILL_NAME} Mosques`,
     layoutDirection: "LTR",
     nextPrayerTimeErrorPrompt: `Sorry, I couldn't find the time for the next prayer at your mosque. Please try again.`,
     nextPrayerTimePrompt: `At %s, the next prayer is %s at %s in %s. `,
-    prayerNames: ["<phoneme alphabet=\"ipa\" ph=\"fadʒr\">Fajr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"duhr\">Dhuhr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕa.sˤr\">Asr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"maɣ.rɪb\">Maghrib</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʔɪʃaːʔ\">Isha</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"dʒumʕa\">Jumma</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕiːd\">Eid</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʃu.ruːq\">Shuruq</phoneme>"],
+    prayerNames: [
+      '<phoneme alphabet="ipa" ph="fadʒr">Fajr</phoneme>',
+      '<phoneme alphabet="ipa" ph="duhr">Dhuhr</phoneme>',
+      '<phoneme alphabet="ipa" ph="ʕa.sˤr">Asr</phoneme>',
+      '<phoneme alphabet="ipa" ph="maɣ.rɪb">Maghrib</phoneme>',
+      '<phoneme alphabet="ipa" ph="ʔɪʃaːʔ">Isha</phoneme>',
+      '<phoneme alphabet="ipa" ph="dʒumʕa">Jumma</phoneme>',
+      '<phoneme alphabet="ipa" ph="ʕiːd">Eid</phoneme>',
+      '<phoneme alphabet="ipa" ph="ʃu.ruːq">Shuruq</phoneme>',
+    ],
     unableToFindMosquePrompt: `Sorry, I couldn't find the mosque you are looking for. Please choose a valid option.`,
     mosqueNotRegisteredPrompt: `You have not registered a mosque to make this request. Please register a mosque first. `,
     mosqueSearchWordPrompt: `Which location would you like to search for a mosque? You can say the name of the city.`,
@@ -36,12 +47,12 @@ module.exports = {
     mosqueInfoErrorPrompt: `Sorry, I couldn't find any information for your mosque, please try again.`,
     nextPrayerTimeWithNamePrompt: `The %s prayer is at %s in %s.`,
     allIqamaTimesPrompt: `For %s, iqama is at %s.`,
-    deleteDataPrompt: `Your data has been successfully deleted. Restart the skill to use ${process.env.skillName} again.`,
+    deleteDataPrompt: `Your data has been successfully deleted. Restart the skill to use ${process.env.SKILL_NAME} again.`,
     okPrompt: `Okay. `,
     jummaTimePrompt: `Additionally, Jumua, the Friday prayer, is at %s.`,
     noJummaTimePrompt: `There is no Jumua prayer at this mosque.`,
     none: `None`,
-    thankYouPrompt: `Thank you for using ${process.env.skillName} to get the exact prayer times of your favorite mosque. `,
+    thankYouPrompt: `Thank you for using ${process.env.SKILL_NAME} to get the exact prayer times of your favorite mosque. `,
     globalErrorPrompt: `Sorry, I didn't quite understand what you said. Please repeat.`,
     fallbackPrompt: `Sorry, I didn't quite understand what you said. Please repeat.`,
     allPrayerTimesPrompt: `%s is at %s. `,
@@ -50,24 +61,47 @@ module.exports = {
     adhanReciterErrorPrompt: `Sorry, I couldn't find any recitations for the adhan. Please try again.`,
     adhanReciterSuccessPrompt: `Perfect, %s is now your favorite recitation for the adhan! `,
     titleForAdhaanReciterList: `Adhan Reciters`,
-    chooseAdhaanByTouchPrompt: "or you can also click on the recitation of your choice on your screen.",
+    chooseAdhaanByTouchPrompt:
+      "or you can also click on the recitation of your choice on your screen.",
     hadithErrorPrompt: `Sorry, I couldn't find any hadiths. Please try again.`,
     adhaanErrorPrompt: `Sorry, Currently, I don't support playing the adhan. Please try again later.`,
     selectMosquePrompt: `To register a mosque, you can say "select my mosque" or "choose my mosque". `,
     unableToResolvePrayerNamePrompt: `Sorry, I couldn't resolve the prayer name. Please try again.`,
-    prayerNamePrompt: "Which prayer would you like to create a routine for? You can choose between %s. You can choose by saying the number associated with the prayer ",
-    prayerNameTouchPrompt: "or you can also click on the prayer of your choice on your screen.",
+    prayerNamePrompt:
+      "Which prayer would you like to create a routine for? You can choose between %s. You can choose by saying the number associated with the prayer ",
+    prayerNameTouchPrompt:
+      "or you can also click on the prayer of your choice on your screen.",
     routineCreatedPrompt: `Perfect, the routine has been created successfully! `,
-    routineErrorPrompt: "Sorry, an error occurred while creating a routine. Please try again later.",
-    routineRejected: "To create a different routine, you can say 'create a routine'.",
-    routineAlreadyEnabled: "This routine has already been created. You can edit this routine in the Alexa app. To create a different routine, you can say 'create a routine'.",    
-    titleForPrayerTimeList: `Prayer Times`, 
+    routineErrorPrompt:
+      "Sorry, an error occurred while creating a routine. Please try again later.",
+    routineRejected:
+      "To create a different routine, you can say 'create a routine'.",
+    routineAlreadyEnabled:
+      "This routine has already been created. You can edit this routine in the Alexa app. To create a different routine, you can say 'create a routine'.",
+    titleForPrayerTimeList: `Prayer Times`,
     invalidPrayerIndexPrompt: `Sorry, the prayer index you provided is invalid. Please try again. You can choose between 1 and %s.`,
     timezoneErrorPrompt: `Sorry, I couldn't retrieve your timezone. Please check your location settings in the Alexa app and try again.`,
     requestRoutinePrompt: "Would you like to set up a routine for this prayer?",
     hadithWidgetTitle: "Hadith of the day",
     hadithWidgetDescription: "Loading...",
-    widgetInstallationErrorPrompt: "Sorry, an error occurred while installing the widget. Please try again later.",
+    widgetInstallationErrorPrompt:
+      "Sorry, an error occurred while installing the widget. Please try again later.",
     nextPrayerWithoutMosqueAndTimePrompt: `The next prayer is %s at %s`,
+    linkAccountPrompt:
+      "To enable the prayer routine, please link your Amazon account in the Alexa app and try again.",
+    refreshTokenMissing:
+      "It looks like your account linking is incomplete. Please disable and re-enable the skill in your Alexa app, then link your Amazon account and run device discovery to fix this.",
+    titleForDeleteRoutineList: "Delete Routine",
+    deleteRoutinePrompt: "Which routine would you like to delete? You can choose between %s. You can choose by saying the number associated with the routine ",
+    deleteRoutineTouchPrompt:
+      "or you can also click on the routine of your choice on your screen.",
+    deleteRoutineConfirmPrompt:
+      "Are you sure you want to delete the routine for %s? ",
+    routineDeletedPrompt: "The routine has been successfully deleted. ",
+    noRoutinesPrompt:
+      "You don't have any routines enabled. You can say 'create a routine' to get started. ",
+    deleteRoutineErrorPrompt:
+      "Sorry, an error occurred while deleting the routine. Please try again later.",
+    allRoutinesEnabled: "You have already enabled all the routines. To delete a routine, you can say 'delete a routine'.",
   },
 };

@@ -1,7 +1,7 @@
 
 module.exports = {
   translation: {
-    skillName: process.env.skillName, //new
+    skillName: process.env.SKILL_NAME, //new
     welcomePrompt: `Salam Aleykoum ! `,
     chooseMosquePrompt: `Quelle mosquée voulez-vous choisir ? Les mosquées les plus proches sont : %s, Vous pouvez choisir en prononçant le numéro associé à la mosquée `,
     chooseMosqueByTouchPrompt: " ou vous pouvez aussi cliquer sur la mosquée de votre choix sur votre écran.",
@@ -16,7 +16,7 @@ module.exports = {
     errorPromptforMosqueList: `Je suis désolé, je n'ai trouvé aucune mosquée MAWAQIT proche de vous.`,
     logoUrl:
       "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
-    titleForMosqueList: `Mosquées ${process.env.skillName}`,
+    titleForMosqueList: `Mosquées ${process.env.SKILL_NAME}`,
     layoutDirection: "LTR",
     nextPrayerTimeErrorPrompt: `Désolé, je n'ai pas pu trouver l'heure de la prochaine prière pour votre mosquée. Veuillez réessayer s'il vous plaît.`,
     nextPrayerTimePrompt: "À %s, la prochaine prière est %s à %s dans %s. ",    prayerNames: ["<phoneme alphabet=\"ipa\" ph=\"fadʒr\">Fajr</phoneme>", " <phoneme alphabet=\"ipa\" ph=\"duhr\">Dohr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕa.sˤr\">Asr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"maɣ.rɪb\">Maghrib</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʔɪʃaːʔ\">Isha</phoneme>","<phoneme alphabet=\"ipa\" ph=\"dʒumʕa\">Jumma</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕiːd\">Eid</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʃu.ruːq\">Shuruq</phoneme>"],
@@ -38,12 +38,12 @@ module.exports = {
     mosqueInfoErrorPrompt: "Désolé, je n'ai pas pu trouver d'information pour votre mosquée, veuillez reéssayer s'il vous plaît.",
     nextPrayerTimeWithNamePrompt: `La prière de %s est à %s dans %s. `,
     allIqamaTimesPrompt: "Pour %s, l'iqama est à %s. ", 
-    deleteDataPrompt: `Vos données ont bien été supprimées. Relancez la skill pour réutiliser ${process.env.skillName}.`,
+    deleteDataPrompt: `Vos données ont bien été supprimées. Relancez la skill pour réutiliser ${process.env.SKILL_NAME}.`,
     okPrompt: "Ok. ",
     jummaTimePrompt: "De plus, le jumua, la prière du Vendredi, est à %s.",
     noJummaTimePrompt: "Il n'y a pas de prière de jumua dans cette mosquée.",
     none: "None",
-    thankYouPrompt: `Merci d'utiliser ${process.env.skillName} afin d'avoir les horaires exactes de prière de votre mosquée favorite. `,
+    thankYouPrompt: `Merci d'utiliser ${process.env.SKILL_NAME} afin d'avoir les horaires exactes de prière de votre mosquée favorite. `,
     globalErrorPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
     fallbackPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
     allPrayerTimesPrompt: "%s est à %s. ",
@@ -70,6 +70,18 @@ module.exports = {
     hadithWidgetTitle: "Hadith du jour",
     hadithWidgetDescription: "Chargement...",
     widgetInstallationErrorPrompt: "Désolé, une erreur s'est produite lors de l'installation du widget. Veuillez réessayer plus tard.",
-    nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s."
+    nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s.",
+    linkAccountPrompt: "Pour activer la routine, veuillez vous connecter à votre compte Amazon dans l'application Alexa et réessayer.",
+    refreshTokenMissing: "Il semble que votre connexion au compte soit incomplète. Veuillez désactiver et réactiver la compétence dans l'application Alexa, puis connectez votre compte Amazon et effectuez la découverte du périphérique pour corriger cela.",
+    titleForDeleteRoutineList: "Supprimer la Routine",
+    deleteRoutineConfirmPrompt: "Êtes-vous sûr de vouloir supprimer la routine pour %s ? ",
+    routineDeletedPrompt: "La routine a été supprimée avec succès. ",
+    noRoutinesPrompt: "Vous n'avez aucune routine activée. Vous pouvez dire 'créer une routine' pour commencer. ",
+    deleteRoutinePrompt: "Quelle routine souhaitez-vous supprimer ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la routine",
+    deleteRoutineTouchPrompt:
+      "ou vous pouvez aussi cliquer sur la routine de votre choix sur votre écran.",
+    deleteRoutineErrorPrompt:
+      "Désolé, une erreur s'est produite lors de la suppression de la routine. Veuillez réessayer plus tard.",
+    allRoutinesEnabled: "Vous avez déjà activé toutes les routines. Pour supprimer une routine, vous pouvez dire 'supprimer une routine'.",
   },
 };

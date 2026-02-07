@@ -1,6 +1,8 @@
 const Alexa = require("ask-sdk-core");
-const AWS = require("aws-sdk");
-const ddbAdapter = require("ask-sdk-dynamodb-persistence-adapter");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const {
+  CustomDynamoDbPersistenceAdapter,
+} = require("./util/CustomDynamoDbPersistenceAdapter.js");
 const {
   LocalizationInterceptor,
   LogRequestInterceptor,
@@ -8,7 +10,7 @@ const {
   SavePersistenceAttributesToSession,
   AddDirectiveResponseInterceptor,
   SetApiKeysAsEnvironmentVariableFromAwsSsm,
-  ResponseTimeCalculationInterceptor
+  ResponseTimeCalculationInterceptor,
 } = require("./interceptors.js");
 const helperFunctions = require("./helperFunctions.js");
 const { SkillEventHandler } = require("./handlers/skillEventHandler.js");
@@ -29,24 +31,28 @@ const {
   PlayAdhanTaskHandler,
   CreateRoutineStartedHandler,
   CreateRoutineIntentHandler,
+  DeleteRoutineStartedHandler,
+  DeleteRoutinePrayerIndexHandler,
+  DeleteRoutinePrayerNameHandler,
   SessionResumedRequestHandler,
   YesIntentHandler,
-  NoIntentHandler
+  NoIntentHandler,
 } = require("./handlers/intentHandler.js");
 const {
   MosqueListTouchEventHandler,
   AdhaanRecitationTouchEventHandler,
-  RoutineListTouchEventHandler
+  RoutineListTouchEventHandler,
+  DeleteRoutineTouchEventHandler,
 } = require("./handlers/touchHandler.js");
 const {
   AudioPlayerEventHandler,
   PlaybackCommandHandler,
-  AudioIntentHandler
+  AudioIntentHandler,
 } = require("./handlers/audioPlayerHandler.js");
 const {
   CFIRWithoutSlotsHandler,
   CFIRSelectMosqueAndFavoriteAdhaanReciterIntentHandler,
-  CFIRNextPrayerTimeAndPlayAdhaanIntentHandler
+  CFIRNextPrayerTimeAndPlayAdhaanIntentHandler,
 } = require("./handlers/CFIRHandler.js");
 const {
   InstallHadithWidgetRequestHandler,
@@ -54,14 +60,14 @@ const {
   UpdateHadithWidgetRequestHandler,
   WidgetInstallationErrorHandler,
   UpdateHadithAPLEventHandler,
-  ReadHadithAPLEventHandler
+  ReadHadithAPLEventHandler,
 } = require("./handlers/hadithWidgetHandler.js");
 const {
   InstallPrayerTimeWidgetRequestHandler,
   RemovePrayerTimeWidgetRequestHandler,
   UpdatePrayerTimeWidgetRequestHandler,
   UpdatePrayerTimeAPLEventHandler,
-  ReadPrayerTimeAPLEventHandler
+  ReadPrayerTimeAPLEventHandler,
 } = require("./handlers/prayerTimeWidgetHandler.js");
 const { AuthHandler } = require("./handlers/authHandler.js");
 
@@ -94,8 +100,11 @@ const HelpIntentHandler = {
     );
   },
   handle(handlerInput) {
-    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    const speakOutput = requestAttributes.t("helpPrompt") + requestAttributes.t("doYouNeedAnythingElsePrompt");
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    const speakOutput =
+      requestAttributes.t("helpPrompt") +
+      requestAttributes.t("doYouNeedAnythingElsePrompt");
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .withShouldEndSession(false)
@@ -110,11 +119,12 @@ const CancelAndStopIntentHandler = {
       (Alexa.getIntentName(handlerInput.requestEnvelope) ===
         "AMAZON.CancelIntent" ||
         Alexa.getIntentName(handlerInput.requestEnvelope) ===
-        "AMAZON.StopIntent")
+          "AMAZON.StopIntent")
     );
   },
   handle(handlerInput) {
-    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
     const speakOutput = requestAttributes.t("stopPrompt");
 
     return handlerInput.responseBuilder
@@ -132,12 +142,15 @@ const FallbackIntentHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      Alexa.getIntentName(handlerInput.requestEnvelope) ===
-      "AMAZON.FallbackIntent"
+      (Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "AMAZON.FallbackIntent" ||
+        Alexa.getIntentName(handlerInput.requestEnvelope) ===
+          "AMAZON.RepeatIntent")
     );
   },
   handle(handlerInput) {
-    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
     const speakOutput = requestAttributes.t("fallbackPrompt");
 
     return handlerInput.responseBuilder
@@ -160,7 +173,7 @@ const SessionEndedRequestHandler = {
   },
   handle(handlerInput) {
     console.log(
-      `~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`
+      `~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`,
     );
     // Any cleanup logic goes here.
     return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
@@ -199,7 +212,8 @@ const ErrorHandler = {
     return true;
   },
   handle(handlerInput, error) {
-    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
     const speakOutput = requestAttributes.t("errorPrompt");
     console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
 
@@ -212,18 +226,16 @@ const ErrorHandler = {
 
 const ExceptionEncounteredHandler = {
   canHandle(handlerInput) {
-    return Alexa.getRequestType(handlerInput.requestEnvelope) === "System.ExceptionEncountered";
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) ===
+      "System.ExceptionEncountered"
+    );
   },
   handle(handlerInput) {
-    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
-    const speakOutput = requestAttributes.t("errorPrompt") || "I'm sorry, I can't understand the command. Please try again.";
-    const error = handlerInput.requestEnvelope.request?.error;
+    const error = handlerInput.requestEnvelope?.request?.error;
     console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
 
-    return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .withShouldEndSession(true)
-      .getResponse();
+    return handlerInput.responseBuilder.getResponse();
   },
 };
 
@@ -277,33 +289,36 @@ exports.handler = Alexa.SkillBuilders.custom()
     MosqueListTouchEventHandler,
     AdhaanRecitationTouchEventHandler,
     RoutineListTouchEventHandler,
+    DeleteRoutineStartedHandler,
+    DeleteRoutinePrayerIndexHandler,
+    DeleteRoutinePrayerNameHandler,
+    DeleteRoutineTouchEventHandler,
     SkillEventHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,
     SessionEndedRequestHandler,
-    IntentReflectorHandler
+    IntentReflectorHandler,
   )
   .addRequestInterceptors(
     LogRequestInterceptor,
     LocalizationInterceptor,
     SetApiKeysAsEnvironmentVariableFromAwsSsm,
-    SavePersistenceAttributesToSession
+    SavePersistenceAttributesToSession,
   )
   .addResponseInterceptors(
     AddDirectiveResponseInterceptor,
     LogResponseInterceptor,
-    ResponseTimeCalculationInterceptor
+    ResponseTimeCalculationInterceptor,
   )
   .addErrorHandlers(ErrorHandler)
   .withPersistenceAdapter(
-    new ddbAdapter.DynamoDbPersistenceAdapter({
-      tableName: process.env.persistenceAdapterTableName,
+    new CustomDynamoDbPersistenceAdapter({
+      tableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
       createTable: true,
-      dynamoDBClient: new AWS.DynamoDB({
-        apiVersion: "latest",
-        region: process.env.awsRegion,
+      dynamoDBClient: new DynamoDBClient({
+        region: process.env.AWS_REGION,
       }),
-    })
+    }),
   )
   .withCustomUserAgent("sample/hello-world/v1.2")
   .withApiClient(new Alexa.DefaultApiClient())

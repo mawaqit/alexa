@@ -7,6 +7,7 @@ const apiHandler = require("./handlers/apiHandler.js");
 const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
 const { getDataSourceForPrayerTime } = require("./datasources.js");
 const awsSsmHandler = require("./handlers/awsSsmHandler.js");
+const authHandler = require("./handlers/authHandler.js");
 
 const LogRequestInterceptor = {
   process(handlerInput) {
@@ -177,8 +178,18 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
   console.log("Persistent Attributes: ", JSON.stringify(persistentAttributes));
 
   delete persistentAttributes.requestedRoutinePrayer;
-  handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
-  await handlerInput.attributesManager.savePersistentAttributes();
+  try {
+    const userInfo = await GetUserInfo.process(handlerInput);
+    console.log("User Info Retrieved Successfully");
+    if (userInfo && userInfo?.email && userInfo?.user_id && (!persistentAttributes?.emailId || !persistentAttributes?.user_id)) {
+      persistentAttributes.emailId = userInfo?.email;
+      persistentAttributes.user_id = userInfo?.user_id;
+      handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+      await handlerInput.attributesManager.savePersistentAttributes();
+    }
+  } catch (error) {
+    console.log("Error while fetching user info: ", error);
+  }
 
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
@@ -205,6 +216,18 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(handlerInput) {
     console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
     await awsSsmHandler.handler();
+  },
+};
+
+const GetUserInfo = {
+  async process(handlerInput) {
+    console.log("GetUserInfo Interceptor");
+    const accessToken = handlerInput.requestEnvelope?.session?.user?.accessToken;
+    if (!accessToken) {
+      return;
+    }
+    const userInfo = await authHandler.getUserInfo(accessToken);
+    return userInfo;
   },
 };
 

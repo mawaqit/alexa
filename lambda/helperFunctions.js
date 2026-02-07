@@ -5,9 +5,28 @@ const { getDataSourceforMosqueList } = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
 const moment = require("moment-timezone");
 const { getLatLng } = require("./handlers/googleGeoApiHandler.js");
-const { translate, detectLanguage } = require('./handlers/googleTranslateHandler.js');
+const {
+  translate,
+  detectLanguage,
+} = require("./handlers/googleTranslateHandler.js");
 const prayerTimeApl = require("./aplDocuments/characterDisplayApl.json");
-const SKILL_ID = process.env.mawaqitAlexaSkillId || "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506";
+const SKILL_ID =
+  process.env.MAWAQIT_ALEXA_SKILL_ID ||
+  "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506";
+const eventBridgeScheduler = require("./handlers/eventBridgeScheduler.js");
+const authHandler = require("./handlers/authHandler");
+const dbHandler = require("./handlers/dynamoDbHandler");
+
+const CANONICAL_PRAYER_NAMES = [
+  "Fajr",
+  "Dhuhr",
+  "Asr",
+  "Maghrib",
+  "Isha",
+  "Jumma",
+  "Eid",
+  "Shuruq",
+];
 
 const getPersistedData = async (handlerInput) => {
   try {
@@ -25,12 +44,17 @@ const getPersistedData = async (handlerInput) => {
 
 const checkForConsentTokenToAccessDeviceLocation = (handlerInput) => {
   return (
-    handlerInput.requestEnvelope.context.System.user.permissions?.consentToken
-    && handlerInput.requestEnvelope.context.System?.apiAccessToken
+    handlerInput.requestEnvelope.context.System.user.permissions
+      ?.consentToken &&
+    handlerInput.requestEnvelope.context.System?.apiAccessToken
   );
 };
 
-const createDirectivePayload = (aplDocument, dataSources = {}, type = "Alexa.Presentation.APL.RenderDocument") => {
+const createDirectivePayload = (
+  aplDocument,
+  dataSources = {},
+  type = "Alexa.Presentation.APL.RenderDocument",
+) => {
   return {
     type: type,
     token: uuidv4(),
@@ -39,16 +63,30 @@ const createDirectivePayload = (aplDocument, dataSources = {}, type = "Alexa.Pre
   };
 };
 
-const getNextPrayerTime = (requestAttributes, times, timezone, prayerNames, iqamaTime = []) => {
+const getNextPrayerTime = (
+  requestAttributes,
+  times,
+  timezone,
+  prayerNames,
+  iqamaTime = [],
+) => {
   const currentDateTime = new Date(
-    new Date().toLocaleString("en-US", { timeZone: timezone })
+    new Date().toLocaleString("en-US", { timeZone: timezone }),
   );
   // Get the current moment object with time zone information
   const now = moment(currentDateTime);
   console.log("Now: ", JSON.stringify(now));
 
   // Parse times into moment objects (assuming times are in your current time zone)
-  const timeMoments = times.map((time, index) => generateNextPrayerTime(requestAttributes, time, now, prayerNames[index], iqamaTime[index]));
+  const timeMoments = times.map((time, index) =>
+    generateNextPrayerTime(
+      requestAttributes,
+      time,
+      now,
+      prayerNames[index],
+      iqamaTime[index],
+    ),
+  );
   console.log("Time Moments: ", timeMoments);
   // Find the first time greater than or equal to current time (considering time zone)
   const nextTime = timeMoments.find(({ time }) => time.isSameOrAfter(now));
@@ -56,13 +94,13 @@ const getNextPrayerTime = (requestAttributes, times, timezone, prayerNames, iqam
   if (nextTime) {
     console.log(
       "The first time greater than or equal to current time is:",
-      nextTime
+      nextTime,
     );
     return {
       name: nextTime.name,
       time: nextTime.time.format("HH:mm"),
       diffInMinutesPrompt: nextTime.diffInMinutesPrompt,
-      diffInMinutes: nextTime.diffInMinutes
+      diffInMinutes: nextTime.diffInMinutes,
     };
   } else {
     console.log("No time is greater than or equal to current time: ", times[0]);
@@ -72,17 +110,14 @@ const getNextPrayerTime = (requestAttributes, times, timezone, prayerNames, iqam
     const diffInMinutesPrompt = calculateMinutes(
       requestAttributes,
       currentTime,
-      nextTimeMoment
+      nextTimeMoment,
     );
-    const diffInMinutes = getDifferenceInMinutes(
-      currentTime,
-      nextTimeMoment
-    );
+    const diffInMinutes = getDifferenceInMinutes(currentTime, nextTimeMoment);
     return {
       name: prayerNames[0],
       time: times[0],
       diffInMinutesPrompt: diffInMinutesPrompt,
-      diffInMinutes: diffInMinutes
+      diffInMinutes: diffInMinutes,
     };
   }
 };
@@ -96,22 +131,30 @@ const checkForPersistenceData = async (handlerInput) => {
   if (persistentAttributes) {
     return await getPrayerTimingsForMosque(handlerInput, mosqueTimes, "");
   }
-  const isLaunchRequest = Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest";
+  const isLaunchRequest =
+    Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest";
   if (isLaunchRequest) {
     console.log("No persistent data found, prompting user to select mosque.");
-    const speakOutput = requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt") + requestAttributes.t("selectMosquePrompt");
+    const speakOutput =
+      requestAttributes.t("thankYouPrompt") +
+      requestAttributes.t("mosqueNotRegisteredPrompt") +
+      requestAttributes.t("selectMosquePrompt");
     return handlerInput.responseBuilder
       .speak(speakOutput)
       .withShouldEndSession(false)
       .getResponse();
   }
-  return await getListOfMosque(handlerInput, requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt"));
+  return await getListOfMosque(
+    handlerInput,
+    requestAttributes.t("thankYouPrompt") +
+      requestAttributes.t("mosqueNotRegisteredPrompt"),
+  );
 };
 
 const getPrayerTimingsForMosque = async (
   handlerInput,
   mosqueTimes,
-  speakOutput
+  speakOutput,
 ) => {
   const { attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
@@ -123,20 +166,25 @@ const getPrayerTimingsForMosque = async (
       requestAttributes,
       mosqueTimes.times,
       userTimeZone,
-      prayerNames
+      prayerNames,
     );
     speakOutput += requestAttributes.t(
       "nextPrayerTimePrompt",
       persistentAttributes.primaryText,
       nextPrayerTime.name,
       nextPrayerTime.time,
-      nextPrayerTime.diffInMinutesPrompt
+      nextPrayerTime.diffInMinutesPrompt,
     );
     const routinePrayerDetails = { ...nextPrayerTime };
     const phonemeText = extractPhonemeText([nextPrayerTime.name])[0];
     routinePrayerDetails.name = phonemeText ? phonemeText : nextPrayerTime.name;
     routinePrayerDetails.namePhoneme = nextPrayerTime.name;
-    if (!await checkForRoutinePrayerAlreadyExists(handlerInput, routinePrayerDetails)) {
+    if (
+      !(await checkForRoutinePrayerAlreadyExists(
+        handlerInput,
+        routinePrayerDetails,
+      ))
+    ) {
       await saveRequestedRoutinePrayer(handlerInput, routinePrayerDetails);
       speakOutput += requestAttributes.t("requestRoutinePrompt");
     } else {
@@ -144,7 +192,10 @@ const getPrayerTimingsForMosque = async (
       speakOutput += requestAttributes.t("doYouNeedAnythingElsePrompt");
     }
     checkForCharacterDisplay(handlerInput, nextPrayerTime.time);
-    return handlerInput.responseBuilder.speak(speakOutput).withShouldEndSession(false).getResponse();
+    return handlerInput.responseBuilder
+      .speak(speakOutput)
+      .withShouldEndSession(false)
+      .getResponse();
   } catch (error) {
     console.log("Error in fetching prayer timings: ", error);
     if (error?.message === "Mosque not found") {
@@ -200,11 +251,15 @@ const getListOfMosqueBasedOnGeoLocation = async (handlerInput, speakOutput) => {
       const mosqueList = await getMosqueList(
         false,
         latitudeInDegrees,
-        longitudeInDegrees
+        longitudeInDegrees,
       );
       sessionAttributes.mosqueList = mosqueList;
       attributesManager.setSessionAttributes(sessionAttributes);
-      return await createResponseDirectiveForMosqueList(handlerInput, mosqueList, speakOutput);
+      return await createResponseDirectiveForMosqueList(
+        handlerInput,
+        mosqueList,
+        speakOutput,
+      );
     } catch (error) {
       console.log("Error in fetching mosque list: ", error);
       return responseBuilder
@@ -244,7 +299,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
     }
     console.log(
       "Address successfully retrieved, now responding to user : ",
-      address
+      address,
     );
     const { city, postalCode } = address;
 
@@ -264,7 +319,11 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
     const mosqueList = await getMosqueList(false, lat, lng);
     sessionAttributes.mosqueList = mosqueList;
     attributesManager.setSessionAttributes(sessionAttributes);
-    return await createResponseDirectiveForMosqueList(handlerInput, mosqueList, speakOutput);
+    return await createResponseDirectiveForMosqueList(
+      handlerInput,
+      mosqueList,
+      speakOutput,
+    );
   } catch (error) {
     console.log("Error in retrieving address: ", error);
     if (error?.message?.startsWith("GeoConversionError")) {
@@ -289,7 +348,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
 const createResponseDirectiveForMosqueList = async (
   handlerInput,
   mosqueList,
-  speechPrompt
+  speechPrompt,
 ) => {
   const { responseBuilder, attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
@@ -312,8 +371,8 @@ const createResponseDirectiveForMosqueList = async (
     mosqueList.map(async (mosque) => {
       mosque.primaryText = await translateText(mosque.primaryText, locale);
       return mosque;
-    })
-  )
+    }),
+  );
   console.log("Mosque List: ", mosqueList);
   const mosqueListPrompt = mosqueList
     .map((mosque, index) => `${index + 1}. ${mosque.primaryText}`)
@@ -322,16 +381,22 @@ const createResponseDirectiveForMosqueList = async (
   speechPrompt += requestAttributes.t("chooseMosquePrompt", mosqueListPrompt);
   if (
     Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
-    "Alexa.Presentation.APL"
+      "Alexa.Presentation.APL"
     ]
   ) {
-    const dataSource = await getDataSourceforMosqueList(handlerInput, mosqueList);
+    const dataSource = await getDataSourceforMosqueList(
+      handlerInput,
+      mosqueList,
+    );
     console.log("Data Source: ", JSON.stringify(dataSource));
     const aplDirective = createDirectivePayload(mosqueListApl, dataSource);
     responseBuilder.addDirective(aplDirective);
     speechPrompt += requestAttributes.t("chooseMosqueByTouchPrompt");
   }
-  return responseBuilder.speak(speechPrompt).withShouldEndSession(false).getResponse();
+  return responseBuilder
+    .speak(speechPrompt)
+    .withShouldEndSession(false)
+    .getResponse();
 };
 
 const getUserTimezone = async (handlerInput) => {
@@ -352,9 +417,17 @@ const getUserTimezone = async (handlerInput) => {
 };
 
 function checkForCharacterDisplay(handlerInput, nextPrayerTime) {
-  if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)["Alexa.Presentation.APLT"]) {
+  if (
+    Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
+      "Alexa.Presentation.APLT"
+    ]
+  ) {
     const dataSource = createDataSourceForPrayerTiming(nextPrayerTime);
-    const aplDirective = createDirectivePayload(prayerTimeApl, dataSource, "Alexa.Presentation.APLT.RenderDocument");
+    const aplDirective = createDirectivePayload(
+      prayerTimeApl,
+      dataSource,
+      "Alexa.Presentation.APLT.RenderDocument",
+    );
     handlerInput.responseBuilder.addDirective(aplDirective);
   }
 }
@@ -365,7 +438,7 @@ const getDifferenceInMinutes = (start, end) => {
 
   const diffInMilliseconds = endDate - startDate;
   return diffInMilliseconds / 1000 / 60;
-}
+};
 
 function calculateMinutes(requestAttributes, start, end) {
   const diffInMinutes = getDifferenceInMinutes(start, end);
@@ -387,15 +460,14 @@ function calculateMinutes(requestAttributes, start, end) {
 
 //Provides resolved slot value
 function getResolvedValue(requestEnvelope, slotName) {
-  return requestEnvelope?.request?.intent?.slots?.[slotName]
-    ?.resolutions?.resolutionsPerAuthority?.[0]
-    ?.values?.[0]?.value?.name;
+  return requestEnvelope?.request?.intent?.slots?.[slotName]?.resolutions
+    ?.resolutionsPerAuthority?.[0]?.values?.[0]?.value?.name;
 }
 
 //Provides resolved slot id
 function getResolvedId(requestEnvelope, slotName) {
-  return requestEnvelope?.request?.intent?.slots?.[slotName]
-    ?.resolutions?.resolutionsPerAuthority?.[0]?.values?.[0]?.value?.id;
+  return requestEnvelope?.request?.intent?.slots?.[slotName]?.resolutions
+    ?.resolutionsPerAuthority?.[0]?.values?.[0]?.value?.id;
 }
 
 const getPrayerTimeForSpecificPrayer = (
@@ -403,14 +475,14 @@ const getPrayerTimeForSpecificPrayer = (
   prayerTime,
   currentMoment,
   now,
-  prayerName
+  prayerName,
 ) => {
   try {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const [hours, minutes] = prayerTime.split(":");
     const timeMoment = moment(
-      `${now.format("YYYY-MM-DD")}T${hours}:${minutes}`
+      `${now.format("YYYY-MM-DD")}T${hours}:${minutes}`,
     );
     const timeDifference = timeMoment.isSameOrAfter(currentMoment)
       ? moment.duration(timeMoment.diff(currentMoment))
@@ -424,7 +496,7 @@ const getPrayerTimeForSpecificPrayer = (
       speakOutput = requestAttributes.t(
         "hoursAndMinutesPrompt",
         hoursDiff,
-        minutesDiff
+        minutesDiff,
       );
     }
     checkForCharacterDisplay(handlerInput, prayerTime);
@@ -434,8 +506,8 @@ const getPrayerTimeForSpecificPrayer = (
           "nextPrayerTimeWithNamePrompt",
           prayerName,
           prayerTime,
-          speakOutput
-        ) + requestAttributes.t("doYouNeedAnythingElsePrompt")
+          speakOutput,
+        ) + requestAttributes.t("doYouNeedAnythingElsePrompt"),
       )
       .withShouldEndSession(false)
       .getResponse();
@@ -443,14 +515,20 @@ const getPrayerTimeForSpecificPrayer = (
     console.log("Error in fetching prayer time for specific prayer: ", error);
     return handlerInput.responseBuilder
       .speak(
-        "Sorry, I am unable to fetch the prayer time for the specific prayer."
+        "Sorry, I am unable to fetch the prayer time for the specific prayer.",
       )
       .withShouldEndSession(true)
       .getResponse();
   }
 };
 
-const generateNextPrayerTime = (requestAttributes, prayerTime, now, prayerName, iqamaTime) => {
+const generateNextPrayerTime = (
+  requestAttributes,
+  prayerTime,
+  now,
+  prayerName,
+  iqamaTime,
+) => {
   const currentMoment = now.format("YYYY-MM-DDTHH:mm");
   const timeMoment = resolveIqamaMoment(iqamaTime, now, prayerTime);
   return {
@@ -459,9 +537,12 @@ const generateNextPrayerTime = (requestAttributes, prayerTime, now, prayerName, 
     diffInMinutesPrompt: calculateMinutes(
       requestAttributes,
       currentMoment,
-      timeMoment.format("YYYY-MM-DDTHH:mm")
+      timeMoment.format("YYYY-MM-DDTHH:mm"),
     ),
-    diffInMinutes: getDifferenceInMinutes(currentMoment, timeMoment.format("YYYY-MM-DDTHH:mm")),
+    diffInMinutes: getDifferenceInMinutes(
+      currentMoment,
+      timeMoment.format("YYYY-MM-DDTHH:mm"),
+    ),
   };
 };
 
@@ -476,7 +557,9 @@ const resolveIqamaMoment = (iqamaTime, now, prayerTime) => {
 
 const generateMomentObject = (time, now) => {
   const [hours, minutes] = time.split(":");
-  return moment(now).set("hour", parseInt(hours)).set("minute", parseInt(minutes));
+  return moment(now)
+    .set("hour", parseInt(hours))
+    .set("minute", parseInt(minutes));
 };
 
 const translateText = async (text, toLang) => {
@@ -493,13 +576,14 @@ const translateText = async (text, toLang) => {
     console.log("Error in converting %s to %s: %s", text, toLang, error);
     return text;
   }
-}
+};
 
 async function callDirectiveService(handlerInput, speakOutput) {
   console.log("Call Directive Service");
   try {
     const requestEnvelope = handlerInput.requestEnvelope;
-    const directiveServiceClient = handlerInput.serviceClientFactory.getDirectiveServiceClient();
+    const directiveServiceClient =
+      handlerInput.serviceClientFactory.getDirectiveServiceClient();
 
     const requestId = requestEnvelope.request.requestId;
     const directive = {
@@ -507,14 +591,14 @@ async function callDirectiveService(handlerInput, speakOutput) {
         requestId,
       },
       directive: {
-        type: 'VoicePlayer.Speak',
+        type: "VoicePlayer.Speak",
         speech: speakOutput,
       },
     };
 
     return await directiveServiceClient.enqueue(directive);
   } catch (error) {
-    console.error('Error calling directive service:', error);
+    console.error("Error calling directive service:", error);
     // Continue skill flow without progressive response
     return Promise.resolve();
   }
@@ -522,15 +606,15 @@ async function callDirectiveService(handlerInput, speakOutput) {
 
 const splitLanguage = (locale) => {
   return locale.split("-")[0];
-}
+};
 
 const createDataSourceForPrayerTiming = (time) => {
   return {
-    "data": {
-      "text": time
-    }
-  }
-}
+    data: {
+      text: time,
+    },
+  };
+};
 
 /**
  * Normalize intent filled slots into a consistent map of resolved slot values and validation state.
@@ -603,7 +687,7 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
   const prayerNames = requestAttributes.t("prayerNames");
   let allPrayerTimes = "";
   const currentDateTime = new Date(
-    new Date().toLocaleString("en-US", { timeZone: userTimeZone })
+    new Date().toLocaleString("en-US", { timeZone: userTimeZone }),
   );
   prayerNames.forEach((prayer, index) => {
     const prayerTime = mosqueTimes.times[index];
@@ -612,13 +696,13 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
         requestAttributes,
         prayerTime,
         moment(currentDateTime),
-        prayer
+        prayer,
       );
       console.log("Prayer Details for %s: ", prayer, prayerDetails);
       allPrayerTimes += requestAttributes.t(
         "allPrayerTimesPrompt",
         prayer,
-        prayerDetails.time.format("HH:mm")
+        prayerDetails.time.format("HH:mm"),
       );
     }
   });
@@ -656,7 +740,7 @@ const offerAutomation = (timezone, time, prayerName, isJumma = false) => {
                 payload: {
                   connectionRequest: {
                     uri: `connection://${SKILL_ID}.PlayAdhaan/1?provider=${SKILL_ID}`,
-                    input: {}
+                    input: {},
                   },
                 },
               },
@@ -690,7 +774,7 @@ const generateOperationId = (time, prayerName) =>
 
 function extractPhonemeText(phonemeArray) {
   return phonemeArray.map((phoneme) => {
-    if (typeof phoneme !== 'string') return phoneme;
+    if (typeof phoneme !== "string") return phoneme;
     // Match text between > and <
     const match = phoneme.match(/>([^<]+)</);
     return match ? match[1] : phoneme;
@@ -713,27 +797,29 @@ const generateRoutineErrorMessage = (message) => {
  * preserving valid tags like <phoneme>, <break>, etc.
  */
 function smartEscapeSSML(ssml) {
-  if (!ssml) return '';
+  if (!ssml) return "";
 
   // Step 1: Escape ampersands not already part of entities
-  ssml = ssml.replace(/&(?!amp;|lt;|gt;|quot;|apos;)/g, '&amp;');
+  ssml = ssml.replace(/&(?!amp;|lt;|gt;|quot;|apos;)/g, "&amp;");
 
   // Step 2: Escape < and > only if they're outside of tag brackets
   // Split the SSML by tags and escape only the text segments
   return ssml
     .split(/(<[^>]+>)/g) // keep tags separate
-    .map(segment => {
-      if (segment.startsWith('<')) return segment; // it's a tag — keep as is
+    .map((segment) => {
+      if (segment.startsWith("<")) return segment; // it's a tag — keep as is
       // escape stray < and > in text only
-      return segment.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return segment.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     })
-    .join('');
+    .join("");
 }
 
 async function generatePrayerNameDetailsForRoutine(handlerInput) {
   const JUMUA_PRAYER_INDEX = 5;
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
+  const { persistentAttributes } = sessionAttributes;
+  const { routinePrayers } = persistentAttributes;
   const requestAttributes = attributesManager.getRequestAttributes();
   const mosqueTimes = sessionAttributes.mosqueTimes;
   console.log("Mosque Times: ", JSON.stringify(mosqueTimes));
@@ -741,9 +827,9 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   const prayerNamesForApl = extractPhonemeText(prayerNames);
   const userTimeZone = await getUserTimezone(handlerInput);
   const currentDateTime = new Date(
-    new Date().toLocaleString("en-US", { timeZone: userTimeZone })
+    new Date().toLocaleString("en-US", { timeZone: userTimeZone }),
   );
-  const prayerNameDetails = prayerNames
+  let prayerNameDetails = prayerNames
     .map((prayer, index) => {
       const prayerTime = mosqueTimes.times[index];
       if (prayerTime) {
@@ -751,7 +837,7 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
           requestAttributes,
           prayerTime,
           moment(currentDateTime),
-          prayer
+          prayer,
         );
         console.log("Prayer Details for %s: ", prayer, prayerDetails);
         const time = prayerDetails.time.format("HH:mm");
@@ -761,37 +847,42 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
           time: time,
           name: prayerName,
           namePhoneme: prayer,
+          canonicalName: CANONICAL_PRAYER_NAMES[index],
         };
       }
     })
     .filter((detail) => detail !== undefined && detail !== null);
-  // Extract only the Jumu'ah times
-  const jumuaTimes = [
-    mosqueTimes.jumua,
-    mosqueTimes.jumua2,
-    mosqueTimes.jumua3,
-  ];
-  // Find the first non-null Jumu'ah time
-  const firstNonNullJumua = jumuaTimes.filter(
-    (time) => time !== null && time !== undefined
-  );
-  if (firstNonNullJumua.length > 0) {
-    firstNonNullJumua.forEach((jumuaTime) => {
-      const prayerName = prayerNamesForApl[JUMUA_PRAYER_INDEX];
-      prayerNameDetails.push({
-        primaryText: `${prayerName} ${jumuaTime}`,
-        time: jumuaTime,
-        name: prayerName,
-        namePhoneme: prayerNames[JUMUA_PRAYER_INDEX],
-      });
+  if (routinePrayers && routinePrayers.length > 0) {
+    prayerNameDetails = prayerNameDetails.filter((detail) => {
+      return !routinePrayers
+        .map((prayer) => prayer.name.toLowerCase())
+        .includes(detail.name.toLowerCase());
     });
   }
+  // Extract only the Jumu'ah times
+  // const jumuaTimes = [
+  //   mosqueTimes.jumua,
+  //   mosqueTimes.jumua2,
+  //   mosqueTimes.jumua3,
+  // ];
+  // // Find the first non-null Jumu'ah time
+  // const firstNonNullJumua = jumuaTimes.filter(
+  //   (time) => time !== null && time !== undefined,
+  // );
+  // if (firstNonNullJumua.length > 0) {
+  //   firstNonNullJumua.forEach((jumuaTime) => {
+  //     const prayerName = prayerNamesForApl[JUMUA_PRAYER_INDEX];
+  //     prayerNameDetails.push({
+  //       primaryText: `${prayerName} ${jumuaTime}`,
+  //       time: jumuaTime,
+  //       name: prayerName,
+  //       namePhoneme: prayerNames[JUMUA_PRAYER_INDEX],
+  //     });
+  //   });
+  // }
   sessionAttributes.prayerNameDetails = prayerNameDetails;
   handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-  console.log(
-    "Final Prayer Name Details: ",
-    JSON.stringify(prayerNameDetails)
-  );
+  console.log("Final Prayer Name Details: ", JSON.stringify(prayerNameDetails));
   return prayerNameDetails;
 }
 
@@ -800,7 +891,7 @@ const saveRequestedRoutinePrayer = async (handlerInput, prayerDetails) => {
   const sessionAttributes = attributesManager.getSessionAttributes();
   sessionAttributes.persistentAttributes.requestedRoutinePrayer = prayerDetails;
   attributesManager.setPersistentAttributes(
-    sessionAttributes.persistentAttributes
+    sessionAttributes.persistentAttributes,
   );
   attributesManager.setSessionAttributes(sessionAttributes);
   await attributesManager.savePersistentAttributes();
@@ -811,19 +902,22 @@ const deleteRequestedRoutinePrayer = async (handlerInput) => {
   const sessionAttributes = attributesManager.getSessionAttributes();
   delete sessionAttributes?.persistentAttributes?.requestedRoutinePrayer;
   attributesManager.setPersistentAttributes(
-    sessionAttributes.persistentAttributes
+    sessionAttributes.persistentAttributes,
   );
   attributesManager.setSessionAttributes(sessionAttributes);
   await attributesManager.savePersistentAttributes();
-}
+};
 
 const getRequestedRoutinePrayer = (handlerInput) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   return sessionAttributes?.persistentAttributes?.requestedRoutinePrayer;
-}
+};
 
-const checkForRoutinePrayerAlreadyExists = async (handlerInput, prayerDetails) => {
+const checkForRoutinePrayerAlreadyExists = async (
+  handlerInput,
+  prayerDetails,
+) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
@@ -831,8 +925,12 @@ const checkForRoutinePrayerAlreadyExists = async (handlerInput, prayerDetails) =
   if (existingRoutines.length === 0) {
     return false;
   }
-  const index = existingRoutines.findIndex((routine) =>
-    routine.name === prayerDetails.name
+  const index = existingRoutines.findIndex(
+    (routine) =>
+      (routine.canonicalName &&
+        prayerDetails.canonicalName &&
+        routine.canonicalName === prayerDetails.canonicalName) ||
+      routine.name === prayerDetails.name,
   );
 
   if (index !== -1) {
@@ -849,9 +947,7 @@ const checkForRoutinePrayerAlreadyExists = async (handlerInput, prayerDetails) =
   // Update persistent attributes
   persistentAttributes.routinePrayers = existingRoutines;
   sessionAttributes.persistentAttributes = persistentAttributes;
-  attributesManager.setPersistentAttributes(
-    persistentAttributes
-  );
+  attributesManager.setPersistentAttributes(persistentAttributes);
   attributesManager.setSessionAttributes(sessionAttributes);
   await attributesManager.savePersistentAttributes();
 
@@ -859,20 +955,84 @@ const checkForRoutinePrayerAlreadyExists = async (handlerInput, prayerDetails) =
   return false;
 };
 
-
 const logRoutineCreation = async (handlerInput, routineDetails) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
-  if (!persistentAttributes.routinePrayers) {
-    persistentAttributes.routinePrayers = [];
+  const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
+  if (
+    persistentAttributes.routinePrayers &&
+    persistentAttributes.routinePrayers.length > 0
+  ) {
+    const index = persistentAttributes.routinePrayers.findIndex(
+      (routine) => routine.name === routineDetails.name,
+    );
+    if (index !== -1) {
+      // Found a routine with the same name
+      if (
+        persistentAttributes.routinePrayers[index].time === routineDetails.time
+      ) {
+        // Name and time both match - routine already exists
+        return handlerInput.responseBuilder
+          .speak(
+            requestAttributes.t("routineAlreadyEnabled") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      } else {
+        // Name matches but time is different - remove the old routine
+        persistentAttributes.routinePrayers.splice(index, 1);
+      }
+    }
   }
-  persistentAttributes.routinePrayers.push(routineDetails);
-  attributesManager.setPersistentAttributes(
-    persistentAttributes
-  );
-  attributesManager.setSessionAttributes(sessionAttributes);
-  await attributesManager.savePersistentAttributes();
+  try {
+    const timezone = await getUserTimezone(handlerInput);
+    const mosqueId = persistentAttributes.uuid;
+    const prayerNameForSchedule =
+      routineDetails.canonicalName || routineDetails.name;
+    const time = routineDetails.time;
+    console.log("Mosque ID: ", mosqueId);
+    console.log("Prayer Name (Schedule): ", prayerNameForSchedule);
+    console.log("Time: ", time);
+    console.log("Timezone: ", timezone);
+    if (mosqueId && prayerNameForSchedule && time && timezone) {
+      await eventBridgeScheduler.createOrUpdateSchedule({
+        mosqueId,
+        prayerName: prayerNameForSchedule,
+        time,
+        timezone,
+      });
+    }
+    if (!persistentAttributes.routinePrayers) {
+      persistentAttributes.routinePrayers = [];
+    }
+    persistentAttributes.routinePrayers.push(routineDetails);
+    attributesManager.setPersistentAttributes(persistentAttributes);
+    attributesManager.setSessionAttributes(sessionAttributes);
+    await attributesManager.savePersistentAttributes();
+    console.log("Routine created successfully");
+    return handlerInput.responseBuilder
+      .speak(
+        requestAttributes.t("routineCreatedPrompt") +
+          requestAttributes.t("doYouNeedAnythingElsePrompt"),
+      )
+      .withShouldEndSession(false)
+      .getResponse();
+  } catch (error) {
+    console.log("Error in logRoutineCreation:", error);
+    if (error?.message === "Unable to fetch user timezone") {
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("timezoneErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+    return handlerInput.responseBuilder
+      .speak(requestAttributes.t("routineErrorPrompt"))
+      .withShouldEndSession(true)
+      .getResponse();
+  }
 };
 
 const getApiEndpoint = (handlerInput) => {
@@ -880,7 +1040,10 @@ const getApiEndpoint = (handlerInput) => {
 };
 
 const getPackageId = (handlerInput) => {
-  return handlerInput.requestEnvelope.request?.payload?.packageId || handlerInput.requestEnvelope.request?.packageId;
+  return (
+    handlerInput.requestEnvelope.request?.payload?.packageId ||
+    handlerInput.requestEnvelope.request?.packageId
+  );
 };
 
 const getAplArgument = (handlerInput, argument) => {
@@ -889,6 +1052,112 @@ const getAplArgument = (handlerInput, argument) => {
 
 const isNewSession = (handlerInput) => {
   return handlerInput.requestEnvelope?.session?.new;
+};
+
+const getAccessToken = (handlerInput) => {
+  return handlerInput.requestEnvelope?.context?.System?.user?.accessToken;
+};
+
+const validateUserAccountStatus = async (handlerInput) => {
+  const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
+  const accessToken = getAccessToken(handlerInput);
+
+  if (!accessToken) {
+    return handlerInput.responseBuilder
+      .speak(requestAttributes.t("linkAccountPrompt"))
+      .withLinkAccountCard()
+      .getResponse();
+  }
+
+  try {
+    const userInfo = await authHandler.getUserInfo(accessToken);
+
+    if (!userInfo?.email || !userInfo?.user_id) {
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("refreshTokenMissing"))
+        .withLinkAccountCard()
+        .getResponse();
+    }
+
+    const azanUserInfo = await dbHandler.GetAzanUserInfo(userInfo.user_id);
+
+    if (!azanUserInfo?.refresh_token || !azanUserInfo?.endpointId) {
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("refreshTokenMissing"))
+        .withLinkAccountCard()
+        .getResponse();
+    }
+
+    // Validation passed
+    return false;
+  } catch (error) {
+    console.error("Error in validateUserAccountStatus:", error);
+    // On error, safest to assume validation failed or return generic error
+    return handlerInput.responseBuilder
+      .speak(requestAttributes.t("refreshTokenMissing"))
+      .withLinkAccountCard()
+      .getResponse();
+  }
+};
+
+const deleteRoutine = async (handlerInput, routineName) => {
+  const { attributesManager } = handlerInput;
+  const sessionAttributes = attributesManager.getSessionAttributes();
+  const { persistentAttributes } = sessionAttributes;
+
+  if (
+    persistentAttributes.routinePrayers &&
+    persistentAttributes.routinePrayers.length > 0
+  ) {
+    const index = persistentAttributes.routinePrayers.findIndex(
+      (routine) =>
+        routine.canonicalName === routineName || routine.name === routineName,
+    );
+    if (index !== -1) {
+      persistentAttributes.routinePrayers.splice(index, 1);
+      attributesManager.setPersistentAttributes(persistentAttributes);
+      attributesManager.setSessionAttributes(sessionAttributes);
+      await attributesManager.savePersistentAttributes();
+      return true;
+    }
+  }
+  return false;
+};
+const updateRoutinePrayers = async (handlerInput) => {
+  const { attributesManager } = handlerInput;
+  const sessionAttributes = attributesManager.getSessionAttributes();
+  const mosqueTimes = sessionAttributes.mosqueTimes;
+  const { persistentAttributes } = sessionAttributes;
+  const requestAttributes = attributesManager.getRequestAttributes();
+  const routinePrayers = persistentAttributes.routinePrayers;
+  if (routinePrayers && routinePrayers.length > 0) {
+    const prayerNames = requestAttributes.t("prayerNames");
+    // Remove SSML tags from prayer names for comparison
+    const cleanPrayerNames = extractPhonemeText(prayerNames);
+
+    routinePrayers.forEach((routine) => {
+      // Find matching prayer name using canonical name if available, else clean names
+      const prayerIndex = CANONICAL_PRAYER_NAMES.findIndex(
+        (cn) => routine.canonicalName && cn === routine.canonicalName,
+      );
+
+      const finalIndex =
+        prayerIndex !== -1
+          ? prayerIndex
+          : cleanPrayerNames.findIndex(
+              (p) => p.toLowerCase() === routine.name.toLowerCase(),
+            );
+
+      if (finalIndex !== -1) {
+        if (finalIndex < 5 && mosqueTimes?.times?.[finalIndex]) {
+          routine.time = mosqueTimes.times[finalIndex];
+        }
+      }
+    });
+    attributesManager.setPersistentAttributes(persistentAttributes);
+    await attributesManager.savePersistentAttributes();
+  }
 };
 
 module.exports = {
@@ -931,4 +1200,9 @@ module.exports = {
   isNewSession,
   resolveIqamaMoment,
   getDifferenceInMinutes,
+  getAccessToken,
+  validateUserAccountStatus,
+  deleteRoutine,
+  updateRoutinePrayers,
+  CANONICAL_PRAYER_NAMES,
 };

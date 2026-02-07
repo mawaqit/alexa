@@ -1,5 +1,5 @@
 const axios = require("axios");
-const mawaqitBaseUrl = process.env.baseUrl;
+const mawaqitBaseUrl = process.env.BASE_URL;
 const moment = require("moment-timezone");
 
 const getMosqueList = async (

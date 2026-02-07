@@ -38,6 +38,11 @@ provider:
       Action:
         - 'kms:Decrypt'
       Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "scheduler:*"
+      Resource: 
+        - "arn:aws:scheduler:eu-west-3:275854128200:schedule/*"
 
 
 functions:

@@ -1,0 +1,51 @@
+service: mawaqit-alexa-azan
+
+frameworkVersion: ^4.0.0
+
+custom:
+  defaultStage: dev
+  defaultRegion: eu-west-1 # Compute is always in Ireland
+  dynamoRegion: eu-west-3  # Data is always in Paris
+  ssmRegion: eu-west-3
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  stage: ${opt:stage, self:custom.defaultStage}
+  region: ${opt:region, self:custom.defaultRegion}
+  
+  # Load env vars dynamically based on stage
+  environment: ${file(env.json):${self:provider.stage}}
+  # deploymentBucket:
+  #   name: mawaqit-serverless-deploy-${self:custom.defaultRegion}-${self:provider.stage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - arn:aws:dynamodb:${self:custom.dynamoRegion}:275854128200:table/*
+        - Effect: Allow
+          Action:
+            - 'ssm:GetParameter'
+            - 'ssm:GetParameters'
+          Resource: 
+            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/clientId
+            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/clientSecret
+            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/api/key/mawaqit
+            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/api/key/google
+
+functions:
+  # ----------------------------------------
+  # THE TRIGGER LAMBDA (Dispatcher)
+  # ----------------------------------------
+  dispatcherHandler:
+    handler: src/handlers/dispatcher.handler
+    name: mawaqit-azan-${self:provider.stage}-handler
+    timeout: 10
+    # Loads events from eventsources.yml -> dispatcher -> [stage]
+    events: ${file(eventsources.yml):${self:provider.stage}, file(eventsources.yml):dev}

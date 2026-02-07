@@ -898,28 +898,28 @@ const CreateRoutineStartedHandler = {
         "prayerNamePrompt",
         prayerNameTimePrompt.join(", ")
       );
-      // if (
-      //   Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
-      //     "Alexa.Presentation.APL"
-      //   ]
-      // ) {
-      //   try {
-      //     const routineDataSource = await getDataSourceForRoutine(
-      //       handlerInput,
-      //       prayerNameDetails
-      //     );
-      //     console.log("Data Source: ", JSON.stringify(routineDataSource));
-      //     const aplDirective = helperFunctions.createDirectivePayload(
-      //       listApl,
-      //       routineDataSource
-      //     );
-      //     console.log("APL Directive: ", JSON.stringify(aplDirective));
-      //     handlerInput.responseBuilder.addDirective(aplDirective);
-      //     speechPrompt += requestAttributes.t("prayerNameTouchPrompt");
-      //   } catch (error) {
-      //     console.log("Error in creating APL Directive: ", error);
-      //   }
-      // }
+      if (
+        Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
+          "Alexa.Presentation.APL"
+        ]
+      ) {
+        try {
+          const routineDataSource = await getDataSourceForRoutine(
+            handlerInput,
+            prayerNameDetails
+          );
+          console.log("Data Source: ", JSON.stringify(routineDataSource));
+          const aplDirective = helperFunctions.createDirectivePayload(
+            listApl,
+            routineDataSource
+          );
+          console.log("APL Directive: ", JSON.stringify(aplDirective));
+          handlerInput.responseBuilder.addDirective(aplDirective);
+          speechPrompt += requestAttributes.t("prayerNameTouchPrompt");
+        } catch (error) {
+          console.log("Error in creating APL Directive: ", error);
+        }
+      }
       const currentIntent = handlerInput.requestEnvelope.request.intent;
       return handlerInput.responseBuilder
         .speak(speechPrompt)

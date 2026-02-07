@@ -7,6 +7,7 @@ const apiHandler = require("./handlers/apiHandler.js");
 const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
 const { getDataSourceForPrayerTime } = require("./datasources.js");
 const awsSsmHandler = require("./handlers/awsSsmHandler.js");
+const authHandler = require("./handlers/authHandler.js");
 
 const LogRequestInterceptor = {
   process(handlerInput) {
@@ -177,6 +178,13 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
   console.log("Persistent Attributes: ", JSON.stringify(persistentAttributes));
 
   delete persistentAttributes.requestedRoutinePrayer;
+  try {
+    const userInfo = await GetUserInfo.process(handlerInput);
+    persistentAttributes.emailId = userInfo.email;
+    persistentAttributes.user_id = userInfo.user_id;
+  } catch (error) {
+    console.log("Error while fetching user info: ", error);
+  }
   handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
   await handlerInput.attributesManager.savePersistentAttributes();
 
@@ -199,6 +207,24 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(handlerInput) {
     console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
     await awsSsmHandler.handler();
+  },
+};
+
+const GetUserInfo = {
+  async process(handlerInput) {
+    console.log("GetUserInfo Interceptor");
+    const accessToken = handlerInput.requestEnvelope?.session?.user?.accessToken;
+    if (!accessToken) {
+      return;
+    }
+    const userInfo = await authHandler.getUserInfo(accessToken).catch((error) => {
+      console.log("Error while fetching user info: ", error);
+    });
+    console.log("User Info: ", userInfo);
+    if (!userInfo) {
+      return;
+    }
+    return userInfo;
   },
 };
 

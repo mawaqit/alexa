@@ -29,6 +29,9 @@ class CustomDynamoDbPersistenceAdapter extends DynamoDbPersistenceAdapter {
         if (attributes.uuid && typeof attributes.uuid === 'string') {
             item.mosqueId = attributes.uuid;
         }
+        if (attributes.user_id && typeof attributes.user_id === 'string') {
+            item.userId = attributes.user_id;
+        }
         // 4. Construct the Put parameters
         const putParams = {
             TableName: this.tableName,

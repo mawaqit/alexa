@@ -145,11 +145,16 @@ const SavePersistenceAttributesToSession = {
       const persistentAttributes = await helperFunctions.getPersistedData(
         handlerInput
       );
-      if (persistentAttributes && persistentAttributes.uuid) {
+      if (persistentAttributes?.uuid) {
         console.log(
           "Persistent Attributes: ",
           JSON.stringify(persistentAttributes)
         );
+        delete persistentAttributes.requestedRoutinePrayer;
+        handlerInput.attributesManager.setPersistentAttributes(
+          persistentAttributes
+        );
+        await handlerInput.attributesManager.savePersistentAttributes();
         try {
           const mosqueTimes = await apiHandler.getPrayerTimings(
             persistentAttributes.uuid

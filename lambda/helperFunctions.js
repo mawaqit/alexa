@@ -92,7 +92,7 @@ const checkForPersistenceData = async (handlerInput) => {
     const speakOutput = requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt") + requestAttributes.t("selectMosquePrompt");
     return handlerInput.responseBuilder
       .speak(speakOutput)
-      .reprompt(speakOutput)
+      .withShouldEndSession(false)
       .getResponse();
   }
   return await getListOfMosque(handlerInput, requestAttributes.t("thankYouPrompt") + requestAttributes.t("mosqueNotRegisteredPrompt"));
@@ -104,9 +104,8 @@ const getPrayerTimingsForMosque = async (
   speakOutput
 ) => {
   const { attributesManager } = handlerInput;
-  const requestAttributes = attributesManager.getRequestAttributes();
-  const persistedData =
-    attributesManager.getSessionAttributes().persistentAttributes;
+  const requestAttributes = attributesManager.getRequestAttributes();  
+  const { persistentAttributes } = attributesManager.getSessionAttributes();
   try {
     const userTimeZone = await getUserTimezone(handlerInput);
     const prayerNames = requestAttributes.t("prayerNames");
@@ -115,20 +114,37 @@ const getPrayerTimingsForMosque = async (
       mosqueTimes.times,
       userTimeZone,
       prayerNames
-    );
+    );    
     speakOutput += requestAttributes.t(
       "nextPrayerTimePrompt",
-      persistedData.primaryText,
+      persistentAttributes.primaryText,
       nextPrayerTime.name,
       nextPrayerTime.time,
       nextPrayerTime.diffInMinutes
     );
+    const routinePrayerDetails = { ...nextPrayerTime };
+    const phonemeText = extractPhonemeText([nextPrayerTime.name])[0];
+    routinePrayerDetails.name = phonemeText ? phonemeText : nextPrayerTime.name;
+    routinePrayerDetails.namePhoneme = nextPrayerTime.name;
+    if (!await checkForRoutinePrayerAlreadyExists(handlerInput, routinePrayerDetails)) {
+      await saveRequestedRoutinePrayer(handlerInput, routinePrayerDetails);
+      speakOutput += requestAttributes.t("requestRoutinePrompt");
+    } else {
+      console.log("Routine for this prayer already exists.");
+      speakOutput += requestAttributes.t("doYouNeedAnythingElsePrompt");
+    }
     checkForCharacterDisplay(handlerInput, nextPrayerTime.time);
     return handlerInput.responseBuilder.speak(speakOutput).withShouldEndSession(false).getResponse();
   } catch (error) {
     console.log("Error in fetching prayer timings: ", error);
     if (error?.message === "Mosque not found") {
       return await getListOfMosque(handlerInput, speakOutput);
+    }
+    if (error?.message === "Unable to fetch user timezone") {
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("timezoneErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
     }
     return handlerInput.responseBuilder
       .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
@@ -320,7 +336,7 @@ const getUserTimezone = async (handlerInput) => {
     })
     .catch((error) => {
       console.log("Error in fetching user timezone: ", error);
-      return "America/Los_Angeles";
+      throw new Error("Unable to fetch user timezone");
     });
   return userTimeZone;
 };
@@ -769,7 +785,85 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   return prayerNameDetails;
 }
 
+const saveRequestedRoutinePrayer = async (handlerInput, prayerDetails) => {
+  const { attributesManager } = handlerInput;
+  const sessionAttributes = attributesManager.getSessionAttributes();
+  sessionAttributes.persistentAttributes.requestedRoutinePrayer = prayerDetails;
+  attributesManager.setPersistentAttributes(
+    sessionAttributes.persistentAttributes
+  );
+  attributesManager.setSessionAttributes(sessionAttributes);
+  await attributesManager.savePersistentAttributes();
+};
 
+const deleteRequestedRoutinePrayer = async (handlerInput) => {
+  const { attributesManager } = handlerInput;
+  const sessionAttributes = attributesManager.getSessionAttributes();
+  delete sessionAttributes?.persistentAttributes?.requestedRoutinePrayer;
+  attributesManager.setPersistentAttributes(
+    sessionAttributes.persistentAttributes
+  );
+  attributesManager.setSessionAttributes(sessionAttributes);
+  await attributesManager.savePersistentAttributes();
+}
+
+const getRequestedRoutinePrayer = (handlerInput) => {
+  const { attributesManager } = handlerInput;
+  const sessionAttributes = attributesManager.getSessionAttributes();
+  return sessionAttributes?.persistentAttributes?.requestedRoutinePrayer;
+}
+
+const checkForRoutinePrayerAlreadyExists = async (handlerInput, prayerDetails) => {  
+  const { attributesManager } = handlerInput;
+  const sessionAttributes = attributesManager.getSessionAttributes();
+  const { persistentAttributes } = sessionAttributes;
+  const existingRoutines = persistentAttributes.routinePrayers || [];
+  if(existingRoutines.length === 0) {
+    return false;
+  }
+  const index = existingRoutines.findIndex((routine) =>
+    routine.name === prayerDetails.name
+  );
+  
+  if (index !== -1) {
+    // Found a routine with the same name
+    if (existingRoutines[index].time === prayerDetails.time) {
+      // Name and time both match - routine already exists
+      return true;
+    } else {
+      // Name matches but time is different - remove the old routine
+      existingRoutines.splice(index, 1);
+      return false;
+    }
+  }
+  // Update persistent attributes
+  persistentAttributes.routinePrayers = existingRoutines;
+  sessionAttributes.persistentAttributes = persistentAttributes;
+  attributesManager.setPersistentAttributes(
+    persistentAttributes
+  );
+  attributesManager.setSessionAttributes(sessionAttributes);
+  await attributesManager.savePersistentAttributes();
+  
+  // No routine with this name exists
+  return false;
+};
+
+
+const logRoutineCreation = async (handlerInput, routineDetails) => {
+  const { attributesManager } = handlerInput;
+  const sessionAttributes = attributesManager.getSessionAttributes();
+  const { persistentAttributes } = sessionAttributes;
+  if (!persistentAttributes.routinePrayers) {
+    persistentAttributes.routinePrayers = [];
+  }
+  persistentAttributes.routinePrayers.push(routineDetails);
+  attributesManager.setPersistentAttributes(
+    persistentAttributes
+  );
+  attributesManager.setSessionAttributes(sessionAttributes);
+  await attributesManager.savePersistentAttributes();
+};
 
 module.exports = {
   getPersistedData,
@@ -799,5 +893,10 @@ module.exports = {
   extractPhonemeText,
   generateRoutineErrorMessage,
   smartEscapeSSML,
-  generatePrayerNameDetailsForRoutine
+  generatePrayerNameDetailsForRoutine,
+  saveRequestedRoutinePrayer,
+  getRequestedRoutinePrayer,
+  deleteRequestedRoutinePrayer,
+  checkForRoutinePrayerAlreadyExists,
+  logRoutineCreation
 };

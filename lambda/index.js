@@ -1,6 +1,6 @@
 const Alexa = require("ask-sdk-core");
 const AWS = require("aws-sdk");
-const ddbAdapter = require("ask-sdk-dynamodb-persistence-adapter");
+const { CustomDynamoDbPersistenceAdapter } = require("./util/CustomDynamoDbPersistenceAdapter.js");
 const {
   LocalizationInterceptor,
   LogRequestInterceptor,
@@ -296,7 +296,7 @@ exports.handler = Alexa.SkillBuilders.custom()
   )
   .addErrorHandlers(ErrorHandler)
   .withPersistenceAdapter(
-    new ddbAdapter.DynamoDbPersistenceAdapter({
+    new CustomDynamoDbPersistenceAdapter({
       tableName: process.env.persistenceAdapterTableName,
       createTable: true,
       dynamoDBClient: new AWS.DynamoDB({

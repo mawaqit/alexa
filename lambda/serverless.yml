@@ -38,11 +38,6 @@ provider:
       Action:
         - 'kms:Decrypt'
       Resource: "*"
-    - Effect: "Allow"
-      Action:
-        - "scheduler:*"
-      Resource: 
-        - "arn:aws:scheduler:eu-west-3:275854128200:schedule/*"
 
 
 functions:
@@ -53,3 +48,17 @@ functions:
     description: MAWAQIT Alexa Backend
     events: ${file(eventsources.yml):${self:provider.stage}, file(eventsources.yml):dev}
     versionFunction: false
+
+resources:
+  Resources:
+    AlexaAzanUsersDataTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: mawaqit-alexa-azan-users-data-${self:provider.stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST

@@ -27,6 +27,8 @@ provider:
             - dynamodb:GetItem
             - dynamodb:Query
             - dynamodb:Scan
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
           Resource:
             - arn:aws:dynamodb:${self:custom.dynamoRegion}:275854128200:table/*
         - Effect: Allow

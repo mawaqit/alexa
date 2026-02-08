@@ -48,6 +48,13 @@ functions:
     description: MAWAQIT Alexa Backend
     events: ${file(eventsources.yml):${self:provider.stage}, file(eventsources.yml):dev}
     versionFunction: false
+    
+  triggerHandler:
+    handler: trigger.handler       
+    timeout: 900
+    memorySize: 128
+    description: New Trigger Function
+    versionFunction: false
 
 resources:
   Resources:

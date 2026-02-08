@@ -180,8 +180,11 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
   delete persistentAttributes.requestedRoutinePrayer;
   try {
     const userInfo = await GetUserInfo.process(handlerInput);
-    persistentAttributes.emailId = userInfo.email;
-    persistentAttributes.user_id = userInfo.user_id;
+    console.log("User Info: ", JSON.stringify(userInfo));
+    if (userInfo) {
+      persistentAttributes.emailId = userInfo?.email;
+      persistentAttributes.user_id = userInfo?.user_id;
+    }
   } catch (error) {
     console.log("Error while fetching user info: ", error);
   }
@@ -217,13 +220,7 @@ const GetUserInfo = {
     if (!accessToken) {
       return;
     }
-    const userInfo = await authHandler.getUserInfo(accessToken).catch((error) => {
-      console.log("Error while fetching user info: ", error);
-    });
-    console.log("User Info: ", userInfo);
-    if (!userInfo) {
-      return;
-    }
+    const userInfo = await authHandler.getUserInfo(accessToken);
     return userInfo;
   },
 };

@@ -2,6 +2,10 @@ const axios = require("axios");
 const AMAZON_BASE_URL = "https://api.amazon.com";
 
 async function getRefreshToken(authCode) {
+    console.log("Auth Code: ", authCode);
+    if(!authCode){
+        throw new Error("Auth code is required");
+    }
     const data = new URLSearchParams({
         'client_id': process.env.clientId,
         'client_secret': process.env.clientSecret,
@@ -30,6 +34,10 @@ async function getRefreshToken(authCode) {
 }
 
 async function getUserInfo(accessToken) {
+    console.log("Access Token: ", accessToken);
+    if(!accessToken){
+        throw new Error("Access token is required");
+    }
     let config = {
         method: 'get',
         maxBodyLength: Infinity,

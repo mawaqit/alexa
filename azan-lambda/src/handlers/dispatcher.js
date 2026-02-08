@@ -13,151 +13,202 @@
 
 'use strict';
 
-let AWS = require('aws-sdk');
-AWS.config.update({region:'us-east-1'});
+const AlexaResponse = require("./AlexaResponse");
+const ssmHandler = require("../ssmHandler/awsSsmHandler");
+const authHandler = require("../authHandler/authHandler");
+const dbHandler = require("../dbHandler/dynamoDbHandler");
 
-let AlexaResponse = require("./AlexaResponse");
-let ssmHandler = require("../ssmHandler/awsSsmHandler");
-let authHandler = require("../authHandler/authHandler");
-
-
-exports.handler = async function (event, context) {
-
-    // Dump the request for logging - check the CloudWatch logs
-    console.log("index.handler request  -----");
-    console.log(JSON.stringify(event));
-
+/**
+ * Initializes the SSM handler to load configuration.
+ */
+async function initializeConfiguration() {
     try {
         await ssmHandler.handler();
     } catch (error) {
         console.log("index.handler ssmHandler error  -----");
         console.log(error);
     }
+}
+
+/**
+ * Validates if the event contains a directive.
+ * @param {Object} event 
+ * @returns {boolean}
+ */
+function isValidDirective(event) {
+    return event && 'directive' in event;
+}
+
+/**
+ * Validates the payload version of the directive.
+ * @param {Object} event 
+ * @returns {boolean}
+ */
+function isValidPayloadVersion(event) {
+    return event?.directive?.header?.payloadVersion === "3";
+}
+
+/**
+ * Helper to log and return the response.
+ * @param {Object} response 
+ * @returns {Object}
+ */
+function sendResponse(response) {
+    console.log("index.handler response -----");
+    console.log(JSON.stringify(response));
+    return response;
+}
+
+/**
+ * Creates an error response object.
+ * @param {string} type 
+ * @param {string} message 
+ * @returns {Object}
+ */
+function createErrorResponse(type, message) {
+    const response = new AlexaResponse({
+        "name": "ErrorResponse",
+        "payload": {
+            "type": type,
+            "message": message
+        }
+    });
+    return response.get();
+}
+
+/**
+ * Handles Alexa.Authorization directives.
+ * @param {Object} event 
+ * @returns {Promise<Object>} Alexa response
+ */
+async function handleAuthorization(event) {
+    try {
+        const authCode = event?.directive?.payload?.grant?.code;
+        const accessToken = await authHandler.getRefreshToken(authCode);
+        const tokenFromRequest = event?.directive?.payload?.grantee?.token;
+        const userInfo = await authHandler.getUserInfo(tokenFromRequest);
+
+        await dbHandler.UpdateAzanUserInfo(userInfo.user_id, {
+            refreshToken: accessToken.refresh_token,
+            emailId: userInfo.email
+        });
+    } catch (error) {
+        console.log("Error in Authorization Event: ", error);
+    }
+
+    const response = new AlexaResponse({
+        "namespace": "Alexa.Authorization",
+        "name": "AcceptGrant.Response",
+    });
+    return response.get();
+}
+
+/**
+ * Handles Alexa.Discovery directives.
+ * @param {Object} event 
+ * @returns {Promise<Object>} Alexa response
+ */
+async function handleDiscovery(event) {
+    let endpointId = "mawaqit-azan-trigger";
+
+    try {
+        const accessTokenFromDirective = event?.directive?.payload?.scope?.token;
+        console.log("AccessTokenFromDirective: ", accessTokenFromDirective);
+
+        const userInfo = await authHandler.getUserInfo(accessTokenFromDirective);
+
+        // Append user-specific part to endpointId if available
+        // Original logic: endpointId += "-" + userInfo.user_id.split(".")[2];
+        if (userInfo?.user_id) {
+            const userIdParts = userInfo.user_id.split(".");
+            if (userIdParts.length > 2) {
+                endpointId += "-" + userIdParts[2];
+            }
+        }
+
+        await dbHandler.UpdateAzanUserInfo(userInfo.user_id, {
+            endpointId: endpointId
+        });
+    } catch (error) {
+        console.log("Error in Alexa Discovery: ", error);
+    }
+
+    const response = new AlexaResponse({
+        "namespace": "Alexa.Discovery",
+        "name": "Discover.Response"
+    });
+
+    const capabilityAlexa = response.createPayloadEndpointCapability();
+    const capabilityDoorbell = response.createPayloadEndpointCapability({
+        "interface": "Alexa.DoorbellEventSource",
+        "proactivelyReported": true
+    });
+
+    response.addPayloadEndpoint({
+        "friendlyName": "MAWAQIT Azan Trigger",
+        "endpointId": endpointId,
+        "capabilities": [capabilityAlexa, capabilityDoorbell],
+        "manufacturerName": "MAWAQIT",
+        "model": "MAWAQIT Azan Trigger",
+        "description": "MAWAQIT Azan Trigger",
+        "displayCategories": ["DOORBELL"]
+    });
+
+    return response.get();
+}
+
+/**
+ * Helper to log requests and context.
+ * @param {Object} event 
+ * @param {Object} context 
+ */
+function logRequest(event, context) {
+    console.log("index.handler request  -----");
+    console.log(JSON.stringify(event));
     if (context !== undefined) {
         console.log("index.handler context  -----");
         console.log(JSON.stringify(context));
     }
+}
 
-    // Validate we have an Alexa directive
-    if (!('directive' in event)) {
-        let aer = new AlexaResponse(
-            {
-                "name": "ErrorResponse",
-                "payload": {
-                    "type": "INVALID_DIRECTIVE",
-                    "message": "Missing key: directive, Is request a valid Alexa directive?"
-                }
-            });
-        return sendResponse(aer.get());
+/**
+ * Main Lambda Handler
+ */
+exports.handler = async function (event, context) {
+    logRequest(event, context);
+
+    await initializeConfiguration();
+
+    if (!isValidDirective(event)) {
+        return sendResponse(createErrorResponse(
+            "INVALID_DIRECTIVE",
+            "Missing key: directive, Is request a valid Alexa directive?"
+        ));
     }
 
-    // Check the payload version
-    if (event?.directive?.header?.payloadVersion !== "3") {
-        let aer = new AlexaResponse(
-            {
-                "name": "ErrorResponse",
-                "payload": {
-                    "type": "INTERNAL_ERROR",
-                    "message": "This skill only supports Smart Home API version 3"
-                }
-            });
-        return sendResponse(aer.get())
+    if (!isValidPayloadVersion(event)) {
+        return sendResponse(createErrorResponse(
+            "INTERNAL_ERROR",
+            "This skill only supports Smart Home API version 3"
+        ));
     }
 
-    let namespace = ((event.directive || {}).header || {}).namespace;
+    const namespace = ((event.directive || {}).header || {}).namespace;
 
-    if (namespace.toLowerCase() === 'alexa.authorization') {
-        try {
-            let authCode = event?.directive?.payload?.grant?.code;
-            let accessToken = await authHandler.getRefreshToken(authCode);
-        } catch (error) {
-            console.log("Error in getRefreshToken: ", error);
-        }
-
-        let aar = new AlexaResponse({"namespace": "Alexa.Authorization", "name": "AcceptGrant.Response",});
-        return sendResponse(aar.get());
+    if (!namespace) {
+        console.log("No namespace found in directive");
+        return;
     }
 
-    if (namespace.toLowerCase() === 'alexa.discovery') {
-        try {
-            let accessTokenFromDirective = event?.directive?.payload?.scope?.token;
-            console.log("accessTokenFromDirective: ", accessTokenFromDirective);
-            let userInfo = await authHandler.getUserInfo(accessTokenFromDirective);
-        } catch (error) {
-            console.log("Error in getUserInfo: ", error);
-        }
-        let adr = new AlexaResponse({"namespace": "Alexa.Discovery", "name": "Discover.Response"});
-        let capability_alexa = adr.createPayloadEndpointCapability();
-        let capability_alexa_doorbell = adr.createPayloadEndpointCapability({"interface": "Alexa.DoorbellEventSource",  "proactivelyReported": true});
-        adr.addPayloadEndpoint({"friendlyName": "MAWAQIT Azan Trigger", "endpointId": "mawaqit-azan-trigger", "capabilities": [capability_alexa, capability_alexa_doorbell], "manufacturerName": "MAWAQIT", "model": "MAWAQIT Azan Trigger", "description": "MAWAQIT Azan Trigger", "displayCategories": ["DOORBELL"]});
-        return sendResponse(adr.get());
+    switch (namespace.toLowerCase()) {
+        case 'alexa.authorization':
+            return sendResponse(await handleAuthorization(event));
+
+        case 'alexa.discovery':
+            return sendResponse(await handleDiscovery(event));
+
+        default:
+            console.log(`Unknown namespace: ${namespace}`);
+            return;
     }
-
-    if (namespace.toLowerCase() === 'alexa.powercontroller') {
-        let power_state_value = "OFF";
-        if (event.directive.header.name === "TurnOn")
-            power_state_value = "ON";
-
-        let endpoint_id = event.directive.endpoint.endpointId;
-        let token = event.directive.endpoint.scope.token;
-        let correlationToken = event.directive.header.correlationToken;
-
-        let ar = new AlexaResponse(
-            {
-                "correlationToken": correlationToken,
-                "token": token,
-                "endpointId": endpoint_id
-            }
-        );
-        ar.addContextProperty({"namespace":"Alexa.PowerController", "name": "powerState", "value": power_state_value});
-
-        // Check for an error when setting the state
-        let state_set = sendDeviceState(endpoint_id, "powerState", power_state_value);
-        if (!state_set) {
-            return new AlexaResponse(
-                {
-                    "name": "ErrorResponse",
-                    "payload": {
-                        "type": "ENDPOINT_UNREACHABLE",
-                        "message": "Unable to reach endpoint database."
-                    }
-                }).get();
-        }
-
-        return sendResponse(ar.get());
-    }
-
 };
-
-function sendResponse(response)
-{
-    // TODO Validate the response
-    console.log("index.handler response -----");
-    console.log(JSON.stringify(response));
-    return response
-}
-
-function sendDeviceState(endpoint_id, state, value) {
-    let dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-
-    let key = state + "Value";
-    let attribute_obj = {};
-    attribute_obj[key] = {"Action": "PUT", "Value": {"S": value}};
-
-    let request = dynamodb.updateItem(
-        {
-            TableName: "SampleSmartHome",
-            Key: {"ItemId": {"S": endpoint_id}},
-            AttributeUpdates: attribute_obj,
-            ReturnValues: "UPDATED_NEW"
-        });
-
-    console.log("index.sendDeviceState request -----");
-    console.log(request);
-
-    let response = request.send();
-
-    console.log("index.sendDeviceState response -----");
-    console.log(response);
-    return true;
-}

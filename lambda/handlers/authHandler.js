@@ -1,6 +1,7 @@
 const Alexa = require("ask-sdk-core");
 const axios = require("axios");
 const AMAZON_BASE_URL = "https://api.amazon.com";
+const qs = require("qs");
 
 const AuthHandler = {
     canHandle(handlerInput) {
@@ -83,6 +84,39 @@ async function getUserInfo(accessToken) {
     }
 }
 
+async function getAccessTokenFromRefreshToken(refreshToken) {
+    console.log("Getting access token from refresh token");
+    if (!refreshToken) {
+        throw new Error("Refresh token is required");
+    }
+
+    let data = qs.stringify({
+        'client_id': process.env.clientId,
+        'client_secret': process.env.clientSecret,
+        'grant_type': 'refresh_token',
+        'refresh_token': refreshToken
+    });
+
+    let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: AMAZON_BASE_URL + '/auth/o2/token',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        data: data
+    };
+
+    try {
+        const response = await axios.request(config);
+        console.log("Response in getAccessTokenFromRefreshToken: ", JSON.stringify(response.data));
+        return response.data;
+    } catch (error) {
+        console.log("Error in getAccessTokenFromRefreshToken: ", error?.response?.data || error.message);
+        throw error;
+    }
+}
+
 module.exports = {
-    AuthHandler, getUserInfo, getRefreshToken
+    AuthHandler, getUserInfo, getRefreshToken, getAccessTokenFromRefreshToken
 };

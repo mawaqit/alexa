@@ -297,11 +297,11 @@ exports.handler = Alexa.SkillBuilders.custom()
   .addErrorHandlers(ErrorHandler)
   .withPersistenceAdapter(
     new CustomDynamoDbPersistenceAdapter({
-      tableName: process.env.persistenceAdapterTableName,
+      tableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
       createTable: true,
       dynamoDBClient: new AWS.DynamoDB({
         apiVersion: "latest",
-        region: process.env.awsRegion,
+        region: process.env.AWS_REGION,
       }),
     })
   )

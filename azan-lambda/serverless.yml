@@ -36,10 +36,7 @@ provider:
             - 'ssm:GetParameter'
             - 'ssm:GetParameters'
           Resource: 
-            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/clientId
-            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/clientSecret
-            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/api/key/mawaqit
-            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/api/key/google
+            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/*
 
 functions:
   # ----------------------------------------

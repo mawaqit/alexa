@@ -12,9 +12,19 @@ provider:
   runtime: nodejs22.x
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${opt:region, self:custom.defaultRegion}
-  environment: ${file(env.json):${self:provider.stage}}
+  environment:
+    SCHEDULER_ROLE_ARN: arn:aws:iam::${aws:accountId}:role/${self:service}-${self:provider.stage}-${self:provider.region}-lambdaRole
+    MAWAQIT_ALEXA_SKILL_ID: ${file(env.json):${self:provider.stage}.mawaqitAlexaSkillId}
+    STAGE: ${self:provider.stage}
+    AWS_ACCOUNT_ID: ${aws:accountId}
+    BASE_URL: ${file(env.json):${self:provider.stage}.baseUrl}
+    PERSISTENCE_ADAPTER_TABLE_NAME: mawaqit-alexa-user-data-${self:provider.stage}
+    SKILL_NAME: MAWAQIT
+    S3_BUCKET_NAME: mawaqit-alexa
+    AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING: ${file(env.json):${self:provider.stage}.AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING}
+    AZAN_DYNAMO_DB_TABLE: mawaqit-alexa-azan-users-data-${self:provider.stage}
+    UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS: ${file(env.json):${self:provider.stage}.updateIntervalHadithWidgetInHours}
   lambdaHashingVersion: 20201221
-
 
   iamRoleStatements:
     - Effect: Allow
@@ -31,14 +41,25 @@ provider:
       Resource: "*"
     - Effect: Allow
       Action:
-        - 'ssm:GetParameter'
-        - 'ssm:GetParameters'
+        - "ssm:GetParameter"
+        - "ssm:GetParameters"
       Resource: "*"
     - Effect: Allow
       Action:
-        - 'kms:Decrypt'
+        - "kms:Decrypt"
       Resource: "*"
-
+    - Effect: Allow
+      Action:
+        - scheduler:*
+      Resource: "arn:aws:scheduler:${self:provider.region}:${aws:accountId}:schedule/*"
+    - Effect: Allow
+      Action:
+        - sqs:*
+      Resource: "arn:aws:sqs:${self:provider.region}:${aws:accountId}:mawaqit-alexa-azan-queue-${self:provider.stage}"
+    - Effect: Allow
+      Action:
+        - iam:PassRole
+      Resource: arn:aws:iam::${aws:accountId}:role/${self:service}-${self:provider.stage}-${self:provider.region}-lambdaRole
 
 functions:
   indexHandler:
@@ -48,16 +69,20 @@ functions:
     description: MAWAQIT Alexa Backend
     events: ${file(eventsources.yml):${self:provider.stage}, file(eventsources.yml):dev}
     versionFunction: false
-    
+
   triggerHandler:
-    handler: trigger.handler       
+    handler: trigger.handler
     timeout: 900
     memorySize: 128
-    description: New Trigger Function
+    description: Lambda will be triggered by EventBridge to send event to Worker Lambda
     versionFunction: false
 
 resources:
   Resources:
+    AlexaAzanQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: mawaqit-alexa-azan-queue-${self:provider.stage}
     AlexaAzanUsersDataTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -69,3 +94,15 @@ resources:
           - AttributeName: id
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
+    IamRoleLambdaExecution:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - scheduler.amazonaws.com
+              Action: sts:AssumeRole

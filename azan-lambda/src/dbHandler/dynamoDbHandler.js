@@ -1,5 +1,5 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, GetCommand, PutCommand } = require("@aws-sdk/lib-dynamodb");
+const { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");
 
 // CRITICAL: Initialize Client pointing to PARIS (eu-west-3)
 // If we don't specify the region here, it defaults to eu-west-1 (Ireland) and fails.
@@ -9,6 +9,7 @@ const client = new DynamoDBClient({
 const dynamo = DynamoDBDocumentClient.from(client);
 
 const TABLE_NAME = process.env.AZAN_DYNAMO_DB_TABLE;
+const PERSISTENCE_TABLE_NAME = process.env.persistenceAdapterTableName;
 
 async function GetAzanUserInfo(id) {
   console.log(`[GetAzanUserInfo] Fetching user with id: ${id}`);
@@ -29,6 +30,27 @@ async function GetAzanUserInfo(id) {
     return data.Item;
   } catch (error) {
     console.error(`[GetAzanUserInfo] Error getting user info for id ${id}:`, error);
+    throw error;
+  }
+}
+
+async function getUsersByMosqueId(mosqueId) {
+  console.log(`Querying ${PERSISTENCE_TABLE_NAME} for mosqueId: ${mosqueId}`);
+  const params = {
+    TableName: PERSISTENCE_TABLE_NAME,
+    IndexName: 'mosqueId_index',
+    KeyConditionExpression: 'mosqueId = :mosqueId',
+    ExpressionAttributeValues: {
+      ':mosqueId': mosqueId
+    }
+  };
+
+  try {
+    const data = await dynamo.send(new QueryCommand(params));
+    console.log(`Found ${data.Items.length} users for mosqueId ${mosqueId}`);
+    return data.Items;
+  } catch (error) {
+    console.error("Error querying persistence table:", error);
     throw error;
   }
 }
@@ -78,6 +100,7 @@ async function UpdateAzanUserInfo(id, { refreshToken, endpointId, emailId, ...ot
 
 module.exports = {
   GetAzanUserInfo,
-  UpdateAzanUserInfo
+  UpdateAzanUserInfo,
+  getUsersByMosqueId
 };
 

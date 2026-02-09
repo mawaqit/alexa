@@ -99,7 +99,7 @@ const getDataSourceforMosqueInfo = async (handlerInput, prayerTimes, mosqueInfo)
             "mosqueTitle": mosqueInfo.mosqueName,
             "mosqueDescription": mosqueInfo.mosqueDescription ? mosqueInfo.mosqueDescription : "",
             "mosqueImage": mosqueInfo.mosqueImage ? mosqueInfo.mosqueImage : "https://cdn.mawaqit.net/images/backend/mosque_default_picture.png",
-            "skillName": process.env.skillName,
+            "skillName": process.env.SKILL_NAME,
             "skillLogoUrl": logoUrl,
             "backgroundImageUrl": backgroundImage,
         }

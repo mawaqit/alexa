@@ -104,6 +104,10 @@ const RoutineListTouchEventHandler = {
     try {
       const selectedRoutine = helperFunctions.getAplArgument(handlerInput, 2);
       const prayerNames = requestAttributes.t("prayerNames");
+      await helperFunctions.saveRequestedRoutinePrayer(
+        handlerInput,
+        selectedRoutine,
+      );
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       const automationDirective = helperFunctions.offerAutomation(
         userTimeZone,

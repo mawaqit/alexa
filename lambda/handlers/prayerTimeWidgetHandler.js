@@ -133,6 +133,10 @@ const ReadPrayerTimeAPLEventHandler = {
     },
     async handle(handlerInput) {
         console.log("ReadPrayerTimeAPLEventHandler");
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        sessionAttributes.skipAplDirective = true;
+        sessionAttributes.skipCardDirective = true;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
         return await helperFunctions.checkForPersistenceData(handlerInput);
     },
 };

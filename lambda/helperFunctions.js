@@ -7,7 +7,8 @@ const moment = require("moment-timezone");
 const { getLatLng } = require("./handlers/googleGeoApiHandler.js");
 const { translate, detectLanguage } = require('./handlers/googleTranslateHandler.js');
 const prayerTimeApl = require("./aplDocuments/characterDisplayApl.json");
-const SKILL_ID = process.env.mawaqitAlexaSkillId || "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506";
+const SKILL_ID = process.env.MAWAQIT_ALEXA_SKILL_ID || "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506";
+const eventBridgeScheduler = require("./handlers/eventBridgeScheduler.js");
 
 const getPersistedData = async (handlerInput) => {
   try {
@@ -873,6 +874,24 @@ const logRoutineCreation = async (handlerInput, routineDetails) => {
   );
   attributesManager.setSessionAttributes(sessionAttributes);
   await attributesManager.savePersistentAttributes();
+  console.log("Routine created successfully");
+  try {
+    const timezone = await getUserTimezone(handlerInput);
+    const mosqueId = persistentAttributes.uuid
+    const userId = persistentAttributes.userId
+    const prayerName = routineDetails.name
+    const time = routineDetails.time
+    await eventBridgeScheduler.createOrUpdateSchedule({ mosqueId, prayerName, time, timezone, userId });
+     
+  } catch (error) {
+    console.log("Error in logRoutineCreation:", error);
+    if (error?.message === "Unable to fetch user timezone") {
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("timezoneErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  }
 };
 
 const getApiEndpoint = (handlerInput) => {

@@ -1,6 +1,6 @@
 module.exports = {
   translation: {
-    skillName: process.env.skillName, //new
+    skillName: process.env.SKILL_NAME, //new
     welcomePrompt: `Salam Aleykoum! `,
     chooseMosquePrompt: `Which mosque would you like to choose? The nearest mosques are: %s, You can choose by saying the number associated with the mosque `,
     chooseMosqueByTouchPrompt: "or you can also click on the mosque of your choice on your screen.",
@@ -13,7 +13,7 @@ module.exports = {
     noAddressPrompt: `It seems you haven't set your address on Alexa. You can do so from the Alexa app. This will allow me to find mosques near you.`,
     errorPromptforMosqueList: `I'm sorry, I couldn't find any MAWAQIT mosques near you.`,
     logoUrl: "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
-    titleForMosqueList: `${process.env.skillName} Mosques`,
+    titleForMosqueList: `${process.env.SKILL_NAME} Mosques`,
     layoutDirection: "LTR",
     nextPrayerTimeErrorPrompt: `Sorry, I couldn't find the time for the next prayer at your mosque. Please try again.`,
     nextPrayerTimePrompt: `At %s, the next prayer is %s at %s in %s. `,
@@ -36,12 +36,12 @@ module.exports = {
     mosqueInfoErrorPrompt: `Sorry, I couldn't find any information for your mosque, please try again.`,
     nextPrayerTimeWithNamePrompt: `The %s prayer is at %s in %s.`,
     allIqamaTimesPrompt: `For %s, iqama is at %s.`,
-    deleteDataPrompt: `Your data has been successfully deleted. Restart the skill to use ${process.env.skillName} again.`,
+    deleteDataPrompt: `Your data has been successfully deleted. Restart the skill to use ${process.env.SKILL_NAME} again.`,
     okPrompt: `Okay. `,
     jummaTimePrompt: `Additionally, Jumua, the Friday prayer, is at %s.`,
     noJummaTimePrompt: `There is no Jumua prayer at this mosque.`,
     none: `None`,
-    thankYouPrompt: `Thank you for using ${process.env.skillName} to get the exact prayer times of your favorite mosque. `,
+    thankYouPrompt: `Thank you for using ${process.env.SKILL_NAME} to get the exact prayer times of your favorite mosque. `,
     globalErrorPrompt: `Sorry, I didn't quite understand what you said. Please repeat.`,
     fallbackPrompt: `Sorry, I didn't quite understand what you said. Please repeat.`,
     allPrayerTimesPrompt: `%s is at %s. `,

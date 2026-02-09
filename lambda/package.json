@@ -23,7 +23,10 @@
         "util": "^0.12.5",
         "uuid": "^10.0.0",
         "@aws-sdk/client-dynamodb": "^3.971.0",
-        "@aws-sdk/lib-dynamodb": "^3.971.0"
+        "@aws-sdk/lib-dynamodb": "^3.971.0",
+        "@aws-sdk/client-scheduler": "^3.971.0",
+        "crypto": "^1.0.1",
+        "qs": "^6.12.3"
     },
     "devDependencies": {
         "serverless-aws-alias": "^1.8.0"

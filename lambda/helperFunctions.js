@@ -878,11 +878,18 @@ const logRoutineCreation = async (handlerInput, routineDetails) => {
   try {
     const timezone = await getUserTimezone(handlerInput);
     const mosqueId = persistentAttributes.uuid
-    const userId = persistentAttributes.userId
+    const userId = persistentAttributes.user_id
     const prayerName = routineDetails.name
     const time = routineDetails.time
-    await eventBridgeScheduler.createOrUpdateSchedule({ mosqueId, prayerName, time, timezone, userId });
-     
+    console.log("Mosque ID: ", mosqueId);
+    console.log("User ID: ", userId);
+    console.log("Prayer Name: ", prayerName);
+    console.log("Time: ", time);
+    console.log("Timezone: ", timezone);
+    if (mosqueId && userId && prayerName && time && timezone) {
+      await eventBridgeScheduler.createOrUpdateSchedule({ mosqueId, prayerName, time, timezone, userId });
+    }
+
   } catch (error) {
     console.log("Error in logRoutineCreation:", error);
     if (error?.message === "Unable to fetch user timezone") {

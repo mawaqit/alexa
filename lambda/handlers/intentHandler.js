@@ -1060,10 +1060,13 @@ const SessionResumedRequestHandler = {
     switch (code) {
       case 200:
         if (prayerNameDetails) {
-          await helperFunctions.logRoutineCreation(
+          const respone = await helperFunctions.logRoutineCreation(
             handlerInput,
-            prayerNameDetails
+            prayerNameDetails,
           );
+          if (respone) {
+            return respone;
+          }
         }
         return handlerInput.responseBuilder
           .speak(

@@ -24,6 +24,8 @@ provider:
     AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING: ${file(env.json):${self:provider.stage}.AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING}
     AZAN_DYNAMO_DB_TABLE: mawaqit-alexa-azan-users-data-${self:provider.stage}
     UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS: ${file(env.json):${self:provider.stage}.updateIntervalHadithWidgetInHours}
+    SQS_QUEUE_BATCH_SIZE: ${file(env.json):${self:provider.stage}.sqsQueueBatchSize, '10'}
+    SQS_QUEUE_URL: { Ref: AlexaAzanQueue }
   lambdaHashingVersion: 20201221
 
   iamRoleStatements:
@@ -66,7 +68,7 @@ functions:
     handler: index.handler
     timeout: 9
     memorySize: 128
-    description: MAWAQIT Alexa Backend
+    description: MAWAQIT Alexa Backend - ${self:provider.stage}
     events: ${file(eventsources.yml):${self:provider.stage}, file(eventsources.yml):dev}
     versionFunction: false
 
@@ -77,12 +79,44 @@ functions:
     description: Lambda will be triggered by EventBridge to send event to Worker Lambda
     versionFunction: false
 
+  workerHandler:
+    handler: worker.handler
+    timeout: 30
+    memorySize: 128
+    description: Worker Lambda to process Alexa events from SQS
+
 resources:
   Resources:
+    AlexaAzanDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: mawaqit-alexa-azan-dlq-${self:provider.stage}
+
+    WorkerEventSourceMapping:
+      Type: AWS::Lambda::EventSourceMapping
+      Properties:
+        BatchSize: 10
+        EventSourceArn:
+          Fn::GetAtt:
+            - AlexaAzanQueue
+            - Arn
+        FunctionName:
+          Fn::GetAtt:
+            - WorkerHandlerLambdaFunction
+            - Arn
+        FunctionResponseTypes:
+          - ReportBatchItemFailures
+
     AlexaAzanQueue:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: mawaqit-alexa-azan-queue-${self:provider.stage}
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt:
+              - AlexaAzanDLQ
+              - Arn
+          maxReceiveCount: 3
     AlexaAzanUsersDataTable:
       Type: AWS::DynamoDB::Table
       Properties:

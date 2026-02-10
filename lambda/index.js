@@ -132,8 +132,10 @@ const FallbackIntentHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      Alexa.getIntentName(handlerInput.requestEnvelope) ===
-      "AMAZON.FallbackIntent"
+      (Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "AMAZON.FallbackIntent" ||
+        Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "AMAZON.RepeatIntent")
     );
   },
   handle(handlerInput) {

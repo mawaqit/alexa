@@ -77,6 +77,11 @@ functions:
     timeout: 900
     memorySize: 128
     description: Lambda will be triggered by EventBridge to send event to Worker Lambda
+    events:
+      - schedule:
+          rate: cron(0 2 * * ? *)
+          input:
+            type: DAILY_UPDATE
     versionFunction: false
 
   workerHandler:
@@ -91,6 +96,11 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: mawaqit-alexa-azan-dlq-${self:provider.stage}
+
+    MawaqitAzanScheduleGroup:
+      Type: AWS::Scheduler::ScheduleGroup
+      Properties:
+        Name: mawaqit-azan-schedule-${self:provider.stage}
 
     WorkerEventSourceMapping:
       Type: AWS::Lambda::EventSourceMapping

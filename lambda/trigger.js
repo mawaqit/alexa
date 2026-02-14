@@ -33,6 +33,14 @@ async function getUserData(userId, eventTimestamp) {
 
 exports.handler = async (event) => {
   console.log("Trigger Event Received:", JSON.stringify(event));
+
+  // Check for Daily Update Trigger
+  if (event.type === "DAILY_UPDATE") {
+    // Lazy load schedulerUpdateHandler to avoid circular dependencies if any
+    const schedulerUpdateHandler = require("./handlers/schedulerUpdateHandler");
+    return await schedulerUpdateHandler.handleDailyUpdate();
+  }
+
   await awsSsmHandler.handler();
 
   const mosqueId = event.mosqueId;

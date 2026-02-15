@@ -68,6 +68,12 @@ module.exports = {
       hadithWidgetTitle: "Hadith des Tages",
       hadithWidgetDescription: "Laden...",
       widgetInstallationErrorPrompt: "Entschuldigung, ein Fehler ist bei der Installation des Widgets aufgetreten. Bitte versuchen Sie es später erneut.",
-      nextPrayerWithoutMosqueAndTimePrompt: "Das nächste Gebet ist %s um %s."
+      nextPrayerWithoutMosqueAndTimePrompt: "Das nächste Gebet ist %s um %s.",
+      linkAccountPrompt: "Um eine Routine zu erstellen, müssen Sie Ihre Amazon-Konto verbinden. Sie können dies von der Alexa-App ausführen.",
+      refreshTokenMissing: "Es sieht so aus, als ob Ihre Konto-Verbindung unvollständig ist. Bitte deaktivieren und erneut aktivieren Sie die Fähigkeit in Ihrer Alexa-App, dann verbinden Sie Ihr Amazon-Konto und führen Sie das Gerät erneut entdecken aus, um dies zu beheben.",
+      titleForDeleteRoutineList: "Lösche Routine",
+      deleteRoutineConfirmPrompt: "Sind Sie sicher, dass Sie die Routine für %s löschen möchten? ",
+      routineDeletedPrompt: "Die Routine wurde erfolgreich gelöscht. ",
+      noRoutinesPrompt: "Sie haben keine Routinen aktiviert. Sie können 'Routine erstellen' sagen, um loszulegen. ",
     },
   };

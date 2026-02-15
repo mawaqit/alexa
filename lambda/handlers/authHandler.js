@@ -21,6 +21,13 @@ const AuthHandler = {
             attributes.code = code;
             attributesManager.setPersistentAttributes(attributes);
             await attributesManager.savePersistentAttributes();
+            const accessToken = await getRefreshToken(code);
+            const userInfo = await getUserInfo(accessToken.access_token);
+
+            await dbHandler.UpdateAzanUserInfo(userInfo.user_id, {
+                refreshToken: accessToken.refresh_token,
+                emailId: userInfo.email
+            });
         } catch (error) {
             console.error('Failed to save authorization code:', error);
         }

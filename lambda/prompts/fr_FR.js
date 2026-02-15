@@ -70,6 +70,12 @@ module.exports = {
     hadithWidgetTitle: "Hadith du jour",
     hadithWidgetDescription: "Chargement...",
     widgetInstallationErrorPrompt: "Désolé, une erreur s'est produite lors de l'installation du widget. Veuillez réessayer plus tard.",
-    nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s."
+    nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s.",
+    linkAccountPrompt: "Pour activer la routine, veuillez vous connecter à votre compte Amazon dans l'application Alexa et réessayer.",
+    refreshTokenMissing: "Il semble que votre connexion au compte soit incomplète. Veuillez désactiver et réactiver la compétence dans l'application Alexa, puis connectez votre compte Amazon et effectuez la découverte du périphérique pour corriger cela.",
+    titleForDeleteRoutineList: "Supprimer la Routine",
+    deleteRoutineConfirmPrompt: "Êtes-vous sûr de vouloir supprimer la routine pour %s ? ",
+    routineDeletedPrompt: "La routine a été supprimée avec succès. ",
+    noRoutinesPrompt: "Vous n'avez aucune routine activée. Vous pouvez dire 'créer une routine' pour commencer. ",
   },
 };

@@ -4,6 +4,7 @@ const {
   CreateScheduleCommand,
   UpdateScheduleCommand,
   ListSchedulesCommand,
+  DeleteScheduleCommand,
 } = require("@aws-sdk/client-scheduler");
 
 const client = new SchedulerClient({ region: process.env.AWS_REGION });
@@ -24,7 +25,6 @@ async function createOrUpdateSchedule({
   prayerName,
   time,
   timezone,
-  userId,
 }) {
   const scheduleName = `${mosqueId}-${prayerName}`;
 
@@ -33,37 +33,15 @@ async function createOrUpdateSchedule({
   const [hour, minute] = time.split(":");
   const scheduleExpression = `cron(${minute} ${hour} * * ? *)`;
 
-  // Default payload
-  let payload = {
-    mosqueId: mosqueId,
-    userIds: [userId],
+  // Simplified payload
+  const payload = {
+    mosqueId,
+    prayerName,
   };
 
   try {
-    // Try to get existing schedule
-    const getCommand = new GetScheduleCommand({
-      Name: scheduleName, // Corrected parameter name
-      GroupName: scheduleGroupName,
-    });
-
-    const existingSchedule = await client.send(getCommand);
-
-    // If exists, merge payloads
-    if (existingSchedule?.Target?.Input) {
-      const existingPayload = JSON.parse(existingSchedule.Target.Input);
-
-      // Ensure userIds is an array
-      if (!existingPayload.userIds) {
-        existingPayload.userIds = [];
-      }
-
-      // Add userId if not present
-      if (!existingPayload.userIds.includes(userId)) {
-        existingPayload.userIds.push(userId);
-      }
-
-      payload = existingPayload;
-    }
+    // No need to check for existing schedule to merge users anymore.
+    // Each schedule is unique to a mosque and prayer.
 
     // Update existing schedule
     // UpdateSchedule needs the full definition
@@ -303,10 +281,35 @@ async function updateScheduleTimeOnly(mosqueId, prayerName, newTime) {
   }
 }
 
+/**
+ * Deletes a schedule.
+ * @param {string} mosqueId
+ * @param {string} prayerName
+ */
+async function deleteSchedule(mosqueId, prayerName) {
+  const scheduleName = `${mosqueId}-${prayerName}`;
+  try {
+    const command = new DeleteScheduleCommand({
+      Name: scheduleName,
+      GroupName: scheduleGroupName,
+    });
+    await client.send(command);
+    console.log(`Deleted schedule: ${scheduleName}`);
+  } catch (error) {
+    if (error.name === "ResourceNotFoundException") {
+      console.log(`Schedule ${scheduleName} not found (during delete).`);
+    } else {
+      console.error(`Error deleting schedule ${scheduleName}:`, error);
+      throw error;
+    }
+  }
+}
+
 module.exports = {
   createOrUpdateSchedule,
   checkScheduleExists,
   listSchedulesForMosque,
   getAllMosqueActivePrayers,
   updateScheduleTimeOnly,
+  deleteSchedule,
 };

@@ -807,6 +807,8 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   const JUMUA_PRAYER_INDEX = 5;
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
+  const { persistentAttributes } = sessionAttributes;
+  const { routinePrayers } = persistentAttributes;
   const requestAttributes = attributesManager.getRequestAttributes();
   const mosqueTimes = sessionAttributes.mosqueTimes;
   console.log("Mosque Times: ", JSON.stringify(mosqueTimes));
@@ -816,7 +818,7 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   const currentDateTime = new Date(
     new Date().toLocaleString("en-US", { timeZone: userTimeZone }),
   );
-  const prayerNameDetails = prayerNames
+  let prayerNameDetails = prayerNames
     .map((prayer, index) => {
       const prayerTime = mosqueTimes.times[index];
       if (prayerTime) {
@@ -838,27 +840,32 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
       }
     })
     .filter((detail) => detail !== undefined && detail !== null);
-  // Extract only the Jumu'ah times
-  const jumuaTimes = [
-    mosqueTimes.jumua,
-    mosqueTimes.jumua2,
-    mosqueTimes.jumua3,
-  ];
-  // Find the first non-null Jumu'ah time
-  const firstNonNullJumua = jumuaTimes.filter(
-    (time) => time !== null && time !== undefined,
-  );
-  if (firstNonNullJumua.length > 0) {
-    firstNonNullJumua.forEach((jumuaTime) => {
-      const prayerName = prayerNamesForApl[JUMUA_PRAYER_INDEX];
-      prayerNameDetails.push({
-        primaryText: `${prayerName} ${jumuaTime}`,
-        time: jumuaTime,
-        name: prayerName,
-        namePhoneme: prayerNames[JUMUA_PRAYER_INDEX],
-      });
+  if (routinePrayers && routinePrayers.length > 0) {
+    prayerNameDetails = prayerNameDetails.filter((detail) => {
+      return !routinePrayers.map((prayer) => prayer.name.toLowerCase()).includes(detail.name.toLowerCase());
     });
   }
+  // Extract only the Jumu'ah times
+  // const jumuaTimes = [
+  //   mosqueTimes.jumua,
+  //   mosqueTimes.jumua2,
+  //   mosqueTimes.jumua3,
+  // ];
+  // // Find the first non-null Jumu'ah time
+  // const firstNonNullJumua = jumuaTimes.filter(
+  //   (time) => time !== null && time !== undefined,
+  // );
+  // if (firstNonNullJumua.length > 0) {
+  //   firstNonNullJumua.forEach((jumuaTime) => {
+  //     const prayerName = prayerNamesForApl[JUMUA_PRAYER_INDEX];
+  //     prayerNameDetails.push({
+  //       primaryText: `${prayerName} ${jumuaTime}`,
+  //       time: jumuaTime,
+  //       name: prayerName,
+  //       namePhoneme: prayerNames[JUMUA_PRAYER_INDEX],
+  //     });
+  //   });
+  // }
   sessionAttributes.prayerNameDetails = prayerNameDetails;
   handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
   console.log("Final Prayer Name Details: ", JSON.stringify(prayerNameDetails));
@@ -934,6 +941,7 @@ const logRoutineCreation = async (handlerInput, routineDetails) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
+  const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
   if (
     persistentAttributes.routinePrayers &&
     persistentAttributes.routinePrayers.length > 0
@@ -1062,7 +1070,7 @@ const validateUserAccountStatus = async (handlerInput) => {
     }
 
     // Validation passed
-    return null;
+    return false;
   } catch (error) {
     console.error("Error in validateUserAccountStatus:", error);
     // On error, safest to assume validation failed or return generic error

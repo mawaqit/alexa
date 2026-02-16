@@ -174,26 +174,35 @@ const DeleteRoutineTouchEventHandler = {
     try {
       const selectedRoutine = helperFunctions.getAplArgument(handlerInput, 2);
       console.log("Selected Routine for deletion: ", selectedRoutine);
-
+      const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+      const { persistentAttributes } = sessionAttributes;
+      const { routinePrayers } = persistentAttributes;
+      const routinePrayerIndex = routinePrayers.findIndex(
+        (routine) => routine.name.toLowerCase() === selectedRoutine.name.toLowerCase(),
+      );
       // Trigger DeleteRoutineIntent confirmation
       return handlerInput.responseBuilder
         .speak(
           requestAttributes.t(
             "deleteRoutineConfirmPrompt",
-            selectedRoutine.name,
+            selectedRoutine.namePhoneme,
           ),
         )
         .addDirective({
           type: "Dialog.ConfirmSlot",
-          slotToConfirm: "prayerName",
+          slotToConfirm: "prayerIndex",
           updatedIntent: {
             name: "DeleteRoutineIntent",
             confirmationStatus: "NONE",
             slots: {
               prayerName: {
                 name: "prayerName",
-                value: selectedRoutine.name,
                 confirmationStatus: "NONE",
+              },
+              prayerIndex: {
+                name: "prayerIndex",
+                value: String(routinePrayerIndex + 1),
+                confirmationStatus: "NONE"
               },
             },
           },
@@ -203,7 +212,7 @@ const DeleteRoutineTouchEventHandler = {
     } catch (error) {
       console.log("Error in DeleteRoutineTouchEventHandler: ", error);
       return handlerInput.responseBuilder
-        .speak(requestAttributes.t("routineErrorPrompt"))
+        .speak(requestAttributes.t("deleteRoutineErrorPrompt"))
         .withShouldEndSession(true)
         .getResponse();
     }

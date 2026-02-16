@@ -77,5 +77,11 @@ module.exports = {
     deleteRoutineConfirmPrompt: "Êtes-vous sûr de vouloir supprimer la routine pour %s ? ",
     routineDeletedPrompt: "La routine a été supprimée avec succès. ",
     noRoutinesPrompt: "Vous n'avez aucune routine activée. Vous pouvez dire 'créer une routine' pour commencer. ",
+    deleteRoutinePrompt: "Quelle routine souhaitez-vous supprimer ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la routine",
+    deleteRoutineTouchPrompt:
+      "ou vous pouvez aussi cliquer sur la routine de votre choix sur votre écran.",
+    deleteRoutineErrorPrompt:
+      "Désolé, une erreur s'est produite lors de la suppression de la routine. Veuillez réessayer plus tard.",
+    allRoutinesEnabled: "Vous avez déjà activé toutes les routines. Pour supprimer une routine, vous pouvez dire 'supprimer une routine'.",
   },
 };

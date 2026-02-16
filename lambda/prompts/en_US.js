@@ -1,3 +1,5 @@
+const { deleteRoutine } = require("../helperFunctions");
+
 module.exports = {
   translation: {
     skillName: process.env.SKILL_NAME, //new
@@ -92,10 +94,16 @@ module.exports = {
     refreshTokenMissing:
       "It looks like your account linking is incomplete. Please disable and re-enable the skill in your Alexa app, then link your Amazon account and run device discovery to fix this.",
     titleForDeleteRoutineList: "Delete Routine",
+    deleteRoutinePrompt: "Which routine would you like to delete? You can choose between %s. You can choose by saying the number associated with the routine ",
+    deleteRoutineTouchPrompt:
+      "or you can also click on the routine of your choice on your screen.",
     deleteRoutineConfirmPrompt:
       "Are you sure you want to delete the routine for %s? ",
     routineDeletedPrompt: "The routine has been successfully deleted. ",
     noRoutinesPrompt:
       "You don't have any routines enabled. You can say 'create a routine' to get started. ",
+    deleteRoutineErrorPrompt:
+      "Sorry, an error occurred while deleting the routine. Please try again later.",
+    allRoutinesEnabled: "You have already enabled all the routines. To delete a routine, you can say 'delete a routine'.",
   },
 };

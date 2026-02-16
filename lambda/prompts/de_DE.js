@@ -75,5 +75,10 @@ module.exports = {
       deleteRoutineConfirmPrompt: "Sind Sie sicher, dass Sie die Routine für %s löschen möchten? ",
       routineDeletedPrompt: "Die Routine wurde erfolgreich gelöscht. ",
       noRoutinesPrompt: "Sie haben keine Routinen aktiviert. Sie können 'Routine erstellen' sagen, um loszulegen. ",
+      deleteRoutinePrompt: "Welche Routine möchten Sie löschen? Sie können zwischen %s wählen. Sie können wählen, indem Sie die zugehörige Nummer sagen",
+      deleteRoutineTouchPrompt:
+        "oder Sie können auch auf die Routine Ihrer Wahl auf Ihrem Bildschirm klicken.",
+      deleteRoutineErrorPrompt: "Entschuldigung, ein Fehler ist beim Löschen der Routine aufgetreten. Bitte versuchen Sie es später erneut.",
+      allRoutinesEnabled: "Sie haben bereits alle Routinen aktiviert. Um eine Routine zu löschen, können Sie 'Routine löschen' sagen.",
     },
   };

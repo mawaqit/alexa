@@ -17,45 +17,76 @@ const adhaanTasks = [
 ];
 const { DeleteUserInfo } = require("./dynamoDbHandler.js");
 
-const DeleteRoutineIntentHandler = {
+const DeleteRoutineStartedHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
       Alexa.getIntentName(handlerInput.requestEnvelope) ===
-        "DeleteRoutineIntent"
+        "DeleteRoutineIntent" &&
+      !Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex") &&
+      !helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName")
     );
   },
   async handle(handlerInput) {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
-    const validateUserAccountStatus =
-      helperFunctions.validateUserAccountStatus(handlerInput);
-    if (validateUserAccountStatus) {
-      return validateUserAccountStatus;
-    }
-
-    const { requestEnvelope, responseBuilder } = handlerInput;
-    const prayerNameSlot = Alexa.getSlotValue(requestEnvelope, "prayerName");
-    const sessionAttributes =
-      handlerInput.attributesManager.getSessionAttributes();
-    const { persistentAttributes } = sessionAttributes;
-    const routinePrayers = persistentAttributes.routinePrayers || [];
-
-    if (!prayerNameSlot) {
+    const requestEnvelope = handlerInput.requestEnvelope;
+    try {
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const responseBuilder = handlerInput.responseBuilder;
+      const { persistentAttributes } = sessionAttributes;
+      if (!persistentAttributes?.uuid) {
+        return await helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      const routinePrayers = persistentAttributes.routinePrayers || [];
       if (routinePrayers.length === 0) {
         return responseBuilder
           .speak(requestAttributes.t("noRoutinesPrompt"))
-          .withShouldEndSession(true)
+          .withShouldEndSession(false)
           .getResponse();
       }
 
-      // Show list of routines to delete
-      const routineList = routinePrayers.map((routine) => ({
-        primaryText: `${routine.name} ${routine.time}`,
-        name: routine.name,
-        time: routine.time,
+      const routineList = routinePrayers.map(({ name, time, namePhoneme }) => ({
+        primaryText: `${name} ${time}`,
+        name,
+        time,
+        namePhoneme,
       }));
-
+      if(routineList.length === 1){
+        return handlerInput.responseBuilder
+        .speak(
+          requestAttributes.t(
+            "deleteRoutineConfirmPrompt",
+            routineList[0].namePhoneme,
+          ),
+        )
+        .addDirective({
+          type: "Dialog.ConfirmSlot",
+          slotToConfirm: "prayerIndex",
+          updatedIntent: {
+            name: "DeleteRoutineIntent",
+            confirmationStatus: "NONE",
+            slots: {
+              prayerName: {
+                name: "prayerName",
+                confirmationStatus: "NONE",
+              },
+              prayerIndex: {
+                name: "prayerIndex",
+                value: String(routinePrayers.length),
+                confirmationStatus: "NONE"
+              },
+            },
+          },
+        })
+        .withShouldEndSession(false)
+        .getResponse();
+      }
+      let speakOutput = requestAttributes.t(
+        "deleteRoutinePrompt",
+        routineList.map((r, index) => `${index + 1}. ${r.namePhoneme} ${r.time}`).join(", "),
+      );
       // Create APL if supported
       if (
         Alexa.getSupportedInterfaces(requestEnvelope)["Alexa.Presentation.APL"]
@@ -70,78 +101,335 @@ const DeleteRoutineIntentHandler = {
             dataSource,
           );
           responseBuilder.addDirective(aplDirective);
+          speakOutput += requestAttributes.t("deleteRoutineTouchPrompt");
         } catch (error) {
           console.log("Error creating APL for Delete Routine: ", error);
         }
       }
 
+      const currentIntent = handlerInput.requestEnvelope.request.intent;
       return responseBuilder
-        .speak(
-          requestAttributes.t(
-            "prayerNamePrompt",
-            routineList.map((r) => r.name).join(", "),
-          ),
-        )
-        .addElicitSlotDirective("prayerName", requestEnvelope.request.intent)
+        .speak(speakOutput)
+        .addElicitSlotDirective("prayerIndex", currentIntent)
         .withShouldEndSession(false)
         .getResponse();
-    }
-
-    // Slot is present, check confirmation
-    const prayerNameSlotObj = requestEnvelope.request.intent.slots.prayerName;
-    const confirmationStatus = prayerNameSlotObj.confirmationStatus;
-
-    if (confirmationStatus === "DENIED") {
-      return responseBuilder
-        .speak(requestAttributes.t("okPrompt") + requestAttributes.t("doYouNeedAnythingElsePrompt"))
-        .withShouldEndSession(false)
-        .getResponse();
-    }
-
-    if (confirmationStatus === "NONE") {
-      
-      return responseBuilder
-        .speak(
-          requestAttributes.t("deleteRoutineConfirmPrompt", prayerNameSlot),
-        )
-        .addConfirmSlotDirective("prayerName", requestEnvelope.request.intent)
-        .withShouldEndSession(false)
-        .getResponse();
-    }
-    const prayerResolvedName = helperFunctions.getResolvedValue(
-      requestEnvelope,
-      "prayerName",
-    );
-
-    const routineToDelete = routinePrayers.find(
-      (r) => prayerResolvedName && r.name.toLowerCase() === prayerResolvedName.toLowerCase(),
-    );
-
-    if (!routineToDelete) {
-      return responseBuilder
-        .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))
-        .addElicitSlotDirective("prayerName")
-        .getResponse();
-    }
-    // Confirmed
-    if (confirmationStatus === "CONFIRMED") {
-      const routineName = routineToDelete.name; // or resolved name
-      const deleted = await helperFunctions.deleteRoutine(
-        handlerInput,
-        routineName,
-      );
-
-      if (deleted) {
+    } catch (error) {
+      console.log("Error in DeleteRoutineStartedHandler: ", error);
+      if (error?.message === "Unable to fetch user timezone") {
         return responseBuilder
-          .speak(requestAttributes.t("routineDeletedPrompt") + requestAttributes.t("doYouNeedAnythingElsePrompt"))
-          .withShouldEndSession(false)
-          .getResponse();
-      } else {
-        return responseBuilder
-          .speak(requestAttributes.t("routineErrorPrompt")) // Reuse error or "routine not found"
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
           .withShouldEndSession(true)
           .getResponse();
       }
+      return responseBuilder
+        .speak(requestAttributes.t("deleteRoutineErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  },
+};
+
+const DeleteRoutinePrayerIndexHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "DeleteRoutineIntent" &&
+      Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex") &&
+      !Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerName") &&
+      !helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName")
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    const requestEnvelope = handlerInput.requestEnvelope;
+    const responseBuilder = handlerInput.responseBuilder;
+    try {
+      const prayerIndex =
+        parseInt(
+          Alexa.getSlotValue(requestEnvelope, "prayerIndex"),
+        ) || 0;
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const { persistentAttributes } = sessionAttributes;
+      if (!persistentAttributes?.uuid) {
+        return await helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      const routinePrayers = persistentAttributes.routinePrayers || [];
+      if (prayerIndex < 1 || prayerIndex > routinePrayers.length) {
+        console.log("Invalid prayer index: ", prayerIndex);
+        sessionAttributes.skipAplDirective = true;
+        sessionAttributes.skipCardDirective = true;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        return handlerInput.responseBuilder
+          .speak(
+            requestAttributes.t(
+              "invalidPrayerIndexPrompt",
+              routinePrayers.length,
+            ),
+          )
+          .addDirective({
+            type: "Dialog.ElicitSlot",
+            slotToElicit: "prayerIndex",
+            updatedIntent: {
+              name: "DeleteRoutineIntent",
+              confirmationStatus: "NONE",
+              slots: {
+                prayerIndex: {
+                  name: "prayerIndex",
+                  confirmationStatus: "NONE",
+                },
+                prayerName: {
+                  name: "prayerName",
+                  confirmationStatus: "NONE",
+                },
+              },
+            },
+          })
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      // Slot is present, check confirmation
+      const prayerIndexSlotObj =
+        requestEnvelope.request.intent.slots.prayerIndex;
+      const confirmationStatus = prayerIndexSlotObj.confirmationStatus;
+      const selectedPrayer = routinePrayers[prayerIndex - 1];
+      console.log("Selected Prayer: ", selectedPrayer);
+      if (confirmationStatus === "DENIED") {
+        return responseBuilder
+          .speak(
+            requestAttributes.t("okPrompt") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+
+      if (confirmationStatus === "NONE") {
+        return responseBuilder
+          .speak(
+            requestAttributes.t(
+              "deleteRoutineConfirmPrompt",
+              selectedPrayer.namePhoneme,
+            ),
+          )
+          .addDirective({
+            type: "Dialog.ConfirmSlot",
+            slotToConfirm: "prayerIndex",
+            updatedIntent: {
+              name: "DeleteRoutineIntent",
+              confirmationStatus: "NONE",
+              slots: {
+                prayerIndex: {
+                  name: "prayerIndex",
+                  value: prayerIndex,
+                  confirmationStatus: "NONE",
+                },
+                prayerName: {
+                  name: "prayerName",
+                  confirmationStatus: "NONE",
+                },
+              },
+            },
+          })
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+
+      // Confirmed
+      if (confirmationStatus === "CONFIRMED") {
+        const routineName = selectedPrayer.name; // or resolved name
+        const deleted = await helperFunctions.deleteRoutine(
+          handlerInput,
+          routineName,
+        );
+
+        if (deleted) {
+          return responseBuilder
+            .speak(
+              requestAttributes.t("routineDeletedPrompt") +
+                requestAttributes.t("doYouNeedAnythingElsePrompt"),
+            )
+            .withShouldEndSession(false)
+            .getResponse();
+        }
+      }
+      return responseBuilder
+        .speak(requestAttributes.t("deleteRoutineErrorPrompt")) // Reuse error or "routine not found"
+        .withShouldEndSession(true)
+        .getResponse();
+
+      // await helperFunctions.saveRequestedRoutinePrayer(
+      //   handlerInput,
+      //   selectedPrayer
+      // );
+      // const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      // const automationDirective = helperFunctions.offerAutomation(
+      //   userTimeZone,
+      //   selectedPrayer.time,
+      //   selectedPrayer.name,
+      //   selectedPrayer.namePhoneme === prayerNames[5]
+      // );
+      // return handlerInput.responseBuilder
+      //   .addDirective(automationDirective)
+      //   .getResponse();
+    } catch (error) {
+      console.log("Error in DeleteRoutinePrayerIndexHandler:", error);
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("deleteRoutineErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  },
+};
+
+const DeleteRoutinePrayerNameHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "DeleteRoutineIntent" &&
+      !Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex") &&
+      Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerName")
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    const requestEnvelope = handlerInput.requestEnvelope;
+    const responseBuilder = handlerInput.responseBuilder;    
+    try {
+      const prayerResolvedName = helperFunctions.getResolvedValue(
+        requestEnvelope,
+        "prayerName",
+      );
+      console.log("Prayer Name: ", prayerResolvedName);
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const { persistentAttributes } = sessionAttributes;
+      if (!persistentAttributes?.uuid) {
+        return await helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      const routinePrayers = persistentAttributes.routinePrayers || [];
+      const prayerIndex = routinePrayers.findIndex(
+        (prayer) => prayer.name === prayerResolvedName,
+      );
+      if (prayerIndex === -1) {
+        console.log("Invalid prayer name: ", prayerResolvedName);
+        sessionAttributes.skipAplDirective = true;
+        sessionAttributes.skipCardDirective = true;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))
+          .addDirective({
+            type: "Dialog.ElicitSlot",
+            slotToElicit: "prayerName",
+            updatedIntent: {
+              name: "DeleteRoutineIntent",
+              confirmationStatus: "NONE",
+              slots: {
+                prayerIndex: {
+                  name: "prayerIndex",
+                  confirmationStatus: "NONE",
+                },
+                prayerName: {
+                  name: "prayerName",
+                  confirmationStatus: "NONE",
+                },
+              },
+            },
+          })
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      // Slot is present, check confirmation
+      const prayerNameSlotObj = requestEnvelope.request.intent.slots.prayerName;
+      const confirmationStatus = prayerNameSlotObj.confirmationStatus;
+      const selectedPrayer = routinePrayers.find(
+        (prayer) =>
+          prayerResolvedName &&
+          prayer.name.toLowerCase() === prayerResolvedName.toLowerCase(),
+      );
+      console.log("Selected Prayer: ", selectedPrayer);
+      if (confirmationStatus === "DENIED") {
+        return responseBuilder
+          .speak(
+            requestAttributes.t("okPrompt") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      const currentIntent = handlerInput.requestEnvelope.request.intent;
+      if (confirmationStatus === "NONE") {
+        return responseBuilder
+          .speak(
+            requestAttributes.t(
+              "deleteRoutineConfirmPrompt",
+              selectedPrayer.name,
+            ),
+          )
+          .addConfirmSlotDirective("prayerName", currentIntent)
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+
+      // Confirmed
+      if (confirmationStatus === "CONFIRMED") {
+        const routineName = selectedPrayer.name; // or resolved name
+        const deleted = await helperFunctions.deleteRoutine(
+          handlerInput,
+          routineName,
+        );
+
+        if (deleted) {
+          return responseBuilder
+            .speak(
+              requestAttributes.t("routineDeletedPrompt") +
+                requestAttributes.t("doYouNeedAnythingElsePrompt"),
+            )
+            .withShouldEndSession(false)
+            .getResponse();
+        }
+      }
+      return responseBuilder
+        .speak(requestAttributes.t("deleteRoutineErrorPrompt")) // Reuse error or "routine not found"
+        .withShouldEndSession(true)
+        .getResponse();
+
+      // await helperFunctions.saveRequestedRoutinePrayer(
+      //   handlerInput,
+      //   selectedPrayer
+      // );
+      // const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      // const automationDirective = helperFunctions.offerAutomation(
+      //   userTimeZone,
+      //   selectedPrayer.time,
+      //   selectedPrayer.name,
+      //   selectedPrayer.namePhoneme === prayerNames[5]
+      // );
+      // return handlerInput.responseBuilder
+      //   .addDirective(automationDirective)
+      //   .getResponse();
+    } catch (error) {
+      console.log("Error in DeleteRoutinePrayerNameHandler:", error);
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("deleteRoutineErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
     }
   },
 };
@@ -1138,7 +1426,7 @@ const CreateRoutineStartedHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const validateUserAccountStatus =
-      helperFunctions.validateUserAccountStatus(handlerInput);
+      await helperFunctions.validateUserAccountStatus(handlerInput);
     if (validateUserAccountStatus) {
       return validateUserAccountStatus;
     }
@@ -1149,8 +1437,14 @@ const CreateRoutineStartedHandler = {
       if (!persistentAttributes?.uuid) {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }
-      const prayerNameDetails =
+      let prayerNameDetails =
         await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput);
+      if (prayerNameDetails.length === 0) {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("allRoutinesEnabled"))
+          .withShouldEndSession(false)
+          .getResponse();
+      }
       const prayerNameTimePrompt = prayerNameDetails.map(
         (prayer, index) => `${index + 1}. ${prayer.namePhoneme} ${prayer.time}`,
       );
@@ -1220,7 +1514,7 @@ const CreateRoutineIntentHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const validateUserAccountStatus =
-      helperFunctions.validateUserAccountStatus(handlerInput);
+      await helperFunctions.validateUserAccountStatus(handlerInput);
     if (validateUserAccountStatus) {
       return validateUserAccountStatus;
     }
@@ -1409,16 +1703,20 @@ const YesIntentHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
-      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-      const automationDirective = helperFunctions.offerAutomation(
-        userTimeZone,
-        prayerNameDetails.time,
-        prayerNameDetails.name,
-        prayerNameDetails.namePhoneme === requestAttributes.t("prayerNames")[5],
+      // const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      // const automationDirective = helperFunctions.offerAutomation(
+      //   userTimeZone,
+      //   prayerNameDetails.time,
+      //   prayerNameDetails.name,
+      //   prayerNameDetails.namePhoneme === requestAttributes.t("prayerNames")[5],
+      // );
+      // return handlerInput.responseBuilder
+      //   .addDirective(automationDirective)
+      //   .getResponse();
+      return await helperFunctions.logRoutineCreation(
+        handlerInput,
+        prayerNameDetails,
       );
-      return handlerInput.responseBuilder
-        .addDirective(automationDirective)
-        .getResponse();
     } catch (error) {
       console.log("Error in YesIntentHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {
@@ -1473,5 +1771,7 @@ module.exports = {
   SessionResumedRequestHandler,
   YesIntentHandler,
   NoIntentHandler,
-  DeleteRoutineIntentHandler,
+  DeleteRoutineStartedHandler,
+  DeleteRoutinePrayerIndexHandler,
+  DeleteRoutinePrayerNameHandler,
 };

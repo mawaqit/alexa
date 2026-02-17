@@ -16,7 +16,13 @@ const getMosqueList = async (
   // url += `lat=10.9543588&lon=79.7294113`;
   // url += `lat=48.9451554&lon=2.4522338`;
   const config = getConfig("get", url, "2.0");
-  console.log("Config: ", JSON.stringify(config, null, 2).replace(/Bearer \w+/g, "Bearer ****"));
+  console.log(
+    "Config: ",
+    JSON.stringify(config, null, 2).replace(
+      /"Api-Access-Token":\s*"[^"]+"/g,
+      '"Api-Access-Token": "****"',
+    ),
+  );
   return await axios
     .request(config)
     .then((response) => {
@@ -48,7 +54,13 @@ const getMosqueList = async (
 
 const getPrayerTimings = async (mosqueUuid, isIqamaCalendarRequired = false, isPrayerCalendarRequired = false) => {
   const config = getConfig("get", `/mosque/${mosqueUuid}/times`);
-  console.log("Config: ", JSON.stringify(config, null, 2).replace(/Bearer \w+/g, "Bearer ****"));
+  console.log(
+    "Config: ",
+    JSON.stringify(config, null, 2).replace(
+      /"Api-Access-Token":\s*"[^"]+"/g,
+      '"Api-Access-Token": "****"',
+    ),
+  );
   return await axios
     .request(config)
     .then((response) => {
@@ -77,7 +89,13 @@ const getPrayerTimings = async (mosqueUuid, isIqamaCalendarRequired = false, isP
 
 const getRandomHadith = async (lang = "ar") => {
   const config = getConfig("get", `/hadith/random?lang=${lang}`, "2.0");
-  console.log("Config: ", JSON.stringify(config, null, 2).replace(/Bearer \w+/g, "Bearer ****"));
+  console.log(
+    "Config: ",
+    JSON.stringify(config, null, 2).replace(
+      /"Api-Access-Token":\s*"[^"]+"/g,
+      '"Api-Access-Token": "****"',
+    ),
+  );
   return await axios
     .request(config)
     .then((response) => {
@@ -92,13 +110,12 @@ const getRandomHadith = async (lang = "ar") => {
       console.log("Error while fetching Hadith: ", error);
       throw error;
     });
-}
+};
 
 const getConfig = (httpMethod, url, apiVersion = "3.0") => {
-  const apiKey = "Bearer " + process.env.mawaqitApiKey;
   const headers = {
     accept: "application/json",
-    Authorization: apiKey,
+    "Api-Access-Token": process.env.mawaqitApiKey,
   };
   return {
     method: httpMethod,
@@ -108,14 +125,14 @@ const getConfig = (httpMethod, url, apiVersion = "3.0") => {
 };
 
 /* *
- * Helper function to generate an access token with the scope alexa::datastore. 
+ * Helper function to generate an access token with the scope alexa::datastore.
  * AlexaClientID and AlexaClientSecret are fetched from the Permissions page
  * */
 const getAccessToken = async () => {
   let config = {
     method: "post",
     url: "https://api.amazon.com/auth/o2/token",
-    timeout: 10000, 
+    timeout: 10000,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
       charset: "utf-8",

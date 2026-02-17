@@ -1,5 +1,5 @@
 const Alexa = require("ask-sdk-core");
-const AWS = require("aws-sdk");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const {
   CustomDynamoDbPersistenceAdapter,
 } = require("./util/CustomDynamoDbPersistenceAdapter.js");
@@ -323,8 +323,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     new CustomDynamoDbPersistenceAdapter({
       tableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
       createTable: true,
-      dynamoDBClient: new AWS.DynamoDB({
-        apiVersion: "latest",
+      dynamoDBClient: new DynamoDBClient({
         region: process.env.AWS_REGION,
       }),
     }),

@@ -1,7 +1,7 @@
 const alexaEventSender = require("./handlers/alexaEventSender");
 
 exports.handler = async (event) => {
-  console.log("Worker Lambda Triggered:", JSON.stringify(event));
+  console.log(`Worker Lambda Triggered with ${event.Records?.length ?? 0} records`);
 
   const batchItemFailures = [];
 

@@ -10,9 +10,13 @@ const SkillEventHandler = {
       console.log(`Skill was disabled for user: ${userId}`);
       try {
         await DeleteUserInfo(userId);
-        await handlerInput.attributesManager.deletePersistentAttributes()
       } catch (error) {
-        console.error(`Error while deleting data: ${error}`);
+        console.error(`Error while deleting user info: ${error}`);
+      }
+      try {
+        await handlerInput.attributesManager.deletePersistentAttributes();
+      } catch (error) {
+        console.error(`Error while deleting persistent attributes: ${error}`);
       }
       return handlerInput.responseBuilder
         .getResponse();

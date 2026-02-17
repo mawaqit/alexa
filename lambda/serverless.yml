@@ -86,7 +86,7 @@ functions:
 
   workerHandler:
     handler: worker.handler
-    timeout: 30
+    timeout: 900
     memorySize: 128
     description: Worker Lambda to process Alexa events from SQS
 
@@ -121,6 +121,7 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: mawaqit-alexa-azan-queue-${self:provider.stage}
+        VisibilityTimeout: 5400
         RedrivePolicy:
           deadLetterTargetArn:
             Fn::GetAtt:

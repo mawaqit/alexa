@@ -165,31 +165,12 @@ async function getAllMosqueActivePrayers() {
       if (response.Schedules) {
         response.Schedules.forEach((schedule) => {
           let mosqueId = null;
-
-          // 1. Try getting mosqueId from payload
-          if (schedule.Target && schedule.Target.Input) {
-            try {
-              const payload = JSON.parse(schedule.Target.Input);
-              if (payload.mosqueId) {
-                mosqueId = payload.mosqueId;
-              }
-            } catch (e) {
-              console.warn(
-                `Failed to parse payload for schedule ${schedule.Name}:`,
-                e,
-              );
-            }
-          }
-
-          // 2. Fallback: Parse from name if payload failed
-          if (!mosqueId) {
-            const name = schedule.Name;
-            const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
-            for (const prayer of prayers) {
-              if (name.endsWith(`-${prayer}`)) {
-                mosqueId = name.substring(0, name.length - prayer.length - 1);
-                break;
-              }
+          const name = schedule.Name;
+          const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+          for (const prayer of prayers) {
+            if (name.endsWith(`-${prayer}`)) {
+              mosqueId = name.substring(0, name.length - prayer.length - 1);
+              break;
             }
           }
 

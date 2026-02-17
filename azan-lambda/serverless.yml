@@ -30,13 +30,13 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
           Resource:
-            - arn:aws:dynamodb:${self:custom.dynamoRegion}:275854128200:table/*
+            - arn:aws:dynamodb:${self:custom.dynamoRegion}:${aws:accountId}:table/*
         - Effect: Allow
           Action:
             - 'ssm:GetParameter'
             - 'ssm:GetParameters'
           Resource: 
-            - arn:aws:ssm:${self:custom.ssmRegion}:275854128200:parameter/alexa/*
+            - arn:aws:ssm:${self:custom.ssmRegion}:${aws:accountId}:parameter/alexa/*
 
 functions:
   # ----------------------------------------

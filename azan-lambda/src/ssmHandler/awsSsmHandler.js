@@ -29,7 +29,7 @@ async function initApiKeysOnce() {
       acc[key] = param.Value;
       return acc;
     }, {});
-    console.log(JSON.stringify(parameterValues))
+    console.log("Parameters loaded:", Object.keys(parameterValues).join(", "));
     process.env.mawaqitApiKey = parameterValues.mawaqit;
     process.env.googleApiKey = parameterValues.google;
     process.env.clientId = parameterValues.clientId;

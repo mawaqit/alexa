@@ -25,7 +25,7 @@ async function GetAzanUserInfo(id) {
     if (!data.Item) {
       console.log(`[GetAzanUserInfo] User with id: ${id} not found.`);
     } else {
-      console.log(`[GetAzanUserInfo] User found:`, JSON.stringify(data.Item));
+      console.log(`[GetAzanUserInfo] User found with id: ${data.Item.id}`);
     }
     return data.Item;
   } catch (error) {
@@ -88,7 +88,7 @@ async function UpdateAzanUserInfo(id, { refreshToken, endpointId, emailId, ...ot
   };
 
   try {
-    console.log(`[UpdateAzanUserInfo] Writing item to DynamoDB:`, JSON.stringify(item));
+    console.log(`[UpdateAzanUserInfo] Writing item for id: ${item.id}`);
     await dynamo.send(new PutCommand(params));
     console.log(`[UpdateAzanUserInfo] Successfully updated/created user ${id}`);
     return item;

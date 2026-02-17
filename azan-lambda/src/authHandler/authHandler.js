@@ -3,7 +3,7 @@ const AMAZON_BASE_URL = "https://api.amazon.com";
 const qs = require('qs');
 
 async function getRefreshToken(authCode) {
-    console.log("Auth Code: ", authCode);
+    console.log("Exchanging auth code for tokens");
     if (!authCode) {
         throw new Error("Auth code is required");
     }
@@ -26,16 +26,16 @@ async function getRefreshToken(authCode) {
 
     try {
         const response = await axios.request(config);
-        console.log("Response in getRefreshToken: ", JSON.stringify(response.data));
+        console.log("GetRefreshToken: token exchange successful");
         return response.data;
     } catch (error) {
-        console.log("Error in getRefreshToken: ", error?.response?.data);
+        console.log("Error in GetRefreshToken: ", error?.response?.data);
         throw error;
     }
 }
 
 async function getUserInfo(accessToken) {
-    console.log("Access Token: ", accessToken);
+    console.log("Getting user info from Amazon");
     if (!accessToken) {
         throw new Error("Access token is required");
     }
@@ -50,10 +50,10 @@ async function getUserInfo(accessToken) {
 
     try {
         const response = await axios.request(config);
-        console.log("Response in getUserInfo: ", JSON.stringify(response.data));
+        console.log("GetUserInfo: profile fetched successfully");
         return response.data;
     } catch (error) {
-        console.log("Error in getUserInfo: ", error?.response?.data);
+        console.log("Error in GetUserInfo: ", error?.response?.data);
         throw error;
     }
 }
@@ -83,10 +83,10 @@ async function getAccessTokenFromRefreshToken(refreshToken) {
 
     try {
         const response = await axios.request(config);
-        console.log("Response in getAccessTokenFromRefreshToken: ", JSON.stringify(response.data));
+        console.log("GetAccessTokenFromRefreshToken: token refreshed successfully");
         return response.data;
     } catch (error) {
-        console.log("Error in getAccessTokenFromRefreshToken: ", error?.response?.data || error.message);
+        console.log("Error in GetAccessTokenFromRefreshToken: ", error?.response?.data || error.message);
         throw error;
     }
 }

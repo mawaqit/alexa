@@ -135,7 +135,7 @@ class AlexaResponse {
             };
 
         if (opts.hasOwnProperty("cookie"))
-            endpoint["cookie"] = this.checkValue('cookie', {});
+            endpoint["cookie"] = this.checkValue(opts.cookie, {});
 
         return endpoint
     }

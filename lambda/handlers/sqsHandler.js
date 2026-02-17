@@ -1,5 +1,6 @@
-const AWS = require("aws-sdk");
-const sqs = new AWS.SQS();
+const { SQSClient, SendMessageBatchCommand } = require("@aws-sdk/client-sqs");
+// Region is automatically loaded from the Lambda environment if not specified
+const sqsClient = new SQSClient({ region: process.env.AWS_REGION });
 const crypto = require("crypto");
 
 async function sendBatchToQueue(users, queueUrl) {
@@ -13,13 +14,13 @@ async function sendBatchToQueue(users, queueUrl) {
     MessageBody: JSON.stringify(user),
   }));
 
-  const params = {
+  const command = new SendMessageBatchCommand({
     QueueUrl: queueUrl,
     Entries: entries,
-  };
+  });
 
   try {
-    const result = await sqs.sendMessageBatch(params).promise();
+    const result = await sqsClient.send(command);
 
     if (result.Failed && result.Failed.length > 0) {
       console.error(

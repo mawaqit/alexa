@@ -1,5 +1,6 @@
-const AWS = require("aws-sdk");
-const ssm = new AWS.SSM();
+const { SSMClient, GetParametersCommand } = require("@aws-sdk/client-ssm");
+// Region and credentials are automatically loaded from the Lambda environment
+const client = new SSMClient();
 
 let initPromise;
 
@@ -13,17 +14,19 @@ async function initApiKeysOnce() {
       "/alexa/clientSecret"
     ];
 
-    const data = await ssm
-      .getParameters({
-        Names: parameterNames,
-        WithDecryption: true,
-      })
-      .promise();
+    const command = new GetParametersCommand({
+      Names: parameterNames,
+      WithDecryption: true,
+    });
+
+    const data = await client.send(command);
 
     console.log("Parameters retrieved from AWS SSM");
 
     const parameterValues = data.Parameters.reduce((acc, param) => {
-      const key = ( param.Name.startsWith("/alexa/api/key") ) ? param.Name.replace(/^\/alexa\/api\/key\//, "") : param.Name.replace(/^\/alexa\//, "");
+      const key = param.Name.startsWith("/alexa/api/key")
+        ? param.Name.replace(/^\/alexa\/api\/key\//, "")
+        : param.Name.replace(/^\/alexa\//, "");
       acc[key] = param.Value;
       return acc;
     }, {});

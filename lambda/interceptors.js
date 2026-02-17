@@ -180,7 +180,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
   delete persistentAttributes.requestedRoutinePrayer;
   try {
     const userInfo = await GetUserInfo.process(handlerInput);
-    console.log("User Info: ", JSON.stringify(userInfo));
+    console.log("User Info Retrieved Successfully");
     if (userInfo) {
       persistentAttributes.emailId = userInfo?.email;
       persistentAttributes.user_id = userInfo?.user_id;

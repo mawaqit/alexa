@@ -1,5 +1,3 @@
-const { deleteRoutine } = require("../helperFunctions");
-
 module.exports = {
   translation: {
     skillName: process.env.SKILL_NAME, //new

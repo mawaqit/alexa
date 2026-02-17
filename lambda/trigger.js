@@ -97,24 +97,38 @@ exports.handler = async (event) => {
 
       // 4. Fetch Access Tokens Concurrently (since we need them for the payload)
       // Optimization: We could move this to the worker if possible, but keeping it here for now to match strict existing logic.
-      const tokenPromises = validUsers.map(async (user) => {
-        try {
-          const tokenResponse =
-            await authHandler.getAccessTokenFromRefreshToken(
-              user.refresh_token,
-            );
-          return {
-            accessToken: tokenResponse.access_token,
-            endpointId: user.endpointId,
-            eventTimestamp: validationTimestamp,
-          };
-        } catch (err) {
-          console.error(`Error processing token for user ${user.userId}:`, err);
-          return null;
-        }
-      });
+      const CONCURRENCY_LIMIT = batchSize;
+      const tokenResults = [];
 
-      const tokenResults = await Promise.all(tokenPromises);
+      for (let i = 0; i < validUsers.length; i += CONCURRENCY_LIMIT) {
+        const chunk = validUsers.slice(i, i + CONCURRENCY_LIMIT);
+        console.log(
+          `Processing token refresh chunk ${i / CONCURRENCY_LIMIT + 1} of ${Math.ceil(validUsers.length / CONCURRENCY_LIMIT)}`,
+        );
+
+        const chunkPromises = chunk.map(async (user) => {
+          try {
+            const tokenResponse =
+              await authHandler.getAccessTokenFromRefreshToken(
+                user.refresh_token,
+              );
+            return {
+              accessToken: tokenResponse.access_token,
+              endpointId: user.endpointId,
+              eventTimestamp: validationTimestamp,
+            };
+          } catch (err) {
+            console.error(
+              `Error processing token for user ${user.userId}:`,
+              err,
+            );
+            return null;
+          }
+        });
+
+        const chunkResults = await Promise.all(chunkPromises);
+        tokenResults.push(...chunkResults);
+      }
       validUsers = tokenResults.filter((u) => u !== null);
     }
 
@@ -132,5 +146,6 @@ exports.handler = async (event) => {
     console.log(`Sent ${promises.length} batches to SQS`);
   } catch (error) {
     console.error("Error in trigger handler:", error);
+    throw error;
   }
 };

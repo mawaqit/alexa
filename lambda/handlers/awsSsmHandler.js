@@ -11,15 +11,26 @@ async function initApiKeysOnce() {
       "/alexa/api/key/mawaqit",
       "/alexa/api/key/google",
       "/alexa/clientId",
-      "/alexa/clientSecret"
+      "/alexa/clientSecret",
     ];
 
-    const command = new GetParametersCommand({
-      Names: parameterNames,
-      WithDecryption: true,
-    });
+    let data;
+    try {
+      const command = new GetParametersCommand({
+        Names: parameterNames,
+        WithDecryption: true,
+      });
+      data = await client.send(command);
+    } catch (error) {
+      console.error("Error retrieving parameters from SSM:", error);
+      throw error;
+    }
 
-    const data = await client.send(command);
+    if (data.InvalidParameters && data.InvalidParameters.length > 0) {
+      const errorMsg = `Invalid/Missing SSM Parameters: ${data.InvalidParameters.join(", ")}`;
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    }
 
     console.log("Parameters retrieved from AWS SSM");
 

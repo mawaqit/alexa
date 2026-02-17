@@ -31,13 +31,20 @@ class CustomDynamoDbPersistenceAdapter extends DynamoDbPersistenceAdapter {
     ) {
       item.emailId = attributes.emailId;
     }
-    if (attributes.uuid && typeof attributes.uuid === "string") {
+    if (
+      attributes.uuid &&
+      typeof attributes.uuid === "string" &&
+      attributes.uuid.trim() !== ""
+    ) {
       item.mosqueId = attributes.uuid;
     }
-    if (attributes.user_id && typeof attributes.user_id === "string") {
+    if (
+      attributes.user_id &&
+      typeof attributes.user_id === "string" &&
+      attributes.user_id.trim() !== ""
+    ) {
       item.userId = attributes.user_id;
-    }
-    // 4. Construct the Put parameters
+    } // 4. Construct the Put parameters
     const putParams = {
       TableName: this.tableName,
       Item: item,

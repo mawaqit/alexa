@@ -44,7 +44,7 @@ class CustomDynamoDbPersistenceAdapter extends DynamoDbPersistenceAdapter {
       attributes.user_id.trim() !== ""
     ) {
       item.userId = attributes.user_id;
-    } // 4. Construct the Put parameters
+    }
     const putParams = {
       TableName: this.tableName,
       Item: item,

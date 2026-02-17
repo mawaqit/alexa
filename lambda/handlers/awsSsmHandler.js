@@ -23,6 +23,7 @@ async function initApiKeysOnce() {
       data = await client.send(command);
     } catch (error) {
       console.error("Error retrieving parameters from SSM:", error);
+      initPromise = null;
       throw error;
     }
 

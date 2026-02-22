@@ -24,6 +24,7 @@ const DeleteRoutineStartedHandler = {
       Alexa.getIntentName(handlerInput.requestEnvelope) ===
         "DeleteRoutineIntent" &&
       !Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex") &&
+      !Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerName") &&
       !helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName")
     );
   },
@@ -211,7 +212,7 @@ const DeleteRoutinePrayerIndexHandler = {
           .speak(
             requestAttributes.t(
               "deleteRoutineConfirmPrompt",
-              selectedPrayer.namePhoneme,
+              selectedPrayer.namePhoneme || selectedPrayer.name,
             ),
           )
           .addDirective({
@@ -260,20 +261,6 @@ const DeleteRoutinePrayerIndexHandler = {
         .withShouldEndSession(true)
         .getResponse();
 
-      // await helperFunctions.saveRequestedRoutinePrayer(
-      //   handlerInput,
-      //   selectedPrayer
-      // );
-      // const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-      // const automationDirective = helperFunctions.offerAutomation(
-      //   userTimeZone,
-      //   selectedPrayer.time,
-      //   selectedPrayer.name,
-      //   selectedPrayer.namePhoneme === prayerNames[5]
-      // );
-      // return handlerInput.responseBuilder
-      //   .addDirective(automationDirective)
-      //   .getResponse();
     } catch (error) {
       console.log("Error in DeleteRoutinePrayerIndexHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {
@@ -352,11 +339,7 @@ const DeleteRoutinePrayerNameHandler = {
       // Slot is present, check confirmation
       const prayerNameSlotObj = requestEnvelope.request.intent.slots.prayerName;
       const confirmationStatus = prayerNameSlotObj.confirmationStatus;
-      const selectedPrayer = routinePrayers.find(
-        (prayer) =>
-          prayerResolvedName &&
-          prayer.name.toLowerCase() === prayerResolvedName.toLowerCase(),
-      );
+      const selectedPrayer = routinePrayers[prayerIndex];
       console.log("Selected Prayer: ", selectedPrayer);
       if (confirmationStatus === "DENIED") {
         return responseBuilder
@@ -404,20 +387,6 @@ const DeleteRoutinePrayerNameHandler = {
         .withShouldEndSession(true)
         .getResponse();
 
-      // await helperFunctions.saveRequestedRoutinePrayer(
-      //   handlerInput,
-      //   selectedPrayer
-      // );
-      // const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-      // const automationDirective = helperFunctions.offerAutomation(
-      //   userTimeZone,
-      //   selectedPrayer.time,
-      //   selectedPrayer.name,
-      //   selectedPrayer.namePhoneme === prayerNames[5]
-      // );
-      // return handlerInput.responseBuilder
-      //   .addDirective(automationDirective)
-      //   .getResponse();
     } catch (error) {
       console.log("Error in DeleteRoutinePrayerNameHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {

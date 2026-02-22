@@ -1,7 +1,6 @@
 const { SSMClient, GetParametersCommand } = require("@aws-sdk/client-ssm");
 
 const ssmRegion = process.env.TARGET_SSM_REGION;
-console.log(`SSM Region: ${ssmRegion}`);
 const ssmClient = new SSMClient({ region: ssmRegion });
 
 let initPromise;
@@ -30,11 +29,16 @@ async function initApiKeysOnce() {
       );
     }
 
+    const PARAM_KEY_MAP = {
+      "/alexa/api/key/mawaqit": "mawaqit",
+      "/alexa/api/key/google": "google",
+      "/alexa/clientId": "clientId",
+      "/alexa/clientSecret": "clientSecret",
+    };
+
     const parameterValues = data.Parameters.reduce((acc, param) => {
-      const key = param.Name.startsWith("/alexa/api/key")
-        ? param.Name.replace(/^\/alexa\/api\/key\//, "")
-        : param.Name.replace(/^\/alexa\//, "");
-      acc[key] = param.Value;
+      const key = PARAM_KEY_MAP[param.Name];
+      if (key) acc[key] = param.Value;
       return acc;
     }, {});
     console.log("Parameters loaded:", Object.keys(parameterValues).join(", "));

@@ -1,4 +1,3 @@
-const authHandler = require("./handlers/authHandler");
 const dbHandler = require("./handlers/dynamoDbHandler");
 const awsSsmHandler = require("./handlers/awsSsmHandler");
 const sqsHandler = require("./handlers/sqsHandler");
@@ -15,7 +14,6 @@ exports.handler = async (event) => {
     const schedulerUpdateHandler = require("./handlers/schedulerUpdateHandler");
     return await schedulerUpdateHandler.handleDailyUpdate();
   }
-
 
   const { mosqueId, prayerName } = event;
 
@@ -69,69 +67,29 @@ exports.handler = async (event) => {
       return;
     }
 
-    if (userIdsToFetch.length > 0) {
-      // 2. Batch fetch user details (tokens, etc.) from Azan Table
-      const azanUsers = await dbHandler.BatchGetAzanUserInfo(userIdsToFetch);
-      console.log(
-        `Fetched details for ${azanUsers.length} users from Azan table.`,
-      );
+    const azanUsers = await dbHandler.BatchGetAzanUserInfo(userIdsToFetch);
+    console.log(
+      `Fetched details for ${azanUsers.length} users from Azan table.`,
+    );
 
-      // 3. Map to valid user objects for SQS
-      validUsers = azanUsers
-        .map((user) => {
-          const { refresh_token, endpointId } = user;
-          if (!refresh_token || !endpointId) {
-            console.log(
-              `Missing refresh_token or endpointId for userId: ${user.id}`,
-            );
-            return null;
-          }
-          return {
-            // We need to fetch the access token individually still, OR refactor to fetch them later/worker.
-            // Current flow requires accessToken here.
-            refresh_token,
-            endpointId,
-            userId: user.id,
-          };
-        })
-        .filter((u) => u !== null);
-
-      // 4. Fetch Access Tokens Concurrently (since we need them for the payload)
-      // Optimization: We could move this to the worker if possible, but keeping it here for now to match strict existing logic.
-      const CONCURRENCY_LIMIT = batchSize;
-      const tokenResults = [];
-
-      for (let i = 0; i < validUsers.length; i += CONCURRENCY_LIMIT) {
-        const chunk = validUsers.slice(i, i + CONCURRENCY_LIMIT);
-        console.log(
-          `Processing token refresh chunk ${i / CONCURRENCY_LIMIT + 1} of ${Math.ceil(validUsers.length / CONCURRENCY_LIMIT)}`,
-        );
-
-        const chunkPromises = chunk.map(async (user) => {
-          try {
-            const tokenResponse =
-              await authHandler.getAccessTokenFromRefreshToken(
-                user.refresh_token,
-              );
-            return {
-              accessToken: tokenResponse.access_token,
-              endpointId: user.endpointId,
-              eventTimestamp: validationTimestamp,
-            };
-          } catch (err) {
-            console.error(
-              `Error processing token for user ${user.userId}:`,
-              err,
-            );
-            return null;
-          }
-        });
-
-        const chunkResults = await Promise.all(chunkPromises);
-        tokenResults.push(...chunkResults);
-      }
-      validUsers = tokenResults.filter((u) => u !== null);
-    }
+    // 3. Map to valid user objects for SQS
+    validUsers = azanUsers
+      .map((user) => {
+        const { refresh_token, endpointId } = user;
+        if (!refresh_token || !endpointId) {
+          console.log(
+            `Missing refresh_token or endpointId for userId: ${user.id}`,
+          );
+          return null;
+        }
+        return {
+          refresh_token,
+          endpointId,
+          userId: user.id,
+          eventTimestamp: validationTimestamp,
+        };
+      })
+      .filter((u) => u !== null);
 
     console.log(
       `Processing ${validUsers.length} valid users for ${prayerName}`,

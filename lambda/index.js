@@ -232,18 +232,10 @@ const ExceptionEncounteredHandler = {
     );
   },
   handle(handlerInput) {
-    const requestAttributes =
-      handlerInput.attributesManager.getRequestAttributes();
-    const speakOutput =
-      requestAttributes.t("errorPrompt") ||
-      "I'm sorry, I can't understand the command. Please try again.";
-    const error = handlerInput.requestEnvelope.request?.error;
+    const error = handlerInput.requestEnvelope?.request?.error;
     console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
 
-    return handlerInput.responseBuilder
-      .speak(speakOutput)
-      .withShouldEndSession(true)
-      .getResponse();
+    return handlerInput.responseBuilder.getResponse();
   },
 };
 

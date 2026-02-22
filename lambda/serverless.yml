@@ -89,6 +89,7 @@ functions:
     timeout: 900
     memorySize: 128
     description: Worker Lambda to process Alexa events from SQS
+    versionFunction: false
 
 resources:
   Resources:
@@ -96,6 +97,7 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: mawaqit-alexa-azan-dlq-${self:provider.stage}
+        MessageRetentionPeriod: 1209600  # 14 days (maximum)
 
     MawaqitAzanScheduleGroup:
       Type: AWS::Scheduler::ScheduleGroup
@@ -105,7 +107,7 @@ resources:
     WorkerEventSourceMapping:
       Type: AWS::Lambda::EventSourceMapping
       Properties:
-        BatchSize: 10
+        BatchSize: ${file(env.json):${self:provider.stage}.sqsQueueBatchSize, 10}
         EventSourceArn:
           Fn::GetAtt:
             - AlexaAzanQueue

@@ -1,10 +1,15 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } = require("@aws-sdk/lib-dynamodb");
+const {
+  DynamoDBDocumentClient,
+  GetCommand,
+  QueryCommand,
+  UpdateCommand,
+} = require("@aws-sdk/lib-dynamodb");
 
 // CRITICAL: Initialize Client pointing to PARIS (eu-west-3)
 // If we don't specify the region here, it defaults to eu-west-1 (Ireland) and fails.
 const client = new DynamoDBClient({
-  region: process.env.TARGET_DYNAMO_REGION
+  region: process.env.TARGET_DYNAMO_REGION,
 });
 const dynamo = DynamoDBDocumentClient.from(client);
 
@@ -16,8 +21,8 @@ async function GetAzanUserInfo(id) {
   const params = {
     TableName: TABLE_NAME,
     Key: {
-      id: id
-    }
+      id: id,
+    },
   };
 
   try {
@@ -29,7 +34,10 @@ async function GetAzanUserInfo(id) {
     }
     return data.Item;
   } catch (error) {
-    console.error(`[GetAzanUserInfo] Error getting user info for id ${id}:`, error);
+    console.error(
+      `[GetAzanUserInfo] Error getting user info for id ${id}:`,
+      error,
+    );
     throw error;
   }
 }
@@ -38,11 +46,11 @@ async function getUsersByMosqueId(mosqueId) {
   console.log(`Querying ${PERSISTENCE_TABLE_NAME} for mosqueId: ${mosqueId}`);
   const params = {
     TableName: PERSISTENCE_TABLE_NAME,
-    IndexName: 'mosqueId_index',
-    KeyConditionExpression: 'mosqueId = :mosqueId',
+    IndexName: "mosqueId_index",
+    KeyConditionExpression: "mosqueId = :mosqueId",
     ExpressionAttributeValues: {
-      ':mosqueId': mosqueId
-    }
+      ":mosqueId": mosqueId,
+    },
   };
 
   try {
@@ -55,45 +63,66 @@ async function getUsersByMosqueId(mosqueId) {
   }
 }
 
-async function UpdateAzanUserInfo(id, { refreshToken, endpointId, emailId, ...otherAttributes }) {
-  console.log(`[UpdateAzanUserInfo] Attempting update for id: ${id}`);
+async function UpdateAzanUserInfo(
+  id,
+  { refreshToken, endpointId, emailId, ...otherAttributes },
+) {
+  console.log(`[UpdateAzanUserInfo] Attempting atomic update for id: ${id}`);
 
-  // Check if user exists to determine if we need to set CreatedTimestamp
-  const existingUser = await GetAzanUserInfo(id);
   const timestamp = new Date().toISOString();
 
-  // If existingUser is undefined, standard JS optional chaining (?.) will return undefined
-  // So existingUser?.refresh_token works even if existingUser is missing.
-
-  const item = {
-    id: id,
-    refresh_token: refreshToken || existingUser?.refresh_token,
-    endpointId: endpointId || existingUser?.endpointId,
-    emailId: emailId || existingUser?.emailId,
-    updatedTimestamp: timestamp,
-    ...otherAttributes
+  let updateExpression =
+    "SET #updatedTimestamp = :updatedTimestamp, #createdTimestamp = if_not_exists(#createdTimestamp, :createdTimestamp)";
+  let expressionAttributeNames = {
+    "#updatedTimestamp": "updatedTimestamp",
+    "#createdTimestamp": "createdTimestamp",
+  };
+  let expressionAttributeValues = {
+    ":updatedTimestamp": timestamp,
+    ":createdTimestamp": timestamp,
   };
 
-  if (!existingUser) {
-    console.log(`[UpdateAzanUserInfo] User ${id} does not exist. Creating new record.`);
-    item.createdTimestamp = timestamp;
-  } else {
-    console.log(`[UpdateAzanUserInfo] User ${id} exists. Updating record.`);
-    item.createdTimestamp = existingUser.createdTimestamp;
+  if (refreshToken) {
+    updateExpression += ", #refresh_token = :refresh_token";
+    expressionAttributeNames["#refresh_token"] = "refresh_token";
+    expressionAttributeValues[":refresh_token"] = refreshToken;
   }
+  if (endpointId) {
+    updateExpression += ", #endpointId = :endpointId";
+    expressionAttributeNames["#endpointId"] = "endpointId";
+    expressionAttributeValues[":endpointId"] = endpointId;
+  }
+  if (emailId) {
+    updateExpression += ", #emailId = :emailId";
+    expressionAttributeNames["#emailId"] = "emailId";
+    expressionAttributeValues[":emailId"] = emailId;
+  }
+
+  // Atomically set any other attributes provided
+  Object.entries(otherAttributes).forEach(([key, value]) => {
+    updateExpression += `, #attr_${key} = :val_${key}`;
+    expressionAttributeNames[`#attr_${key}`] = key;
+    expressionAttributeValues[`:val_${key}`] = value;
+  });
 
   const params = {
     TableName: TABLE_NAME,
-    Item: item
+    Key: { id },
+    UpdateExpression: updateExpression,
+    ExpressionAttributeNames: expressionAttributeNames,
+    ExpressionAttributeValues: expressionAttributeValues,
+    ReturnValues: "ALL_NEW",
   };
 
   try {
-    console.log(`[UpdateAzanUserInfo] Writing item for id: ${item.id}`);
-    await dynamo.send(new PutCommand(params));
+    const data = await dynamo.send(new UpdateCommand(params));
     console.log(`[UpdateAzanUserInfo] Successfully updated/created user ${id}`);
-    return item;
+    return data.Attributes;
   } catch (error) {
-    console.error(`[UpdateAzanUserInfo] Error updating user info for id ${id}:`, error);
+    console.error(
+      `[UpdateAzanUserInfo] Error in atomic update for id ${id}:`,
+      error,
+    );
     throw error;
   }
 }
@@ -101,6 +130,5 @@ async function UpdateAzanUserInfo(id, { refreshToken, endpointId, emailId, ...ot
 module.exports = {
   GetAzanUserInfo,
   UpdateAzanUserInfo,
-  getUsersByMosqueId
+  getUsersByMosqueId,
 };
-

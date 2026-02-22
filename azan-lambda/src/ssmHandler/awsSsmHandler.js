@@ -1,7 +1,8 @@
-const AWS = require("aws-sdk");
+const { SSMClient, GetParametersCommand } = require("@aws-sdk/client-ssm");
+
 const ssmRegion = process.env.TARGET_SSM_REGION;
 console.log(`SSM Region: ${ssmRegion}`);
-const ssm = new AWS.SSM({ region: ssmRegion });
+const ssmClient = new SSMClient({ region: ssmRegion });
 
 let initPromise;
 
@@ -12,20 +13,22 @@ async function initApiKeysOnce() {
       "/alexa/api/key/mawaqit",
       "/alexa/api/key/google",
       "/alexa/clientId",
-      "/alexa/clientSecret"
+      "/alexa/clientSecret",
     ];
 
-    const data = await ssm
-      .getParameters({
-        Names: parameterNames,
-        WithDecryption: true,
-      })
-      .promise();
+    const command = new GetParametersCommand({
+      Names: parameterNames,
+      WithDecryption: true,
+    });
+
+    const data = await ssmClient.send(command);
 
     console.log("Parameters retrieved from AWS SSM");
 
     const parameterValues = data.Parameters.reduce((acc, param) => {
-      const key = (param.Name.startsWith("/alexa/api/key")) ? param.Name.replace(/^\/alexa\/api\/key\//, "") : param.Name.replace(/^\/alexa\//, "");
+      const key = param.Name.startsWith("/alexa/api/key")
+        ? param.Name.replace(/^\/alexa\/api\/key\//, "")
+        : param.Name.replace(/^\/alexa\//, "");
       acc[key] = param.Value;
       return acc;
     }, {});
@@ -39,6 +42,10 @@ async function initApiKeysOnce() {
   return initPromise;
 }
 
-exports.handler = async () => {
+const handler = async () => {
   await initApiKeysOnce();
+};
+
+module.exports = {
+  handler,
 };

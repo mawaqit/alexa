@@ -63,7 +63,7 @@ async function getRefreshToken(authCode) {
   try {
     const response = await axios.request(config);
     console.log("GetRefreshToken: token exchange successful");
-    console.error("Error in GetUserInfo: ", error?.response?.data);
+    return response.data;
   } catch (error) {
     console.log("Error in GetRefreshToken: ", error?.response?.data);
     throw error;

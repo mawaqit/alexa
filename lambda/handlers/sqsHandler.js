@@ -8,6 +8,10 @@ async function sendBatchToQueue(users, queueUrl) {
     throw new Error("Queue URL is required");
   }
 
+  if (!Array.isArray(users) || users.length === 0) {
+    throw new Error("Users array must be a non-empty array");
+  }
+
   // Transform users into SQS batch entries
   const entries = users.map((user) => ({
     Id: crypto.randomUUID(), // Unique ID for the batch entry

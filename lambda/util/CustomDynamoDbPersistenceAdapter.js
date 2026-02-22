@@ -2,6 +2,7 @@ const {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
+  DeleteCommand,
 } = require("@aws-sdk/lib-dynamodb");
 
 /**
@@ -10,6 +11,12 @@ const {
  */
 class CustomDynamoDbPersistenceAdapter {
   constructor(config) {
+    if (!config.tableName) {
+      throw new Error(
+        "CustomDynamoDbPersistenceAdapter: config.tableName is required",
+      );
+    }
+  
     this.tableName = config.tableName;
     this.partitionKeyName = config.partitionKeyName || "id";
     this.attributesName = config.attributesName || "attributes";
@@ -18,24 +25,20 @@ class CustomDynamoDbPersistenceAdapter {
     this.partitionKeyGenerator =
       config.partitionKeyGenerator ||
       ((requestEnvelope) => {
-        if (
-          requestEnvelope.session &&
-          requestEnvelope.session.user &&
-          requestEnvelope.session.user.userId
-        ) {
+        if (requestEnvelope?.session?.user?.userId) {
           return requestEnvelope.session.user.userId;
         }
-        if (
-          requestEnvelope.context &&
-          requestEnvelope.context.System &&
-          requestEnvelope.context.System.user &&
-          requestEnvelope.context.System.user.userId
-        ) {
+        if (requestEnvelope?.context?.System?.user?.userId) {
           return requestEnvelope.context.System.user.userId;
         }
         throw new Error("Could not find userId to use as partition key");
       });
 
+    if (!config.dynamoDBClient) {
+      throw new Error(
+        "CustomDynamoDbPersistenceAdapter: config.dynamoDBClient is required",
+      );
+    }
     this.dynamoDBDocumentClient = DynamoDBDocumentClient.from(
       config.dynamoDBClient,
     );
@@ -63,6 +66,25 @@ class CustomDynamoDbPersistenceAdapter {
     } catch (error) {
       console.error(
         `Error getting attributes from table ${this.tableName}:`,
+        error.message,
+      );
+      throw error;
+    }
+  }
+
+  async deleteAttributes(requestEnvelope) {
+    const partitionKey = this.partitionKeyGenerator(requestEnvelope);
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        [this.partitionKeyName]: partitionKey,
+      },
+    };
+    try {
+      await this.dynamoDBDocumentClient.send(new DeleteCommand(params));
+    } catch (error) {
+      console.error(
+        `Error deleting attributes from table ${this.tableName}:`,
         error.message,
       );
       throw error;

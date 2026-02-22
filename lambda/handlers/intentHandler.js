@@ -31,11 +31,11 @@ const DeleteRoutineStartedHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const requestEnvelope = handlerInput.requestEnvelope;
+    const sessionAttributes =
+      handlerInput.attributesManager.getSessionAttributes();
+    const responseBuilder = handlerInput.responseBuilder;
+    const { persistentAttributes } = sessionAttributes;
     try {
-      const sessionAttributes =
-        handlerInput.attributesManager.getSessionAttributes();
-      const responseBuilder = handlerInput.responseBuilder;
-      const { persistentAttributes } = sessionAttributes;
       if (!persistentAttributes?.uuid) {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }

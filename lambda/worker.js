@@ -11,7 +11,7 @@ exports.handler = async (event) => {
       const { accessToken, endpointId, eventTimestamp } = user;
 
       if (!accessToken || !endpointId) {
-        console.log(`Skipping invalid user data: ${JSON.stringify(user)}`);
+        console.log(`Skipping invalid user data for endpointId: ${endpointId ?? "missing"}`);
         continue;
       }
 

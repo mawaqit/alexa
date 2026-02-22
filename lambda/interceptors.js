@@ -181,15 +181,15 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
   try {
     const userInfo = await GetUserInfo.process(handlerInput);
     console.log("User Info Retrieved Successfully");
-    if (userInfo) {
+    if (userInfo && userInfo?.email && userInfo?.user_id && (!persistentAttributes?.emailId || !persistentAttributes?.user_id)) {
       persistentAttributes.emailId = userInfo?.email;
       persistentAttributes.user_id = userInfo?.user_id;
+      handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+      await handlerInput.attributesManager.savePersistentAttributes();
     }
   } catch (error) {
     console.log("Error while fetching user info: ", error);
   }
-  handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
-  await handlerInput.attributesManager.savePersistentAttributes();
 
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 

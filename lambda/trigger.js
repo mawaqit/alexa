@@ -7,6 +7,8 @@ const eventBridgeScheduler = require("./handlers/eventBridgeScheduler");
 exports.handler = async (event) => {
   console.log("Trigger Event Received:", JSON.stringify(event));
 
+  await awsSsmHandler.handler();
+
   // Check for Daily Update Trigger
   if (event?.type === "DAILY_UPDATE") {
     // Lazy load schedulerUpdateHandler to avoid circular dependencies if any
@@ -14,7 +16,6 @@ exports.handler = async (event) => {
     return await schedulerUpdateHandler.handleDailyUpdate();
   }
 
-  await awsSsmHandler.handler();
 
   const { mosqueId, prayerName } = event;
 

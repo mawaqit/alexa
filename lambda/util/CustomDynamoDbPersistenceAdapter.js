@@ -11,6 +11,9 @@ const {
  */
 class CustomDynamoDbPersistenceAdapter {
   constructor(config) {
+    if (!config) {
+      throw new Error("CustomDynamoDbPersistenceAdapter: config is required");
+    }
     if (!config.tableName) {
       throw new Error(
         "CustomDynamoDbPersistenceAdapter: config.tableName is required",
@@ -62,7 +65,7 @@ class CustomDynamoDbPersistenceAdapter {
       const data = await this.dynamoDBDocumentClient.send(
         new GetCommand(params),
       );
-      return data.Item ? data.Item[this.attributesName] : {};
+       return data.Item?.[this.attributesName] ?? {};
     } catch (error) {
       console.error(
         `Error getting attributes from table ${this.tableName}:`,

@@ -89,24 +89,30 @@ async function UpdateAzanUserInfo(
     ":createdTimestamp": timestamp,
   };
 
-  if (refreshToken) {
+  if (refreshToken != null) {
     updateExpression += ", #refresh_token = :refresh_token";
     expressionAttributeNames["#refresh_token"] = "refresh_token";
     expressionAttributeValues[":refresh_token"] = refreshToken;
   }
-  if (endpointId) {
+  if (endpointId != null) {
     updateExpression += ", #endpointId = :endpointId";
     expressionAttributeNames["#endpointId"] = "endpointId";
     expressionAttributeValues[":endpointId"] = endpointId;
   }
-  if (emailId) {
+  if (emailId != null) {
     updateExpression += ", #emailId = :emailId";
     expressionAttributeNames["#emailId"] = "emailId";
     expressionAttributeValues[":emailId"] = emailId;
   }
 
+  const RESERVED_KEYS = new Set([
+    "updatedTimestamp",
+    "createdTimestamp",
+  ]);
+
   // Atomically set any other attributes provided
   Object.entries(otherAttributes).forEach(([key, value]) => {
+    if (RESERVED_KEYS.has(key)) return; // already handled above
     updateExpression += `, #attr_${key} = :val_${key}`;
     expressionAttributeNames[`#attr_${key}`] = key;
     expressionAttributeValues[`:val_${key}`] = value;

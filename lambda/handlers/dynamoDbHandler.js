@@ -58,9 +58,9 @@ async function UpdateAzanUserInfo(
 
   const item = {
     id: id,
-    refresh_token: refreshToken || existingUser?.refresh_token,
-    endpointId: endpointId || existingUser?.endpointId,
-    emailId: emailId || existingUser?.emailId,
+    refresh_token: refreshToken ?? existingUser?.refresh_token,
+    endpointId: endpointId ?? existingUser?.endpointId,
+    emailId: emailId ?? existingUser?.emailId,
     updatedTimestamp: timestamp,
     ...otherAttributes,
   };

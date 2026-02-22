@@ -42,7 +42,10 @@ async function initApiKeysOnce() {
     process.env.googleApiKey = parameterValues.google;
     process.env.clientId = parameterValues.clientId;
     process.env.clientSecret = parameterValues.clientSecret;
-  })();
+  })().catch((err) => {
+    initPromise = undefined; // Allow retry on next invocation
+    throw err;
+  });
 
   return initPromise;
 }

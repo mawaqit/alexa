@@ -12,6 +12,7 @@ exports.handler = async (event) => {
 
       if (!accessToken || !endpointId) {
         console.log(`Skipping invalid user data for endpointId: ${endpointId ?? "missing"}`);
+        batchItemFailures.push({ itemIdentifier: record.messageId });
         continue;
       }
 

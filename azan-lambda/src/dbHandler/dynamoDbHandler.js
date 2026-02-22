@@ -44,19 +44,26 @@ async function GetAzanUserInfo(id) {
 
 async function getUsersByMosqueId(mosqueId) {
   console.log(`Querying ${PERSISTENCE_TABLE_NAME} for mosqueId: ${mosqueId}`);
-  const params = {
+  const baseParams = {
     TableName: PERSISTENCE_TABLE_NAME,
     IndexName: "mosqueId_index",
     KeyConditionExpression: "mosqueId = :mosqueId",
-    ExpressionAttributeValues: {
-      ":mosqueId": mosqueId,
-    },
+    ExpressionAttributeValues: { ":mosqueId": mosqueId },
   };
 
   try {
-    const data = await dynamo.send(new QueryCommand(params));
-    console.log(`Found ${data.Items.length} users for mosqueId ${mosqueId}`);
-    return data.Items;
+    let allItems = [];
+    let lastKey;
+    do {
+      const params = lastKey
+        ? { ...baseParams, ExclusiveStartKey: lastKey }
+        : baseParams;
+      const data = await dynamo.send(new QueryCommand(params));
+      allItems = allItems.concat(data.Items || []);
+      lastKey = data.LastEvaluatedKey;
+    } while (lastKey);
+    console.log(`Found ${allItems.length} users for mosqueId ${mosqueId}`);
+    return allItems;
   } catch (error) {
     console.error("Error querying persistence table:", error);
     throw error;

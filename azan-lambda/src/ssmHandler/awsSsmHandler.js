@@ -24,6 +24,11 @@ async function initApiKeysOnce() {
     const data = await ssmClient.send(command);
 
     console.log("Parameters retrieved from AWS SSM");
+    if (data.InvalidParameters && data.InvalidParameters.length > 0) {
+      throw new Error(
+        `Failed to retrieve SSM parameters: ${data.InvalidParameters.join(", ")}`
+      );
+    }
 
     const parameterValues = data.Parameters.reduce((acc, param) => {
       const key = param.Name.startsWith("/alexa/api/key")

@@ -51,7 +51,7 @@ const DeleteRoutineStartedHandler = {
         primaryText: `${name} ${time}`,
         name,
         time,
-        namePhoneme,
+        namePhoneme: namePhoneme || name,
       }));
       if(routineList.length === 1){
         return handlerInput.responseBuilder
@@ -223,7 +223,7 @@ const DeleteRoutinePrayerIndexHandler = {
               slots: {
                 prayerIndex: {
                   name: "prayerIndex",
-                  value: prayerIndex,
+                  value: String(prayerIndex),
                   confirmationStatus: "NONE",
                 },
                 prayerName: {
@@ -373,7 +373,7 @@ const DeleteRoutinePrayerNameHandler = {
           .speak(
             requestAttributes.t(
               "deleteRoutineConfirmPrompt",
-              selectedPrayer.name,
+              selectedPrayer.namePhoneme || selectedPrayer.name,
             ),
           )
           .addConfirmSlotDirective("prayerName", currentIntent)
@@ -1631,12 +1631,12 @@ const SessionResumedRequestHandler = {
     switch (code) {
       case 200:
         if (prayerNameDetails) {
-          const respone = await helperFunctions.logRoutineCreation(
+          const response = await helperFunctions.logRoutineCreation(
             handlerInput,
             prayerNameDetails,
           );
-          if (respone) {
-            return respone;
+          if (response) {
+            return response;
           }
         }
         return handlerInput.responseBuilder

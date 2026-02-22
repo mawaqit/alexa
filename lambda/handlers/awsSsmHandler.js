@@ -30,9 +30,9 @@ async function initApiKeysOnce() {
     if (data.InvalidParameters && data.InvalidParameters.length > 0) {
       const errorMsg = `Invalid/Missing SSM Parameters: ${data.InvalidParameters.join(", ")}`;
       console.error(errorMsg);
+      initPromise = null;
       throw new Error(errorMsg);
     }
-
     console.log("Parameters retrieved from AWS SSM");
 
     const parameterValues = data.Parameters.reduce((acc, param) => {

@@ -17,6 +17,17 @@ const eventBridgeScheduler = require("./handlers/eventBridgeScheduler.js");
 const authHandler = require("./handlers/authHandler");
 const dbHandler = require("./handlers/dynamoDbHandler");
 
+const CANONICAL_PRAYER_NAMES = [
+  "Fajr",
+  "Dhuhr",
+  "Asr",
+  "Maghrib",
+  "Isha",
+  "Jumma",
+  "Eid",
+  "Shuruq",
+];
+
 const getPersistedData = async (handlerInput) => {
   try {
     const userId = Alexa.getUserId(handlerInput.requestEnvelope);
@@ -836,13 +847,16 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
           time: time,
           name: prayerName,
           namePhoneme: prayer,
+          canonicalName: CANONICAL_PRAYER_NAMES[index],
         };
       }
     })
     .filter((detail) => detail !== undefined && detail !== null);
   if (routinePrayers && routinePrayers.length > 0) {
     prayerNameDetails = prayerNameDetails.filter((detail) => {
-      return !routinePrayers.map((prayer) => prayer.name.toLowerCase()).includes(detail.name.toLowerCase());
+      return !routinePrayers
+        .map((prayer) => prayer.name.toLowerCase())
+        .includes(detail.name.toLowerCase());
     });
   }
   // Extract only the Jumu'ah times
@@ -912,7 +926,11 @@ const checkForRoutinePrayerAlreadyExists = async (
     return false;
   }
   const index = existingRoutines.findIndex(
-    (routine) => routine.name === prayerDetails.name,
+    (routine) =>
+      (routine.canonicalName &&
+        prayerDetails.canonicalName &&
+        routine.canonicalName === prayerDetails.canonicalName) ||
+      routine.name === prayerDetails.name,
   );
 
   if (index !== -1) {
@@ -941,7 +959,8 @@ const logRoutineCreation = async (handlerInput, routineDetails) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
-  const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+  const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
   if (
     persistentAttributes.routinePrayers &&
     persistentAttributes.routinePrayers.length > 0
@@ -971,16 +990,17 @@ const logRoutineCreation = async (handlerInput, routineDetails) => {
   try {
     const timezone = await getUserTimezone(handlerInput);
     const mosqueId = persistentAttributes.uuid;
-    const prayerName = routineDetails.name;
+    const prayerNameForSchedule =
+      routineDetails.canonicalName || routineDetails.name;
     const time = routineDetails.time;
     console.log("Mosque ID: ", mosqueId);
-    console.log("Prayer Name: ", prayerName);
+    console.log("Prayer Name (Schedule): ", prayerNameForSchedule);
     console.log("Time: ", time);
     console.log("Timezone: ", timezone);
-    if (mosqueId && prayerName && time && timezone) {
+    if (mosqueId && prayerNameForSchedule && time && timezone) {
       await eventBridgeScheduler.createOrUpdateSchedule({
         mosqueId,
-        prayerName,
+        prayerName: prayerNameForSchedule,
         time,
         timezone,
       });
@@ -1091,7 +1111,8 @@ const deleteRoutine = async (handlerInput, routineName) => {
     persistentAttributes.routinePrayers.length > 0
   ) {
     const index = persistentAttributes.routinePrayers.findIndex(
-      (routine) => routine.name === routineName,
+      (routine) =>
+        routine.canonicalName === routineName || routine.name === routineName,
     );
     if (index !== -1) {
       persistentAttributes.routinePrayers.splice(index, 1);
@@ -1103,7 +1124,6 @@ const deleteRoutine = async (handlerInput, routineName) => {
   }
   return false;
 };
-
 const updateRoutinePrayers = async (handlerInput) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
@@ -1117,14 +1137,21 @@ const updateRoutinePrayers = async (handlerInput) => {
     const cleanPrayerNames = extractPhonemeText(prayerNames);
 
     routinePrayers.forEach((routine) => {
-      // Find matching prayer name without SSML
-      const prayerIndex = cleanPrayerNames.findIndex(
-        (p) => p.toLowerCase() === routine.name.toLowerCase(),
+      // Find matching prayer name using canonical name if available, else clean names
+      const prayerIndex = CANONICAL_PRAYER_NAMES.findIndex(
+        (cn) => routine.canonicalName && cn === routine.canonicalName,
       );
 
-      if (prayerIndex !== -1) {
-        if (prayerIndex < 5 && mosqueTimes?.times?.[prayerIndex]) {
-          routine.time = mosqueTimes.times[prayerIndex];
+      const finalIndex =
+        prayerIndex !== -1
+          ? prayerIndex
+          : cleanPrayerNames.findIndex(
+              (p) => p.toLowerCase() === routine.name.toLowerCase(),
+            );
+
+      if (finalIndex !== -1) {
+        if (finalIndex < 5 && mosqueTimes?.times?.[finalIndex]) {
+          routine.time = mosqueTimes.times[finalIndex];
         }
       }
     });
@@ -1176,5 +1203,6 @@ module.exports = {
   getAccessToken,
   validateUserAccountStatus,
   deleteRoutine,
-  updateRoutinePrayers
+  updateRoutinePrayers,
+  CANONICAL_PRAYER_NAMES,
 };

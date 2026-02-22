@@ -1,6 +1,6 @@
 const apiHandler = require("./apiHandler");
 const eventBridgeScheduler = require("./eventBridgeScheduler");
-
+const helperFunctions = require("../helperFunctions");
 /**
  * Handles the daily update of prayer schedules.
  * Scans all mosques with existing schedules, fetches fresh prayer times, and updates the schedules.
@@ -43,7 +43,7 @@ async function handleDailyUpdate() {
 
         // 3. Update only the ACTIVE schedules for this mosque
         const activePrayers = mosquePrayersMap[mosqueId]; // Array of strings e.g. ["Fajr", "Maghrib"]
-        const allPrayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+        const allPrayers = helperFunctions.CANONICAL_PRAYER_NAMES;
 
         // Use a for loop to await async operations sequentially
         for (const prayerName of activePrayers) {

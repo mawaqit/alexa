@@ -8,6 +8,7 @@ const {
 } = require("@aws-sdk/client-scheduler");
 
 const client = new SchedulerClient({ region: process.env.AWS_REGION });
+const helperFunctions = require("../helperFunctions");
 
 const scheduleGroupName = "mawaqit-azan-schedule-" + process.env.STAGE;
 
@@ -166,7 +167,7 @@ async function getAllMosqueActivePrayers() {
         response.Schedules.forEach((schedule) => {
           let mosqueId = null;
           const name = schedule.Name;
-          const prayers = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+          const prayers = helperFunctions.CANONICAL_PRAYER_NAMES
           for (const prayer of prayers) {
             if (name.endsWith(`-${prayer}`)) {
               mosqueId = name.substring(0, name.length - prayer.length - 1);

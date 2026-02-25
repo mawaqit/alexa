@@ -930,5 +930,5 @@ module.exports = {
   getAplArgument,
   isNewSession,
   resolveIqamaMoment,
-  getDifferenceInMinutes
+  getDifferenceInMinutes,
 };

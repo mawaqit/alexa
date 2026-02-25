@@ -31,7 +31,8 @@ const MosqueListTouchEventHandler = {
     );
     await handlerInput.attributesManager.savePersistentAttributes();
     try {
-      const mosqueTimes = await getPrayerTimings(selectedMosque.uuid);
+      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      const mosqueTimes = await getPrayerTimings(selectedMosque.uuid, userTimeZone);
       sessionAttributes.mosqueTimes = mosqueTimes;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
       return await helperFunctions.getPrayerTimingsForMosque(
@@ -43,6 +44,12 @@ const MosqueListTouchEventHandler = {
       console.log("Error in fetching prayer timings: ", error);
       if (error?.message === "Mosque not found") {
         return await helperFunctions.getListOfMosque(handlerInput, requestAttributes.t("mosqueNotRegisteredPrompt"));
+      }
+       if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
       }
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))

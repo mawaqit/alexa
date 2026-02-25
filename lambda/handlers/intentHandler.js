@@ -68,7 +68,8 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
     );
     await handlerInput.attributesManager.savePersistentAttributes();
     try {
-      const mosqueTimes = await getPrayerTimings(selectedMosqueDetails.uuid);
+      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      const mosqueTimes = await getPrayerTimings(selectedMosqueDetails.uuid, userTimeZone);
       sessionAttributes.mosqueTimes = mosqueTimes;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
       return await helperFunctions.getPrayerTimingsForMosque(
@@ -83,6 +84,12 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       console.log("Error in fetching prayer timings: ", error);
       if (error?.message === "Mosque not found") {
         return await helperFunctions.getListOfMosque(handlerInput, requestAttributes.t("mosqueNotRegisteredPrompt"));
+      }
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
       }
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
@@ -312,6 +319,7 @@ const NextIqamaTimeIntentHandler = {
       }
       mosqueTimes.iqamaCalendar = await getPrayerTimings(
         persistentAttributes.uuid,
+        userTimeZone,
         true
       )
         .then((data) => data.iqamaCalendar)
@@ -523,6 +531,7 @@ const AllIqamaTimeIntentHandler = {
       }
       mosqueTimes.iqamaCalendar = await getPrayerTimings(
         persistentAttributes.uuid,
+        userTimeZone,
         true
       )
         .then((data) => data.iqamaCalendar)
@@ -805,9 +814,11 @@ const PlayAdhanTaskHandler = {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       let { mosqueTimes } = sessionAttributes;
+        
+      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       if (!mosqueTimes?.times) {
         try {
-          mosqueTimes = await getPrayerTimings(persistentAttributes.uuid);
+          mosqueTimes = await getPrayerTimings(persistentAttributes.uuid, userTimeZone);
           sessionAttributes.mosqueTimes = mosqueTimes;
           handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
         } catch (error) {
@@ -820,7 +831,7 @@ const PlayAdhanTaskHandler = {
       }
       let audioName = "Adhaan";
       const prayerNames = requestAttributes.t("prayerNames");
-      const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, await helperFunctions.getUserTimezone(handlerInput), prayerNames);
+      const prayerTimeDetails = helperFunctions.getNextPrayerTime(requestAttributes, mosqueTimes.times, userTimeZone, prayerNames);
       const isFajrPrayer = prayerTimeDetails.name === prayerNames[0];
       let audioUrl = isFajrPrayer ? adhaanRecitation[0].fajrUrl : adhaanRecitation[0].otherUrl;
       if(persistentAttributes?.favouriteAdhaan){

@@ -1,4 +1,5 @@
 const axios = require("axios");
+const helperFunctions = require("../helperFunctions");
 const mawaqitBaseUrl = process.env.baseUrl;
 
 const getMosqueList = async (
@@ -52,7 +53,7 @@ const getMosqueList = async (
     });
 };
 
-const getPrayerTimings = async (mosqueUuid, isIqamaCalendarRequired = false, isPrayerCalendarRequired = false) => {
+const getPrayerTimings = async (mosqueUuid, timezone, isIqamaCalendarRequired = false, isPrayerCalendarRequired = false) => {
   const config = getConfig("get", `/mosque/${mosqueUuid}/times`);
   console.log(
     "Config: ",
@@ -65,9 +66,18 @@ const getPrayerTimings = async (mosqueUuid, isIqamaCalendarRequired = false, isP
     .request(config)
     .then((response) => {
       console.log("Mosque Timings: ", JSON.stringify(response.data));
-      if (!response?.data?.times) {
+      const currentDate = new Date();
+      const dateAndMonth = helperFunctions.getDateAndMonthForTimezone(timezone);
+      const date = dateAndMonth?.date ?? currentDate.getDate();
+      const month = dateAndMonth?.month ?? currentDate.getMonth();
+      const calendar = response?.data?.calendar;
+      const timings = calendar?.[month]?.[String(date)];
+
+      if (!Array.isArray(calendar) || calendar.length === 0 || !timings) {
         throw new Error("Received Empty Response");
       }
+
+      response.data.times = timings;
       if (!isIqamaCalendarRequired && response?.data?.iqamaCalendar) {
         delete response.data.iqamaCalendar;
       }

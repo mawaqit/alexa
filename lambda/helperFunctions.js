@@ -891,6 +891,17 @@ const isNewSession = (handlerInput) => {
   return handlerInput.requestEnvelope?.session?.new;
 };
 
+const getDateAndMonthForTimezone = (timezone) => {
+  if (!timezone || !moment.tz.zone(timezone)) return null;
+
+  const now = moment().tz(timezone);
+  const date = now.date();
+  const month = now.month();
+
+  return { date, month };
+};
+
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -930,5 +941,6 @@ module.exports = {
   getAplArgument,
   isNewSession,
   resolveIqamaMoment,
-  getDifferenceInMinutes
+  getDifferenceInMinutes,
+  getDateAndMonthForTimezone
 };

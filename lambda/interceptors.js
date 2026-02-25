@@ -183,7 +183,8 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
   try {
-    const mosqueTimes = await apiHandler.getPrayerTimings(persistentAttributes.uuid);
+    const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+    const mosqueTimes = await apiHandler.getPrayerTimings(persistentAttributes.uuid, userTimeZone);
     sessionAttributes.mosqueTimes = mosqueTimes;
     sessionAttributes.persistentAttributes = persistentAttributes;
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
@@ -191,7 +192,12 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
     console.log("Error while fetching mosque list: ", error);
     if (error?.message === "Mosque not found") {
       await handlerInput.attributesManager.deletePersistentAttributes();
-    }
+    } else if (error?.message === "Unable to fetch user timezone") {
+      // Timezone unavailable: still load persistentAttributes into session so
+      // handlers can display the correct mosque context and prompt for timezone consent.
+      sessionAttributes.persistentAttributes = persistentAttributes;
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+     }
   }
 }
 

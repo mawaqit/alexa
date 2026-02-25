@@ -18,8 +18,8 @@ const InstallPrayerTimeWidgetRequestHandler = {
                 .getResponse();
         }
         try {
-            const mosqueTimes = await apiHandler.getPrayerTimings(persistentAttributes.uuid);
             const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+            const mosqueTimes = await apiHandler.getPrayerTimings(persistentAttributes.uuid, userTimeZone);
             const prayerNames = requestAttributes.t("prayerNames");
             const nextPrayerTime = helperFunctions.getNextPrayerTime(
                 requestAttributes,

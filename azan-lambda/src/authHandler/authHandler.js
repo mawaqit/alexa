@@ -7,7 +7,7 @@ async function getRefreshToken(authCode) {
   if (!authCode) {
     throw new Error("Auth code is required");
   }
-  const data = new URLSearchParams({
+  const data = qs.stringify({
     client_id: process.env.clientId,
     client_secret: process.env.clientSecret,
     grant_type: "authorization_code",

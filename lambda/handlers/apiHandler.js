@@ -68,6 +68,7 @@ const getPrayerTimings = async (mosqueUuid, timezone, isIqamaCalendarRequired = 
       console.log("Mosque Timings: ", JSON.stringify(response.data));
       const currentDate = new Date();
       const dateAndMonth = getDateAndMonthForTimezone(timezone);
+      console.log("Date and Month: ", JSON.stringify(dateAndMonth));
       const date = dateAndMonth?.date ?? currentDate.getDate();
       const month = dateAndMonth?.month ?? currentDate.getMonth();
       const calendar = response?.data?.calendar;
@@ -200,11 +201,33 @@ const getDateAndMonthForTimezone = (timezone) => {
   return { date, month };
 };
 
+const getMosqueInformation = async (mosqueUuid) => {
+  const config = getConfig("get", `/mosque/${mosqueUuid}/info`);
+  console.log(
+    "Config: ",
+    JSON.stringify(config, null, 2).replace(
+      /"Api-Access-Token":\s*"[^"]+"/g,
+      '"Api-Access-Token": "****"',
+    ),
+  );
+  return await axios
+    .request(config)
+    .then((response) => {
+      console.log("Mosque Information: ", JSON.stringify(response.data));
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error while fetching mosque information: ", error);
+      throw error;
+    });
+}
+
 module.exports = {
   getMosqueList,
   getPrayerTimings,
   getRandomHadith,
   updateDatastore,
   getAccessToken,
-  getDateAndMonthForTimezone
+  getDateAndMonthForTimezone,
+  getMosqueInformation
 };

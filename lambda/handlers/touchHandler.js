@@ -139,9 +139,12 @@ const RoutineListTouchEventHandler = {
       //   selectedRoutine.name,
       //   selectedRoutine.namePhoneme === prayerNames[5],
       // );
+      let prayerNameDetails =
+              await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput);
       return await helperFunctions.logRoutineCreation(
         handlerInput,
         selectedRoutine,
+        prayerNameDetails
       );
     } catch (error) {
       console.log("Error in RoutineListTouchEventHandler: ", error);
@@ -184,9 +187,13 @@ const DeleteRoutineTouchEventHandler = {
       const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes } = sessionAttributes;
       const { routinePrayers } = persistentAttributes;
-      const routinePrayerIndex = routinePrayers.findIndex(
+      let routinePrayerIndex = routinePrayers.findIndex(
         (routine) => routine.name.toLowerCase() === selectedRoutine.name.toLowerCase(),
       );
+
+      if (routinePrayerIndex === -1 && selectedRoutine.name === helperFunctions.ALL_PRAYERS(handlerInput).name) {
+        routinePrayerIndex = 0;        
+      }
       // Trigger DeleteRoutineIntent confirmation
       return handlerInput.responseBuilder
         .speak(

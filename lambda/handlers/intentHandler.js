@@ -16,6 +16,7 @@ const adhaanTasks = [
   "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan",
 ];
 const { DeleteUserInfo } = require("./dynamoDbHandler.js");
+const ALL_PRAYER_INDEX = 8;
 
 const DeleteRoutineStartedHandler = {
   canHandle(handlerInput) {
@@ -48,12 +49,16 @@ const DeleteRoutineStartedHandler = {
           .getResponse();
       }
 
-      const routineList = routinePrayers.map(({ name, time, namePhoneme }) => ({
+      let routineList = routinePrayers.map(({ name, time, namePhoneme }) => ({
         primaryText: `${name} ${time}`,
         name,
         time,
         namePhoneme: namePhoneme || name,
-      }));
+      })).sort((a, b) => {
+        const timeA = moment(a.time, "HH:mm");
+        const timeB = moment(b.time, "HH:mm");
+        return timeA.diff(timeB);
+      });
       if(routineList.length === 1){
         return handlerInput.responseBuilder
         .speak(
@@ -83,7 +88,8 @@ const DeleteRoutineStartedHandler = {
         })
         .withShouldEndSession(false)
         .getResponse();
-      }
+      }     
+      routineList = [helperFunctions.ALL_PRAYERS(handlerInput), ...routineList];
       let speakOutput = requestAttributes.t(
         "deleteRoutinePrompt",
         routineList.map((r, index) => `${index + 1}. ${r.namePhoneme} ${r.time}`).join(", "),
@@ -157,7 +163,11 @@ const DeleteRoutinePrayerIndexHandler = {
       if (!persistentAttributes?.uuid) {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }
-      const routinePrayers = persistentAttributes.routinePrayers || [];
+
+      let routinePrayers = persistentAttributes.routinePrayers || [];
+      if(routinePrayers.length != 0){
+        routinePrayers = [helperFunctions.ALL_PRAYERS(handlerInput), ...routinePrayers];
+      }
       if (prayerIndex < 1 || prayerIndex > routinePrayers.length) {
         console.log("Invalid prayer index: ", prayerIndex);
         sessionAttributes.skipAplDirective = true;
@@ -297,6 +307,10 @@ const DeleteRoutinePrayerNameHandler = {
         requestEnvelope,
         "prayerName",
       );
+      const prayerNameResolvedId = helperFunctions.getResolvedId(
+        requestEnvelope,
+        "prayerName",
+      );
       console.log("Prayer Name: ", prayerResolvedName);
       const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
@@ -308,7 +322,7 @@ const DeleteRoutinePrayerNameHandler = {
       const prayerIndex = routinePrayers.findIndex(
         (prayer) => prayer.name === prayerResolvedName,
       );
-      if (prayerIndex === -1) {
+      if (prayerIndex === -1 && prayerNameResolvedId !== String(ALL_PRAYER_INDEX)) {
         console.log("Invalid prayer name: ", prayerResolvedName);
         sessionAttributes.skipAplDirective = true;
         sessionAttributes.skipCardDirective = true;
@@ -339,7 +353,7 @@ const DeleteRoutinePrayerNameHandler = {
       // Slot is present, check confirmation
       const prayerNameSlotObj = requestEnvelope.request.intent.slots.prayerName;
       const confirmationStatus = prayerNameSlotObj.confirmationStatus;
-      const selectedPrayer = routinePrayers[prayerIndex];
+      const selectedPrayer = prayerNameResolvedId === String(ALL_PRAYER_INDEX)? helperFunctions.ALL_PRAYERS(handlerInput) : routinePrayers[prayerIndex];
       console.log("Selected Prayer: ", selectedPrayer);
       if (confirmationStatus === "DENIED") {
         return responseBuilder
@@ -1490,9 +1504,7 @@ const CreateRoutineIntentHandler = {
       handlerInput.attributesManager.getRequestAttributes();
     const validateUserAccountStatus =
       await helperFunctions.validateUserAccountStatus(handlerInput);
-    if (validateUserAccountStatus) {
-      return validateUserAccountStatus;
-    }
+    if (validateUserAccountStatus) return validateUserAccountStatus;
     try {
       const prayerNameResolvedId = helperFunctions.getResolvedId(
         handlerInput.requestEnvelope,
@@ -1508,16 +1520,15 @@ const CreateRoutineIntentHandler = {
       if (!persistentAttributes?.uuid) {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }
-      const prayerNameDetails =
+      let prayerNameDetails =
         sessionAttributes.prayerNameDetails ||
         (await helperFunctions.generatePrayerNameDetailsForRoutine(
           handlerInput,
         ));
-      const prayerNames = requestAttributes.t("prayerNames");
       if (prayerNameResolvedId !== undefined && prayerNameResolvedId !== null) {
         prayerIndex = parseInt(prayerNameResolvedId) + 1; // Adjusting index to match the slot value
       }
-      if (prayerIndex < 1 || prayerIndex > prayerNameDetails.length) {
+      if (( prayerIndex < 1 || prayerIndex > prayerNameDetails.length ) && prayerIndex !== ALL_PRAYER_INDEX + 1) {
         console.log("Invalid prayer index: ", prayerIndex);
         return handlerInput.responseBuilder
           .speak(
@@ -1547,7 +1558,16 @@ const CreateRoutineIntentHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
-      const selectedPrayer = prayerNameDetails[prayerIndex - 1];
+      let selectedPrayer = {};
+      if (prayerIndex === ALL_PRAYER_INDEX + 1 || prayerIndex === 1) {
+        selectedPrayer = prayerNameDetails[0];
+      } else {
+        prayerNameDetails = prayerNameDetails.filter(
+          (prayer) => prayer.name !== requestAttributes.t("allPrayers"),
+        );
+        selectedPrayer = prayerNameDetails[prayerIndex - 2];
+      }
+
       console.log("Selected Prayer: ", selectedPrayer);
       // await helperFunctions.saveRequestedRoutinePrayer(
       //   handlerInput,
@@ -1566,6 +1586,7 @@ const CreateRoutineIntentHandler = {
       return await helperFunctions.logRoutineCreation(
         handlerInput,
         selectedPrayer,
+        prayerNameDetails
       );
     } catch (error) {
       console.log("Error in CreateRoutineIntentHandler:", error);

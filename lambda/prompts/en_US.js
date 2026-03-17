@@ -68,40 +68,41 @@ module.exports = {
     selectMosquePrompt: `To register a mosque, you can say "select my mosque" or "choose my mosque". `,
     unableToResolvePrayerNamePrompt: `Sorry, I couldn't resolve the prayer name. Please try again.`,
     prayerNamePrompt:
-      "Which prayer would you like to create a routine for? You can choose between %s. You can choose by saying the number associated with the prayer ",
+      "Which prayer would you like to create a notification for? You can choose between %s. You can choose by saying the number associated with the prayer ",
     prayerNameTouchPrompt:
       "or you can also click on the prayer of your choice on your screen.",
-    routineCreatedPrompt: `Perfect, the routine has been created successfully! `,
+    routineCreatedPrompt: `Perfect, the notification has been created successfully! `,
     routineErrorPrompt:
-      "Sorry, an error occurred while creating a routine. Please try again later.",
+      "Sorry, an error occurred while creating a notification. Please try again later.",
     routineRejected:
-      "To create a different routine, you can say 'create a routine'.",
+      "To create a different notification, you can say 'create a notification'.",
     routineAlreadyEnabled:
-      "This routine has already been created. You can edit this routine in the Alexa app. To create a different routine, you can say 'create a routine'.",
+      "This notification has already been enabled. To create a different notification, you can say 'create a notification'.",
     titleForPrayerTimeList: `Prayer Times`,
     invalidPrayerIndexPrompt: `Sorry, the prayer index you provided is invalid. Please try again. You can choose between 1 and %s.`,
     timezoneErrorPrompt: `Sorry, I couldn't retrieve your timezone. Please check your location settings in the Alexa app and try again.`,
-    requestRoutinePrompt: "Would you like to set up a routine for this prayer?",
+    requestRoutinePrompt: "Would you like to set up a notification for this prayer?",
     hadithWidgetTitle: "Hadith of the day",
     hadithWidgetDescription: "Loading...",
     widgetInstallationErrorPrompt:
       "Sorry, an error occurred while installing the widget. Please try again later.",
     nextPrayerWithoutMosqueAndTimePrompt: `The next prayer is %s at %s`,
     linkAccountPrompt:
-      "To enable the prayer routine, please link your Amazon account in the Alexa app and try again.",
+      "To enable the prayer notification, please link your Amazon account in the Alexa app and try again.",
     refreshTokenMissing:
       "It looks like your account linking is incomplete. Please disable and re-enable the skill in your Alexa app, then link your Amazon account and run device discovery to fix this.",
-    titleForDeleteRoutineList: "Delete Routine",
-    deleteRoutinePrompt: "Which routine would you like to delete? You can choose between %s. You can choose by saying the number associated with the routine ",
+    titleForDeleteRoutineList: "Delete Notification",
+    deleteRoutinePrompt: "Which notification would you like to delete? You can choose between %s. You can choose by saying the number associated with the notification ",
     deleteRoutineTouchPrompt:
-      "or you can also click on the routine of your choice on your screen.",
+      "or you can also click on the notification of your choice on your screen.",
     deleteRoutineConfirmPrompt:
-      "Are you sure you want to delete the routine for %s? ",
-    routineDeletedPrompt: "The routine has been successfully deleted. ",
+      "Are you sure you want to delete the notification for %s? ",
+    routineDeletedPrompt: "The notification has been successfully deleted. ",
     noRoutinesPrompt:
-      "You don't have any routines enabled. You can say 'create a routine' to get started. ",
+      "You don't have any notifications enabled. You can say 'create a notification' to get started. ",
     deleteRoutineErrorPrompt:
-      "Sorry, an error occurred while deleting the routine. Please try again later.",
-    allRoutinesEnabled: "You have already enabled all the routines. To delete a routine, you can say 'delete a routine'.",
+      "Sorry, an error occurred while deleting the notification. Please try again later.",
+    allRoutinesEnabled: "You have already enabled all the notifications. To delete a notification, you can say 'delete a notification'.",
+    allPrayers: "All Prayers"
   },
 };

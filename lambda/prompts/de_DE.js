@@ -80,5 +80,6 @@ module.exports = {
         "oder Sie können auch auf die Routine Ihrer Wahl auf Ihrem Bildschirm klicken.",
       deleteRoutineErrorPrompt: "Entschuldigung, ein Fehler ist beim Löschen der Routine aufgetreten. Bitte versuchen Sie es später erneut.",
       allRoutinesEnabled: "Sie haben bereits alle Routinen aktiviert. Um eine Routine zu löschen, können Sie 'Routine löschen' sagen.",
+      allPrayers: "Alle Gebete",
     },
   };

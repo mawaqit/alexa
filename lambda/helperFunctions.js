@@ -815,7 +815,6 @@ function smartEscapeSSML(ssml) {
 }
 
 async function generatePrayerNameDetailsForRoutine(handlerInput) {
-  const JUMUA_PRAYER_INDEX = 5;
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
@@ -852,7 +851,7 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
       }
     })
     .filter((detail) => detail !== undefined && detail !== null);
-  if (routinePrayers && routinePrayers.length > 0) {
+  if (routinePrayers?.length > 0) {
     prayerNameDetails = prayerNameDetails.filter((detail) => {
       return !routinePrayers
         .map((prayer) => prayer.name.toLowerCase())
@@ -880,6 +879,9 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   //     });
   //   });
   // }
+  if (prayerNameDetails.length > 0) {
+    prayerNameDetails = [ALL_PRAYERS(handlerInput), ...prayerNameDetails];
+  }
   sessionAttributes.prayerNameDetails = prayerNameDetails;
   handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
   console.log("Final Prayer Name Details: ", JSON.stringify(prayerNameDetails));
@@ -890,22 +892,14 @@ const saveRequestedRoutinePrayer = async (handlerInput, prayerDetails) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   sessionAttributes.persistentAttributes.requestedRoutinePrayer = prayerDetails;
-  attributesManager.setPersistentAttributes(
-    sessionAttributes.persistentAttributes,
-  );
   attributesManager.setSessionAttributes(sessionAttributes);
-  await attributesManager.savePersistentAttributes();
 };
 
 const deleteRequestedRoutinePrayer = async (handlerInput) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   delete sessionAttributes?.persistentAttributes?.requestedRoutinePrayer;
-  attributesManager.setPersistentAttributes(
-    sessionAttributes.persistentAttributes,
-  );
   attributesManager.setSessionAttributes(sessionAttributes);
-  await attributesManager.savePersistentAttributes();
 };
 
 const getRequestedRoutinePrayer = (handlerInput) => {
@@ -955,7 +949,7 @@ const checkForRoutinePrayerAlreadyExists = async (
   return false;
 };
 
-const logRoutineCreation = async (handlerInput, routineDetails) => {
+const logRoutineCreation = async (handlerInput, routineDetails, prayerNameDetails = []) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
@@ -990,25 +984,38 @@ const logRoutineCreation = async (handlerInput, routineDetails) => {
   try {
     const timezone = await getUserTimezone(handlerInput);
     const mosqueId = persistentAttributes.uuid;
-    const prayerNameForSchedule =
-      routineDetails.canonicalName || routineDetails.name;
-    const time = routineDetails.time;
-    console.log("Mosque ID: ", mosqueId);
-    console.log("Prayer Name (Schedule): ", prayerNameForSchedule);
-    console.log("Time: ", time);
-    console.log("Timezone: ", timezone);
-    if (mosqueId && prayerNameForSchedule && time && timezone) {
-      await eventBridgeScheduler.createOrUpdateSchedule({
-        mosqueId,
-        prayerName: prayerNameForSchedule,
-        time,
-        timezone,
-      });
+    if(routineDetails.name !== requestAttributes.t("allPrayers")){
+      prayerNameDetails = [routineDetails]
+    } else {
+      prayerNameDetails = prayerNameDetails.filter((prayer) => prayer.name !== requestAttributes.t("allPrayers"));
+    }
+  
+    for(const prayer of prayerNameDetails){
+      const prayerNameForSchedule =
+        prayer.canonicalName || prayer.name;
+      const time = prayer.time;
+      console.log("Mosque ID: ", mosqueId);
+      console.log("Prayer Name (Schedule): ", prayerNameForSchedule);
+      console.log("Time: ", time);
+      console.log("Timezone: ", timezone);
+      if (mosqueId && prayerNameForSchedule && time && timezone && time.toString().length > 0) {
+        await eventBridgeScheduler.createOrUpdateSchedule({
+          mosqueId,
+          prayerName: prayerNameForSchedule,
+          time,
+          timezone,
+        });
+      }
     }
     if (!persistentAttributes.routinePrayers) {
       persistentAttributes.routinePrayers = [];
     }
-    persistentAttributes.routinePrayers.push(routineDetails);
+    persistentAttributes.routinePrayers = [...persistentAttributes.routinePrayers, ...prayerNameDetails];
+    persistentAttributes.routinePrayers.sort((a, b) => {
+      const timeA = moment(a.time, "HH:mm");
+      const timeB = moment(b.time, "HH:mm");
+      return timeA.diff(timeB);
+    });
     attributesManager.setPersistentAttributes(persistentAttributes);
     attributesManager.setSessionAttributes(sessionAttributes);
     await attributesManager.savePersistentAttributes();
@@ -1105,10 +1112,17 @@ const deleteRoutine = async (handlerInput, routineName) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
+  const requestAttributes = attributesManager.getRequestAttributes();
+  if(routineName === requestAttributes.t("allPrayers")){
+    delete persistentAttributes.routinePrayers;
+    attributesManager.setPersistentAttributes(persistentAttributes);
+    attributesManager.setSessionAttributes(sessionAttributes);
+    await attributesManager.savePersistentAttributes();
+    return true;
+  }
 
   if (
-    persistentAttributes.routinePrayers &&
-    persistentAttributes.routinePrayers.length > 0
+    persistentAttributes?.routinePrayers?.length > 0
   ) {
     const index = persistentAttributes.routinePrayers.findIndex(
       (routine) =>
@@ -1160,6 +1174,20 @@ const updateRoutinePrayers = async (handlerInput) => {
   }
 };
 
+const isTaskTrigger = (handlerInput) => {
+  return handlerInput.requestEnvelope.request?.targetURI?.includes("AMAZON.Launch");
+};
+
+const ALL_PRAYERS = (handlerInput) => {
+  const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+  return {
+    name: requestAttributes.t("allPrayers"),
+    time: "",
+    namePhoneme: requestAttributes.t("allPrayers"),
+    primaryText: requestAttributes.t("allPrayers")
+  };
+};
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -1205,4 +1233,6 @@ module.exports = {
   deleteRoutine,
   updateRoutinePrayers,
   CANONICAL_PRAYER_NAMES,
+  isTaskTrigger,
+  ALL_PRAYERS
 };

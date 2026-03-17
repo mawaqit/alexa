@@ -37,7 +37,7 @@ module.exports = {
     mosqueInfoPrompt: "Votre mosquée est %s. Localisé à %s, à environ %s kilomètres de votre localisation. ",
     mosqueInfoErrorPrompt: "Désolé, je n'ai pas pu trouver d'information pour votre mosquée, veuillez reéssayer s'il vous plaît.",
     nextPrayerTimeWithNamePrompt: `La prière de %s est à %s dans %s. `,
-    allIqamaTimesPrompt: "Pour %s, l'iqama est à %s. ", 
+    allIqamaTimesPrompt: "Pour %s, l'iqama est à %s. ",
     deleteDataPrompt: `Vos données ont bien été supprimées. Relancez la skill pour réutiliser ${process.env.SKILL_NAME}.`,
     okPrompt: "Ok. ",
     jummaTimePrompt: "De plus, le jumua, la prière du Vendredi, est à %s.",
@@ -47,7 +47,7 @@ module.exports = {
     globalErrorPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
     fallbackPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
     allPrayerTimesPrompt: "%s est à %s. ",
-    doYouNeedAnythingElsePrompt: " Voulez-vous autre chose ?",    
+    doYouNeedAnythingElsePrompt: " Voulez-vous autre chose ?",
     adhanReciterPrompt: `Quelle récitation souhaitez-vous définir comme favorite pour l'adhan ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la récitation `,
     adhanReciterErrorPrompt: `Désolé, je n'ai trouvé aucune récitation pour l'adhan. Veuillez réessayer.`,
     adhanReciterSuccessPrompt: `Parfait, %s est maintenant votre récitation favorite pour l'adhan ! `,
@@ -57,31 +57,44 @@ module.exports = {
     adhaanErrorPrompt: `Désolé, actuellement, je ne supporte pas la lecture de l'adhan. Veuillez réessayer plus tard.`,
     selectMosquePrompt: `Pour enregistrer une mosquée, vous pouvez dire "sélectionne ma mosquée" ou "choisis ma mosquée". `,
     unableToResolvePrayerNamePrompt: `Désolé, je n'ai pas pu résoudre le nom de la prière. Veuillez réessayer.`,
-    prayerNamePrompt: "Quelle prière souhaitez-vous créer une routine pour ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la prière",
-    prayerNameTouchPrompt: "ou vous pouvez aussi cliquer sur la prière de votre choix sur votre écran.",
-    routineCreatedPrompt: `Parfait, la routine a été créée avec succès ! `,
-    routineErrorPrompt: "Désolé, une erreur s'est produite lors de la création de la routine. Veuillez réessayer plus tard.",
-    routineRejected: "Pour créer une autre routine, vous pouvez dire : « créer une routine ».",
-    routineAlreadyEnabled: "Cette routine a déjà été créée. Vous pouvez éditer cette routine dans l'application Alexa. Je peux créer une autre routine, vous pouvez dire : « créer une routine ».",    
-    titleForPrayerTimeList: `Heures de prière`, 
+    prayerNamePrompt:
+      "Pour quelle prière souhaitez-vous créer une notification ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la prière",
+    prayerNameTouchPrompt:
+      "ou vous pouvez aussi cliquer sur la prière de votre choix sur votre écran.",
+    routineCreatedPrompt: `Parfait, la notification a été créée avec succès ! `,
+    routineErrorPrompt:
+      "Désolé, une erreur s'est produite lors de la création de la notification. Veuillez réessayer plus tard.",
+    routineRejected:
+      "Pour créer une autre notification, vous pouvez dire : « créer une notification ».",
+    routineAlreadyEnabled:
+      "Cette notification a déjà été activée. Pour créer une autre notification, vous pouvez dire : « créer une notification ».",
+    titleForPrayerTimeList: `Heures de prière`,
     invalidPrayerIndexPrompt: `Désolé, l'index de prière que vous avez fourni est invalide. Veuillez réessayer. Vous pouvez choisir entre 1 et %s.`,
     timezoneErrorPrompt: `Désolé, je n'ai pas pu récupérer votre fuseau horaire. Veuillez vérifier vos paramètres de localisation dans l'application Alexa et réessayer.`,
-    requestRoutinePrompt: "Souhaitez-vous configurer une routine pour cette prière ?",
+    requestRoutinePrompt:
+      "Souhaitez-vous configurer une notification pour cette prière ?",
     hadithWidgetTitle: "Hadith du jour",
     hadithWidgetDescription: "Chargement...",
     widgetInstallationErrorPrompt: "Désolé, une erreur s'est produite lors de l'installation du widget. Veuillez réessayer plus tard.",
     nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s.",
-    linkAccountPrompt: "Pour activer la routine, veuillez vous connecter à votre compte Amazon dans l'application Alexa et réessayer.",
-    refreshTokenMissing: "Il semble que votre connexion au compte soit incomplète. Veuillez désactiver et réactiver la compétence dans l'application Alexa, puis connectez votre compte Amazon et effectuez la découverte du périphérique pour corriger cela.",
-    titleForDeleteRoutineList: "Supprimer la Routine",
-    deleteRoutineConfirmPrompt: "Êtes-vous sûr de vouloir supprimer la routine pour %s ? ",
-    routineDeletedPrompt: "La routine a été supprimée avec succès. ",
-    noRoutinesPrompt: "Vous n'avez aucune routine activée. Vous pouvez dire 'créer une routine' pour commencer. ",
-    deleteRoutinePrompt: "Quelle routine souhaitez-vous supprimer ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la routine",
+    linkAccountPrompt:
+      "Pour activer la notification, veuillez vous connecter à votre compte Amazon dans l'application Alexa et réessayer.",
+    refreshTokenMissing:
+      "Il semble que votre connexion au compte soit incomplète. Veuillez désactiver et réactiver la compétence dans l'application Alexa, puis connectez votre compte Amazon et effectuez la découverte du périphérique pour corriger cela.",
+    titleForDeleteRoutineList: "Supprimer la Notification",
+    deleteRoutineConfirmPrompt:
+      "Êtes-vous sûr de vouloir supprimer la notification pour %s ? ",
+    routineDeletedPrompt: "La notification a été supprimée avec succès. ",
+    noRoutinesPrompt:
+      "Vous n'avez aucune notification activée. Vous pouvez dire 'créer une notification' pour commencer. ",
+    deleteRoutinePrompt:
+      "Quelle notification souhaitez-vous supprimer ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la notification",
     deleteRoutineTouchPrompt:
-      "ou vous pouvez aussi cliquer sur la routine de votre choix sur votre écran.",
+      "ou vous pouvez aussi cliquer sur la notification de votre choix sur votre écran.",
     deleteRoutineErrorPrompt:
-      "Désolé, une erreur s'est produite lors de la suppression de la routine. Veuillez réessayer plus tard.",
-    allRoutinesEnabled: "Vous avez déjà activé toutes les routines. Pour supprimer une routine, vous pouvez dire 'supprimer une routine'.",
+      "Désolé, une erreur s'est produite lors de la suppression de la notification. Veuillez réessayer plus tard.",
+    allRoutinesEnabled:
+      "Vous avez déjà activé toutes les notifications. Pour supprimer une notification, vous pouvez dire 'supprimer une notification'.",
+    allPrayers: "Toutes les prières",
   },
 };

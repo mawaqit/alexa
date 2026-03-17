@@ -70,6 +70,7 @@ const {
   ReadPrayerTimeAPLEventHandler,
 } = require("./handlers/prayerTimeWidgetHandler.js");
 const { AuthHandler } = require("./handlers/authHandler.js");
+const moment = require("moment-timezone");
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -82,7 +83,35 @@ const LaunchRequestHandler = {
   },
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
+    const sessionAttributes = attributesManager.getSessionAttributes();
+    const { persistentAttributes } = sessionAttributes;
+    console.log("Persisted Data: ", persistentAttributes);
     const requestAttributes = attributesManager.getRequestAttributes();
+    if (
+      helperFunctions.isTaskTrigger(handlerInput) &&
+      persistentAttributes?.routinePrayers?.length > 0
+    ) {
+      try {
+        const userTimeZone =
+          await helperFunctions.getUserTimezone(handlerInput);
+        const currentTime = moment.tz(userTimeZone).format("HH:mm");
+        const routinePrayer = persistentAttributes.routinePrayers.find(
+          (prayer) => prayer.time === currentTime,
+        );
+        if (routinePrayer) {
+          console.log("Launched via Azan Trigger: ", routinePrayer);
+          return PlayAdhanTaskHandler.handle(handlerInput);
+        }
+      } catch (error) {
+        if (error?.message === "Unable to fetch user timezone") {
+          return handlerInput.responseBuilder
+            .speak(requestAttributes.t("timezoneErrorPrompt"))
+            .withShouldEndSession(true)
+            .getResponse();
+        }
+      }
+    }
+    
     await helperFunctions
       .callDirectiveService(handlerInput, requestAttributes.t("welcomePrompt"))
       .catch((error) => {

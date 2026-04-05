@@ -179,6 +179,7 @@ const getPrayerTimingsForMosque = async (
     const phonemeText = extractPhonemeText([nextPrayerTime.name])[0];
     routinePrayerDetails.name = phonemeText ? phonemeText : nextPrayerTime.name;
     routinePrayerDetails.namePhoneme = nextPrayerTime.name;
+    routinePrayerDetails.canonicalName = CANONICAL_PRAYER_NAMES[mosqueTimes.times.findIndex(time => time === nextPrayerTime.time)]
     if (
       !(await checkForRoutinePrayerAlreadyExists(
         handlerInput,

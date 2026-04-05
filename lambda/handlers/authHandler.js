@@ -1,7 +1,6 @@
 const Alexa = require("ask-sdk-core");
 const axios = require("axios");
 const AMAZON_BASE_URL = "https://api.amazon.com";
-const qs = require("qs");
 const dbHandler = require("./dynamoDbHandler");
 
 const AuthHandler = {
@@ -100,7 +99,7 @@ async function getAccessTokenFromRefreshToken(refreshToken) {
     throw new Error("Refresh token is required");
   }
 
-  let data = qs.stringify({
+  let data = new URLSearchParams({
     client_id: process.env.clientId,
     client_secret: process.env.clientSecret,
     grant_type: "refresh_token",

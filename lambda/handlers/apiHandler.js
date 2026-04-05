@@ -82,9 +82,12 @@ const getPrayerTimings = async (mosqueUuid, timezone, isIqamaCalendarRequired = 
       if (!isIqamaCalendarRequired && response?.data?.iqamaCalendar) {
         delete response.data.iqamaCalendar;
       }
+
       if (!isPrayerCalendarRequired && response?.data?.calendar) {
         delete response.data.calendar;
       }
+      
+      console.log("Mosque Times after Update: ",response?.data?.times)
 
       return response.data;
     })

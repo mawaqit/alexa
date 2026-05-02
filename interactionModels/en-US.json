@@ -52,6 +52,58 @@
           "delegationStrategy": "SKILL_RESPONSE",
           "confirmationRequired": false,
           "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "elicitationRequired": false,
+              "type": "prayerName",
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "prayerIndex",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1109143510857.1736532477159"
+              }
+            }
+          ],
+          "name": "CreateRoutineIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "elicitationRequired": true,
+              "type": "prayerName",
+              "confirmationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.952448063954.570480165001",
+                "confirmation": "Confirm.Slot.952448063954.570480165001"
+              }
+            },
+            {
+              "name": "prayerIndex",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1212586752329.741121682059",
+                "confirmation": "Confirm.Slot.952448063954.1441695377689"
+              }
+            }
+          ],
+          "name": "DeleteRoutineIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
         }
       ],
       "delegationStrategy": "ALWAYS"
@@ -234,7 +286,20 @@
             "time for iqamas",
             "when are the ikamas",
             "time for ikamas",
-            "prayer times and iqamas"
+            "prayer times and iqamas",
+            "give me all iqama times",
+            "what are the iqama times",
+            "tell me the iqama times",
+            "today's iqama times",
+            "iqama schedule",
+            "full iqama schedule",
+            "when is the iqama for the prayers",
+            "iqama timings for today",
+            "list all iqama times",
+            "give me today's iqama timings",
+            "times for all iqamas",
+            "show me iqama timings",
+            "iqama times please"
           ]
         },
         {
@@ -271,7 +336,20 @@
             "prayer schedule",
             "what time are the prayers",
             "times for today's prayers",
-            "prayer times for today"
+            "prayer times for today",
+            "today prayer timings",
+            "give me all the prayer times",
+            "list all today's prayer times",
+            "what are today prayer timings",
+            "prayer times please",
+            "show me prayer times",
+            "I want the prayer times",
+            "tell me the prayer schedule",
+            "today's prayer schedule",
+            "all prayer times for today",
+            "give me the full prayer schedule",
+            "prayer timings for today",
+            "give me prayer timings"
           ]
         },
         {
@@ -286,7 +364,19 @@
           ],
           "name": "FavoriteAdhaanReciterIntent",
           "samples": [
-            "choose my adhaan reciter"
+            "set my adhaan reciter",
+            "change my adhaan reciter",
+            "select my adhaan reciter",
+            "pick my adhaan reciter",
+            "update my adhaan reciter",
+            "I want to change my adhaan reciter",
+            "I want to choose an adhaan reciter",
+            "let me choose my adhaan reciter",
+            "help me choose an adhaan reciter",
+            "set my favorite adhaan reciter",
+            "change the reciter for my adhaan",
+            "select my favorite adhaan reciter",
+            "choose a different adhaan reciter"
           ]
         },
         {
@@ -301,14 +391,196 @@
           "slots": [],
           "name": "HadithIntent",
           "samples": [
+            "give me a hadith",
+            "tell me a hadith",
+            "share a hadith with me",
+            "read a hadith",
+            "tell me a random hadith",
+            "give me a hadith for today",
+            "I want to hear a hadith",
+            "read a hadith for me",
+            "say a hadith",
+            "give me any hadith",
+            "give me another hadith",
+            "tell me one more hadith",
+            "I want a hadith please",
+            "give me a short hadith",
+            "hadith of the day",
+            "today's hadith",
             "random hadith",
-            "hadith"
+            "hadith please"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName"
+            },
+            {
+              "name": "prayerIndex",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{prayerIndex}"
+              ]
+            }
+          ],
+          "name": "CreateRoutineIntent",
+          "samples": [
+            "update routine for {prayerName} prayer",
+            "create routine for {prayerName} prayer",
+            "create {prayerName} routine",
+            "update {prayerName} routine",
+            "update my routine for {prayerName}",
+            "create routine for {prayerName}",
+            "update my routine",
+            "create my routine",
+            "update routine",
+            "create routine",
+            "edit routine for {prayerName} prayer",
+            "change my routine for {prayerName}",
+            "modify {prayerName} routine",
+            "update the {prayerName} prayer routine",
+            "create a new routine for {prayerName}",
+            "set up routine for {prayerName}",
+            "make a routine for {prayerName}",
+            "add routine for {prayerName} prayer",
+            "build a {prayerName} routine",
+            "make my routine for {prayerName} prayer",
+            "setup my {prayerName} routine",
+            "adjust my routine for {prayerName}",
+            "change my {prayerName} routine",
+            "make changes to my routine for {prayerName}",
+            "edit my {prayerName} routine",
+            "create a prayer routine for {prayerName}",
+            "update my prayer routine",
+            "create my prayer routine",
+            "set my routine for {prayerName}",
+            "start a new routine for {prayerName}",
+            "remind me for {prayerName} prayer",
+            "set an alert for {prayerName} prayer",
+            "notify me for {prayerName}",
+            "turn on notifications for {prayerName}",
+            "schedule a reminder for {prayerName}",
+            "set up a notification for {prayerName}",
+            "alert me for {prayerName}",
+            "put a reminder on for {prayerName}",
+            "ping me for {prayerName}",
+            "remind me for all prayers",
+            "set notifications for all prayers",
+            "alert me for every prayer",
+            "turn on all prayer reminders",
+            "remind me to pray",
+            "set a prayer reminder",
+            "create a notification",
+            "ping me when it's prayer time",
+            "set an alert",
+            "add a prayer alert",
+            "setup my routine",
+            "create a schedule",
+            "start a new routine",
+            "build a prayer routine",
+            "update my notifications",
+            "change my alerts",
+            "manage my prayer reminders",
+            "edit my notification settings",
+            "update the routine",
+            "create a prayer routine"
+          ]
+        },
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName",
+              "samples": [
+                "{prayerName}"
+              ]
+            },
+            {
+              "name": "prayerIndex",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{prayerIndex}"
+              ]
+            }
+          ],
+          "name": "DeleteRoutineIntent",
+          "samples": [
+            "delete notification for {prayerName} prayer",
+            "remove notification for {prayerName} prayer",
+            "delete {prayerName} notification",
+            "remove {prayerName} alert",
+            "delete my reminder for {prayerName}",
+            "cancel reminder for {prayerName}",
+            "turn off notifications for {prayerName}",
+            "stop alerts for {prayerName} prayer",
+            "get rid of my {prayerName} notification",
+            "erase {prayerName} reminder",
+            "disable notification for {prayerName}",
+            "delete my prayer notifications",
+            "remove my prayer alerts",
+            "stop all my prayer reminders",
+            "clear all prayer notifications",
+            "turn off all my alerts",
+            "delete every prayer reminder",
+            "delete my notification",
+            "remove my alert",
+            "clear my reminders",
+            "wipe my notifications",
+            "stop notifications",
+            "disable my alerts",
+            "cancel all reminders",
+            "delete routine for {prayerName} prayer",
+            "remove routine for {prayerName} prayer",
+            "delete {prayerName} routine",
+            "remove {prayerName} routine",
+            "delete my routine for {prayerName}",
+            "cancel routine for {prayerName}",
+            "delete my routine",
+            "remove my routine",
+            "clear my routine",
+            "wipe my routine",
+            "stop routine for {prayerName} prayer",
+            "get rid of my {prayerName} routine",
+            "erase {prayerName} routine",
+            "delete the {prayerName} prayer routine",
+            "remove my prayer routine",
+            "discard routine for {prayerName}",
+            "turn off routine for {prayerName}",
+            "delete my prayer routine"
           ]
         }
       ],
       "types": [
         {
           "values": [
+            {
+              "name": {
+                "synonyms": [
+                  "all",
+                  "all prayers",
+                  "every prayer",
+                  "each prayer",
+                  "all five",
+                  "everything",
+                  "all of them",
+                  "the whole day",
+                  "each one",
+                  "all the prayers"
+                ],
+                "value": "all prayers"
+              },
+              "id": "8"
+            },
             {
               "name": {
                 "synonyms": [
@@ -465,6 +737,68 @@
           }
         ],
         "id": "Elicit.Slot.102046521153.828952134948"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Which prayer?"
+          },
+          {
+            "type": "PlainText",
+            "value": "For which prayer?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Please specify the prayer"
+          }
+        ],
+        "id": "Elicit.Slot.845127847171.342320641194"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "which prayer?"
+          }
+        ],
+        "id": "Elicit.Slot.1109143510857.1736532477159"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "which prayer?"
+          }
+        ],
+        "id": "Elicit.Slot.1212586752329.741121682059"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Which prayer?"
+          }
+        ],
+        "id": "Elicit.Slot.952448063954.570480165001"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Do you want to delete {prayerName} ?"
+          }
+        ],
+        "id": "Confirm.Slot.952448063954.570480165001"
+      },
+      {
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "Do you want to delete {prayerIndex} ?"
+          }
+        ],
+        "id": "Confirm.Slot.952448063954.1441695377689"
       }
     ]
   }

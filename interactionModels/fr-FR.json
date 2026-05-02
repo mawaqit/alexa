@@ -49,7 +49,6 @@
             }
           ],
           "name": "FavoriteAdhaanReciterIntent",
-          "delegationStrategy": "SKILL_RESPONSE",
           "confirmationRequired": false,
           "prompts": {}
         },
@@ -377,7 +376,18 @@
             "quand sont les iqamas",
             "quand sont les ikamas",
             "iqamas du jour",
-            "ikamas du jour"
+            "ikamas du jour",
+            "donne moi les horaires d'iqama",
+            "quels sont les horaires d'iqama",
+            "horaires d'iqama aujourd'hui",
+            "donne moi les iqamas du jour",
+            "je veux les horaires d'iqama",
+            "montre moi les horaires d'iqama",
+            "programme d'iqama",
+            "tous les horaires d'iqama",
+            "donne moi tous les horaires d'iqama",
+            "les horaires d'iqama s'il te plait",
+            "heures des iqamas aujourd'hui"
           ]
         },
         {
@@ -443,7 +453,19 @@
             "horaires des prières aujourd'hui",
             "horaires de prière du jour",
             "prières du jour",
-            "prières d'aujourd'hui"
+            "prières d'aujourd'hui",
+            "donne moi les horaires de priere",
+            "quels sont les horaires de priere",
+            "horaires de priere aujourd'hui",
+            "donne moi les horaires d'aujourd'hui",
+            "je veux les horaires de priere",
+            "montre moi les horaires de priere",
+            "programme de priere",
+            "horaires des prieres du jour",
+            "tous les horaires de priere",
+            "donne moi tous les horaires de priere",
+            "quel est le programme de priere aujourd'hui",
+            "les horaires de priere s'il te plait"
           ]
         },
         {
@@ -483,7 +505,26 @@
             "muezzin favori",
             "choisis mon muezzin",
             "qui est mon récitant",
-            "modifie mon récitant"
+            "modifie mon récitant",
+            "choisir mon reciteur d'adhan",
+            "definir mon reciteur d'adhan",
+            "changer mon reciteur d'adhan",
+            "selectionner mon reciteur d'adhan",
+            "mettre a jour mon reciteur d'adhan",
+            "je veux changer mon reciteur d'adhan",
+            "je veux choisir un reciteur d'adhan",
+            "laisse moi choisir mon reciteur d'adhan",
+            "aide moi a choisir un reciteur d'adhan",
+            "definir mon reciteur d'adhan prefere",
+            "changer le reciteur de mon adhan",
+            "selectionner mon reciteur d'adhan prefere",
+            "choisir un autre reciteur d'adhan",
+            "choisir le muezzin",
+            "choisir l'appel à la prière",
+            "sélectionner le muezzin",
+            "sélectionner l'appel à la prière",
+            "changer le muezzin",
+            "changer l'appel à la prière"
           ]
         },
         {
@@ -507,7 +548,150 @@
             "j'aimerais entendre un hadith",
             "j'aimerais un hadith",
             "fais-moi écouter un hadith",
-            "dis-moi un hadith"
+            "dis-moi un hadith",
+            "donne moi un hadith au hasard",
+            "je veux entendre un hadith",
+            "partage un hadith avec moi",
+            "dis moi une parole du Prophete",
+            "donne moi un hadith pour aujourd'hui",
+            "donne moi un autre hadith",
+            "raconte moi encore un hadith",
+            "un hadith s'il te plait",
+            "je veux un hadith court",
+            "le hadith d'aujourd'hui",
+            "hadith s'il te plait"
+          ]
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName"
+            },
+            {
+              "name": "prayerIndex",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{prayerIndex}"
+              ]
+            }
+          ],
+          "name": "CreateRoutineIntent",
+          "samples": [
+            "rappelle-moi pour la prière {prayerName}",
+            "programme une alerte pour {prayerName}",
+            "envoie-moi une notification pour {prayerName}",
+            "active les rappels pour la prière {prayerName}",
+            "préviens-moi quand c'est l'heure de {prayerName}",
+            "mets une notification pour {prayerName}",
+            "alerte-moi pour la prière de {prayerName}",
+            "active les notifications de prière pour {prayerName}",
+            "crée un rappel pour {prayerName}",
+            "rappelle-moi pour toutes les prières",
+            "active les notifications pour chaque prière",
+            "alerte-moi pour les cinq prières",
+            "mets des rappels pour toutes les prières",
+            "préviens-moi à chaque heure de prière",
+            "rappelle-moi de prier",
+            "configure un rappel",
+            "crée une notification",
+            "alerte-moi quand c'est l'heure",
+            "mets une alerte de prière",
+            "active une notification",
+            "configure ma routine",
+            "crée mon planning",
+            "démarre une nouvelle routine",
+            "prépare ma routine de prière",
+            "mets à jour mes notifications",
+            "modifie mes alertes",
+            "gère mes rappels",
+            "change mes paramètres de notification",
+            "mets à jour ma routine",
+            "crée ma routine",
+            "mets à jour ma routine pour la prière {prayerName}",
+            "crée une routine pour la prière {prayerName}",
+            "crée la routine {prayerName}",
+            "mets à jour la routine {prayerName}",
+            "modifie ma routine pour {prayerName}",
+            "change ma routine pour {prayerName}",
+            "configure une routine pour {prayerName}",
+            "ajoute une routine pour {prayerName}",
+            "mets à jour ma routine de prière",
+            "crée ma routine de prière",
+            "prépare une routine pour {prayerName}",
+            "fais une routine pour {prayerName}",
+            "démarre une routine pour {prayerName}",
+            "mets à jour ma routine de la prière {prayerName}",
+            "change la routine de la prière {prayerName}",
+            "modifie la routine pour la prière {prayerName}",
+            "crée une nouvelle routine pour {prayerName}",
+            "change ma routine"
+          ]
+        },
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "type": "prayerName",
+              "samples": [
+                "{prayerName}"
+              ]
+            },
+            {
+              "name": "prayerIndex",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{prayerIndex}"
+              ]
+            }
+          ],
+          "name": "DeleteRoutineIntent",
+          "samples": [
+            "supprimer la notification pour la prière {prayerName}",
+            "effacer l'alerte pour la prière {prayerName}",
+            "supprimer ma notification {prayerName}",
+            "retirer le rappel {prayerName}",
+            "annuler mon alerte pour {prayerName}",
+            "désactiver les notifications pour {prayerName}",
+            "arrête les alertes pour la prière {prayerName}",
+            "enlève ma notification pour la prière {prayerName}",
+            "supprimer le rappel pour {prayerName}",
+            "efface mon alerte pour {prayerName}",
+            "supprimer toutes mes notifications de prière",
+            "enlève tous les rappels de prière",
+            "désactive toutes mes alertes",
+            "arrête tous les rappels",
+            "supprime toutes les notifications pour chaque prière",
+            "effacer toutes mes alertes de prière",
+            "supprimer ma notification",
+            "effacer mon alerte",
+            "enlever mes rappels",
+            "désactiver mes notifications",
+            "annuler mes alertes",
+            "stop les notifications",
+            "enlever la notification",
+            "supprimer la routine pour la prière {prayerName}",
+            "effacer la routine pour la prière {prayerName}",
+            "supprimer ma routine {prayerName}",
+            "retirer la routine {prayerName}",
+            "annuler ma routine pour {prayerName}",
+            "supprimer ma routine",
+            "effacer ma routine",
+            "enlever la routine de prière {prayerName}",
+            "supprime la routine pour {prayerName}",
+            "je veux supprimer ma routine de prière",
+            "arrête la routine pour {prayerName}",
+            "enlève ma routine pour la prière {prayerName}",
+            "supprimer le programme pour {prayerName}",
+            "efface ma programmation pour {prayerName}"
           ]
         }
       ],
@@ -690,6 +874,14 @@
     "prompts": [
       {
         "variations": [
+          {
+            "type": "PlainText",
+            "value": "S'il vous plaît, dites le nombre associé à votre mosquée"
+          },
+          {
+            "type": "PlainText",
+            "value": "Veuillez mentionner le numéro de la mosquée"
+          },
           {
             "type": "PlainText",
             "value": "Quel est le numéro de votre mosquée ?"

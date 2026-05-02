@@ -10,9 +10,57 @@ exports.handler = async (event) => {
 
   // Check for Daily Update Trigger
   if (event?.type === "DAILY_UPDATE") {
-    // Lazy load schedulerUpdateHandler to avoid circular dependencies if any
-    const schedulerUpdateHandler = require("./handlers/schedulerUpdateHandler");
-    return await schedulerUpdateHandler.handleDailyUpdate();
+    const { mosqueId, timeZone } = event;
+    const apiHandler = require("./handlers/apiHandler");
+    const helperFunctions = require("./helperFunctions");
+
+    if (!mosqueId || !timeZone) {
+      console.error("Missing mosqueId or timeZone for DAILY_UPDATE");
+      return;
+    }
+
+    try {
+      console.log(`Starting DAILY_UPDATE for mosque: ${mosqueId}`);
+      const schedules = await eventBridgeScheduler.listSchedulesForMosque(mosqueId);
+      
+      const activePrayers = [];
+      const allPrayers = helperFunctions.CANONICAL_PRAYER_NAMES;
+      
+      schedules.forEach(schedule => {
+        const name = schedule.Name;
+        for (const prayer of allPrayers) {
+          if (name === `${mosqueId}-${prayer}`) {
+            activePrayers.push(prayer);
+            break;
+          }
+        }
+      });
+
+      if (activePrayers.length === 0) {
+        console.log(`No active prayer schedules found for mosque: ${mosqueId}`);
+        return;
+      }
+
+      const prayerTimes = await apiHandler.getPrayerTimings(mosqueId, timeZone);
+      
+      if (!prayerTimes?.times || prayerTimes.times.length === 0) {
+        console.warn(`No prayer times found for mosque: ${mosqueId}`);
+        return;
+      }
+
+      for (const prayerName of activePrayers) {
+        const prayerIndex = allPrayers.indexOf(prayerName);
+        if (prayerIndex !== -1 && prayerTimes.times[prayerIndex]) {
+          const time = prayerTimes.times[prayerIndex];
+          console.log(`Updating schedule for mosque: ${mosqueId}, prayer: ${prayerName}, time: ${time}`);
+          await eventBridgeScheduler.updateScheduleTimeOnly(mosqueId, prayerName, time);
+        }
+      }
+      return;
+    } catch (error) {
+       console.error(`Error in DAILY_UPDATE for mosque ${mosqueId}:`, error);
+       throw error;
+    }
   }
 
   const { mosqueId, prayerName } = event;

@@ -26,6 +26,7 @@ provider:
     UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS: ${file(env.json):${self:provider.stage}.updateIntervalHadithWidgetInHours}
     SQS_QUEUE_BATCH_SIZE: ${file(env.json):${self:provider.stage}.sqsQueueBatchSize, '10'}
     SQS_QUEUE_URL: { Ref: AlexaAzanQueue }
+    MOSQUE_AZAN_DATA_TABLE: mawaqit-alexa-mosque-azan-data-${self:provider.stage}
   lambdaHashingVersion: 20201221
 
   iamRoleStatements:
@@ -77,11 +78,6 @@ functions:
     timeout: 900
     memorySize: 128
     description: Lambda will be triggered by EventBridge to send event to Worker Lambda
-    events:
-      - schedule:
-          rate: cron(0 2 * * ? *)
-          input:
-            type: DAILY_UPDATE
     versionFunction: false
 
   workerHandler:
@@ -134,6 +130,17 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: mawaqit-alexa-azan-users-data-${self:provider.stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    AlexaMosqueAzanDataTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: mawaqit-alexa-mosque-azan-data-${self:provider.stage}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S

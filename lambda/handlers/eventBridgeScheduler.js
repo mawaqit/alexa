@@ -29,6 +29,53 @@ async function createOrUpdateSchedule({
 }) {
   const scheduleName = `${mosqueId}-${prayerName}`;
 
+  try {
+    const dbHandler = require("./dynamoDbHandler");
+    const mosqueData = await dbHandler.GetMosqueAzanData(mosqueId);
+    if (!mosqueData || !mosqueData.updateScheduleCreated) {
+      const updateScheduleName = `${mosqueId}-DAILY_UPDATE`;
+      const updateScheduleExpression = `cron(0 2 * * ? *)`; // 2:00 AM every day
+      const updatePayload = {
+        type: "DAILY_UPDATE",
+        mosqueId: mosqueId,
+        timeZone: timezone
+      };
+
+      const createUpdateCommand = new CreateScheduleCommand({
+        Name: updateScheduleName,
+        GroupName: scheduleGroupName,
+        ScheduleExpression: updateScheduleExpression,
+        ScheduleExpressionTimezone: timezone,
+        FlexibleTimeWindow: { Mode: "OFF" },
+        Target: {
+          Arn: `arn:aws:lambda:${process.env.AWS_REGION}:${process.env.AWS_ACCOUNT_ID}:function:alexa-${process.env.STAGE}-triggerHandler`,
+          RoleArn: process.env.SCHEDULER_ROLE_ARN,
+          Input: JSON.stringify(updatePayload),
+          RetryPolicy: {
+            MaximumEventAgeInSeconds: 900,
+            MaximumRetryAttempts: 3,
+          },
+        },
+        State: "ENABLED",
+      });
+
+      try {
+        await client.send(createUpdateCommand);
+        console.log(`Created Daily Update schedule: ${updateScheduleName}`);
+      } catch (err) {
+        if (err.name === 'ConflictException' || err.name === 'ResourceAlreadyExistsException') {
+          console.log(`Daily Update schedule ${updateScheduleName} already exists`);
+        } else {
+          console.error("Error creating Daily Update schedule:", err);
+        }
+      }
+
+      await dbHandler.UpdateMosqueAzanData(mosqueId, { updateScheduleCreated: true });
+    }
+  } catch (error) {
+    console.error("Error checking or creating Daily Update schedule:", error);
+  }
+
   // Parse time for Cron expression
   // Input time: "HH:mm" -> Cron: "mm HH * * ? *" (Daily)
   const [hour, minute] = time.split(":");

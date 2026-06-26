@@ -5,14 +5,14 @@ module.exports = {
     chooseMosquePrompt: `Which mosque would you like to choose? Here are the nearest mosques: %s. To choose one, say its number`,
     chooseMosqueByTouchPrompt:
       " or you can tap the mosque of your choice on the screen.",
-    helpPrompt: `Here are some examples of what you can ask me. When is the next prayer? When is <sub alias='asser'>asr</sub>? How much time before the iqama? Give me all the iqama times. Give me today's prayer times. Play the adhan. Play the <sub alias='fajer'>fajr</sub> adhan. Give me information about my mosque. Change my favorite mosque. Choose my adhan reciter. Tell me a hadith. These commands also work in your Alexa routines. More features coming soon inshaAllah.`,
+    helpPrompt: `You can, for example, ask me when the third prayer of the day is, ask for a hadith, or change the adhan reciter. To see the full list of commands, check the skill description.`,
     stopPrompt: `Goodbye, and may Allah protect you!`,
     errorPrompt: `Sorry, an error occurred. Please try again later.`,
     noDataPrompt: `Sorry, I couldn't find any data for this request. Please try again.`,
     noCityPrompt: `Sorry, I couldn't find any mosques in this city. Please try again.`,
     requestForGeoLocationPrompt: `To find mosques near you, I need access to your location. Please open the Alexa app to grant permission.`,
     noAddressPrompt: `It looks like your address isn't set on Alexa. You can set it from the Alexa app so I can find mosques near you.`,
-    errorPromptforMosqueList: `Sorry, I couldn't find any MAWAQIT mosques near you.`,
+    errorPromptforMosqueList: `Sorry, I couldn't find any MAWAQIT mosques near you. Please check your device location. For now, the skill only works when a mosque is available nearby.`,
     logoUrl:
       "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
     titleForMosqueList: `${process.env.SKILL_NAME} Mosques`,

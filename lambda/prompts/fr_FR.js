@@ -5,7 +5,7 @@ module.exports = {
     chooseMosquePrompt: `Quelle mosquée souhaitez-vous choisir ? Voici les mosquées les plus proches : %s. Pour en choisir une, dites son numéro`,
     chooseMosqueByTouchPrompt:
       " ou touchez directement la mosquée de votre choix sur l'écran.",
-    helpPrompt: `Voici quelques exemples de ce que vous pouvez me demander. Quand est la prochaine prière ? Quand est la prière de l'<sub alias='asser'>asr</sub> ? Combien de temps avant l'iqama ? Donne-moi tous les iqamas. Donne-moi les horaires de prière du jour. Lance l'appel à la prière. Lance l'appel à la prière du <sub alias='fadjr'>fajr</sub>. Donne-moi des informations sur ma mosquée. Change ma mosquée favorite. Choisis mon récitant d'adhan. Donne-moi un hadith. Vous pouvez aussi utiliser ces commandes dans vos routines Alexa. D'autres fonctionnalités arrivent bientôt inch'Allah.`,
+    helpPrompt: `Vous pouvez par exemple me demander quand est la troisième prière de la journée, demander un hadith ou changer de récitateur d'adhan. Pour voir la liste complète des commandes, consultez la description de la skill.`,
     stopPrompt: `Au revoir, et qu'Allah vous préserve !`,
     errorPrompt: `Désolé, une erreur est survenue. Veuillez réessayer plus tard.`,
     noDataPrompt: `Désolé, je n'ai trouvé aucune donnée pour cette requête. Veuillez réessayer.`,
@@ -13,7 +13,7 @@ module.exports = {
     requestForGeoLocationPrompt: `Pour trouver les mosquées proches de vous, j'ai besoin d'accéder à votre localisation. Ouvrez l'application Alexa pour m'y autoriser.`,
     noAddressPrompt:
       "Votre adresse ne semble pas être définie sur Alexa. Vous pouvez la renseigner dans l'application Alexa pour que je puisse trouver les mosquées proches de vous.",
-    errorPromptforMosqueList: `Désolé, je n'ai trouvé aucune mosquée MAWAQIT près de vous.`,
+    errorPromptforMosqueList: `Désolé, je n'ai trouvé aucune mosquée MAWAQIT près de vous. Veuillez vérifier la localisation de votre appareil. Pour le moment, la skill fonctionne uniquement si une mosquée est disponible aux alentours.`,
     logoUrl:
       "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
     titleForMosqueList: `Mosquées ${process.env.SKILL_NAME}`,

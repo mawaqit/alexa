@@ -52,7 +52,7 @@ module.exports = {
     jummaTimePrompt: `Also, the Friday prayer, <sub alias='joomua'>Jumua</sub>, is at %s.`,
     noJummaTimePrompt: `There is no <sub alias='joomua'>Jumua</sub> prayer at this mosque.`,
     none: `None`,
-    thankYouPrompt: `Thank you for using ${process.env.SKILL_NAME} to get the exact prayer times of your favorite mosque. `,
+    thankYouPrompt: `Thank you for using ${process.env.SKILL_NAME} for the prayer times of your mosque. `,
     globalErrorPrompt: `Sorry, I didn't quite catch that. Could you say it again, please?`,
     fallbackPrompt: `Sorry, I didn't quite catch that. Could you say it again, please?`,
     allPrayerTimesPrompt: `%s is at %s. `,
@@ -65,7 +65,7 @@ module.exports = {
       "or you can tap the recitation of your choice on the screen.",
     hadithErrorPrompt: `Sorry, I couldn't find any hadiths. Please try again.`,
     adhaanErrorPrompt: `Sorry, playing the adhan isn't available right now. Please try again later.`,
-    selectMosquePrompt: `To register a mosque, say "select my mosque" or "choose my mosque". `,
+    selectMosquePrompt: `To register a mosque, say "choose my mosque". `,
     unableToResolvePrayerNamePrompt: `Sorry, I couldn't recognize the prayer name. Please try again.`,
     prayerNamePrompt:
       "Which prayer would you like to create a notification for? You can choose between %s. Say the number of the prayer",

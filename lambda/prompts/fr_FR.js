@@ -58,7 +58,7 @@ module.exports = {
     noJummaTimePrompt:
       "Il n'y a pas de prière du <sub alias='joumoua'>jumua</sub> dans cette mosquée.",
     none: "None",
-    thankYouPrompt: `Merci d'utiliser ${process.env.SKILL_NAME} pour connaître les horaires exacts de prière de votre mosquée favorite. `,
+    thankYouPrompt: `Merci d'utiliser ${process.env.SKILL_NAME} pour les horaires de prière de votre mosquée. `,
     globalErrorPrompt:
       "Désolé, je n'ai pas bien compris. Pouvez-vous répéter, s'il vous plaît ?",
     fallbackPrompt:
@@ -73,7 +73,7 @@ module.exports = {
       "ou touchez la récitation de votre choix sur l'écran.",
     hadithErrorPrompt: `Désolé, je n'ai trouvé aucun hadith. Veuillez réessayer.`,
     adhaanErrorPrompt: `Désolé, la lecture de l'adhan n'est pas disponible pour le moment. Veuillez réessayer plus tard.`,
-    selectMosquePrompt: `Pour enregistrer une mosquée, dites « sélectionne ma mosquée » ou « choisis ma mosquée ». `,
+    selectMosquePrompt: `Pour enregistrer une mosquée, dites « choisis ma mosquée ». `,
     unableToResolvePrayerNamePrompt: `Désolé, je n'ai pas pu reconnaître le nom de la prière. Veuillez réessayer.`,
     prayerNamePrompt:
       "Pour quelle prière souhaitez-vous créer une notification ? Vous avez le choix entre %s. Dites le numéro de la prière",

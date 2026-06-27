@@ -1,48 +1,150 @@
-const { DynamoDbPersistenceAdapter } = require('ask-sdk-dynamodb-persistence-adapter');
+const {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  DeleteCommand,
+} = require("@aws-sdk/lib-dynamodb");
 
 /**
- * Custom Persistence Adapter extending the standard DynamoDB adapter.
- * Promotes 'emailId' and 'mosqueId' to top-level columns.
+ * Custom Persistence Adapter for DynamoDB using AWS SDK v3.
+ * Promotes 'emailId', 'mosqueId', and 'userId' to top-level columns.
  */
-class CustomDynamoDbPersistenceAdapter extends DynamoDbPersistenceAdapter {
+class CustomDynamoDbPersistenceAdapter {
+  constructor(config) {
+    if (!config) {
+      throw new Error("CustomDynamoDbPersistenceAdapter: config is required");
+    }
+    if (!config.tableName) {
+      throw new Error(
+        "CustomDynamoDbPersistenceAdapter: config.tableName is required",
+      );
+    }
+  
+    this.tableName = config.tableName;
+    this.partitionKeyName = config.partitionKeyName || "id";
+    this.attributesName = config.attributesName || "attributes";
 
-    constructor(config) {
-        super(config);
+    // Fallback to default user id generator if not provided
+    this.partitionKeyGenerator =
+      config.partitionKeyGenerator ||
+      ((requestEnvelope) => {
+        if (requestEnvelope?.session?.user?.userId) {
+          return requestEnvelope.session.user.userId;
+        }
+        if (requestEnvelope?.context?.System?.user?.userId) {
+          return requestEnvelope.context.System.user.userId;
+        }
+        throw new Error("Could not find userId to use as partition key");
+      });
+
+    if (!config.dynamoDBClient) {
+      throw new Error(
+        "CustomDynamoDbPersistenceAdapter: config.dynamoDBClient is required",
+      );
+    }
+    this.dynamoDBDocumentClient = DynamoDBDocumentClient.from(
+      config.dynamoDBClient,
+    );
+  }
+
+  /**
+   * Retrieves attributes from DynamoDB.
+   * @param {Object} requestEnvelope
+   */
+  async getAttributes(requestEnvelope) {
+    const partitionKey = this.partitionKeyGenerator(requestEnvelope);
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        [this.partitionKeyName]: partitionKey,
+      },
+      ConsistentRead: true,
+    };
+
+    try {
+      const data = await this.dynamoDBDocumentClient.send(
+        new GetCommand(params),
+      );
+       return data.Item?.[this.attributesName] ?? {};
+    } catch (error) {
+      console.error(
+        `Error getting attributes from table ${this.tableName}:`,
+        error.message,
+      );
+      throw error;
+    }
+  }
+
+  async deleteAttributes(requestEnvelope) {
+    const partitionKey = this.partitionKeyGenerator(requestEnvelope);
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        [this.partitionKeyName]: partitionKey,
+      },
+    };
+    try {
+      await this.dynamoDBDocumentClient.send(new DeleteCommand(params));
+    } catch (error) {
+      console.error(
+        `Error deleting attributes from table ${this.tableName}:`,
+        error.message,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Saves attributes to DynamoDB, promoting specific fields to top-level columns.
+   * @param {Object} requestEnvelope
+   * @param {Object} attributes
+   */
+  async saveAttributes(requestEnvelope, attributes) {
+    const partitionKey = this.partitionKeyGenerator(requestEnvelope);
+
+    const item = {
+      [this.partitionKeyName]: partitionKey,
+      [this.attributesName]: attributes,
+    };
+
+    // Promote specific fields to top-level columns for indexing/visibility
+    if (
+      attributes.emailId &&
+      typeof attributes.emailId === "string" &&
+      attributes.emailId.trim() !== ""
+    ) {
+      item.emailId = attributes.emailId;
+    }
+    if (
+      attributes.uuid &&
+      typeof attributes.uuid === "string" &&
+      attributes.uuid.trim() !== ""
+    ) {
+      item.mosqueId = attributes.uuid;
+    }
+    if (
+      attributes.user_id &&
+      typeof attributes.user_id === "string" &&
+      attributes.user_id.trim() !== ""
+    ) {
+      item.userId = attributes.user_id;
     }
 
-    async saveAttributes(requestEnvelope, attributes) {
-        // 1. Generate the Partition Key (usually the userId) using the parent class's generator
-        const partitionKey = this.partitionKeyGenerator(requestEnvelope);
+    const params = {
+      TableName: this.tableName,
+      Item: item,
+    };
 
-        // 2. Prepare the DynamoDB Item
-        // We use the parent class's property names for consistency (default: 'id' and 'attributes')
-        const item = {
-            [this.partitionKeyName]: partitionKey,
-            [this.attributesName]: attributes // The full JSON blob is still saved here
-        };
-
-        // 3. Add the extra columns to the Item if they exist in the session attributes
-        // These will be saved as top-level attributes in the DynamoDB table
-        if (attributes.emailId && typeof attributes.emailId === 'string' && attributes.emailId.trim() !== '') {
-            item.emailId = attributes.emailId;
-        }
-        if (attributes.uuid && typeof attributes.uuid === 'string') {
-            item.mosqueId = attributes.uuid;
-        }
-        // 4. Construct the Put parameters
-        const putParams = {
-            TableName: this.tableName,
-            Item: item
-        };
-
-        // 5. Execute the Put operation using the parent's DocumentClient
-        try {
-            await this.dynamoDBDocumentClient.put(putParams).promise();
-        } catch (error) {
-            console.error(`Error saving attributes to table ${this.tableName}:`, error.message);
-            throw error;
-        }
+    try {
+      await this.dynamoDBDocumentClient.send(new PutCommand(params));
+    } catch (error) {
+      console.error(
+        `Error saving attributes to table ${this.tableName}:`,
+        error.message,
+      );
+      throw error;
     }
+  }
 }
 
 module.exports = { CustomDynamoDbPersistenceAdapter };

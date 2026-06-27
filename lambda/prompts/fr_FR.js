@@ -1,75 +1,118 @@
-
 module.exports = {
   translation: {
-    skillName: process.env.skillName, //new
+    skillName: process.env.SKILL_NAME, //new
     welcomePrompt: `Salam Aleykoum ! `,
-    chooseMosquePrompt: `Quelle mosquée voulez-vous choisir ? Les mosquées les plus proches sont : %s, Vous pouvez choisir en prononçant le numéro associé à la mosquée `,
-    chooseMosqueByTouchPrompt: " ou vous pouvez aussi cliquer sur la mosquée de votre choix sur votre écran.",
-    helpPrompt: `Voici les commandes que vous pouvez utiliser :\n- Quand est la prochaine prière ?\n- Tu peux aussi demander l'heure de chaque prière en demandant par exemple "Quand est la quatrième prière ?" pour Maghrib\n- Combien de temps reste-t-il avant l'iqama ?\n- Donne moi des informations sur ma mosquée.\n- Change ma mosquée favorite.\n- Donne moi les heures de prière de la journée.\n- Mets l'appel à la prière.\n- Mets l'appel à la prière du Fajr.\nCes commandes peuvent notamment être utilisées dans vos routines Alexa. D'autres commandes arrivent très bientôt inshaAllah.`,
-    stopPrompt: `Au revoir et qu'Allah vous préserve !`,
+    chooseMosquePrompt: `Quelle mosquée souhaitez-vous choisir ? Voici les mosquées les plus proches : %s. Pour en choisir une, dites son numéro`,
+    chooseMosqueByTouchPrompt:
+      " ou touchez directement la mosquée de votre choix sur l'écran.",
+    helpPrompt: `Vous pouvez par exemple me demander quand est la troisième prière de la journée, demander un hadith ou changer de récitateur d'adhan. Pour voir la liste complète des commandes, consultez la description de la skill.`,
+    stopPrompt: `Au revoir, et qu'Allah vous préserve !`,
     errorPrompt: `Désolé, une erreur est survenue. Veuillez réessayer plus tard.`,
-    noDataPrompt: `Désolé, je n'ai pu trouver aucune donnée pour cette requête. Veuillez réessayer s'il vous plaît.`,
-    noCityPrompt: `Désolé, je n'ai pu trouver aucune mosuée pour cette ville. Veuillez réessayer s'il vous plaît.`,
-    requestForGeoLocationPrompt: `Pour utiliser la skill, vous devez m'autoriser à accéder à votre localisation pour que je puisse trouver les mosquées les plus proches de vous. Ouvrez l'application Alexa sur votre téléphone pour accepter s'il vous plaît.`,
+    noDataPrompt: `Désolé, je n'ai trouvé aucune donnée pour cette requête. Veuillez réessayer.`,
+    noCityPrompt: `Désolé, je n'ai trouvé aucune mosquée dans cette ville. Veuillez réessayer.`,
+    requestForGeoLocationPrompt: `Pour trouver les mosquées proches de vous, j'ai besoin d'accéder à votre localisation. Ouvrez l'application Alexa pour m'y autoriser.`,
     noAddressPrompt:
-      "Il semble que vous n'avez pas défini votre adresse sur Alexa. Vous pouvez le faire depuis l'application Alexa. Cela me permettra de trouver les mosquées proches de vous.",
-    errorPromptforMosqueList: `Je suis désolé, je n'ai trouvé aucune mosquée MAWAQIT proche de vous.`,
+      "Votre adresse ne semble pas être définie sur Alexa. Vous pouvez la renseigner dans l'application Alexa pour que je puisse trouver les mosquées proches de vous.",
+    errorPromptforMosqueList: `Désolé, je n'ai trouvé aucune mosquée MAWAQIT près de vous. Veuillez vérifier la localisation de votre appareil. Pour le moment, la skill fonctionne uniquement si une mosquée est disponible aux alentours.`,
     logoUrl:
       "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA",
-    titleForMosqueList: `Mosquées ${process.env.skillName}`,
+    titleForMosqueList: `Mosquées ${process.env.SKILL_NAME}`,
     layoutDirection: "LTR",
-    nextPrayerTimeErrorPrompt: `Désolé, je n'ai pas pu trouver l'heure de la prochaine prière pour votre mosquée. Veuillez réessayer s'il vous plaît.`,
-    nextPrayerTimePrompt: "À %s, la prochaine prière est %s à %s dans %s. ",    prayerNames: ["<phoneme alphabet=\"ipa\" ph=\"fadʒr\">Fajr</phoneme>", " <phoneme alphabet=\"ipa\" ph=\"duhr\">Dohr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕa.sˤr\">Asr</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"maɣ.rɪb\">Maghrib</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʔɪʃaːʔ\">Isha</phoneme>","<phoneme alphabet=\"ipa\" ph=\"dʒumʕa\">Jumma</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʕiːd\">Eid</phoneme>", "<phoneme alphabet=\"ipa\" ph=\"ʃu.ruːq\">Shuruq</phoneme>"],
-    unableToFindMosquePrompt: `Désolé, je n'ai pas pu trouver la mosquée que vous cherchez. S'il vous plaît, choisissez une option valide.`,
-    mosqueNotRegisteredPrompt: `Vous n'avez pas enregistré de mosquée pour faire cette reqûete. Veuillez enregistrer une mosquée d'abord. `,
-    mosqueSearchWordPrompt: `Pour quel lieu voulez-vous chercher une mosquée ? Vous pouvez dire le nom de la ville.`,
-    noPrayerTimePrompt: `Désole, il n'y a pas d'horaire pour %s dans cette mosquée.`,
+    nextPrayerTimeErrorPrompt: `Désolé, je n'ai pas pu trouver l'heure de la prochaine prière. Veuillez réessayer.`,
+    nextPrayerTimePrompt: "À %s, la prochaine prière est %s, à %s, dans %s. ",
+    prayerNames: [
+      "<sub alias='fadjr'>Fajr</sub>",
+      "<sub alias='dohr'>Dohr</sub>",
+      "<sub alias='asser'>Asr</sub>",
+      "<sub alias='magrib'>Maghrib</sub>",
+      "<sub alias='icha'>Isha</sub>",
+      "<sub alias='joumoua'>Jumma</sub>",
+      "<sub alias='aïd'>Eid</sub>",
+      "<sub alias='chourouk'>Shuruq</sub>",
+    ],
+    unableToFindMosquePrompt: `Désolé, je n'ai pas trouvé la mosquée demandée. Veuillez choisir une option valide.`,
+    mosqueNotRegisteredPrompt: `Vous n'avez pas encore enregistré de mosquée. Veuillez en choisir une d'abord. `,
+    mosqueSearchWordPrompt: `Dans quelle ville cherchez-vous une mosquée ?`,
+    noPrayerTimePrompt: `Désolé, il n'y a pas d'horaire pour %s dans cette mosquée.`,
     hoursAndMinutesPrompt: "%s heures et %s minutes",
     minutesPrompt: "%s minutes",
-    nextPrayerTimeSpecificPrompt: `à %s, la prière de %s est à %s. Voulez-vous savoir autre chose ?`,
-    shuruqPrompt: `à %s, Shourouk est à %s. Voulez-vous savoir autre chose ?`,
+    nextPrayerTimeSpecificPrompt: `À %s, la prière de %s est à %s. Souhaitez-vous savoir autre chose ?`,
+    shuruqPrompt: `À %s, le <sub alias='chourouk'>shourouk</sub> est à %s. Souhaitez-vous savoir autre chose ?`,
     secondsPrompt: "%s secondes",
-    errorGeoConversionPrompt: `Désolé, je n'ai pas pu convertir votre adresse en géolocalisation. Veuillez reéssayer.`,
-    nextIqamaTimePrompt: `L'iqama pour la prochaine prière %s est dans %s.`,
+    errorGeoConversionPrompt: `Désolé, je n'ai pas pu convertir votre adresse en géolocalisation. Veuillez réessayer.`,
+    nextIqamaTimePrompt: `L'iqama pour la prochaine prière, %s, est dans %s.`,
     selectedMosquePrompt: `Parfait, %s est désormais votre mosquée favorite ! `,
-    nextPrayerWithoutMosquePrompt: `La prochaine prière est %s à %s dans %s.`,
-    iqamaNotEnabledPrompt: "Les temps entre les adhans et les iqamas ne sont pas fournis par votre mosquée.",
-    mosqueInfoPrompt: "Votre mosquée est %s. Localisé à %s, à environ %s kilomètres de votre localisation. ",
-    mosqueInfoErrorPrompt: "Désolé, je n'ai pas pu trouver d'information pour votre mosquée, veuillez reéssayer s'il vous plaît.",
-    nextPrayerTimeWithNamePrompt: `La prière de %s est à %s dans %s. `,
-    allIqamaTimesPrompt: "Pour %s, l'iqama est à %s. ", 
-    deleteDataPrompt: `Vos données ont bien été supprimées. Relancez la skill pour réutiliser ${process.env.skillName}.`,
+    nextPrayerWithoutMosquePrompt: `La prochaine prière est %s à %s, dans %s.`,
+    iqamaNotEnabledPrompt:
+      "Les délais entre l'adhan et l'iqama ne sont pas fournis par votre mosquée.",
+    mosqueInfoPrompt:
+      "Votre mosquée est %s, située à %s, à environ %s kilomètres de chez vous. ",
+    mosqueInfoErrorPrompt:
+      "Désolé, je n'ai pas trouvé d'information sur votre mosquée. Veuillez réessayer.",
+    nextPrayerTimeWithNamePrompt: `La prière de %s est à %s, dans %s. `,
+    allIqamaTimesPrompt: "Pour %s, l'iqama est à %s. ",
+    deleteDataPrompt: `Vos données ont bien été supprimées. Relancez la skill pour réutiliser ${process.env.SKILL_NAME}.`,
     okPrompt: "Ok. ",
-    jummaTimePrompt: "De plus, le jumua, la prière du Vendredi, est à %s.",
-    noJummaTimePrompt: "Il n'y a pas de prière de jumua dans cette mosquée.",
+    jummaTimePrompt:
+      "De plus, la prière du vendredi, le <sub alias='joumoua'>jumua</sub>, est à %s.",
+    noJummaTimePrompt:
+      "Il n'y a pas de prière du <sub alias='joumoua'>jumua</sub> dans cette mosquée.",
     none: "None",
-    thankYouPrompt: `Merci d'utiliser ${process.env.skillName} afin d'avoir les horaires exactes de prière de votre mosquée favorite. `,
-    globalErrorPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
-    fallbackPrompt: "Désolé, je n'ai pas bien compris ce que vous avez dit. Veuillez répéter s'il vous plaît.",
+    thankYouPrompt: `Merci d'utiliser ${process.env.SKILL_NAME} pour connaître les horaires exacts de prière de votre mosquée favorite. `,
+    globalErrorPrompt:
+      "Désolé, je n'ai pas bien compris. Pouvez-vous répéter, s'il vous plaît ?",
+    fallbackPrompt:
+      "Désolé, je n'ai pas bien compris. Pouvez-vous répéter, s'il vous plaît ?",
     allPrayerTimesPrompt: "%s est à %s. ",
-    doYouNeedAnythingElsePrompt: " Voulez-vous autre chose ?",    
-    adhanReciterPrompt: `Quelle récitation souhaitez-vous définir comme favorite pour l'adhan ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la récitation `,
-    adhanReciterErrorPrompt: `Désolé, je n'ai trouvé aucune récitation pour l'adhan. Veuillez réessayer.`,
+    doYouNeedAnythingElsePrompt: " Souhaitez-vous autre chose ?",
+    adhanReciterPrompt: `Quelle récitation souhaitez-vous pour l'adhan ? Vous avez le choix entre %s. Pour en choisir une, dites son numéro`,
+    adhanReciterErrorPrompt: `Désolé, je n'ai trouvé aucune récitation d'adhan. Veuillez réessayer.`,
     adhanReciterSuccessPrompt: `Parfait, %s est maintenant votre récitation favorite pour l'adhan ! `,
     titleForAdhaanReciterList: `Récitateurs d'Adhan`,
-    chooseAdhaanByTouchPrompt: "ou vous pouvez aussi cliquer sur la récitation de votre choix sur votre écran.",
+    chooseAdhaanByTouchPrompt:
+      "ou touchez la récitation de votre choix sur l'écran.",
     hadithErrorPrompt: `Désolé, je n'ai trouvé aucun hadith. Veuillez réessayer.`,
-    adhaanErrorPrompt: `Désolé, actuellement, je ne supporte pas la lecture de l'adhan. Veuillez réessayer plus tard.`,
-    selectMosquePrompt: `Pour enregistrer une mosquée, vous pouvez dire "sélectionne ma mosquée" ou "choisis ma mosquée". `,
-    unableToResolvePrayerNamePrompt: `Désolé, je n'ai pas pu résoudre le nom de la prière. Veuillez réessayer.`,
-    prayerNamePrompt: "Quelle prière souhaitez-vous créer une routine pour ? Vous pouvez choisir entre %s. Vous pouvez choisir en prononçant le numéro associé à la prière",
-    prayerNameTouchPrompt: "ou vous pouvez aussi cliquer sur la prière de votre choix sur votre écran.",
-    routineCreatedPrompt: `Parfait, la routine a été créée avec succès ! `,
-    routineErrorPrompt: "Désolé, une erreur s'est produite lors de la création de la routine. Veuillez réessayer plus tard.",
-    routineRejected: "Pour créer une autre routine, vous pouvez dire : « créer une routine ».",
-    routineAlreadyEnabled: "Cette routine a déjà été créée. Vous pouvez éditer cette routine dans l'application Alexa. Je peux créer une autre routine, vous pouvez dire : « créer une routine ».",    
-    titleForPrayerTimeList: `Heures de prière`, 
-    invalidPrayerIndexPrompt: `Désolé, l'index de prière que vous avez fourni est invalide. Veuillez réessayer. Vous pouvez choisir entre 1 et %s.`,
-    timezoneErrorPrompt: `Désolé, je n'ai pas pu récupérer votre fuseau horaire. Veuillez vérifier vos paramètres de localisation dans l'application Alexa et réessayer.`,
-    requestRoutinePrompt: "Souhaitez-vous configurer une routine pour cette prière ?",
+    adhaanErrorPrompt: `Désolé, la lecture de l'adhan n'est pas disponible pour le moment. Veuillez réessayer plus tard.`,
+    selectMosquePrompt: `Pour enregistrer une mosquée, dites « sélectionne ma mosquée » ou « choisis ma mosquée ». `,
+    unableToResolvePrayerNamePrompt: `Désolé, je n'ai pas pu reconnaître le nom de la prière. Veuillez réessayer.`,
+    prayerNamePrompt:
+      "Pour quelle prière souhaitez-vous créer une notification ? Vous avez le choix entre %s. Dites le numéro de la prière",
+    prayerNameTouchPrompt: "ou touchez la prière de votre choix sur l'écran.",
+    routineCreatedPrompt: `Parfait, la notification a été créée avec succès ! `,
+    routineErrorPrompt:
+      "Désolé, une erreur est survenue lors de la création de la notification. Veuillez réessayer plus tard.",
+    routineRejected:
+      "Pour créer une autre notification, dites « créer une notification ».",
+    routineAlreadyEnabled:
+      "Cette notification est déjà activée. Pour en créer une autre, dites « créer une notification ».",
+    titleForPrayerTimeList: `Heures de prière`,
+    invalidPrayerIndexPrompt: `Désolé, le numéro indiqué n'est pas valide. Veuillez choisir entre 1 et %s.`,
+    timezoneErrorPrompt: `Désolé, je n'ai pas pu récupérer votre fuseau horaire. Vérifiez vos paramètres de localisation dans l'application Alexa, puis réessayez.`,
+    requestRoutinePrompt:
+      "Souhaitez-vous configurer une notification pour cette prière ?",
     hadithWidgetTitle: "Hadith du jour",
     hadithWidgetDescription: "Chargement...",
-    widgetInstallationErrorPrompt: "Désolé, une erreur s'est produite lors de l'installation du widget. Veuillez réessayer plus tard.",
-    nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s."
+    widgetInstallationErrorPrompt:
+      "Désolé, une erreur est survenue lors de l'installation du widget. Veuillez réessayer plus tard.",
+    nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s.",
+    linkAccountPrompt:
+      "Pour activer la notification, veuillez connecter votre compte Amazon dans l'application Alexa, puis réessayez.",
+    refreshTokenMissing:
+      "Votre connexion au compte semble incomplète. Pour corriger cela, désactivez puis réactivez la skill dans l'application Alexa, connectez votre compte Amazon, puis lancez la découverte des appareils.",
+    titleForDeleteRoutineList: "Supprimer la notification",
+    deleteRoutineConfirmPrompt:
+      "Êtes-vous sûr de vouloir supprimer la notification pour %s ? ",
+    routineDeletedPrompt: "La notification a été supprimée avec succès. ",
+    noRoutinesPrompt:
+      "Vous n'avez aucune notification activée. Dites « créer une notification » pour commencer. ",
+    deleteRoutinePrompt:
+      "Quelle notification souhaitez-vous supprimer ? Vous avez le choix entre %s. Dites le numéro de la notification",
+    deleteRoutineTouchPrompt:
+      "ou touchez la notification de votre choix sur l'écran.",
+    deleteRoutineErrorPrompt:
+      "Désolé, une erreur est survenue lors de la suppression de la notification. Veuillez réessayer plus tard.",
+    allRoutinesEnabled:
+      "Toutes les notifications sont déjà activées. Pour en supprimer une, dites « supprimer une notification ».",
+    allPrayers: "Toutes les prières",
   },
 };

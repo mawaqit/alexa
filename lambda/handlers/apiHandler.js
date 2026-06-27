@@ -1,5 +1,5 @@
 const axios = require("axios");
-const mawaqitBaseUrl = process.env.baseUrl;
+const mawaqitBaseUrl = process.env.BASE_URL;
 const moment = require("moment-timezone");
 
 const getMosqueList = async (
@@ -48,7 +48,7 @@ const getMosqueList = async (
         .slice(0, 5);
     })
     .catch((error) => {
-      console.log("Error while fetching mosque list: ", error);
+      console.error("Error while fetching mosque list: ", error);
       throw error;
     });
 };
@@ -68,6 +68,7 @@ const getPrayerTimings = async (mosqueUuid, timezone, isIqamaCalendarRequired = 
       console.log("Mosque Timings: ", JSON.stringify(response.data));
       const currentDate = new Date();
       const dateAndMonth = getDateAndMonthForTimezone(timezone);
+      console.log("Date and Month: ", JSON.stringify(dateAndMonth));
       const date = dateAndMonth?.date ?? currentDate.getDate();
       const month = dateAndMonth?.month ?? currentDate.getMonth();
       const calendar = response?.data?.calendar;
@@ -77,20 +78,23 @@ const getPrayerTimings = async (mosqueUuid, timezone, isIqamaCalendarRequired = 
         throw new Error("Received Empty Response");
       }
 
-      response.data.times = timings.slice(1, 1);
+      response.data.times = timings.filter((_, index) => index !== 1);
       if (!isIqamaCalendarRequired && response?.data?.iqamaCalendar) {
         delete response.data.iqamaCalendar;
       }
+
       if (!isPrayerCalendarRequired && response?.data?.calendar) {
         delete response.data.calendar;
       }
+      
+      console.log("Mosque Times after Update: ",response?.data?.times)
 
       return response.data;
     })
     .catch((error) => {
-      console.log("Error while fetching mosque Timings: ", error);
+      console.error("Error while fetching mosque Timings: ", error);
       if (error?.response?.status === 404) {
-        console.log("Mosque not found: ", error.response.status);
+        console.error("Mosque not found: ", error.response.status);
         throw new Error("Mosque not found");
       }
       throw error;
@@ -117,7 +121,7 @@ const getRandomHadith = async (lang = "ar") => {
       return response.data.text;
     })
     .catch((error) => {
-      console.log("Error while fetching Hadith: ", error);
+      console.error("Error while fetching Hadith: ", error);
       throw error;
     });
 };
@@ -160,7 +164,7 @@ const getAccessToken = async () => {
       return response.data;
     })
     .catch(function (error) {
-      console.log("Error while fetching access token: ", error.message, "Status:", error?.response?.status);
+      console.error("Error while fetching access token: ", error.message, "Status:", error?.response?.status);
       throw error;
     });
 }
@@ -186,7 +190,7 @@ const updateDatastore = async (token, commands, target, apiEndpoint = "https://a
       return response.data;
     })
     .catch(function (error) {
-      console.log("Error while updating Datastore: ", error.message, "Status:", error?.response?.status); throw error;
+      console.error("Error while updating Datastore: ", error.message, "Status:", error?.response?.status); throw error;
     });
 }
 
@@ -200,11 +204,33 @@ const getDateAndMonthForTimezone = (timezone) => {
   return { date, month };
 };
 
+const getMosqueInformation = async (mosqueUuid) => {
+  const config = getConfig("get", `/mosque/${mosqueUuid}/info`);
+  console.log(
+    "Config: ",
+    JSON.stringify(config, null, 2).replace(
+      /"Api-Access-Token":\s*"[^"]+"/g,
+      '"Api-Access-Token": "****"',
+    ),
+  );
+  return await axios
+    .request(config)
+    .then((response) => {
+      console.log("Mosque Information: ", JSON.stringify(response.data));
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("Error while fetching mosque information: ", error);
+      throw error;
+    });
+}
+
 module.exports = {
   getMosqueList,
   getPrayerTimings,
   getRandomHadith,
   updateDatastore,
   getAccessToken,
-  getDateAndMonthForTimezone
+  getDateAndMonthForTimezone,
+  getMosqueInformation
 };

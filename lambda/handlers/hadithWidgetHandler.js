@@ -16,8 +16,13 @@ const InstallHadithWidgetRequestHandler = {
         const attributes = await attributesManager.getPersistentAttributes() || {};
         const locale = helperFunctions.splitLanguage(Alexa.getLocale(handlerInput.requestEnvelope));
         const currentTime = new Date();
+        // Use actual UTC epoch timestamp for logic comparison
         const updateInterval = (process.env.UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS || 1) * 60 * 60 * 1000;
         const nextUpdateTime = currentTime.getTime() + updateInterval;
+
+        // If you need the HH:mm format for display in APL, use this:
+        const nextUpdateDate = new Date(nextUpdateTime);
+        const formattedNextUpdateTime = `${String(nextUpdateDate.getHours()).padStart(2, '0')}:${String(nextUpdateDate.getMinutes()).padStart(2, '0')}`;
 
         try {
             const hadith = await getRandomHadith(locale);
@@ -29,7 +34,8 @@ const InstallHadithWidgetRequestHandler = {
                     content: {
                         title: title,
                         randomHadith: hadith || description,
-                        nextUpdateTime: nextUpdateTime
+                        nextUpdateTime: nextUpdateTime,
+                        formattedNextUpdateTime: formattedNextUpdateTime
                     }
                 }
             ];
@@ -125,7 +131,16 @@ const UpdateHadithAPLEventHandler = {
             helperFunctions.getAplArgument(handlerInput, 0) === "FETCH_NEW_HADITH";
     },
     async handle(handlerInput) {
-        return InstallHadithWidgetRequestHandler.handle(handlerInput);
+        const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
+        console.log("Next Update Time: " + nextUpdateTime);
+
+        const currentTime = Date.now();
+
+        if (currentTime >= nextUpdateTime) {
+            return InstallHadithWidgetRequestHandler.handle(handlerInput);
+        }
+
+        return handlerInput.responseBuilder.getResponse();
     },
 };
 

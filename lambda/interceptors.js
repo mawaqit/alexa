@@ -7,6 +7,7 @@ const apiHandler = require("./handlers/apiHandler.js");
 const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
 const { getDataSourceForPrayerTime } = require("./datasources.js");
 const awsSsmHandler = require("./handlers/awsSsmHandler.js");
+const authHandler = require("./handlers/authHandler.js");
 
 const LogRequestInterceptor = {
   process(handlerInput) {
@@ -177,8 +178,18 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
   console.log("Persistent Attributes: ", JSON.stringify(persistentAttributes));
 
   delete persistentAttributes.requestedRoutinePrayer;
-  handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
-  await handlerInput.attributesManager.savePersistentAttributes();
+  try {
+    const userInfo = await GetUserInfo.process(handlerInput);
+    console.log("User Info Retrieved Successfully");
+    if (userInfo && userInfo?.email && userInfo?.user_id && (!persistentAttributes?.emailId || !persistentAttributes?.user_id)) {
+      persistentAttributes.emailId = userInfo?.email;
+      persistentAttributes.user_id = userInfo?.user_id;
+      handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+      await handlerInput.attributesManager.savePersistentAttributes();
+    }
+  } catch (error) {
+    console.log("Error while fetching user info: ", error);
+  }
 
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
@@ -186,6 +197,8 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
     const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
     const mosqueTimes = await apiHandler.getPrayerTimings(persistentAttributes.uuid, userTimeZone);
     sessionAttributes.mosqueTimes = mosqueTimes;
+    const { routinePrayers } = persistentAttributes;
+    updateRoutinePrayerTimings(routinePrayers, mosqueTimes.times, persistentAttributes);    
     sessionAttributes.persistentAttributes = persistentAttributes;
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
   } catch (error) {
@@ -208,6 +221,48 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   },
 };
 
+const GetUserInfo = {
+  async process(handlerInput) {
+    console.log("GetUserInfo Interceptor");
+    const accessToken = handlerInput.requestEnvelope?.session?.user?.accessToken;
+    if (!accessToken) {
+      return;
+    }
+    const userInfo = await authHandler.getUserInfo(accessToken);
+    return userInfo;
+  },
+};
+
+function updateRoutinePrayerTimings(routinePrayers, mosqueTimes, persistentAttributes) {
+  console.log("Updating Routine Prayers: ", routinePrayers)
+  console.log("Mosque Times: ", mosqueTimes)
+  if (routinePrayers &&
+    Array.isArray(routinePrayers) &&
+    routinePrayers.length > 0) {
+    const updatedPrayers = routinePrayers.map(prayer => {
+      // 1. Find the index in the canonical list
+      const canonicalIndex = helperFunctions.CANONICAL_PRAYER_NAMES.findIndex(
+        prayerName => prayerName?.toLowerCase() === prayer?.canonicalName?.toLowerCase() || prayerName?.toLowerCase() === prayer?.name?.toLowerCase()
+      );
+      console.log("Canonical Index: ", canonicalIndex)
+      // 2. Logic to get the new time from your mosque data
+      // Assuming 'mosqueTimes' is an object where keys match canonical names
+      const newTime = mosqueTimes[canonicalIndex];
+      console.log("New Time: ", newTime)
+      // 3. Return the updated object
+      return {
+        ...prayer,
+        canonicalName: helperFunctions.CANONICAL_PRAYER_NAMES[canonicalIndex] || prayer.canonicalName,
+        primaryText: `${prayer.name} ${newTime || prayer.time}`,
+        time: newTime || prayer.time, // fallback to old time if mosque time is missing
+      };
+    });
+    console.log("Updated Routine Prayers: ", updatedPrayers)
+    persistentAttributes.routinePrayers = updatedPrayers;
+  }
+}
+
+
 module.exports = {
   LogResponseInterceptor,
   LogRequestInterceptor,
@@ -217,3 +272,4 @@ module.exports = {
   AddDirectiveResponseInterceptor,
   SetApiKeysAsEnvironmentVariableFromAwsSsm
 };
+

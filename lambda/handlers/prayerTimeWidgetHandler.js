@@ -33,7 +33,12 @@ const InstallPrayerTimeWidgetRequestHandler = {
             const currentDateTime = new Date(
                 new Date().toLocaleString("en-US", { timeZone: userTimeZone })
             );
-            const nextPrayerTimeInMillis = currentDateTime.getTime() + nextPrayerTime.diffInMinutes * 60 * 1000;
+            // Use actual UTC epoch timestamp for logic comparison
+            const nextUpdateTime = Date.now() + nextPrayerTime.diffInMinutes * 60 * 1000;
+            
+            // If you still need the HH:mm format for display in APL, you can keep this:
+            const nextUpdateDate = new Date(currentDateTime.getTime() + nextPrayerTime.diffInMinutes * 60 * 1000);
+            const formattedNextUpdateTime = `${String(nextUpdateDate.getHours()).padStart(2, '0')}:${String(nextUpdateDate.getMinutes()).padStart(2, '0')}`;
 
             const commands = [
                 {
@@ -45,7 +50,8 @@ const InstallPrayerTimeWidgetRequestHandler = {
                         prayerTime,
                         nextPrayerTime,
                         mosqueName,
-                        nextUpdateTime: nextPrayerTimeInMillis
+                        nextUpdateTime,
+                        formattedNextUpdateTime
                     }
                 }
             ];
@@ -122,7 +128,16 @@ const UpdatePrayerTimeAPLEventHandler = {
             helperFunctions.getAplArgument(handlerInput, 0) === "FETCH_PRAYER_TIME";
     },
     async handle(handlerInput) {
-        return InstallPrayerTimeWidgetRequestHandler.handle(handlerInput);
+        const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
+        console.log("Next Update Time: " + nextUpdateTime);
+        
+        const currentTime = Date.now();
+
+        if (currentTime >= nextUpdateTime) {
+            return InstallPrayerTimeWidgetRequestHandler.handle(handlerInput);
+        }
+
+        return handlerInput.responseBuilder.getResponse();
     },
 };
 

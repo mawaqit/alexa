@@ -48,7 +48,60 @@
               }
             }
           ],
-          "name": "FavoriteAdhaanReciterIntent",
+          "name": "FavoriteAdhaanReciterIntent",          
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "elicitationRequired": false,
+              "type": "prayerName",
+              "confirmationRequired": false,
+              "prompts": {}
+            },
+            {
+              "name": "prayerIndex",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": false,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1628418320741.1597614273988"
+              }
+            }
+          ],
+          "name": "CreateRoutineIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
+          "confirmationRequired": false,
+          "prompts": {}
+        },
+        {
+          "slots": [
+            {
+              "name": "prayerName",
+              "elicitationRequired": true,
+              "type": "prayerName",
+              "confirmationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.1552906193426.292049581877",
+                "confirmation": "Confirm.Slot.1552906193426.292049581877"
+              }
+            },
+            {
+              "name": "prayerIndex",
+              "elicitationRequired": true,
+              "type": "AMAZON.NUMBER",
+              "confirmationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.386957774926.532659639414",
+                "confirmation": "Confirm.Slot.1552906193426.588543644875"
+              }
+            }
+          ],
+          "name": "DeleteRoutineIntent",
+          "delegationStrategy": "SKILL_RESPONSE",
           "confirmationRequired": false,
           "prompts": {}
         },
@@ -221,28 +274,7 @@
               "name": "prayerName",
               "type": "prayerName",
               "samples": [
-                "{prayerName}",
-                "c'est quand {prayerName}",
-                "c'est quand le {prayerName}",
-                "c'est quand la {prayerName}",
-                "à quelle heure est {prayerName}",
-                "à quelle heure est le {prayerName}",
-                "à quelle heure est la {prayerName}",
-                "à quelle heure est la prière de {prayerName}",
-                "quand est {prayerName}",
-                "quand est la prière de {prayerName}",
-                "quand est-ce que c'est {prayerName}",
-                "quelle est l'heure de {prayerName}",
-                "quelle est l'heure de la prière {prayerName}",
-                "quand commence {prayerName}",
-                "à quelle heure commence {prayerName}",
-                "à quelle heure se termine {prayerName}",
-                "donne-moi l'heure de {prayerName}",
-                "donne-moi l'horaire de {prayerName}",
-                "dis-moi l'heure de {prayerName}",
-                "combien de temps avant {prayerName}",
-                "combien de temps avant la prière de {prayerName}",
-                "dans combien de temps est {prayerName}"
+                "{prayerName}"
               ]
             }
           ],
@@ -258,7 +290,28 @@
             "combien de temps avant la prochaine prière",
             "dans combien de temps est la prochaine prière",
             "il reste combien de temps avant la prochaine prière",
-            "prière suivante"
+            "prière suivante",
+            "c'est quand {prayerName}",
+            "c'est quand le {prayerName}",
+            "c'est quand la {prayerName}",
+            "à quelle heure est {prayerName}",
+            "à quelle heure est le {prayerName}",
+            "à quelle heure est la {prayerName}",
+            "à quelle heure est la prière de {prayerName}",
+            "quand est {prayerName}",
+            "quand est la prière de {prayerName}",
+            "quand est-ce que c'est {prayerName}",
+            "quelle est l'heure de {prayerName}",
+            "quelle est l'heure de la prière {prayerName}",
+            "quand commence {prayerName}",
+            "à quelle heure commence {prayerName}",
+            "à quelle heure se termine {prayerName}",
+            "donne-moi l'heure de {prayerName}",
+            "donne-moi l'horaire de {prayerName}",
+            "dis-moi l'heure de {prayerName}",
+            "combien de temps avant {prayerName}",
+            "combien de temps avant la prière de {prayerName}",
+            "dans combien de temps est {prayerName}"
           ]
         },
         {

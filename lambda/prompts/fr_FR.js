@@ -79,6 +79,7 @@ module.exports = {
       "Pour quelle prière souhaitez-vous créer une notification ? Vous avez le choix entre %s. Dites le numéro de la prière",
     prayerNameTouchPrompt: "ou touchez la prière de votre choix sur l'écran.",
     routineCreatedPrompt: `Parfait, la notification a été créée avec succès ! `,
+    routinesCreatedPrompt: `Parfait, les notifications ont été créées avec succès ! `,
     routineErrorPrompt:
       "Désolé, une erreur est survenue lors de la création de la notification. Veuillez réessayer plus tard.",
     routineRejected:
@@ -103,6 +104,7 @@ module.exports = {
     deleteRoutineConfirmPrompt:
       "Êtes-vous sûr de vouloir supprimer la notification pour %s ? ",
     routineDeletedPrompt: "La notification a été supprimée avec succès. ",
+    routinesDeletedPrompt: "Les notifications ont été supprimées avec succès. ",
     noRoutinesPrompt:
       "Vous n'avez aucune notification activée. Dites « créer une notification » pour commencer. ",
     deleteRoutinePrompt:
@@ -114,5 +116,6 @@ module.exports = {
     allRoutinesEnabled:
       "Toutes les notifications sont déjà activées. Pour en supprimer une, dites « supprimer une notification ».",
     allPrayers: "Toutes les prières",
+    oneMosquePrompt: "La seule mosquée autour de vous est %s. Voulez-vous la choisir ? Vous pouvez dire 'oui' ou 'non'.",
   },
 };

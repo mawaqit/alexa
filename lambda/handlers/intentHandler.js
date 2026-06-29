@@ -255,12 +255,14 @@ const DeleteRoutinePrayerIndexHandler = {
           handlerInput,
           routineName,
         );
-
+        let speakOutput = requestAttributes.t("routineDeletedPrompt");
+        if (routineName === requestAttributes.t("allPrayers")) {
+          speakOutput = requestAttributes.t("routinesDeletedPrompt");
+        }
         if (deleted) {
           return responseBuilder
             .speak(
-              requestAttributes.t("routineDeletedPrompt") +
-                requestAttributes.t("doYouNeedAnythingElsePrompt"),
+              speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
             )
             .withShouldEndSession(false)
             .getResponse();
@@ -385,12 +387,15 @@ const DeleteRoutinePrayerNameHandler = {
           handlerInput,
           routineName,
         );
+        let speakOutput = requestAttributes.t("routineDeletedPrompt");
+        if (routineName === requestAttributes.t("allPrayers")) {
+          speakOutput = requestAttributes.t("routinesDeletedPrompt");
+        }
 
         if (deleted) {
           return responseBuilder
             .speak(
-              requestAttributes.t("routineDeletedPrompt") +
-                requestAttributes.t("doYouNeedAnythingElsePrompt"),
+              speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
             )
             .withShouldEndSession(false)
             .getResponse();
@@ -1747,6 +1752,114 @@ const NoIntentHandler = {
   },
 };
 
+const MosqueYesIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "AMAZON.YesIntent" &&
+      handlerInput.attributesManager.getSessionAttributes().isMosqueRequested
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    try {
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const mosqueList = sessionAttributes.mosqueList;
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
+      if (!mosqueList || mosqueList.length === 0) {
+        throw new Error("Mosque not found");
+      }
+      const selectedMosqueDetails = mosqueList[0];
+      delete sessionAttributes.mosqueList;
+      delete sessionAttributes.isMosqueRequested;
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+      if (!selectedMosqueDetails) {
+        return await helperFunctions.createResponseDirectiveForMosqueList(
+          handlerInput,
+          mosqueList,
+          requestAttributes.t("unableToFindMosquePrompt"),
+        );
+      }
+      selectedMosqueDetails.primaryText = await helperFunctions.translateText(
+        selectedMosqueDetails.primaryText,
+        locale,
+      );
+      selectedMosqueDetails.localisation = await helperFunctions.translateText(
+        selectedMosqueDetails.localisation,
+        locale,
+      );
+      selectedMosqueDetails.proximity =
+        parseInt(selectedMosqueDetails.proximity) / 1000;
+      console.log("Selected Mosque Details: ", selectedMosqueDetails);
+      sessionAttributes.persistentAttributes = selectedMosqueDetails;
+      handlerInput.attributesManager.setPersistentAttributes(
+        sessionAttributes.persistentAttributes,
+      );
+      await handlerInput.attributesManager.savePersistentAttributes();
+      const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
+      const mosqueTimes = await getPrayerTimings(
+        selectedMosqueDetails.uuid,
+        userTimeZone,
+      );
+      sessionAttributes.mosqueTimes = mosqueTimes;
+      await helperFunctions.updateRoutinePrayers(handlerInput);
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+      return await helperFunctions.getPrayerTimingsForMosque(
+        handlerInput,
+        mosqueTimes,
+        requestAttributes.t(
+          "selectedMosquePrompt",
+          selectedMosqueDetails.primaryText,
+        ),
+      );
+    } catch (error) {
+      console.log("Error in MosqueYesIntentHandler: ", error);
+      if (error?.message === "Mosque not found") {
+        return await helperFunctions.getListOfMosque(
+          handlerInput,
+          requestAttributes.t("mosqueNotRegisteredPrompt"),
+        );
+      }
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("nextPrayerTimeErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  },
+};
+
+const MosqueNoIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.NoIntent" &&
+      handlerInput.attributesManager.getSessionAttributes().isMosqueRequested
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+    delete sessionAttributes.mosqueList;
+    delete sessionAttributes.isMosqueRequested;
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    return handlerInput.responseBuilder
+      .speak(requestAttributes.t("stopPrompt"))
+      .withShouldEndSession(false)
+      .getResponse();
+  },
+};
+
 module.exports = {
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
@@ -1770,4 +1883,6 @@ module.exports = {
   DeleteRoutineStartedHandler,
   DeleteRoutinePrayerIndexHandler,
   DeleteRoutinePrayerNameHandler,
+  MosqueYesIntentHandler,
+  MosqueNoIntentHandler,
 };

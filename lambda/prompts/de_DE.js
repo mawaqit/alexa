@@ -67,6 +67,7 @@ module.exports = {
       prayerNamePrompt: "Für welches Gebet möchten Sie eine Benachrichtigung erstellen? Sie können zwischen %s wählen. Sagen Sie die Nummer des Gebets",
       prayerNameTouchPrompt: "oder tippen Sie auf das Gebet Ihrer Wahl auf dem Bildschirm.",
       routineCreatedPrompt: `Perfekt, die Benachrichtigung wurde erfolgreich erstellt! `,
+      routinesCreatedPrompt: `Perfekt, die Benachrichtigungen wurden erfolgreich erstellt! `,
       routineErrorPrompt: "Entschuldigung, beim Erstellen der Benachrichtigung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
       routineRejected: "Um eine andere Benachrichtigung zu erstellen, sagen Sie „erstelle eine Benachrichtigung\".",
       routineAlreadyEnabled: "Diese Benachrichtigung ist bereits aktiviert. Um eine andere zu erstellen, sagen Sie „erstelle eine Benachrichtigung\".",
@@ -83,6 +84,7 @@ module.exports = {
       titleForDeleteRoutineList: "Benachrichtigung löschen",
       deleteRoutineConfirmPrompt: "Sind Sie sicher, dass Sie die Benachrichtigung für %s löschen möchten? ",
       routineDeletedPrompt: "Die Benachrichtigung wurde erfolgreich gelöscht. ",
+      routinesDeletedPrompt: "Die Benachrichtigungen wurden erfolgreich gelöscht. ",
       noRoutinesPrompt: "Sie haben keine Benachrichtigungen aktiviert. Sagen Sie „erstelle eine Benachrichtigung\", um zu beginnen. ",
       deleteRoutinePrompt: "Welche Benachrichtigung möchten Sie löschen? Sie können zwischen %s wählen. Sagen Sie die Nummer der Benachrichtigung",
       deleteRoutineTouchPrompt:
@@ -90,5 +92,6 @@ module.exports = {
       deleteRoutineErrorPrompt: "Entschuldigung, beim Löschen der Benachrichtigung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
       allRoutinesEnabled: "Alle Benachrichtigungen sind bereits aktiviert. Um eine zu löschen, sagen Sie „lösche eine Benachrichtigung\".",
       allPrayers: "Alle Gebete",
+      oneMosquePrompt: "Die einzige Moschee in Ihrer Nähe ist %s. Möchten Sie diese auswählen? Sie können 'Ja' oder 'Nein' sagen.",
     },
   };

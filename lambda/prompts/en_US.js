@@ -72,6 +72,7 @@ module.exports = {
     prayerNameTouchPrompt:
       "or you can tap the prayer of your choice on the screen.",
     routineCreatedPrompt: `Perfect, the notification has been created successfully! `,
+    routinesCreatedPrompt: `Perfect, the notifications have been created successfully! `,
     routineErrorPrompt:
       "Sorry, an error occurred while creating the notification. Please try again later.",
     routineRejected:
@@ -98,11 +99,13 @@ module.exports = {
     deleteRoutineConfirmPrompt:
       "Are you sure you want to delete the notification for %s? ",
     routineDeletedPrompt: "The notification has been successfully deleted. ",
+    routinesDeletedPrompt: "The notifications have been successfully deleted. ",
     noRoutinesPrompt:
       "You don't have any notifications enabled. Say 'create a notification' to get started. ",
     deleteRoutineErrorPrompt:
       "Sorry, an error occurred while deleting the notification. Please try again later.",
     allRoutinesEnabled: "All notifications are already enabled. To delete one, say 'delete a notification'.",
-    allPrayers: "All Prayers"
+    allPrayers: "All Prayers",
+    oneMosquePrompt: "The only mosque around you is %s. Do you want to choose this one? you can say \"yes\" or \"no\"",
   },
 };

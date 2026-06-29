@@ -37,6 +37,8 @@ const {
   SessionResumedRequestHandler,
   YesIntentHandler,
   NoIntentHandler,
+  MosqueYesIntentHandler,
+  MosqueNoIntentHandler,
 } = require("./handlers/intentHandler.js");
 const {
   MosqueListTouchEventHandler,
@@ -307,6 +309,8 @@ exports.handler = Alexa.SkillBuilders.custom()
     PlayAdhanTaskHandler,
     SelectMosqueIntentStartedHandler,
     SelectMosqueIntentAfterSelectingMosqueHandler,
+    MosqueYesIntentHandler,
+    MosqueNoIntentHandler,
     FavoriteAdhaanReciterStartedHandler,
     FavoriteAdhaanReciterIntentHandler,
     YesIntentHandler,

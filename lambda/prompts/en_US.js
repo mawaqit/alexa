@@ -18,7 +18,7 @@ module.exports = {
     titleForMosqueList: `${process.env.SKILL_NAME} Mosques`,
     layoutDirection: "LTR",
     nextPrayerTimeErrorPrompt: `Sorry, I couldn't find the time for the next prayer. Please try again.`,
-    nextPrayerTimePrompt: `At %s, the next prayer is %s, at %s, in %s. `,
+    nextPrayerTimePrompt: `The next prayer is %s in %s, at %s, at %s. `,
     prayerNames: [
       "<sub alias='fajer'>Fajr</sub>",
       "<sub alias='dohr'>Dhuhr</sub>",
@@ -57,7 +57,7 @@ module.exports = {
     fallbackPrompt: `Sorry, I didn't quite catch that. Could you say it again, please?`,
     allPrayerTimesPrompt: `%s is at %s. `,
     doYouNeedAnythingElsePrompt: ` Do you need anything else?`,
-    adhanReciterPrompt: `Which recitation would you like for the adhan? You can choose between %s. To choose one, say its number`,
+    adhanReciterPrompt: `Which recitation would you like for the adhan? You can choose between %s. To choose one, say its number `,
     adhanReciterErrorPrompt: `Sorry, I couldn't find any recitations for the adhan. Please try again.`,
     adhanReciterSuccessPrompt: `Perfect, %s is now your favorite recitation for the adhan! `,
     titleForAdhaanReciterList: `Adhan Reciters`,
@@ -68,10 +68,11 @@ module.exports = {
     selectMosquePrompt: `To register a mosque, say "select my mosque" or "choose my mosque". `,
     unableToResolvePrayerNamePrompt: `Sorry, I couldn't recognize the prayer name. Please try again.`,
     prayerNamePrompt:
-      "Which prayer would you like to create a notification for? You can choose between %s. Say the number of the prayer",
+      "Which prayer would you like to create a notification for? You can choose between %s. Say the number of the prayer ",
     prayerNameTouchPrompt:
       "or you can tap the prayer of your choice on the screen.",
     routineCreatedPrompt: `Perfect, the notification has been created successfully! `,
+    routinesCreatedPrompt: `Perfect, the notifications has been created successfully! `,
     routineErrorPrompt:
       "Sorry, an error occurred while creating the notification. Please try again later.",
     routineRejected:
@@ -92,17 +93,19 @@ module.exports = {
     refreshTokenMissing:
       "Your account linking seems incomplete. To fix this, disable and re-enable the skill in the Alexa app, link your Amazon account, then run device discovery.",
     titleForDeleteRoutineList: "Delete Notification",
-    deleteRoutinePrompt: "Which notification would you like to delete? You can choose between %s. Say the number of the notification",
+    deleteRoutinePrompt: "Which notification would you like to delete? You can choose between %s. Say the number of the notification ",
     deleteRoutineTouchPrompt:
       "or you can tap the notification of your choice on the screen.",
     deleteRoutineConfirmPrompt:
       "Are you sure you want to delete the notification for %s? ",
     routineDeletedPrompt: "The notification has been successfully deleted. ",
+    routinesDeletedPrompt: "The notifications have been successfully deleted. ",
     noRoutinesPrompt:
       "You don't have any notifications enabled. Say 'create a notification' to get started. ",
     deleteRoutineErrorPrompt:
       "Sorry, an error occurred while deleting the notification. Please try again later.",
     allRoutinesEnabled: "All notifications are already enabled. To delete one, say 'delete a notification'.",
-    allPrayers: "All Prayers"
+    allPrayers: "All Prayers",
+    oneMosquePrompt: "The only mosque around you is %s. Do you want to choose this one? you can say \"yes\" or \"no\""
   },
 };

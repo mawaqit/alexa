@@ -19,7 +19,7 @@ module.exports = {
     titleForMosqueList: `Mosquées ${process.env.SKILL_NAME}`,
     layoutDirection: "LTR",
     nextPrayerTimeErrorPrompt: `Désolé, je n'ai pas pu trouver l'heure de la prochaine prière. Veuillez réessayer.`,
-    nextPrayerTimePrompt: "À %s, la prochaine prière est %s, à %s, dans %s. ",
+    nextPrayerTimePrompt: "La prochaine prière est %s dans %s, à %s, à %s. ",
     prayerNames: [
       "<sub alias='fadjr'>Fajr</sub>",
       "<sub alias='dohr'>Dohr</sub>",
@@ -65,7 +65,7 @@ module.exports = {
       "Désolé, je n'ai pas bien compris. Pouvez-vous répéter, s'il vous plaît ?",
     allPrayerTimesPrompt: "%s est à %s. ",
     doYouNeedAnythingElsePrompt: " Souhaitez-vous autre chose ?",
-    adhanReciterPrompt: `Quelle récitation souhaitez-vous pour l'adhan ? Vous avez le choix entre %s. Pour en choisir une, dites son numéro`,
+    adhanReciterPrompt: `Quelle récitation souhaitez-vous pour l'adhan ? Vous avez le choix entre %s. Pour en choisir une, dites son numéro `,
     adhanReciterErrorPrompt: `Désolé, je n'ai trouvé aucune récitation d'adhan. Veuillez réessayer.`,
     adhanReciterSuccessPrompt: `Parfait, %s est maintenant votre récitation favorite pour l'adhan ! `,
     titleForAdhaanReciterList: `Récitateurs d'Adhan`,
@@ -76,9 +76,10 @@ module.exports = {
     selectMosquePrompt: `Pour enregistrer une mosquée, dites « sélectionne ma mosquée » ou « choisis ma mosquée ». `,
     unableToResolvePrayerNamePrompt: `Désolé, je n'ai pas pu reconnaître le nom de la prière. Veuillez réessayer.`,
     prayerNamePrompt:
-      "Pour quelle prière souhaitez-vous créer une notification ? Vous avez le choix entre %s. Dites le numéro de la prière",
+      "Pour quelle prière souhaitez-vous créer une notification ? Vous avez le choix entre %s. Dites le numéro de la prière ",
     prayerNameTouchPrompt: "ou touchez la prière de votre choix sur l'écran.",
     routineCreatedPrompt: `Parfait, la notification a été créée avec succès ! `,
+    routinesCreatedPrompt: `Parfait, les notifications ont été créées avec succès ! `,
     routineErrorPrompt:
       "Désolé, une erreur est survenue lors de la création de la notification. Veuillez réessayer plus tard.",
     routineRejected:
@@ -103,10 +104,11 @@ module.exports = {
     deleteRoutineConfirmPrompt:
       "Êtes-vous sûr de vouloir supprimer la notification pour %s ? ",
     routineDeletedPrompt: "La notification a été supprimée avec succès. ",
+    routinesDeletedPrompt: "Les notifications ont été supprimées avec succès. ",
     noRoutinesPrompt:
       "Vous n'avez aucune notification activée. Dites « créer une notification » pour commencer. ",
     deleteRoutinePrompt:
-      "Quelle notification souhaitez-vous supprimer ? Vous avez le choix entre %s. Dites le numéro de la notification",
+      "Quelle notification souhaitez-vous supprimer ? Vous avez le choix entre %s. Dites le numéro de la notification ",
     deleteRoutineTouchPrompt:
       "ou touchez la notification de votre choix sur l'écran.",
     deleteRoutineErrorPrompt:
@@ -114,5 +116,6 @@ module.exports = {
     allRoutinesEnabled:
       "Toutes les notifications sont déjà activées. Pour en supprimer une, dites « supprimer une notification ».",
     allPrayers: "Toutes les prières",
+    oneMosquePrompt: "La seule mosquée autour de vous est %s. Voulez-vous la choisir ? Vous pouvez dire 'oui' ou 'non'."
   },
 };

@@ -226,26 +226,7 @@
               "name": "prayerName",
               "type": "prayerName",
               "samples": [
-                "{prayerName}",
-                "when is {prayerName}",
-                "when is the {prayerName}",
-                "when is the {prayerName} prayer",
-                "what time is {prayerName}",
-                "what time is the {prayerName}",
-                "what time is the {prayerName} prayer",
-                "what is the time of {prayerName}",
-                "what is the time for {prayerName}",
-                "when does {prayerName} start",
-                "when does {prayerName} end",
-                "when does the {prayerName} prayer start",
-                "give me the time for {prayerName}",
-                "give me the time of {prayerName}",
-                "tell me the time for {prayerName}",
-                "tell me the time of {prayerName}",
-                "how long until {prayerName}",
-                "how much time until {prayerName}",
-                "how much time before {prayerName}",
-                "time for {prayerName}"
+                "{prayerName}"
               ]
             }
           ],
@@ -260,7 +241,26 @@
             "next prayer time",
             "how long until the next prayer",
             "how much time before the next prayer",
-            "how much time until the next prayer"
+            "how much time until the next prayer",
+            "when is {prayerName}",
+            "when is the {prayerName}",
+            "when is the {prayerName} prayer",
+            "what time is {prayerName}",
+            "what time is the {prayerName}",
+            "what time is the {prayerName} prayer",
+            "what is the time of {prayerName}",
+            "what is the time for {prayerName}",
+            "when does {prayerName} start",
+            "when does {prayerName} end",
+            "when does the {prayerName} prayer start",
+            "give me the time for {prayerName}",
+            "give me the time of {prayerName}",
+            "tell me the time for {prayerName}",
+            "tell me the time of {prayerName}",
+            "how long until {prayerName}",
+            "how much time until {prayerName}",
+            "how much time before {prayerName}",
+            "time for {prayerName}"
           ]
         },
         {

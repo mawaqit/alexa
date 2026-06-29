@@ -170,28 +170,29 @@ const getPrayerTimingsForMosque = async (
     );
     speakOutput += requestAttributes.t(
       "nextPrayerTimePrompt",
-      persistentAttributes.primaryText,
-      nextPrayerTime.name,
-      nextPrayerTime.time,
-      nextPrayerTime.diffInMinutesPrompt,
+      nextPrayerTime.name,               // 1st %s: Prayer Name
+      nextPrayerTime.diffInMinutesPrompt,// 2nd %s: Time Left
+      nextPrayerTime.time,               // 3rd %s: Hour
+      persistentAttributes.primaryText,  // 4th %s: Mosque Name
     );
-    const routinePrayerDetails = { ...nextPrayerTime };
-    const phonemeText = extractPhonemeText([nextPrayerTime.name])[0];
-    routinePrayerDetails.name = phonemeText ? phonemeText : nextPrayerTime.name;
-    routinePrayerDetails.namePhoneme = nextPrayerTime.name;
-    routinePrayerDetails.canonicalName = CANONICAL_PRAYER_NAMES[mosqueTimes.times.findIndex(time => time === nextPrayerTime.time)]
-    if (
-      !(await checkForRoutinePrayerAlreadyExists(
-        handlerInput,
-        routinePrayerDetails,
-      ))
-    ) {
-      await saveRequestedRoutinePrayer(handlerInput, routinePrayerDetails);
-      speakOutput += requestAttributes.t("requestRoutinePrompt");
-    } else {
-      console.log("Routine for this prayer already exists.");
-      speakOutput += requestAttributes.t("doYouNeedAnythingElsePrompt");
-    }
+
+    // const routinePrayerDetails = { ...nextPrayerTime };
+    // const phonemeText = extractPhonemeText([nextPrayerTime.name])[0];
+    // routinePrayerDetails.name = phonemeText ? phonemeText : nextPrayerTime.name;
+    // routinePrayerDetails.namePhoneme = nextPrayerTime.name;
+    // routinePrayerDetails.canonicalName = CANONICAL_PRAYER_NAMES[mosqueTimes.times.findIndex(time => time === nextPrayerTime.time)]
+    // if (
+    //   !(await checkForRoutinePrayerAlreadyExists(
+    //     handlerInput,
+    //     routinePrayerDetails,
+    //   ))
+    // ) {
+    //   await saveRequestedRoutinePrayer(handlerInput, routinePrayerDetails);
+    //   speakOutput += requestAttributes.t("requestRoutinePrompt");
+    // } else {
+    //   console.log("Routine for this prayer already exists.");
+    // }
+    speakOutput += requestAttributes.t("doYouNeedAnythingElsePrompt");
     checkForCharacterDisplay(handlerInput, nextPrayerTime.time);
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -354,6 +355,22 @@ const createResponseDirectiveForMosqueList = async (
   const { responseBuilder, attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
   const locale = Alexa.getLocale(handlerInput.requestEnvelope);
+  const sessionAttributes = attributesManager.getSessionAttributes();
+  mosqueList = await Promise.all(
+    mosqueList.map(async (mosque) => {
+      mosque.primaryText = await translateText(mosque.primaryText, locale);
+      return mosque;
+    }),
+  );
+  if (mosqueList != null && mosqueList.length == 1) {
+    sessionAttributes.isMosqueRequested = true;
+    attributesManager.setSessionAttributes(sessionAttributes);
+    speechPrompt += requestAttributes.t("oneMosquePrompt", mosqueList[0].primaryText);
+    return handlerInput.responseBuilder
+      .speak(speechPrompt)
+      .withShouldEndSession(false)
+      .getResponse();
+  }
   responseBuilder.addDirective({
     type: "Dialog.ElicitSlot",
     slotToElicit: "selectedMosque",
@@ -368,12 +385,6 @@ const createResponseDirectiveForMosqueList = async (
       },
     },
   });
-  mosqueList = await Promise.all(
-    mosqueList.map(async (mosque) => {
-      mosque.primaryText = await translateText(mosque.primaryText, locale);
-      return mosque;
-    }),
-  );
   console.log("Mosque List: ", mosqueList);
   const mosqueListPrompt = mosqueList
     .map((mosque, index) => `${index + 1}. ${mosque.primaryText}`)
@@ -990,7 +1001,12 @@ const logRoutineCreation = async (handlerInput, routineDetails, prayerNameDetail
     } else {
       prayerNameDetails = prayerNameDetails.filter((prayer) => prayer.name !== requestAttributes.t("allPrayers"));
     }
-  
+    let speakOutput = "";
+    if(prayerNameDetails.length > 1){
+      speakOutput = requestAttributes.t("routinesCreatedPrompt");
+    } else {
+      speakOutput = requestAttributes.t("routineCreatedPrompt");
+    }
     for(const prayer of prayerNameDetails){
       const prayerNameForSchedule =
         prayer.canonicalName || prayer.name;
@@ -1023,8 +1039,7 @@ const logRoutineCreation = async (handlerInput, routineDetails, prayerNameDetail
     console.log("Routine created successfully");
     return handlerInput.responseBuilder
       .speak(
-        requestAttributes.t("routineCreatedPrompt") +
-          requestAttributes.t("doYouNeedAnythingElsePrompt"),
+        speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
       )
       .withShouldEndSession(false)
       .getResponse();

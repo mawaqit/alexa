@@ -1,0 +1,30 @@
+# Reusable quality gate: lint + format check.
+# Called by ci.yml (on PRs) and by the deploy workflows before any deploy runs,
+# so nothing ever ships without passing these.
+name: Quality Checks
+
+on:
+  workflow_call:
+
+jobs:
+  quality:
+    name: Lint & format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      # Root workspace holds eslint + prettier (see root package.json).
+      - name: Install tooling
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check

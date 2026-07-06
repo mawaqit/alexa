@@ -1,0 +1,19 @@
+# Publishing a GitHub Release deploys the prod environment.
+# The `prod` GitHub Environment should require a manual approval (see docs).
+name: Deploy prod
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+
+  deploy:
+    needs: checks
+    uses: ./.github/workflows/deploy.yml
+    with:
+      stage: prod
+      environment: prod
+    secrets: inherit

@@ -1,0 +1,150 @@
+# Reusable deploy workflow. Called by deploy-dev.yml (stage=dev) and
+# deploy-prod.yml (stage=prod). Deploys both Lambda services and pushes the
+# interaction models to the skill's `development` stage.
+#
+# The Alexa skill going *live* is intentionally NOT automated (option B):
+# publishing to the `live` stage requires Amazon certification, which is a
+# manual review. On prod releases this workflow deploys the prod backend and
+# leaves a reminder to submit for certification from the Alexa console.
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: Serverless stage (dev | prod)
+        required: true
+        type: string
+      environment:
+        description: GitHub Environment holding the secrets for this stage
+        required: true
+        type: string
+
+# One skill, both stages share the same ID (matches lambda/env.json).
+# Override with a repo variable SKILL_ID if it ever changes.
+env:
+  SKILL_ID: ${{ vars.SKILL_ID || 'amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506' }}
+  ASK_PROFILE: ${{ vars.ASK_PROFILE || 'default' }}
+
+jobs:
+  deploy-lambda:
+    name: Deploy lambda (${{ inputs.stage }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write # OIDC
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lambda/package-lock.json
+
+      # --- AWS auth: OIDC (recommended, no long-lived keys) ---
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-west-3
+          # --- Fallback if you use access keys instead of OIDC: comment the
+          # line above and uncomment these two, then set the secrets:
+          # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless@^4
+
+      - name: Deploy alexa backend
+        working-directory: lambda
+        env:
+          # Serverless Framework v4 requires an access key to authenticate.
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        run: |
+          npm ci
+          serverless deploy --stage ${{ inputs.stage }}
+
+  deploy-azan:
+    name: Deploy azan-lambda (${{ inputs.stage }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: azan-lambda/package-lock.json
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-west-3
+          # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless@^4
+
+      - name: Deploy azan dispatcher
+        working-directory: azan-lambda
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        run: |
+          npm ci
+          serverless deploy --stage ${{ inputs.stage }}
+
+  push-interaction-models:
+    name: Push interaction models (development stage)
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install ASK CLI
+        run: npm install -g ask-cli
+
+      # Reconstruct ~/.ask/cli_config from a base64 secret produced locally with:
+      #   base64 -i ~/.ask/cli_config | pbcopy   (macOS)
+      # Store the result as the ASK_CLI_CONFIG secret.
+      - name: Configure ASK CLI
+        env:
+          ASK_CLI_CONFIG: ${{ secrets.ASK_CLI_CONFIG }}
+        run: |
+          mkdir -p ~/.ask
+          echo "$ASK_CLI_CONFIG" | base64 --decode > ~/.ask/cli_config
+
+      - name: Push every locale to the development stage
+        working-directory: interactionModels
+        run: |
+          set -e
+          for f in *.json; do
+            locale="${f%.json}"
+            echo "→ $locale"
+            ask smapi set-interaction-model \
+              --skill-id "$SKILL_ID" \
+              --stage development \
+              --locale "$locale" \
+              --interaction-model "file:$f" \
+              -p "$ASK_PROFILE"
+          done
+
+  certification-reminder:
+    name: Certification reminder
+    if: ${{ inputs.stage == 'prod' }}
+    needs: [deploy-lambda, deploy-azan, push-interaction-models]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remind to submit for certification
+        run: |
+          echo "::notice title=Skill not yet live::Prod Lambda deployed and the interaction models are on the skill's *development* stage."
+          echo "::notice title=Manual step::Go live is manual (option B). Review the development stage, then submit for certification from the Alexa Developer Console (or run 'ask smapi submit-skill-for-certification')."

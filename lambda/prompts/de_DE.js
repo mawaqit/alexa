@@ -92,6 +92,6 @@ module.exports = {
       deleteRoutineErrorPrompt: "Entschuldigung, beim Löschen der Benachrichtigung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
       allRoutinesEnabled: "Alle Benachrichtigungen sind bereits aktiviert. Um eine zu löschen, sagen Sie „lösche eine Benachrichtigung\".",
       allPrayers: "Alle Gebete",
-      oneMosquePrompt: "Die einzige Moschee in Ihrer Nähe ist %s. Möchten Sie diese auswählen? Sie können 'Ja' oder 'Nein' sagen."
+      oneMosquePrompt: "Die einzige Moschee in Ihrer Nähe ist %s. Möchten Sie diese auswählen?",
     },
   };

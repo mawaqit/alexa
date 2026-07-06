@@ -70,3 +70,216 @@ base64 -i ~/.ask/cli_config | pbcopy   # macOS; use `base64 -w0` on Linux
 
 Paste the result into the `ASK_CLI_CONFIG` secret. Make sure the config
 contains a profile matching `ASK_PROFILE` (default `default`).
+
+## Appendix: least-privilege IAM policy for the deploy role
+
+Permissions are derived from what the two CloudFormation stacks actually create,
+scoped by account, region, and the resource naming conventions
+(`alexa-*`, `mawaqit-alexa-azan-*`, `mawaqit-azan-*`). Replace `<ACCOUNT_ID>`.
+If dev and prod are separate accounts, attach this to the role in each account
+(the resource names are stage-suffixed, so one policy covers both stages).
+
+A few actions (`ValidateTemplate`, `DescribeLogGroups`, `ListEventSourceMappings`,
+`sqs:ListQueues`) do not support resource-level scoping and are unavoidably `*`.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CloudFormationStacks",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:CreateStack",
+        "cloudformation:UpdateStack",
+        "cloudformation:DeleteStack",
+        "cloudformation:DescribeStacks",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResource",
+        "cloudformation:DescribeStackResources",
+        "cloudformation:ListStackResources",
+        "cloudformation:GetTemplate",
+        "cloudformation:CreateChangeSet",
+        "cloudformation:DeleteChangeSet",
+        "cloudformation:DescribeChangeSet",
+        "cloudformation:ExecuteChangeSet"
+      ],
+      "Resource": [
+        "arn:aws:cloudformation:eu-west-3:<ACCOUNT_ID>:stack/alexa-*/*",
+        "arn:aws:cloudformation:eu-west-1:<ACCOUNT_ID>:stack/mawaqit-alexa-azan-*/*"
+      ]
+    },
+    {
+      "Sid": "CloudFormationGlobal",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:ValidateTemplate",
+        "cloudformation:GetTemplateSummary"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ServerlessDeploymentBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:DeleteBucket",
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetBucketPolicy",
+        "s3:PutBucketPolicy",
+        "s3:PutEncryptionConfiguration",
+        "s3:GetEncryptionConfiguration",
+        "s3:PutBucketVersioning",
+        "s3:PutBucketTagging",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*serverlessdeploymentbucket*",
+        "arn:aws:s3:::*serverlessdeploymentbucket*/*"
+      ]
+    },
+    {
+      "Sid": "Lambda",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:CreateFunction",
+        "lambda:DeleteFunction",
+        "lambda:GetFunction",
+        "lambda:GetFunctionConfiguration",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:ListVersionsByFunction",
+        "lambda:PublishVersion",
+        "lambda:AddPermission",
+        "lambda:RemovePermission",
+        "lambda:GetPolicy",
+        "lambda:TagResource",
+        "lambda:UntagResource",
+        "lambda:CreateEventSourceMapping",
+        "lambda:UpdateEventSourceMapping",
+        "lambda:DeleteEventSourceMapping",
+        "lambda:GetEventSourceMapping"
+      ],
+      "Resource": [
+        "arn:aws:lambda:eu-west-3:<ACCOUNT_ID>:function:alexa-*",
+        "arn:aws:lambda:eu-west-1:<ACCOUNT_ID>:function:mawaqit-azan-*",
+        "arn:aws:lambda:eu-west-3:<ACCOUNT_ID>:event-source-mapping:*"
+      ]
+    },
+    {
+      "Sid": "LambdaListGlobal",
+      "Effect": "Allow",
+      "Action": ["lambda:ListEventSourceMappings"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "IamExecutionRoles",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:PassRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:AttachRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:TagRole",
+        "iam:UntagRole"
+      ],
+      "Resource": [
+        "arn:aws:iam::<ACCOUNT_ID>:role/alexa-*",
+        "arn:aws:iam::<ACCOUNT_ID>:role/mawaqit-alexa-azan-*"
+      ]
+    },
+    {
+      "Sid": "Sqs",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:CreateQueue",
+        "sqs:DeleteQueue",
+        "sqs:GetQueueAttributes",
+        "sqs:SetQueueAttributes",
+        "sqs:TagQueue",
+        "sqs:ListQueueTags"
+      ],
+      "Resource": [
+        "arn:aws:sqs:eu-west-3:<ACCOUNT_ID>:mawaqit-alexa-azan-queue-*",
+        "arn:aws:sqs:eu-west-3:<ACCOUNT_ID>:mawaqit-alexa-azan-dlq-*"
+      ]
+    },
+    {
+      "Sid": "DynamoDbTables",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:CreateTable",
+        "dynamodb:DeleteTable",
+        "dynamodb:DescribeTable",
+        "dynamodb:UpdateTable",
+        "dynamodb:TagResource",
+        "dynamodb:UntagResource",
+        "dynamodb:ListTagsOfResource",
+        "dynamodb:DescribeTimeToLive",
+        "dynamodb:DescribeContinuousBackups"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:eu-west-3:<ACCOUNT_ID>:table/mawaqit-alexa-azan-users-data-*",
+        "arn:aws:dynamodb:eu-west-3:<ACCOUNT_ID>:table/mawaqit-alexa-mosque-azan-data-*"
+      ]
+    },
+    {
+      "Sid": "SchedulerGroup",
+      "Effect": "Allow",
+      "Action": [
+        "scheduler:CreateScheduleGroup",
+        "scheduler:DeleteScheduleGroup",
+        "scheduler:GetScheduleGroup",
+        "scheduler:TagResource",
+        "scheduler:UntagResource",
+        "scheduler:ListTagsForResource"
+      ],
+      "Resource": "arn:aws:scheduler:eu-west-3:<ACCOUNT_ID>:schedule-group/mawaqit-azan-schedule-*"
+    },
+    {
+      "Sid": "Logs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:DeleteLogGroup",
+        "logs:PutRetentionPolicy",
+        "logs:DeleteRetentionPolicy",
+        "logs:TagResource",
+        "logs:ListTagsForResource"
+      ],
+      "Resource": [
+        "arn:aws:logs:eu-west-3:<ACCOUNT_ID>:log-group:/aws/lambda/alexa-*",
+        "arn:aws:logs:eu-west-1:<ACCOUNT_ID>:log-group:/aws/lambda/mawaqit-azan-*"
+      ]
+    },
+    {
+      "Sid": "LogsAndSqsDescribeGlobal",
+      "Effect": "Allow",
+      "Action": ["logs:DescribeLogGroups", "sqs:ListQueues"],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+> **Note on `iam:PassRole`:** it is scoped to the two execution-role name
+> patterns, so the deploy role can only hand those roles to Lambda/Scheduler —
+> not arbitrary roles. This is the main lever that keeps a Serverless deploy
+> role from becoming an admin role.
+>
+> Serverless deploys are broad by nature (CloudFormation creates many resource
+> types). If you need to tighten further, use a **CloudFormation service role**:
+> give the GitHub role only `cloudformation:*` + `iam:PassRole` on a dedicated
+> CFN role, and put the resource permissions above on that CFN role instead.

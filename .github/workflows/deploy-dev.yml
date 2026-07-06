@@ -8,6 +8,12 @@ on:
 permissions:
   contents: read
 
+# Serialize dev deploys; a newer push supersedes an in-flight one, so cancel it
+# to avoid concurrent `serverless deploy` runs contending on the same stacks.
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: true
+
 jobs:
   checks:
     uses: ./.github/workflows/checks.yml

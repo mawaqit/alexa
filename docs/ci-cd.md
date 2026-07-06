@@ -5,8 +5,8 @@
 | Event                         | Workflow          | What runs                                                                             |
 | ----------------------------- | ----------------- | ------------------------------------------------------------------------------------- |
 | Pull request → `main`         | `ci.yml`          | Lint + format check (quality gate)                                                     |
-| Push to `main`                | `deploy-dev.yml`  | Quality gate → deploy **dev** (both Lambdas) + push interaction models (dev stage)     |
-| Publish a **GitHub Release**  | `deploy-prod.yml` | Quality gate → deploy **prod** (both Lambdas) + push interaction models (dev stage)    |
+| Push to `main`                | `deploy-dev.yml`  | Quality gate → deploy **dev** (both Lambdas) + push interaction models (development stage) |
+| Publish a **GitHub Release**  | `deploy-prod.yml` | Quality gate → deploy **prod** (both Lambdas) + push interaction models (development stage) |
 
 `checks.yml` and `deploy.yml` are reusable workflows called by the above; you
 don't trigger them directly.
@@ -56,7 +56,7 @@ Ask the MAWAQIT AWS administrator to, in the target account:
 1. Add the GitHub OIDC identity provider (`token.actions.githubusercontent.com`).
 2. Create an IAM role trusting this repo, e.g. condition
    `token.actions.githubusercontent.com:sub = repo:mawaqit/alexa:*` (or restrict
-   to `environment:prod` for the prod role).
+   to `repo:mawaqit/alexa:environment:prod` for the prod role).
 3. Attach a policy allowing the resources in each `serverless.yml`
    (CloudFormation, Lambda, SQS, DynamoDB, IAM role create/pass, EventBridge
    Scheduler, S3, SSM read).

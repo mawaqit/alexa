@@ -100,6 +100,9 @@ jobs:
 
   push-interaction-models:
     name: Push Interaction Models (Development Stage)
+    # Only publish the voice model once both backends deploy, so the skill's
+    # development stage never points at a model whose backend failed to ship.
+    needs: [deploy-lambda, deploy-azan]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:

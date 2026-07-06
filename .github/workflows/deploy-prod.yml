@@ -9,6 +9,12 @@ on:
 permissions:
   contents: read
 
+# Serialize prod deploys. Unlike dev we never cancel an in-flight run — a prod
+# deploy must finish; concurrent releases queue behind it instead.
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
 jobs:
   checks:
     uses: ./.github/workflows/checks.yml

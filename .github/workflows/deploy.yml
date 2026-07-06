@@ -36,25 +36,25 @@ jobs:
     name: Notify deploy started
     runs-on: ubuntu-latest
     permissions: {} # only talks to Discord; no repo token needed
+    env:
+      # Job-level env so the step `if:` can gate on it (secrets can't be read
+      # directly in `if:`); also lets the step skip cleanly when it's unset.
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
+      - name: Short SHA
+        id: meta
+        if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
+        run: echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
       - name: Discord — deploy started
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          ENVIRONMENT: ${{ inputs.environment }}
-          STAGE: ${{ inputs.stage }}
-          SHA: ${{ github.sha }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
-            echo "::notice::DISCORD_WEBHOOK_URL not set — skipping Discord notification."
-            exit 0
-          fi
-          payload=$(jq -n \
-            --arg title "🚀 Deploy started — $ENVIRONMENT" \
-            --arg desc "Stage \`$STAGE\` · commit \`${SHA:0:7}\` · [run log]($RUN_URL)" \
-            --argjson color 3447003 \
-            '{username: "GitHub Actions", embeds: [{title: $title, description: $desc, color: $color}]}')
-          curl -sf -X POST -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK_URL"
+        if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
+        uses: tsickert/discord-webhook@v7
+        with:
+          webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
+          username: GitHub Actions
+          embed-title: "🚀 Deploy started — ${{ inputs.environment }}"
+          embed-description: "Stage `${{ inputs.stage }}` · commit `${{ steps.meta.outputs.short }}` · [run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          embed-color: "3447003"
 
   deploy-lambda:
     name: Deploy lambda (${{ inputs.stage }})
@@ -192,31 +192,31 @@ jobs:
     needs: [deploy-lambda, deploy-azan, push-interaction-models]
     runs-on: ubuntu-latest
     permissions: {} # only talks to Discord; no repo token needed
+    env:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
-      - name: Discord — deploy result
+      - name: Compute status
+        id: status
+        if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          ENVIRONMENT: ${{ inputs.environment }}
-          STAGE: ${{ inputs.stage }}
-          SHA: ${{ github.sha }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           # 'success' only if none of the needed jobs failed or was cancelled.
           RESULT: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
         run: |
-          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
-            echo "::notice::DISCORD_WEBHOOK_URL not set — skipping Discord notification."
-            exit 0
-          fi
           if [ "$RESULT" = "success" ]; then
-            title="✅ Deploy succeeded — $ENVIRONMENT"
-            color=3066993
+            echo "title=✅ Deploy succeeded — ${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+            echo "color=3066993" >> "$GITHUB_OUTPUT"
           else
-            title="❌ Deploy failed — $ENVIRONMENT"
-            color=15158332
+            echo "title=❌ Deploy failed — ${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+            echo "color=15158332" >> "$GITHUB_OUTPUT"
           fi
-          payload=$(jq -n \
-            --arg title "$title" \
-            --arg desc "Stage \`$STAGE\` · commit \`${SHA:0:7}\` · [run log]($RUN_URL)" \
-            --argjson color "$color" \
-            '{username: "GitHub Actions", embeds: [{title: $title, description: $desc, color: $color}]}')
-          curl -sf -X POST -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK_URL"
+          echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Discord — deploy result
+        if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
+        uses: tsickert/discord-webhook@v7
+        with:
+          webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
+          username: GitHub Actions
+          embed-title: ${{ steps.status.outputs.title }}
+          embed-description: "Stage `${{ inputs.stage }}` · commit `${{ steps.status.outputs.short }}` · [run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          embed-color: ${{ steps.status.outputs.color }}

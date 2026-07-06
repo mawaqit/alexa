@@ -15,9 +15,7 @@ const CFIRWithoutSlotsHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         `CanFulfillIntentRequest` &&
-      intentWithoutSlots.includes(
-        helperFunctions.getIntentName(handlerInput)
-      )
+      intentWithoutSlots.includes(helperFunctions.getIntentName(handlerInput))
     );
   },
   async handle(handlerInput) {
@@ -25,7 +23,10 @@ const CFIRWithoutSlotsHandler = {
     const { attributesManager } = handlerInput;
     const sessionAttributes = attributesManager.getSessionAttributes();
     const { persistentAttributes } = sessionAttributes;
-    console.log("Persisted data present:", !!(persistentAttributes && persistentAttributes.uuid));
+    console.log(
+      "Persisted data present:",
+      !!(persistentAttributes && persistentAttributes.uuid),
+    );
     if (!persistentAttributes || !persistentAttributes.uuid) {
       console.log("No persistent data found, returning MAYBE");
       return handlerInput.responseBuilder
@@ -81,12 +82,15 @@ const CFIRNextPrayerTimeAndPlayAdhaanIntentHandler = {
     const intentName = helperFunctions.getIntentName(handlerInput);
     console.log(
       "in CFIRNextPrayerTimeAndPlayAdhaanIntentHandler " +
-        JSON.stringify(slotValues)
+        JSON.stringify(slotValues),
     );
     const { attributesManager } = handlerInput;
     const sessionAttributes = attributesManager.getSessionAttributes();
     const { persistentAttributes } = sessionAttributes;
-    console.log("Persisted data present:", !!(persistentAttributes && persistentAttributes.uuid));
+    console.log(
+      "Persisted data present:",
+      !!(persistentAttributes && persistentAttributes.uuid),
+    );
     if (
       (!persistentAttributes || !persistentAttributes.uuid) &&
       intentName !== "PlayAdhanIntent"

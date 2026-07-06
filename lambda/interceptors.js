@@ -28,8 +28,10 @@ const LogResponseInterceptor = {
 };
 
 const ResponseTimeCalculationInterceptor = {
-  process(handlerInput, response) {
-    const timestamp = Alexa.getRequest(handlerInput.requestEnvelope)["timestamp"];
+  process(handlerInput, _response) {
+    const timestamp = Alexa.getRequest(handlerInput.requestEnvelope)[
+      "timestamp"
+    ];
     // console.log("Request Timestamp: ", JSON.stringify(timestamp));
     const requestTimestamp = new Date(timestamp);
     const responseTimestamp = new Date();
@@ -42,7 +44,9 @@ const ResponseTimeCalculationInterceptor = {
 const AddDirectiveResponseInterceptor = {
   async process(handlerInput, response) {
     console.log("AddDirectiveResponseInterceptor");
-    const sessionAttributes = handlerInput.requestEnvelope?.session? handlerInput.attributesManager.getSessionAttributes() : {};
+    const sessionAttributes = handlerInput.requestEnvelope?.session
+      ? handlerInput.attributesManager.getSessionAttributes()
+      : {};
     const { skipAplDirective, skipCardDirective } = sessionAttributes;
     if (!response) {
       return;
@@ -52,20 +56,43 @@ const AddDirectiveResponseInterceptor = {
     const aplDirective = getAplDirective(directives);
     const { ssmlText, text, hasAudio } = getSsmlInfo(response);
 
-    console.log("APL Directive: %s \n SSML Text: %s", JSON.stringify(aplDirective), ssmlText);
+    console.log(
+      "APL Directive: %s \n SSML Text: %s",
+      JSON.stringify(aplDirective),
+      ssmlText,
+    );
 
     if (ssmlText && !hasAudio) {
-      response["outputSpeech"]["ssml"] = helperFunctions.smartEscapeSSML(ssmlText);
+      response["outputSpeech"]["ssml"] =
+        helperFunctions.smartEscapeSSML(ssmlText);
     }
 
-    const supportsAPL = Alexa.getSupportedInterfaces(handlerInput.requestEnvelope);
+    const supportsAPL = Alexa.getSupportedInterfaces(
+      handlerInput.requestEnvelope,
+    );
 
-    if (!skipAplDirective && (supportsAPL["Alexa.Presentation.APL"] || supportsAPL["Alexa.Presentation.APLT"])) {
-      await handleAplSupport(handlerInput, response, aplDirective, ssmlText, hasAudio, text, supportsAPL);
+    if (
+      !skipAplDirective &&
+      (supportsAPL["Alexa.Presentation.APL"] ||
+        supportsAPL["Alexa.Presentation.APLT"])
+    ) {
+      await handleAplSupport(
+        handlerInput,
+        response,
+        aplDirective,
+        ssmlText,
+        hasAudio,
+        text,
+        supportsAPL,
+      );
     } else {
       handleNoAplSupport(response, ssmlText, hasAudio, text, skipCardDirective);
     }
-    if (handlerInput.requestEnvelope?.session && (sessionAttributes?.skipAplDirective || sessionAttributes?.skipCardDirective)) {
+    if (
+      handlerInput.requestEnvelope?.session &&
+      (sessionAttributes?.skipAplDirective ||
+        sessionAttributes?.skipCardDirective)
+    ) {
       delete sessionAttributes.skipAplDirective;
       delete sessionAttributes.skipCardDirective;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
@@ -76,9 +103,10 @@ const AddDirectiveResponseInterceptor = {
 function getAplDirective(directives) {
   return directives
     ? directives.find(
-      (directive) =>
-        directive?.type && (directive.type.startsWith("Alexa.Presentation.APL"))
-    ) || false
+        (directive) =>
+          directive?.type &&
+          directive.type.startsWith("Alexa.Presentation.APL"),
+      ) || false
     : false;
 }
 
@@ -89,13 +117,26 @@ function getSsmlInfo(response) {
   return { ssmlText, text, hasAudio };
 }
 
-async function handleAplSupport(handlerInput, response, aplDirective, ssmlText, hasAudio, text, supportsAPL) {
-  if (!aplDirective && ssmlText && !hasAudio && supportsAPL["Alexa.Presentation.APL"]) {
+async function handleAplSupport(
+  handlerInput,
+  response,
+  aplDirective,
+  ssmlText,
+  hasAudio,
+  text,
+  supportsAPL,
+) {
+  if (
+    !aplDirective &&
+    ssmlText &&
+    !hasAudio &&
+    supportsAPL["Alexa.Presentation.APL"]
+  ) {
     console.log("Adding APL Directive");
     const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
     const directive = helperFunctions.createDirectivePayload(
       prayerTimeApl,
-      dataSource
+      dataSource,
     );
 
     if (!response.directives) {
@@ -106,7 +147,13 @@ async function handleAplSupport(handlerInput, response, aplDirective, ssmlText, 
   }
 }
 
-function handleNoAplSupport(response, ssmlText, hasAudio, text, skipCardDirective) {
+function handleNoAplSupport(
+  response,
+  ssmlText,
+  hasAudio,
+  text,
+  skipCardDirective,
+) {
   console.log("APL not supported");
   if (ssmlText && !hasAudio && !skipCardDirective) {
     console.log("Adding Simple Card");
@@ -167,7 +214,8 @@ const SavePersistenceAttributesToSession = {
 
 async function handleNewSession(handlerInput) {
   console.log("New Session");
-  const persistentAttributes = await helperFunctions.getPersistedData(handlerInput);
+  const persistentAttributes =
+    await helperFunctions.getPersistedData(handlerInput);
 
   if (persistentAttributes?.uuid) {
     await processPersistentAttributes(handlerInput, persistentAttributes);
@@ -181,24 +229,39 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
   try {
     const userInfo = await GetUserInfo.process(handlerInput);
     console.log("User Info Retrieved Successfully");
-    if (userInfo && userInfo?.email && userInfo?.user_id && (!persistentAttributes?.emailId || !persistentAttributes?.user_id)) {
+    if (
+      userInfo &&
+      userInfo?.email &&
+      userInfo?.user_id &&
+      (!persistentAttributes?.emailId || !persistentAttributes?.user_id)
+    ) {
       persistentAttributes.emailId = userInfo?.email;
       persistentAttributes.user_id = userInfo?.user_id;
-      handlerInput.attributesManager.setPersistentAttributes(persistentAttributes);
+      handlerInput.attributesManager.setPersistentAttributes(
+        persistentAttributes,
+      );
       await handlerInput.attributesManager.savePersistentAttributes();
     }
   } catch (error) {
     console.log("Error while fetching user info: ", error);
   }
 
-  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+  const sessionAttributes =
+    handlerInput.attributesManager.getSessionAttributes();
 
   try {
     const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-    const mosqueTimes = await apiHandler.getPrayerTimings(persistentAttributes.uuid, userTimeZone);
+    const mosqueTimes = await apiHandler.getPrayerTimings(
+      persistentAttributes.uuid,
+      userTimeZone,
+    );
     sessionAttributes.mosqueTimes = mosqueTimes;
     const { routinePrayers } = persistentAttributes;
-    updateRoutinePrayerTimings(routinePrayers, mosqueTimes.times, persistentAttributes);    
+    updateRoutinePrayerTimings(
+      routinePrayers,
+      mosqueTimes.times,
+      persistentAttributes,
+    );
     sessionAttributes.persistentAttributes = persistentAttributes;
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
   } catch (error) {
@@ -210,12 +273,12 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
       // handlers can display the correct mosque context and prompt for timezone consent.
       sessionAttributes.persistentAttributes = persistentAttributes;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-     }
+    }
   }
 }
 
 const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
-  async process(handlerInput) {
+  async process(_handlerInput) {
     console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
     await awsSsmHandler.handler();
   },
@@ -224,7 +287,8 @@ const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
 const GetUserInfo = {
   async process(handlerInput) {
     console.log("GetUserInfo Interceptor");
-    const accessToken = handlerInput.requestEnvelope?.session?.user?.accessToken;
+    const accessToken =
+      handlerInput.requestEnvelope?.session?.user?.accessToken;
     if (!accessToken) {
       return;
     }
@@ -233,35 +297,44 @@ const GetUserInfo = {
   },
 };
 
-function updateRoutinePrayerTimings(routinePrayers, mosqueTimes, persistentAttributes) {
-  console.log("Updating Routine Prayers: ", routinePrayers)
-  console.log("Mosque Times: ", mosqueTimes)
-  if (routinePrayers &&
+function updateRoutinePrayerTimings(
+  routinePrayers,
+  mosqueTimes,
+  persistentAttributes,
+) {
+  console.log("Updating Routine Prayers: ", routinePrayers);
+  console.log("Mosque Times: ", mosqueTimes);
+  if (
+    routinePrayers &&
     Array.isArray(routinePrayers) &&
-    routinePrayers.length > 0) {
-    const updatedPrayers = routinePrayers.map(prayer => {
+    routinePrayers.length > 0
+  ) {
+    const updatedPrayers = routinePrayers.map((prayer) => {
       // 1. Find the index in the canonical list
       const canonicalIndex = helperFunctions.CANONICAL_PRAYER_NAMES.findIndex(
-        prayerName => prayerName?.toLowerCase() === prayer?.canonicalName?.toLowerCase() || prayerName?.toLowerCase() === prayer?.name?.toLowerCase()
+        (prayerName) =>
+          prayerName?.toLowerCase() === prayer?.canonicalName?.toLowerCase() ||
+          prayerName?.toLowerCase() === prayer?.name?.toLowerCase(),
       );
-      console.log("Canonical Index: ", canonicalIndex)
+      console.log("Canonical Index: ", canonicalIndex);
       // 2. Logic to get the new time from your mosque data
       // Assuming 'mosqueTimes' is an object where keys match canonical names
       const newTime = mosqueTimes[canonicalIndex];
-      console.log("New Time: ", newTime)
+      console.log("New Time: ", newTime);
       // 3. Return the updated object
       return {
         ...prayer,
-        canonicalName: helperFunctions.CANONICAL_PRAYER_NAMES[canonicalIndex] || prayer.canonicalName,
+        canonicalName:
+          helperFunctions.CANONICAL_PRAYER_NAMES[canonicalIndex] ||
+          prayer.canonicalName,
         primaryText: `${prayer.name} ${newTime || prayer.time}`,
         time: newTime || prayer.time, // fallback to old time if mosque time is missing
       };
     });
-    console.log("Updated Routine Prayers: ", updatedPrayers)
+    console.log("Updated Routine Prayers: ", updatedPrayers);
     persistentAttributes.routinePrayers = updatedPrayers;
   }
 }
-
 
 module.exports = {
   LogResponseInterceptor,
@@ -270,6 +343,5 @@ module.exports = {
   ResponseTimeCalculationInterceptor,
   SavePersistenceAttributesToSession,
   AddDirectiveResponseInterceptor,
-  SetApiKeysAsEnvironmentVariableFromAwsSsm
+  SetApiKeysAsEnvironmentVariableFromAwsSsm,
 };
-

@@ -4,7 +4,10 @@ let translateInstance = null;
 // Translate the text
 module.exports.translate = async (text, targetLanguage = "en") => {
   try {
-    const [translation] = await createTranslateInstance().translate(text, targetLanguage);
+    const [translation] = await createTranslateInstance().translate(
+      text,
+      targetLanguage,
+    );
     // console.log("Translated text: ", translation);
     return translation ? translation : text;
   } catch (error) {

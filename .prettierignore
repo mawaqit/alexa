@@ -1,0 +1,6 @@
+node_modules
+.history
+package-lock.json
+lambda/aplDocuments
+azan-lambda/aplDocuments
+.serverless

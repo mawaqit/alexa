@@ -25,7 +25,7 @@ async function initApiKeysOnce() {
     console.log("Parameters retrieved from AWS SSM");
     if (data.InvalidParameters && data.InvalidParameters.length > 0) {
       throw new Error(
-        `Failed to retrieve SSM parameters: ${data.InvalidParameters.join(", ")}`
+        `Failed to retrieve SSM parameters: ${data.InvalidParameters.join(", ")}`,
       );
     }
 

@@ -38,11 +38,12 @@ async function fetchGeocodingResults(address) {
     throw new Error("Google API key is not set in environment variables.");
   }
   const url =
-    googleBaseUrl + `?address=${encodeURIComponent(address)}&key=${googleApiKey}`;
+    googleBaseUrl +
+    `?address=${encodeURIComponent(address)}&key=${googleApiKey}`;
   const response = await axios.get(url).catch((error) => {
     console.error("Error fetching geocoding results:", error);
     throw new Error("GeoConversionError: No results found");
-  })
+  });
   return response?.data?.results;
 }
 
@@ -93,15 +94,16 @@ async function getLatLng(addressJson) {
   const address = constructAddress(addressJson);
   console.log(`Fetching geocoding results for address: ${address}`);
   const results = await fetchGeocodingResults(address);
-  if (!results?.length)
-    throw new Error("GeoConversionError: No results found");
+  if (!results?.length) throw new Error("GeoConversionError: No results found");
   console.log(`Found geocoding results: ${JSON.stringify(results)}`);
   const desiredComponents = {
-    postal_code: addressJson.postalCode || '',
-    locality: addressJson.city?.split(',').pop()?.trim() || '',
-    sublocality: addressJson.addressLine2 ? extractSublocality(addressJson.addressLine2) : "",
-    route: addressJson.addressLine1 || ''
-};
+    postal_code: addressJson.postalCode || "",
+    locality: addressJson.city?.split(",").pop()?.trim() || "",
+    sublocality: addressJson.addressLine2
+      ? extractSublocality(addressJson.addressLine2)
+      : "",
+    route: addressJson.addressLine1 || "",
+  };
 
   const bestResult = findBestResult(results, desiredComponents);
   const location = bestResult?.geometry?.location;
@@ -110,7 +112,7 @@ async function getLatLng(addressJson) {
   }
   const lat = location.lat;
   const lng = location.lng;
-  if(lat === null || lat === undefined || lng === null || lng === undefined) {
+  if (lat === null || lat === undefined || lng === null || lng === undefined) {
     throw new Error("GeoConversionError: No latitude or longitude found");
   }
   return { lat, lng };

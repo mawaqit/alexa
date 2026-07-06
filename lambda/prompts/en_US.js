@@ -82,7 +82,8 @@ module.exports = {
     titleForPrayerTimeList: `Prayer Times`,
     invalidPrayerIndexPrompt: `Sorry, the number you provided is invalid. Please choose between 1 and %s.`,
     timezoneErrorPrompt: `Sorry, I couldn't retrieve your timezone. Please check your location settings in the Alexa app and try again.`,
-    requestRoutinePrompt: "Would you like to set up a notification for this prayer?",
+    requestRoutinePrompt:
+      "Would you like to set up a notification for this prayer?",
     hadithWidgetTitle: "Hadith of the day",
     hadithWidgetDescription: "Loading...",
     widgetInstallationErrorPrompt:
@@ -93,7 +94,8 @@ module.exports = {
     refreshTokenMissing:
       "Your account linking seems incomplete. To fix this, disable and re-enable the skill in the Alexa app, link your Amazon account, then run device discovery.",
     titleForDeleteRoutineList: "Delete Notification",
-    deleteRoutinePrompt: "Which notification would you like to delete? You can choose between %s. Say the number of the notification ",
+    deleteRoutinePrompt:
+      "Which notification would you like to delete? You can choose between %s. Say the number of the notification ",
     deleteRoutineTouchPrompt:
       "or you can tap the notification of your choice on the screen.",
     deleteRoutineConfirmPrompt:
@@ -104,8 +106,10 @@ module.exports = {
       "You don't have any notifications enabled. Say 'create a notification' to get started. ",
     deleteRoutineErrorPrompt:
       "Sorry, an error occurred while deleting the notification. Please try again later.",
-    allRoutinesEnabled: "All notifications are already enabled. To delete one, say 'delete a notification'.",
+    allRoutinesEnabled:
+      "All notifications are already enabled. To delete one, say 'delete a notification'.",
     allPrayers: "All Prayers",
-    oneMosquePrompt: "The only mosque around you is %s. Do you want to choose this one?",
+    oneMosquePrompt:
+      "The only mosque around you is %s. Do you want to choose this one?",
   },
 };

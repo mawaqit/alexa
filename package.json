@@ -1,0 +1,19 @@
+{
+  "name": "mawaqit-alexa",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tooling workspace for the MAWAQIT Alexa skill (lambda + azan-lambda)",
+  "scripts": {
+    "lint": "eslint lambda azan-lambda",
+    "lint:fix": "eslint lambda azan-lambda --fix",
+    "format": "prettier --write \"{lambda,azan-lambda}/**/*.js\"",
+    "format:check": "prettier --check \"{lambda,azan-lambda}/**/*.js\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2"
+  }
+}

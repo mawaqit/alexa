@@ -38,7 +38,7 @@ async function createOrUpdateSchedule({
       const updatePayload = {
         type: "DAILY_UPDATE",
         mosqueId: mosqueId,
-        timeZone: timezone
+        timeZone: timezone,
       };
 
       const createUpdateCommand = new CreateScheduleCommand({
@@ -63,14 +63,21 @@ async function createOrUpdateSchedule({
         await client.send(createUpdateCommand);
         console.log(`Created Daily Update schedule: ${updateScheduleName}`);
       } catch (err) {
-        if (err.name === 'ConflictException' || err.name === 'ResourceAlreadyExistsException') {
-          console.log(`Daily Update schedule ${updateScheduleName} already exists`);
+        if (
+          err.name === "ConflictException" ||
+          err.name === "ResourceAlreadyExistsException"
+        ) {
+          console.log(
+            `Daily Update schedule ${updateScheduleName} already exists`,
+          );
         } else {
           console.error("Error creating Daily Update schedule:", err);
         }
       }
 
-      await dbHandler.UpdateMosqueAzanData(mosqueId, { updateScheduleCreated: true });
+      await dbHandler.UpdateMosqueAzanData(mosqueId, {
+        updateScheduleCreated: true,
+      });
     }
   } catch (error) {
     console.error("Error checking or creating Daily Update schedule:", error);
@@ -214,7 +221,7 @@ async function getAllMosqueActivePrayers() {
         response.Schedules.forEach((schedule) => {
           let mosqueId = null;
           const name = schedule.Name;
-          const prayers = helperFunctions.CANONICAL_PRAYER_NAMES
+          const prayers = helperFunctions.CANONICAL_PRAYER_NAMES;
           for (const prayer of prayers) {
             if (name.endsWith(`-${prayer}`)) {
               mosqueId = name.substring(0, name.length - prayer.length - 1);

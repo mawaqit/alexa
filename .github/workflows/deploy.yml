@@ -6,6 +6,10 @@
 # publishing to the `live` stage requires Amazon certification, which is a
 # manual review. On prod releases this workflow deploys the prod backend and
 # leaves a reminder to submit for certification from the Alexa console.
+#
+# Discord notifications: if the optional repo secret DISCORD_WEBHOOK_URL is set,
+# a message is posted when a deploy starts and when it finishes (success or
+# failure). If the secret is missing, the notification steps no-op.
 name: Deploy
 
 on:
@@ -28,6 +32,30 @@ env:
   ASK_PROFILE: ${{ vars.ASK_PROFILE }}
 
 jobs:
+  notify-start:
+    name: Notify deploy started
+    runs-on: ubuntu-latest
+    permissions: {} # only talks to Discord; no repo token needed
+    steps:
+      - name: Discord — deploy started
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          STAGE: ${{ inputs.stage }}
+          SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "::notice::DISCORD_WEBHOOK_URL not set — skipping Discord notification."
+            exit 0
+          fi
+          payload=$(jq -n \
+            --arg title "🚀 Deploy started — $ENVIRONMENT" \
+            --arg desc "Stage \`$STAGE\` · commit \`${SHA:0:7}\` · [run log]($RUN_URL)" \
+            --argjson color 3447003 \
+            '{username: "GitHub Actions", embeds: [{title: $title, description: $desc, color: $color}]}')
+          curl -sf -X POST -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK_URL"
+
   deploy-lambda:
     name: Deploy lambda (${{ inputs.stage }})
     runs-on: ubuntu-latest
@@ -154,3 +182,41 @@ jobs:
         run: |
           echo "::notice title=Skill not yet live::Prod Lambda deployed and the interaction models are on the skill's *development* stage."
           echo "::notice title=Manual step::Go live is manual (option B). Review the development stage, then submit for certification from the Alexa Developer Console (or run 'ask smapi submit-skill-for-certification')."
+
+  notify-result:
+    name: Notify deploy result
+    # Runs whatever happens (success, failure, cancellation) so we always report
+    # the outcome. Depends on the three deploy jobs; certification-reminder is a
+    # prod-only echo and intentionally left out of the status.
+    if: always()
+    needs: [deploy-lambda, deploy-azan, push-interaction-models]
+    runs-on: ubuntu-latest
+    permissions: {} # only talks to Discord; no repo token needed
+    steps:
+      - name: Discord — deploy result
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ENVIRONMENT: ${{ inputs.environment }}
+          STAGE: ${{ inputs.stage }}
+          SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          # 'success' only if none of the needed jobs failed or was cancelled.
+          RESULT: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "::notice::DISCORD_WEBHOOK_URL not set — skipping Discord notification."
+            exit 0
+          fi
+          if [ "$RESULT" = "success" ]; then
+            title="✅ Deploy succeeded — $ENVIRONMENT"
+            color=3066993
+          else
+            title="❌ Deploy failed — $ENVIRONMENT"
+            color=15158332
+          fi
+          payload=$(jq -n \
+            --arg title "$title" \
+            --arg desc "Stage \`$STAGE\` · commit \`${SHA:0:7}\` · [run log]($RUN_URL)" \
+            --argjson color "$color" \
+            '{username: "GitHub Actions", embeds: [{title: $title, description: $desc, color: $color}]}')
+          curl -sf -X POST -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK_URL"

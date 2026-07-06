@@ -49,6 +49,16 @@ fallback, so deploys fail if they are unset:
 | `SKILL_ID`    | The skill ID from the Alexa Developer Console (also in `lambda/env.json`).   |
 | `ASK_PROFILE` | Name of a profile present in `ASK_CLI_CONFIG` (usually `default`).           |
 
+**Optional — Discord notifications.** If you set a **repository-level** secret
+`DISCORD_WEBHOOK_URL` (Settings → Secrets and variables → Actions → *Repository
+secrets*), each deploy posts a "started" message and a "succeeded"/"failed"
+message to that Discord channel. Leave it unset to disable — the notification
+steps no-op when it's absent. Create the webhook in Discord under **Server
+Settings → Integrations → Webhooks**. Keep it as a repo secret (not an
+environment secret): the notification jobs run without an `environment`, so an
+environment-scoped secret would be invisible to them and the "started"
+notification would otherwise be gated behind the `prod` approval.
+
 ### 3. AWS OIDC (recommended)
 
 Ask the MAWAQIT AWS administrator to, in the target account:

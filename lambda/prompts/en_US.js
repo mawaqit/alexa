@@ -106,6 +106,6 @@ module.exports = {
       "Sorry, an error occurred while deleting the notification. Please try again later.",
     allRoutinesEnabled: "All notifications are already enabled. To delete one, say 'delete a notification'.",
     allPrayers: "All Prayers",
-    oneMosquePrompt: "The only mosque around you is %s. Do you want to choose this one? you can say \"yes\" or \"no\""
+    oneMosquePrompt: "The only mosque around you is %s. Do you want to choose this one?",
   },
 };

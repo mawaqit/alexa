@@ -6,14 +6,14 @@ and the Smart Azan (adhan) notification system.
 The project is split into two independently deployed Serverless Framework
 services, plus the Alexa skill configuration itself:
 
-| Path                | Service name          | What it does                                                              |
-| ------------------- | ---------------------- | -------------------------------------------------------------------------- |
-| `lambda/`           | `alexa`                | Main skill backend: intent handling, prayer times, routines, widgets       |
-| `azan-lambda/`       | `mawaqit-alexa-azan`   | Smart Azan: scheduled adhan playback dispatch                             |
-| `interactionModels/` | -                       | Alexa interaction models (voice model) per locale                         |
-| `skill-package/`     | -                       | Skill package assets (tasks, routine triggers)                            |
-| `skillManifest/`     | -                       | Skill manifest (`skill.json`) used by the ASK CLI                          |
-| `utils/`             | -                       | One-off Python script for generating locale files                         |
+| Path                 | Service name         | What it does                                                         |
+| -------------------- | -------------------- | -------------------------------------------------------------------- |
+| `lambda/`            | `alexa`              | Main skill backend: intent handling, prayer times, routines, widgets |
+| `azan-lambda/`       | `mawaqit-alexa-azan` | Smart Azan: scheduled adhan playback dispatch                        |
+| `interactionModels/` | -                    | Alexa interaction models (voice model) per locale                    |
+| `skill-package/`     | -                    | Skill package assets (tasks, routine triggers)                       |
+| `skillManifest/`     | -                    | Skill manifest (`skill.json`) used by the ASK CLI                    |
+| `utils/`             | -                    | One-off Python script for generating locale files                    |
 
 ## Prerequisites
 
@@ -241,22 +241,21 @@ If you omit `--stage`, both services default to `dev`.
 
 ## Configuring the ASK CLI
 
+You only need **one** ASK CLI profile — one that is logged in to the Amazon
+developer account with access to the MAWAQIT skill.
+
 1. Install the "Alexa Skills Kit" extension in VS Code (optional, only
    needed if you want the graphical skill/model editor).
-2. Configure the default ASK CLI profile:
-   ```bash
-   ask configure
-   ```
-3. Configure a named profile for this skill:
+2. Create the profile:
    ```bash
    ask configure --profile MAWAQIT
    ```
-   Follow the prompts to log in with the Amazon developer account that has
-   access to the MAWAQIT skill.
-4. Verify the profile was created:
-   ```bash
-   ask configure list-profiles
-   ```
+   - Follow the prompts to log in with the Amazon developer account that has
+     access to the MAWAQIT skill.
+   - When asked _"Do you want to link your AWS account in order to host your
+     Alexa skills?"_, answer **No** — this repo deploys its Lambda separately
+     via Serverless Framework (see [Deploying](#deploying)), so the ASK CLI does
+     not need an AWS link.
 
 ## Updating the interaction model
 
@@ -278,4 +277,3 @@ If you omit `--stage`, both services default to `dev`.
    - Replace `${profile}` with the ASK CLI profile name, e.g. `MAWAQIT`.
 3. Once verified in development, promote the skill to certification/live
    through the Alexa Developer Console or `ask smapi` as usual.
-

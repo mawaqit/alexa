@@ -25,7 +25,7 @@ certification from the [Alexa Developer Console](https://developer.amazon.com/al
 ### 1. GitHub Environments
 
 Create two environments (repo **Settings → Environments**): `dev` and `prod`.
-Add the [secrets](#secrets) below to each. For `prod`, enable **Required
+Add the [secrets](#2-secrets-per-environment) below to each. For `prod`, enable **Required
 reviewers** so a human approves before a production deploy runs.
 
 ### 2. Secrets (per environment)
@@ -37,11 +37,17 @@ reviewers** so a human approves before a production deploy runs.
 | `ASK_CLI_CONFIG`        | Interaction models | Base64 of your `~/.ask/cli_config` (see [ASK CLI](#4-ask-cli-credentials)).                     |
 
 > **Access-key fallback:** if you are not using OIDC, replace `AWS_DEPLOY_ROLE_ARN`
-> with `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` and uncomment the matching
-> lines in `deploy.yml`.
+> with `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` secrets, and in `deploy.yml`
+> swap the `role-to-assume` line of each `configure-aws-credentials` step for
+> `aws-access-key-id` / `aws-secret-access-key` inputs referencing those secrets.
 
-Optional repo **variables** (Settings → Variables): `SKILL_ID` (defaults to the
-skill ID in `lambda/env.json`) and `ASK_PROFILE` (defaults to `default`).
+**Required** repo **variables** (Settings → Variables) — the workflow applies no
+fallback, so deploys fail if they are unset:
+
+| Variable      | Value                                                                        |
+| ------------- | ---------------------------------------------------------------------------- |
+| `SKILL_ID`    | The skill ID from the Alexa Developer Console (also in `lambda/env.json`).   |
+| `ASK_PROFILE` | Name of a profile present in `ASK_CLI_CONFIG` (usually `default`).           |
 
 ### 3. AWS OIDC (recommended)
 
@@ -69,7 +75,7 @@ base64 -i ~/.ask/cli_config | pbcopy   # macOS; use `base64 -w0` on Linux
 ```
 
 Paste the result into the `ASK_CLI_CONFIG` secret. Make sure the config
-contains a profile matching `ASK_PROFILE` (default `default`).
+contains a profile matching the `ASK_PROFILE` repo variable.
 
 ## Appendix: least-privilege IAM policy for the deploy role
 

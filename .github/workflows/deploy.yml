@@ -20,8 +20,9 @@ on:
         required: true
         type: string
 
-# One skill, both stages share the same ID (matches lambda/env.json).
-# Override with a repo variable SKILL_ID if it ever changes.
+# Required repo variables (Settings → Variables) — no fallback is applied.
+# SKILL_ID: the skill ID from the Alexa Developer Console (one skill, both
+# stages share it). ASK_PROFILE: a profile present in the ASK_CLI_CONFIG secret.
 env:
   SKILL_ID: ${{ vars.SKILL_ID }}
   ASK_PROFILE: ${{ vars.ASK_PROFILE }}
@@ -36,6 +37,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
@@ -70,6 +73,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
@@ -97,15 +102,19 @@ jobs:
     name: Push Interaction Models (Development Stage)
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
       - name: Install ASK CLI
-        run: npm install -g ask-cli
+        run: npm install -g ask-cli@^2
 
       # Reconstruct ~/.ask/cli_config from a base64 secret produced locally with:
       #   base64 -i ~/.ask/cli_config | pbcopy   (macOS)

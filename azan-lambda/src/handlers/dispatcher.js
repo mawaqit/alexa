@@ -206,7 +206,7 @@ exports.handler = async function (event, context) {
 
   try {
     await initializeConfiguration();
-  } catch (error) {
+  } catch {
     return sendResponse(
       createErrorResponse(
         "INTERNAL_ERROR",

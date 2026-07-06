@@ -33,7 +33,7 @@ async function handleDailyUpdate() {
         try {
           const mosqueInfo = await apiHandler.getMosqueInformation(mosqueId);
           timezone = mosqueInfo?.timezone;
-        } catch (error) {
+        } catch {
           console.log(
             `Error fetching mosque information for mosque: ${mosqueId}`,
           );

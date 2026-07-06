@@ -593,7 +593,7 @@ const NextPrayerTimeIntentHandler = {
         );
       }
       switch (parseInt(prayerNameResolvedId)) {
-        case 5:
+        case 5: {
           // Extract only the Jumu'ah times
           const jumuaTimes = [
             mosqueTimesData.jumua,
@@ -628,7 +628,8 @@ const NextPrayerTimeIntentHandler = {
             )
             .withShouldEndSession(false)
             .getResponse();
-        case 6:
+        }
+        case 6: {
           // Extract only the Eid times
           const eidTimes = [
             mosqueTimesData.aidPrayerTime,
@@ -662,7 +663,8 @@ const NextPrayerTimeIntentHandler = {
             )
             .withShouldEndSession(false)
             .getResponse();
-        case 7:
+        }
+        case 7: {
           const firstNonNullShuruq = mosqueTimesData.shuruq;
           if (firstNonNullShuruq) {
             return helperFunctions.getPrayerTimeForSpecificPrayer(
@@ -680,6 +682,7 @@ const NextPrayerTimeIntentHandler = {
             )
             .withShouldEndSession(false)
             .getResponse();
+        }
         default:
           return handlerInput.responseBuilder
             .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))
@@ -910,6 +913,8 @@ const MosqueInfoIntentHandler = {
     );
   },
   async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
     try {
       const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
@@ -917,8 +922,6 @@ const MosqueInfoIntentHandler = {
       if (!persistentAttributes || !persistentAttributes.uuid) {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }
-      const requestAttributes =
-        handlerInput.attributesManager.getRequestAttributes();
       const {
         primaryText,
         localisation,

@@ -1,7 +1,6 @@
 const Alexa = require("ask-sdk-core");
 const apiHandler = require("./apiHandler");
 const helperFunctions = require("../helperFunctions");
-const moment = require("moment-timezone");
 
 const InstallPrayerTimeWidgetRequestHandler = {
   canHandle(handlerInput) {

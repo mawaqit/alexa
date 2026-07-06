@@ -28,7 +28,7 @@ const LogResponseInterceptor = {
 };
 
 const ResponseTimeCalculationInterceptor = {
-  process(handlerInput, response) {
+  process(handlerInput, _response) {
     const timestamp = Alexa.getRequest(handlerInput.requestEnvelope)[
       "timestamp"
     ];
@@ -278,7 +278,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
 }
 
 const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
-  async process(handlerInput) {
+  async process(_handlerInput) {
     console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
     await awsSsmHandler.handler();
   },

@@ -135,7 +135,7 @@ class AlexaResponse {
       model: this.checkValue(opts.model, "Sample Model"),
     };
 
-    if (opts.hasOwnProperty("cookie"))
+    if (Object.hasOwn(opts, "cookie"))
       endpoint["cookie"] = this.checkValue(opts.cookie, {});
 
     return endpoint;

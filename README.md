@@ -18,10 +18,16 @@ services, plus the Alexa skill configuration itself:
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 22.x (matches the Lambda runtime — `nodejs22.x`)
-- [AWS CLI](https://aws.amazon.com/cli/), configured with access to the MAWAQIT AWS account
-- [AWS Vault](https://github.com/99designs/aws-vault#installing) with a `mawaqit-external` profile
-- [Serverless Framework](https://www.serverless.com/framework/docs/getting-started) v4 (`npm install -g serverless`)
-- [ASK CLI](https://developer.amazon.com/en-US/docs/alexa/smapi/ask-cli-command-reference.html), configured with a profile that has access to the MAWAQIT skill (see [Configuring the ASK CLI](#configuring-the-ask-cli) below)
+- [AWS CLI](https://aws.amazon.com/cli/) — `brew install awscli`
+- [AWS Vault](https://github.com/99designs/aws-vault#installing) — `brew install --cask aws-vault` (see [Getting AWS access](#getting-aws-access) and [Configuring AWS Vault](#configuring-aws-vault) below)
+- [Serverless Framework](https://www.serverless.com/framework/docs/getting-started) v4 — `npm install -g serverless`
+- [ASK CLI](https://developer.amazon.com/en-US/docs/alexa/smapi/ask-cli-command-reference.html) — `npm install -g ask-cli`, configured with a profile that has access to the MAWAQIT skill (see [Configuring the ASK CLI](#configuring-the-ask-cli) below)
+
+> **First time setting this up?** You need credentials to two separate systems:
+> an **AWS account** (to deploy the Lambda backend) and an **Amazon Developer
+> account** (to manage the Alexa skill). Neither is created by this repo — both
+> are granted by whoever administers the MAWAQIT infrastructure. Start with
+> [Getting AWS access](#getting-aws-access).
 
 ## Repository structure
 
@@ -63,13 +69,18 @@ cd ../azan-lambda && npm install
 Both services read secrets from AWS Systems Manager Parameter Store at
 runtime (not from `env.json`, which only holds non-secret config). Before
 the first deploy to a given AWS account, create these `SecureString`
-parameters:
+parameters. This requires AWS access — set up
+[AWS Vault](#configuring-aws-vault) first, then run the commands **inside** an
+`aws-vault` session so they land in the MAWAQIT account (not your personal
+`default` profile), in the `eu-west-3` region both services read from:
 
 ```bash
-aws ssm put-parameter --name /alexa/api/key/mawaqit --type SecureString --value "<mawaqit-api-key>"
-aws ssm put-parameter --name /alexa/api/key/google --type SecureString --value "<google-api-key>"
-aws ssm put-parameter --name /alexa/clientId --type SecureString --value "<amazon-oauth-client-id>"
-aws ssm put-parameter --name /alexa/clientSecret --type SecureString --value "<amazon-oauth-client-secret>"
+aws-vault exec mawaqit-external -- bash   # then, inside the subshell:
+
+aws ssm put-parameter --region eu-west-3 --name /alexa/api/key/mawaqit --type SecureString --value "<mawaqit-api-key>"
+aws ssm put-parameter --region eu-west-3 --name /alexa/api/key/google --type SecureString --value "<google-api-key>"
+aws ssm put-parameter --region eu-west-3 --name /alexa/clientId --type SecureString --value "<amazon-oauth-client-id>"
+aws ssm put-parameter --region eu-west-3 --name /alexa/clientSecret --type SecureString --value "<amazon-oauth-client-secret>"
 ```
 
 - `mawaqit` key: used to call the [mawaqit.net](https://mawaqit.net) API.
@@ -89,19 +100,119 @@ intervals, etc. These files are committed and can be edited directly when
 adding a new stage or changing a non-secret value — no need to touch
 `serverless.yml` itself.
 
+## Getting AWS access
+
+Deploying requires credentials to the **MAWAQIT AWS account**. This repo does
+**not** contain those credentials and they cannot be self-served — request them
+from the MAWAQIT AWS administrator. When you ask, you need to find out:
+
+1. **Which AWS account(s) are used.** Both `dev` and `prod` deploy to the same
+   region (`eu-west-3`, Paris) using the same Alexa skill ID, and stages are
+   separated by resource-name suffix (`...-dev` / `...-prod` — see `env.json`).
+   Confirm with the admin whether that means **one account** (dev/prod side by
+   side, one profile) or **two separate accounts** (one profile each). This
+   determines how many `aws-vault` profiles you set up below.
+2. **How you authenticate.** Ask which of these the account uses, and get the
+   corresponding values:
+   - **IAM user access keys** → an Access Key ID + Secret Access Key (and the
+     MFA device ARN, if MFA is enforced).
+   - **Assume-role** → the `role_arn` to assume plus which base profile /
+     credentials to assume it from.
+   - **AWS SSO / IAM Identity Center** → the SSO start URL and region.
+3. **The IAM permissions** attached must allow deploying CloudFormation,
+   Lambda, SQS, DynamoDB, IAM roles, EventBridge Scheduler, S3, and reading SSM
+   parameters — i.e. the resources declared in each `serverless.yml`.
+
+You **also** need an **Amazon Developer account** with access to the MAWAQIT
+skill — that is separate from AWS and is covered in
+[Configuring the ASK CLI](#configuring-the-ask-cli).
+
+## Configuring AWS Vault
+
+`aws-vault` stores the AWS credentials in your OS keychain and injects them as
+temporary environment variables into a subshell, so nothing sensitive lands in
+plaintext. The profile name used throughout this README is `mawaqit-external` —
+if the admin gave you a different name, substitute it everywhere.
+
+Pick the setup matching the authentication method from step 2 above.
+
+**IAM user access keys** — store the key pair once; aws-vault prompts for the
+values:
+
+```bash
+aws-vault add mawaqit-external
+```
+
+If MFA is enforced, add the device ARN to `~/.aws/config`:
+
+```ini
+[profile mawaqit-external]
+region = eu-west-3
+mfa_serial = arn:aws:iam::<ACCOUNT_ID>:mfa/<your-device>
+```
+
+**Assume-role** — store your base credentials, then point a profile at the
+role to assume in `~/.aws/config`:
+
+```bash
+aws-vault add mawaqit-base            # your personal/base access keys
+```
+
+```ini
+[profile mawaqit-external]
+region = eu-west-3
+source_profile = mawaqit-base
+role_arn = arn:aws:iam::<ACCOUNT_ID>:role/<role-name>
+# mfa_serial = arn:aws:iam::<ACCOUNT_ID>:mfa/<your-device>   # if MFA required
+```
+
+**AWS SSO** — configure the profile in `~/.aws/config`, then log in:
+
+```ini
+[profile mawaqit-external]
+sso_start_url = https://<your-org>.awsapps.com/start
+sso_region = eu-west-3
+sso_account_id = <ACCOUNT_ID>
+sso_role_name = <PermissionSetName>
+region = eu-west-3
+```
+
+```bash
+aws sso login --profile mawaqit-external
+```
+
+Verify the profile works before deploying — this should print the MAWAQIT
+account ID and your identity, not your personal `default` account:
+
+```bash
+aws-vault exec mawaqit-external -- aws sts get-caller-identity
+```
+
+> If you use two separate accounts for dev and prod, repeat the setup for a
+> second profile (e.g. `mawaqit-external-prod`) and use it when deploying the
+> `prod` stage.
+
 ## Deploying
 
-Both services are deployed independently, from within an AWS Vault session:
+Both services are deployed independently, each from within an AWS Vault session
+so the deploy runs against the MAWAQIT account. `--stage` selects the
+environment; it suffixes all resource names (`...-dev` / `...-prod`), so dev and
+prod never collide.
+
+Open a shell with the credentials loaded:
 
 ```bash
 aws-vault exec mawaqit-external -- bash
 ```
 
+Everything below runs inside that subshell.
+
 ### Main skill backend (`lambda/`)
 
 ```bash
 cd lambda
-serverless deploy --stage ${stage}
+serverless deploy --stage dev      # deploy to the dev environment
+serverless deploy --stage prod     # deploy to the prod environment
 ```
 
 This deploys all three functions (`indexHandler`, `triggerHandler`,
@@ -110,20 +221,23 @@ role. To redeploy a single function after the stack already exists (faster
 for iterating on a single handler):
 
 ```bash
-serverless deploy --stage ${stage} -f indexHandler
+serverless deploy --stage dev -f indexHandler
 ```
 
 ### Smart Azan dispatcher (`azan-lambda/`)
 
 ```bash
 cd azan-lambda
-serverless deploy --stage ${stage}
+serverless deploy --stage dev      # or --stage prod
 ```
 
-`${stage}` is one of:
+> **Regions:** the main `alexa` service deploys entirely to `eu-west-3` (Paris).
+> The `mawaqit-alexa-azan` service runs its compute in `eu-west-1` (Ireland)
+> while reading its DynamoDB tables and SSM parameters from `eu-west-3` (Paris)
+> — this split is defined in `azan-lambda/serverless.yml`, you don't configure
+> it per deploy.
 
-- `dev`
-- `prod`
+If you omit `--stage`, both services default to `dev`.
 
 ## Configuring the ASK CLI
 

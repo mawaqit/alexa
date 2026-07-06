@@ -105,10 +105,7 @@ async function UpdateAzanUserInfo(
     expressionAttributeValues[":emailId"] = emailId;
   }
 
-  const RESERVED_KEYS = new Set([
-    "updatedTimestamp",
-    "createdTimestamp",
-  ]);
+  const RESERVED_KEYS = new Set(["updatedTimestamp", "createdTimestamp"]);
 
   // Atomically set any other attributes provided
   Object.entries(otherAttributes).forEach(([key, value]) => {

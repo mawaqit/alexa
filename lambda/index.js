@@ -113,7 +113,7 @@ const LaunchRequestHandler = {
         }
       }
     }
-    
+
     await helperFunctions
       .callDirectiveService(handlerInput, requestAttributes.t("welcomePrompt"))
       .catch((error) => {

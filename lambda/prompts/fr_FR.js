@@ -116,6 +116,7 @@ module.exports = {
     allRoutinesEnabled:
       "Toutes les notifications sont déjà activées. Pour en supprimer une, dites « supprimer une notification ».",
     allPrayers: "Toutes les prières",
-    oneMosquePrompt: "La seule mosquée autour de vous est %s. Voulez-vous la choisir ?",
+    oneMosquePrompt:
+      "La seule mosquée autour de vous est %s. Voulez-vous la choisir ?",
   },
 };

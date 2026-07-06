@@ -69,7 +69,7 @@ async function getAccessTokenFromRefreshToken(refreshToken) {
     throw new Error("Refresh token is required");
   }
 
-  let data =new URLSearchParams({
+  let data = new URLSearchParams({
     client_id: process.env.clientId,
     client_secret: process.env.clientSecret,
     grant_type: "refresh_token",

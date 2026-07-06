@@ -5,7 +5,7 @@ const moment = require("moment-timezone");
 const getMosqueList = async (
   searchWord,
   latitudeInDegrees,
-  longitudeInDegrees
+  longitudeInDegrees,
 ) => {
   let url = `/mosque/search?`;
   if (searchWord) {
@@ -34,7 +34,16 @@ const getMosqueList = async (
 
       return response.data
         .map(
-          ({ name, uuid, proximity, localisation, jumua, jumua2, jumua3, image }) => ({
+          ({
+            name,
+            uuid,
+            proximity,
+            localisation,
+            jumua,
+            jumua2,
+            jumua3,
+            image,
+          }) => ({
             primaryText: name,
             uuid,
             proximity,
@@ -42,8 +51,8 @@ const getMosqueList = async (
             jumua,
             jumua2,
             jumua3,
-            image
-          })
+            image,
+          }),
         )
         .slice(0, 5);
     })
@@ -53,7 +62,12 @@ const getMosqueList = async (
     });
 };
 
-const getPrayerTimings = async (mosqueUuid, timezone, isIqamaCalendarRequired = false, isPrayerCalendarRequired = false) => {
+const getPrayerTimings = async (
+  mosqueUuid,
+  timezone,
+  isIqamaCalendarRequired = false,
+  isPrayerCalendarRequired = false,
+) => {
   const config = getConfig("get", `/mosque/${mosqueUuid}/times`);
   console.log(
     "Config: ",
@@ -86,8 +100,8 @@ const getPrayerTimings = async (mosqueUuid, timezone, isIqamaCalendarRequired = 
       if (!isPrayerCalendarRequired && response?.data?.calendar) {
         delete response.data.calendar;
       }
-      
-      console.log("Mosque Times after Update: ",response?.data?.times)
+
+      console.log("Mosque Times after Update: ", response?.data?.times);
 
       return response.data;
     })
@@ -155,8 +169,8 @@ const getAccessToken = async () => {
       grant_type: "client_credentials",
       client_id: process.env.clientId,
       client_secret: process.env.clientSecret,
-      scope: "alexa::datastore"
-    }
+      scope: "alexa::datastore",
+    },
   };
 
   return await axios(config)
@@ -164,25 +178,42 @@ const getAccessToken = async () => {
       return response.data;
     })
     .catch(function (error) {
-      console.error("Error while fetching access token: ", error.message, "Status:", error?.response?.status);
+      console.error(
+        "Error while fetching access token: ",
+        error.message,
+        "Status:",
+        error?.response?.status,
+      );
       throw error;
     });
-}
+};
 
-const updateDatastore = async (token, commands, target, apiEndpoint = "https://api.eu.amazonalexa.com") => {
+const updateDatastore = async (
+  token,
+  commands,
+  target,
+  apiEndpoint = "https://api.eu.amazonalexa.com",
+) => {
   const config = {
     method: "post",
     url: `${apiEndpoint}/v1/datastore/commands`,
     timeout: 10000,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `${token.token_type} ${token.access_token}`
+      Authorization: `${token.token_type} ${token.access_token}`,
     },
     data: {
       commands: commands,
-      target: target
-    }
-  }; console.log("Datastore Config: ", JSON.stringify(config, null, 2).replace(/Authorization":\s*"[^"]+"/g, 'Authorization": "****"'));
+      target: target,
+    },
+  };
+  console.log(
+    "Datastore Config: ",
+    JSON.stringify(config, null, 2).replace(
+      /Authorization":\s*"[^"]+"/g,
+      'Authorization": "****"',
+    ),
+  );
 
   return await axios(config)
     .then(function (response) {
@@ -190,9 +221,15 @@ const updateDatastore = async (token, commands, target, apiEndpoint = "https://a
       return response.data;
     })
     .catch(function (error) {
-      console.error("Error while updating Datastore: ", error.message, "Status:", error?.response?.status); throw error;
+      console.error(
+        "Error while updating Datastore: ",
+        error.message,
+        "Status:",
+        error?.response?.status,
+      );
+      throw error;
     });
-}
+};
 
 const getDateAndMonthForTimezone = (timezone) => {
   if (!timezone || !moment.tz.zone(timezone)) return null;
@@ -223,7 +260,7 @@ const getMosqueInformation = async (mosqueUuid) => {
       console.error("Error while fetching mosque information: ", error);
       throw error;
     });
-}
+};
 
 module.exports = {
   getMosqueList,
@@ -232,5 +269,5 @@ module.exports = {
   updateDatastore,
   getAccessToken,
   getDateAndMonthForTimezone,
-  getMosqueInformation
+  getMosqueInformation,
 };

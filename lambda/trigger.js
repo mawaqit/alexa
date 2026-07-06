@@ -21,12 +21,13 @@ exports.handler = async (event) => {
 
     try {
       console.log(`Starting DAILY_UPDATE for mosque: ${mosqueId}`);
-      const schedules = await eventBridgeScheduler.listSchedulesForMosque(mosqueId);
-      
+      const schedules =
+        await eventBridgeScheduler.listSchedulesForMosque(mosqueId);
+
       const activePrayers = [];
       const allPrayers = helperFunctions.CANONICAL_PRAYER_NAMES;
-      
-      schedules.forEach(schedule => {
+
+      schedules.forEach((schedule) => {
         const name = schedule.Name;
         for (const prayer of allPrayers) {
           if (name === `${mosqueId}-${prayer}`) {
@@ -42,7 +43,7 @@ exports.handler = async (event) => {
       }
 
       const prayerTimes = await apiHandler.getPrayerTimings(mosqueId, timeZone);
-      
+
       if (!prayerTimes?.times || prayerTimes.times.length === 0) {
         console.warn(`No prayer times found for mosque: ${mosqueId}`);
         return;
@@ -52,14 +53,20 @@ exports.handler = async (event) => {
         const prayerIndex = allPrayers.indexOf(prayerName);
         if (prayerIndex !== -1 && prayerTimes.times[prayerIndex]) {
           const time = prayerTimes.times[prayerIndex];
-          console.log(`Updating schedule for mosque: ${mosqueId}, prayer: ${prayerName}, time: ${time}`);
-          await eventBridgeScheduler.updateScheduleTimeOnly(mosqueId, prayerName, time);
+          console.log(
+            `Updating schedule for mosque: ${mosqueId}, prayer: ${prayerName}, time: ${time}`,
+          );
+          await eventBridgeScheduler.updateScheduleTimeOnly(
+            mosqueId,
+            prayerName,
+            time,
+          );
         }
       }
       return;
     } catch (error) {
-       console.error(`Error in DAILY_UPDATE for mosque ${mosqueId}:`, error);
-       throw error;
+      console.error(`Error in DAILY_UPDATE for mosque ${mosqueId}:`, error);
+      throw error;
     }
   }
 

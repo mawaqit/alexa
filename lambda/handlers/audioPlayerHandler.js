@@ -3,7 +3,9 @@ const intentHandler = require("./intentHandler.js");
 
 const AudioPlayerEventHandler = {
   canHandle(handlerInput) {
-    return Alexa.getRequestType(handlerInput.requestEnvelope).startsWith("AudioPlayer.");
+    return Alexa.getRequestType(handlerInput.requestEnvelope).startsWith(
+      "AudioPlayer.",
+    );
   },
   async handle(handlerInput) {
     const audioPlayerEvent = Alexa.getRequestType(handlerInput.requestEnvelope);
@@ -13,15 +15,14 @@ const AudioPlayerEventHandler = {
         .addAudioPlayerStopDirective()
         .getResponse();
     }
-    return handlerInput.responseBuilder
-      .getResponse();
+    return handlerInput.responseBuilder.getResponse();
   },
 };
 
 const PlaybackCommandHandler = {
   canHandle(handlerInput) {
     return Alexa.getRequestType(handlerInput.requestEnvelope).startsWith(
-      "PlaybackController"
+      "PlaybackController",
     );
   },
   async handle(handlerInput) {
@@ -40,8 +41,10 @@ const AudioIntentHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
-      (Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.ResumeIntent" ||
-       Alexa.getIntentName(handlerInput.requestEnvelope) === "AMAZON.PauseIntent")
+      (Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "AMAZON.ResumeIntent" ||
+        Alexa.getIntentName(handlerInput.requestEnvelope) ===
+          "AMAZON.PauseIntent")
     );
   },
   async handle(handlerInput) {
@@ -59,10 +62,8 @@ const AudioIntentHandler = {
   },
 };
 
-
-
 module.exports = {
-    AudioPlayerEventHandler,
-    PlaybackCommandHandler,
-    AudioIntentHandler
-}
+  AudioPlayerEventHandler,
+  PlaybackCommandHandler,
+  AudioIntentHandler,
+};

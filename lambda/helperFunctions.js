@@ -170,10 +170,10 @@ const getPrayerTimingsForMosque = async (
     );
     speakOutput += requestAttributes.t(
       "nextPrayerTimePrompt",
-      nextPrayerTime.name,               // 1st %s: Prayer Name
-      nextPrayerTime.diffInMinutesPrompt,// 2nd %s: Time Left
-      nextPrayerTime.time,               // 3rd %s: Hour
-      persistentAttributes.primaryText,  // 4th %s: Mosque Name
+      nextPrayerTime.name, // 1st %s: Prayer Name
+      nextPrayerTime.diffInMinutesPrompt, // 2nd %s: Time Left
+      nextPrayerTime.time, // 3rd %s: Hour
+      persistentAttributes.primaryText, // 4th %s: Mosque Name
     );
 
     // const routinePrayerDetails = { ...nextPrayerTime };
@@ -365,7 +365,10 @@ const createResponseDirectiveForMosqueList = async (
   if (mosqueList != null && mosqueList.length == 1) {
     sessionAttributes.isMosqueRequested = true;
     attributesManager.setSessionAttributes(sessionAttributes);
-    speechPrompt += requestAttributes.t("oneMosquePrompt", mosqueList[0].primaryText);
+    speechPrompt += requestAttributes.t(
+      "oneMosquePrompt",
+      mosqueList[0].primaryText,
+    );
     return handlerInput.responseBuilder
       .speak(speechPrompt)
       .withShouldEndSession(false)
@@ -961,7 +964,11 @@ const checkForRoutinePrayerAlreadyExists = async (
   return false;
 };
 
-const logRoutineCreation = async (handlerInput, routineDetails, prayerNameDetails = []) => {
+const logRoutineCreation = async (
+  handlerInput,
+  routineDetails,
+  prayerNameDetails = [],
+) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
@@ -996,26 +1003,33 @@ const logRoutineCreation = async (handlerInput, routineDetails, prayerNameDetail
   try {
     const timezone = await getUserTimezone(handlerInput);
     const mosqueId = persistentAttributes.uuid;
-    if(routineDetails.name !== requestAttributes.t("allPrayers")){
-      prayerNameDetails = [routineDetails]
+    if (routineDetails.name !== requestAttributes.t("allPrayers")) {
+      prayerNameDetails = [routineDetails];
     } else {
-      prayerNameDetails = prayerNameDetails.filter((prayer) => prayer.name !== requestAttributes.t("allPrayers"));
+      prayerNameDetails = prayerNameDetails.filter(
+        (prayer) => prayer.name !== requestAttributes.t("allPrayers"),
+      );
     }
     let speakOutput = "";
-    if(prayerNameDetails.length > 1){
+    if (prayerNameDetails.length > 1) {
       speakOutput = requestAttributes.t("routinesCreatedPrompt");
     } else {
       speakOutput = requestAttributes.t("routineCreatedPrompt");
     }
-    for(const prayer of prayerNameDetails){
-      const prayerNameForSchedule =
-        prayer.canonicalName || prayer.name;
+    for (const prayer of prayerNameDetails) {
+      const prayerNameForSchedule = prayer.canonicalName || prayer.name;
       const time = prayer.time;
       console.log("Mosque ID: ", mosqueId);
       console.log("Prayer Name (Schedule): ", prayerNameForSchedule);
       console.log("Time: ", time);
       console.log("Timezone: ", timezone);
-      if (mosqueId && prayerNameForSchedule && time && timezone && time.toString().length > 0) {
+      if (
+        mosqueId &&
+        prayerNameForSchedule &&
+        time &&
+        timezone &&
+        time.toString().length > 0
+      ) {
         await eventBridgeScheduler.createOrUpdateSchedule({
           mosqueId,
           prayerName: prayerNameForSchedule,
@@ -1027,7 +1041,10 @@ const logRoutineCreation = async (handlerInput, routineDetails, prayerNameDetail
     if (!persistentAttributes.routinePrayers) {
       persistentAttributes.routinePrayers = [];
     }
-    persistentAttributes.routinePrayers = [...persistentAttributes.routinePrayers, ...prayerNameDetails];
+    persistentAttributes.routinePrayers = [
+      ...persistentAttributes.routinePrayers,
+      ...prayerNameDetails,
+    ];
     persistentAttributes.routinePrayers.sort((a, b) => {
       const timeA = moment(a.time, "HH:mm");
       const timeB = moment(b.time, "HH:mm");
@@ -1038,9 +1055,7 @@ const logRoutineCreation = async (handlerInput, routineDetails, prayerNameDetail
     await attributesManager.savePersistentAttributes();
     console.log("Routine created successfully");
     return handlerInput.responseBuilder
-      .speak(
-        speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
-      )
+      .speak(speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"))
       .withShouldEndSession(false)
       .getResponse();
   } catch (error) {
@@ -1129,7 +1144,7 @@ const deleteRoutine = async (handlerInput, routineName) => {
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes } = sessionAttributes;
   const requestAttributes = attributesManager.getRequestAttributes();
-  if(routineName === requestAttributes.t("allPrayers")){
+  if (routineName === requestAttributes.t("allPrayers")) {
     delete persistentAttributes.routinePrayers;
     attributesManager.setPersistentAttributes(persistentAttributes);
     attributesManager.setSessionAttributes(sessionAttributes);
@@ -1137,9 +1152,7 @@ const deleteRoutine = async (handlerInput, routineName) => {
     return true;
   }
 
-  if (
-    persistentAttributes?.routinePrayers?.length > 0
-  ) {
+  if (persistentAttributes?.routinePrayers?.length > 0) {
     const index = persistentAttributes.routinePrayers.findIndex(
       (routine) =>
         routine.canonicalName === routineName || routine.name === routineName,
@@ -1191,16 +1204,19 @@ const updateRoutinePrayers = async (handlerInput) => {
 };
 
 const isTaskTrigger = (handlerInput) => {
-  return handlerInput.requestEnvelope.request?.targetURI?.includes("AMAZON.Launch");
+  return handlerInput.requestEnvelope.request?.targetURI?.includes(
+    "AMAZON.Launch",
+  );
 };
 
 const ALL_PRAYERS = (handlerInput) => {
-  const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+  const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
   return {
     name: requestAttributes.t("allPrayers"),
     time: "",
     namePhoneme: requestAttributes.t("allPrayers"),
-    primaryText: requestAttributes.t("allPrayers")
+    primaryText: requestAttributes.t("allPrayers"),
   };
 };
 
@@ -1250,5 +1266,5 @@ module.exports = {
   updateRoutinePrayers,
   CANONICAL_PRAYER_NAMES,
   isTaskTrigger,
-  ALL_PRAYERS
+  ALL_PRAYERS,
 };

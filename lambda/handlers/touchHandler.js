@@ -37,7 +37,10 @@ const MosqueListTouchEventHandler = {
     sessionAttributes.persistentAttributes = selectedMosque;
     try {
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-      const mosqueTimes = await getPrayerTimings(selectedMosque.uuid, userTimeZone);
+      const mosqueTimes = await getPrayerTimings(
+        selectedMosque.uuid,
+        userTimeZone,
+      );
       sessionAttributes.mosqueTimes = mosqueTimes;
       await helperFunctions.updateRoutinePrayers(handlerInput);
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
@@ -54,7 +57,7 @@ const MosqueListTouchEventHandler = {
           requestAttributes.t("mosqueNotRegisteredPrompt"),
         );
       }
-       if (error?.message === "Unable to fetch user timezone") {
+      if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
           .withShouldEndSession(true)
@@ -140,11 +143,11 @@ const RoutineListTouchEventHandler = {
       //   selectedRoutine.namePhoneme === prayerNames[5],
       // );
       let prayerNameDetails =
-              await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput);
+        await helperFunctions.generatePrayerNameDetailsForRoutine(handlerInput);
       return await helperFunctions.logRoutineCreation(
         handlerInput,
         selectedRoutine,
-        prayerNameDetails
+        prayerNameDetails,
       );
     } catch (error) {
       console.log("Error in RoutineListTouchEventHandler: ", error);
@@ -184,15 +187,20 @@ const DeleteRoutineTouchEventHandler = {
     try {
       const selectedRoutine = helperFunctions.getAplArgument(handlerInput, 2);
       console.log("Selected Routine for deletion: ", selectedRoutine);
-      const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes } = sessionAttributes;
       const { routinePrayers } = persistentAttributes;
       let routinePrayerIndex = routinePrayers.findIndex(
-        (routine) => routine.name.toLowerCase() === selectedRoutine.name.toLowerCase(),
+        (routine) =>
+          routine.name.toLowerCase() === selectedRoutine.name.toLowerCase(),
       );
 
-      if (routinePrayerIndex === -1 && selectedRoutine.name === helperFunctions.ALL_PRAYERS(handlerInput).name) {
-        routinePrayerIndex = 0;        
+      if (
+        routinePrayerIndex === -1 &&
+        selectedRoutine.name === helperFunctions.ALL_PRAYERS(handlerInput).name
+      ) {
+        routinePrayerIndex = 0;
       }
       // Trigger DeleteRoutineIntent confirmation
       return handlerInput.responseBuilder
@@ -216,7 +224,7 @@ const DeleteRoutineTouchEventHandler = {
               prayerIndex: {
                 name: "prayerIndex",
                 value: String(routinePrayerIndex + 1),
-                confirmationStatus: "NONE"
+                confirmationStatus: "NONE",
               },
             },
           },

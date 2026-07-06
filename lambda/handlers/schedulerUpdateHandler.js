@@ -30,14 +30,18 @@ async function handleDailyUpdate() {
       try {
         console.log(`Fetching prayer times for mosque: ${mosqueId}`);
         let timezone = null;
-        try{
+        try {
           const mosqueInfo = await apiHandler.getMosqueInformation(mosqueId);
           timezone = mosqueInfo?.timezone;
+        } catch (error) {
+          console.log(
+            `Error fetching mosque information for mosque: ${mosqueId}`,
+          );
         }
-        catch(error){
-          console.log(`Error fetching mosque information for mosque: ${mosqueId}`);
-        }
-        const prayerTimes = await apiHandler.getPrayerTimings(mosqueId, timezone);
+        const prayerTimes = await apiHandler.getPrayerTimings(
+          mosqueId,
+          timezone,
+        );
 
         if (!prayerTimes?.times || prayerTimes.times.length === 0) {
           console.warn(`No prayer times found for mosque: ${mosqueId}`);

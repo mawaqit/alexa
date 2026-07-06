@@ -19,7 +19,7 @@ class CustomDynamoDbPersistenceAdapter {
         "CustomDynamoDbPersistenceAdapter: config.tableName is required",
       );
     }
-  
+
     this.tableName = config.tableName;
     this.partitionKeyName = config.partitionKeyName || "id";
     this.attributesName = config.attributesName || "attributes";
@@ -65,7 +65,7 @@ class CustomDynamoDbPersistenceAdapter {
       const data = await this.dynamoDBDocumentClient.send(
         new GetCommand(params),
       );
-       return data.Item?.[this.attributesName] ?? {};
+      return data.Item?.[this.attributesName] ?? {};
     } catch (error) {
       console.error(
         `Error getting attributes from table ${this.tableName}:`,

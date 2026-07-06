@@ -222,7 +222,10 @@ async function GetMosqueAzanData(id) {
     const data = await dynamo.send(new GetCommand(params));
     return data.Item;
   } catch (error) {
-    console.error(`[GetMosqueAzanData] Error getting mosque azan data for id ${id}:`, error);
+    console.error(
+      `[GetMosqueAzanData] Error getting mosque azan data for id ${id}:`,
+      error,
+    );
     throw error;
   }
 }
@@ -232,14 +235,17 @@ async function UpdateMosqueAzanData(id, attributes) {
     TableName: MOSQUE_AZAN_TABLE_NAME,
     Item: {
       id: id,
-      ...attributes
+      ...attributes,
     },
   };
   try {
     await dynamo.send(new PutCommand(params));
     return true;
   } catch (error) {
-    console.error(`[UpdateMosqueAzanData] Error updating mosque azan data for id ${id}:`, error);
+    console.error(
+      `[UpdateMosqueAzanData] Error updating mosque azan data for id ${id}:`,
+      error,
+    );
     throw error;
   }
 }

@@ -184,5 +184,5 @@ module.exports = {
   getDataSourceForAdhaanReciter,
   getMetadata,
   getDataSourceForRoutine,
-  getDataSourceForDeleteRoutineList
+  getDataSourceForDeleteRoutineList,
 };

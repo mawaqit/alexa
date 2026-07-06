@@ -1,6 +1,4 @@
+**/node_modules
+
 ask-resources.json
 .ask
-.vscode
-lambda/node_modules
-azan-lambda/node_modules
-node_modules

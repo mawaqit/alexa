@@ -93,11 +93,17 @@ async function handleAuthorization(event) {
     const accessToken = await authHandler.getRefreshToken(authCode);
     const tokenFromRequest = event?.directive?.payload?.grantee?.token;
     if (!tokenFromRequest) {
-      return createErrorResponse("ACCEPT_GRANT_FAILED", "Missing grantee token");
+      return createErrorResponse(
+        "ACCEPT_GRANT_FAILED",
+        "Missing grantee token",
+      );
     }
     const userInfo = await authHandler.getUserInfo(tokenFromRequest);
     if (!userInfo) {
-      return createErrorResponse("ACCEPT_GRANT_FAILED", "Failed to get user info");
+      return createErrorResponse(
+        "ACCEPT_GRANT_FAILED",
+        "Failed to get user info",
+      );
     }
     await dbHandler.UpdateAzanUserInfo(userInfo.user_id, {
       refreshToken: accessToken.refresh_token,

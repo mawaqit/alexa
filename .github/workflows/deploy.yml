@@ -23,8 +23,8 @@ on:
 # One skill, both stages share the same ID (matches lambda/env.json).
 # Override with a repo variable SKILL_ID if it ever changes.
 env:
-  SKILL_ID: ${{ vars.SKILL_ID || 'amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506' }}
-  ASK_PROFILE: ${{ vars.ASK_PROFILE || 'default' }}
+  SKILL_ID: ${{ vars.SKILL_ID }}
+  ASK_PROFILE: ${{ vars.ASK_PROFILE }}
 
 jobs:
   deploy-lambda:
@@ -48,15 +48,11 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-west-3
-          # --- Fallback if you use access keys instead of OIDC: comment the
-          # line above and uncomment these two, then set the secrets:
-          # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Install Serverless Framework
         run: npm install -g serverless@^4
 
-      - name: Deploy alexa backend
+      - name: Deploy Alexa Skill Backend
         working-directory: lambda
         env:
           # Serverless Framework v4 requires an access key to authenticate.
@@ -66,7 +62,7 @@ jobs:
           serverless deploy --stage ${{ inputs.stage }}
 
   deploy-azan:
-    name: Deploy azan-lambda (${{ inputs.stage }})
+    name: Deploy Azan Lambda (${{ inputs.stage }})
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
@@ -85,13 +81,11 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-west-3
-          # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Install Serverless Framework
         run: npm install -g serverless@^4
 
-      - name: Deploy azan dispatcher
+      - name: Deploy Azan Dispatcher
         working-directory: azan-lambda
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
@@ -100,7 +94,7 @@ jobs:
           serverless deploy --stage ${{ inputs.stage }}
 
   push-interaction-models:
-    name: Push interaction models (development stage)
+    name: Push Interaction Models (Development Stage)
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
@@ -144,7 +138,7 @@ jobs:
     needs: [deploy-lambda, deploy-azan, push-interaction-models]
     runs-on: ubuntu-latest
     steps:
-      - name: Remind to submit for certification
+      - name: Remind to Submit for Certification
         run: |
           echo "::notice title=Skill not yet live::Prod Lambda deployed and the interaction models are on the skill's *development* stage."
           echo "::notice title=Manual step::Go live is manual (option B). Review the development stage, then submit for certification from the Alexa Developer Console (or run 'ask smapi submit-skill-for-certification')."

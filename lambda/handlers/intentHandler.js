@@ -949,7 +949,7 @@ const MosqueInfoIntentHandler = {
         "mosqueInfoPrompt",
         primaryText,
         localisation,
-        proximity,
+        helperFunctions.formatDistance(proximity),
       );
       // Find the first non-null Jumu'ah time
       const firstNonNullJumua = jumuaTimes.filter(

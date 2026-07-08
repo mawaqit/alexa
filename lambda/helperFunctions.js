@@ -1220,6 +1220,19 @@ const ALL_PRAYERS = (handlerInput) => {
   };
 };
 
+function formatDistance(distance) {
+    // Parse to float in case the input is passed as a string
+    const distNum = parseFloat(distance);
+
+    if (distNum < 10) {
+        // Less than 10 km: keep 1 decimal place
+        return `${distNum.toFixed(1)}`;
+    } else {
+        // 10 km or more: round to the nearest whole number
+        return `${Math.round(distNum)}`;
+    }
+}
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -1267,4 +1280,5 @@ module.exports = {
   CANONICAL_PRAYER_NAMES,
   isTaskTrigger,
   ALL_PRAYERS,
+  formatDistance
 };

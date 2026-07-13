@@ -1,0 +1,11 @@
+# Code owners for mawaqit/alexa.
+#
+# When a pull request touches a matching path, GitHub automatically requests a
+# review from the owners listed here. The last matching pattern wins.
+#
+# Note: a team is only requested if it has write (or higher) access to the repo
+# and at least one member other than the PR author. The `alexa` team currently
+# has `maintain`, so it qualifies.
+
+# Default: every change requests a review from the whole Alexa team.
+* @mawaqit/alexa

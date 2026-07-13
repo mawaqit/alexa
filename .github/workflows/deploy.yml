@@ -2,7 +2,7 @@
 # deploy-prod.yml (stage=prod). Deploys both Lambda services and pushes the
 # interaction models to the skill's `development` stage.
 #
-# The Alexa skill going *live* is intentionally NOT automated (option B):
+# The Alexa skill going *live* is intentionally NOT automated:
 # publishing to the `live` stage requires Amazon certification, which is a
 # manual review. On prod releases this workflow deploys the prod backend and
 # leaves a reminder to submit for certification from the Alexa console.
@@ -24,7 +24,6 @@ on:
         required: true
         type: string
 
-# Required repo variables (Settings → Variables) — no fallback is applied.
 # SKILL_ID: the skill ID from the Alexa Developer Console (one skill, both
 # stages share it). ASK_PROFILE: a profile present in the ASK_CLI_CONFIG secret.
 env:
@@ -35,10 +34,8 @@ jobs:
   notify-start:
     name: Notify deploy started
     runs-on: ubuntu-latest
-    permissions: {} # only talks to Discord; no repo token needed
+    permissions: {}
     env:
-      # Job-level env so the step `if:` can gate on it (secrets can't be read
-      # directly in `if:`); also lets the step skip cleanly when it's unset.
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
       - name: Short SHA
@@ -64,17 +61,17 @@ jobs:
       id-token: write # OIDC
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: lambda/package-lock.json
 
-      # --- AWS auth: OIDC (recommended, no long-lived keys) ---
+      # AWS auth: OIDC
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
@@ -86,7 +83,6 @@ jobs:
       - name: Deploy Alexa Skill Backend
         working-directory: lambda
         env:
-          # Serverless Framework v4 requires an access key to authenticate.
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: |
           npm ci
@@ -100,11 +96,11 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -136,20 +132,17 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
 
       - name: Install ASK CLI
         run: npm install -g ask-cli@^2
 
-      # Reconstruct ~/.ask/cli_config from a base64 secret produced locally with:
-      #   base64 -i ~/.ask/cli_config | pbcopy   (macOS)
-      # Store the result as the ASK_CLI_CONFIG secret.
       - name: Configure ASK CLI
         env:
           ASK_CLI_CONFIG: ${{ secrets.ASK_CLI_CONFIG }}
@@ -185,13 +178,10 @@ jobs:
 
   notify-result:
     name: Notify deploy result
-    # Runs whatever happens (success, failure, cancellation) so we always report
-    # the outcome. Depends on the three deploy jobs; certification-reminder is a
-    # prod-only echo and intentionally left out of the status.
     if: always()
     needs: [deploy-lambda, deploy-azan, push-interaction-models]
     runs-on: ubuntu-latest
-    permissions: {} # only talks to Discord; no repo token needed
+    permissions: {}
     env:
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
@@ -210,6 +200,12 @@ jobs:
             echo "color=15158332" >> "$GITHUB_OUTPUT"
           fi
           echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          # On a successful prod deploy, add a call-to-action link (webhooks
+          # can't send real buttons — that needs a bot — so this is a clickable
+          # markdown link). Empty otherwise, so nothing is appended.
+          if [ "$RESULT" = "success" ] && [ "${{ inputs.stage }}" = "prod" ]; then
+            echo "cta= · [🎓 Submit for certification](https://developer.amazon.com/alexa/console/ask)" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Discord — deploy result
         if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
@@ -218,5 +214,5 @@ jobs:
           webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
           username: GitHub Actions
           embed-title: ${{ steps.status.outputs.title }}
-          embed-description: "Stage `${{ inputs.stage }}` · commit `${{ steps.status.outputs.short }}` · [run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          embed-description: "Stage `${{ inputs.stage }}` · commit `${{ steps.status.outputs.short }}` · [run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})${{ steps.status.outputs.cta }}"
           embed-color: ${{ steps.status.outputs.color }}

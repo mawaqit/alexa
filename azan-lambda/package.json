@@ -14,7 +14,7 @@
     "@aws-sdk/client-ssm": "^3.971.0",
     "@aws-sdk/lib-dynamodb": "^3.971.0",
     "axios": "^1.16.0",
-    "uuid": "^10.0.0",
+    "uuid": "^14.0.0",
     "qs": "^6.15.2"
   }
 }

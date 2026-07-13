@@ -1,3 +1,5 @@
+org: mawaqitapp
+app: alexa
 service: alexa
 
 frameworkVersion: ^4.0.0
@@ -93,7 +95,7 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: mawaqit-alexa-azan-dlq-${self:provider.stage}
-        MessageRetentionPeriod: 1209600  # 14 days (maximum)
+        MessageRetentionPeriod: 1209600 # 14 days (maximum)
 
     MawaqitAzanScheduleGroup:
       Type: AWS::Scheduler::ScheduleGroup

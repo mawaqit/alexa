@@ -95,7 +95,7 @@ const DeleteRoutineStartedHandler = {
       let speakOutput = requestAttributes.t(
         "deleteRoutinePrompt",
         routineList
-          .map((r, index) => `${index + 1}. ${r.namePhoneme} ${r.time}`)
+          .map((r, index) => `${index + 1}. ${r.namePhoneme}`)
           .join(", "),
       );
       // Create APL if supported
@@ -1462,13 +1462,13 @@ const CreateRoutineStartedHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
-      const prayerNameTimePrompt = prayerNameDetails.map(
-        (prayer, index) => `${index + 1}. ${prayer.namePhoneme} ${prayer.time}`,
+      const prayerNameChoices = prayerNameDetails.map(
+        (prayer, index) => `${index + 1}. ${prayer.namePhoneme}`,
       );
 
       let speechPrompt = requestAttributes.t(
         "prayerNamePrompt",
-        prayerNameTimePrompt.join(", "),
+        prayerNameChoices.join(", "),
       );
       if (
         Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[

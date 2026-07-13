@@ -48,7 +48,7 @@ jobs:
 
       - name: Discord — deploy started
         if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
-        uses: tsickert/discord-webhook@v7
+        uses: tsickert/discord-webhook@v7.0.0
         with:
           webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
           username: GitHub Actions
@@ -213,7 +213,7 @@ jobs:
 
       - name: Discord — deploy result
         if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
-        uses: tsickert/discord-webhook@v7
+        uses: tsickert/discord-webhook@v7.0.0
         with:
           webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
           username: GitHub Actions

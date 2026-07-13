@@ -1,0 +1,47 @@
+scope/lambda:
+  - changed-files:
+      - any-glob-to-any-file: "lambda/**"
+
+scope/azan:
+  - changed-files:
+      - any-glob-to-any-file: "azan-lambda/**"
+
+scope/skill:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "interactionModels/**"
+          - "skill-package/**"
+          - "skillManifest/**"
+
+scope/tooling:
+  - changed-files:
+      - any-glob-to-any-file: "utils/**"
+
+scope/ci:
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+
+scope/docs:
+  - changed-files:
+      - any-glob-to-any-file: "**/*.md"
+
+type/feature:
+  - head-branch: ["^feat"]
+
+type/fix:
+  - head-branch: ["^fix"]
+
+type/docs:
+  - head-branch: ["^docs"]
+
+type/refactor:
+  - head-branch: ["^refactor"]
+
+type/test:
+  - head-branch: ["^test"]
+
+type/chore:
+  - head-branch: ["^chore"]
+
+type/ci:
+  - head-branch: ["^ci"]

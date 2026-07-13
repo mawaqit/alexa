@@ -1,0 +1,56 @@
+name: Pull Request Automation
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened, synchronize]
+
+# Deny all by default; each job opts into the minimum it needs.
+permissions: {}
+
+# A new push to a PR supersedes an in-flight run for that same PR.
+concurrency:
+  group: pr-automation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  Auto-Assign:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    permissions:
+      contents: read # read the config file via the API
+      issues: write # assignees are managed through the issues API
+      pull-requests: write # assign the author to the PR
+    steps:
+      # No checkout needed: the action reads its config from the repo via the API.
+      - name: Auto assign Author as Assignee
+        uses: kentaro-m/auto-assign-action@v2.0.2
+        with:
+          configuration-path: ".github/auto_assign_config.yaml"
+
+  Auto-Labels:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # read the labeler config via the API
+      issues: write # size-label may create the size labels on first run
+      pull-requests: write # add labels to the PR
+    steps:
+      - name: Labeler
+        uses: actions/labeler@v6
+        with:
+          configuration-path: .github/labeler_config.yaml
+
+      - name: Size Label
+        uses: "pascalgn/size-label-action@v0.5.7"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          IGNORED: "**/package-lock.json"
+        with:
+          sizes: >
+            {
+              "0": "XS",
+              "30": "S",
+              "100": "M",
+              "300": "L",
+              "800": "XL",
+              "2000": "XXL"
+            }

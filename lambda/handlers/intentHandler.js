@@ -487,8 +487,8 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       selectedMosqueDetails.localisation,
       locale,
     );
-    selectedMosqueDetails.proximity =
-      parseInt(selectedMosqueDetails.proximity) / 1000;
+    // Keep the raw distance in meters; it is localized at display time.
+    selectedMosqueDetails.proximity = parseInt(selectedMosqueDetails.proximity);
     console.log("Selected Mosque Details: ", selectedMosqueDetails);
     sessionAttributes.persistentAttributes = selectedMosqueDetails;
     handlerInput.attributesManager.setPersistentAttributes(
@@ -579,6 +579,7 @@ const NextPrayerTimeIntentHandler = {
       );
       const now = moment(currentDateTime);
       const currentMoment = moment(now.format("YYYY-MM-DDTHH:mm"));
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
       console.log("Now: ", JSON.stringify(now));
       console.log("Prayer Name From Data: ", prayerNameFromData);
       if (parseInt(prayerNameResolvedId) < 5) {
@@ -603,6 +604,7 @@ const NextPrayerTimeIntentHandler = {
           // Find the first non-null Jumu'ah time
           const firstNonNullJumua = jumuaTimes
             .filter((time) => time !== null && time !== undefined)
+            .map((time) => helperFunctions.formatTime(time, locale))
             .join(", ");
           if (firstNonNullJumua) {
             helperFunctions.checkForCharacterDisplay(
@@ -638,6 +640,7 @@ const NextPrayerTimeIntentHandler = {
           // Find the first non-null Eid time
           const firstNonNullEid = eidTimes
             .filter((time) => time !== null && time !== undefined)
+            .map((time) => helperFunctions.formatTime(time, locale))
             .join(", ");
           if (firstNonNullEid) {
             helperFunctions.checkForCharacterDisplay(
@@ -734,11 +737,12 @@ const NextPrayerTimeIntentWithoutNameHandler = {
         handlerInput,
         prayerTimeDetails.time,
       );
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
       const speakOutput =
         requestAttributes.t(
           "nextPrayerWithoutMosquePrompt",
           prayerTimeDetails.name,
-          prayerTimeDetails.time,
+          helperFunctions.formatTime(prayerTimeDetails.time, locale),
           prayerTimeDetails.diffInMinutesPrompt,
         ) + requestAttributes.t("doYouNeedAnythingElsePrompt");
       return handlerInput.responseBuilder
@@ -936,20 +940,23 @@ const MosqueInfoIntentHandler = {
         mosqueDescription: localisation,
         mosqueImage: image,
       };
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
+      const distanceUnits =
+        await helperFunctions.getUserDistanceUnits(handlerInput);
       // Extract only the Jumu'ah times
       const jumuaTimes = [jumua, jumua2, jumua3];
       const prayerNames = requestAttributes.t("prayerNames");
       let prayerTimeApl = prayerNames.slice(0, 5).map((prayer, index) => {
         const prayerTime = mosqueTimes.times[index];
         return {
-          primaryText: `${prayer} ${prayerTime}`,
+          primaryText: `${prayer} ${helperFunctions.formatTime(prayerTime, locale)}`,
         };
       });
       let speakOutput = requestAttributes.t(
         "mosqueInfoPrompt",
         primaryText,
         localisation,
-        helperFunctions.formatDistance(proximity),
+        helperFunctions.formatDistance(proximity, locale, distanceUnits),
       );
       // Find the first non-null Jumu'ah time
       const firstNonNullJumua = jumuaTimes.filter(
@@ -958,11 +965,13 @@ const MosqueInfoIntentHandler = {
       if (firstNonNullJumua.length > 0) {
         speakOutput += requestAttributes.t(
           "jummaTimePrompt",
-          firstNonNullJumua.join(", "),
+          firstNonNullJumua
+            .map((jumuaTime) => helperFunctions.formatTime(jumuaTime, locale))
+            .join(", "),
         );
         firstNonNullJumua.forEach((jumuaTime, index) => {
           prayerTimeApl.push({
-            primaryText: `${prayerNames[5]} ${index + 1} ${jumuaTime}`,
+            primaryText: `${prayerNames[5]} ${index + 1} ${helperFunctions.formatTime(jumuaTime, locale)}`,
           });
         });
       } else {
@@ -973,7 +982,7 @@ const MosqueInfoIntentHandler = {
       }
       if (mosqueTimes.shuruq) {
         prayerTimeApl.push({
-          primaryText: `${prayerNames[7]}  ${mosqueTimes.shuruq}`,
+          primaryText: `${prayerNames[7]}  ${helperFunctions.formatTime(mosqueTimes.shuruq, locale)}`,
         });
       }
       if (
@@ -1052,6 +1061,7 @@ const AllIqamaTimeIntentHandler = {
       const month = currentDateTime.getMonth();
       const iqamaTimes = iqamaCalendar[month][String(date)];
       console.log("Iqama Times: ", iqamaTimes);
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
       let allIqamaTimes = "";
       prayerNames.forEach((prayer, index) => {
         const iqamaTime = iqamaTimes[index];
@@ -1068,7 +1078,10 @@ const AllIqamaTimeIntentHandler = {
           allIqamaTimes += requestAttributes.t(
             "allIqamaTimesPrompt",
             prayer,
-            iqamaDetails.time.format("HH:mm"),
+            helperFunctions.formatTime(
+              iqamaDetails.time.format("HH:mm"),
+              locale,
+            ),
           );
         }
       });
@@ -1817,8 +1830,10 @@ const MosqueYesIntentHandler = {
         selectedMosqueDetails.localisation,
         locale,
       );
-      selectedMosqueDetails.proximity =
-        parseInt(selectedMosqueDetails.proximity) / 1000;
+      // Keep the raw distance in meters; it is localized at display time.
+      selectedMosqueDetails.proximity = parseInt(
+        selectedMosqueDetails.proximity,
+      );
       console.log("Selected Mosque Details: ", selectedMosqueDetails);
       sessionAttributes.persistentAttributes = selectedMosqueDetails;
       handlerInput.attributesManager.setPersistentAttributes(

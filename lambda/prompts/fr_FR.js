@@ -46,7 +46,7 @@ module.exports = {
     iqamaNotEnabledPrompt:
       "Les délais entre l'adhan et l'iqama ne sont pas fournis par votre mosquée.",
     mosqueInfoPrompt:
-      "Votre mosquée est %s, située à %s, à environ %s kilomètres de chez vous. ",
+      "Votre mosquée est %s, située à %s, à environ %s de chez vous. ",
     mosqueInfoErrorPrompt:
       "Désolé, je n'ai pas trouvé d'information sur votre mosquée. Veuillez réessayer.",
     nextPrayerTimeWithNamePrompt: `La prière de %s est à %s, dans %s. `,

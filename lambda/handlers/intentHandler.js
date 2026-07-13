@@ -582,8 +582,24 @@ const NextPrayerTimeIntentHandler = {
       console.log("Now: ", JSON.stringify(now));
       console.log("Prayer Name From Data: ", prayerNameFromData);
       if (parseInt(prayerNameResolvedId) < 5) {
-        const timeForNextPrayer =
-          mosqueTimesData.times[parseInt(prayerNameResolvedId)];
+        const prayerIndex = parseInt(prayerNameResolvedId);
+        let timeForNextPrayer = mosqueTimesData.times[prayerIndex];
+        // When today's prayer has already passed, the next occurrence is
+        // tomorrow — and tomorrow's actual time can differ from today's, so we
+        // fetch it from the calendar instead of reusing today's time.
+        if (helperFunctions.hasPrayerTimePassed(timeForNextPrayer, now)) {
+          try {
+            const tomorrowTimes = await helperFunctions.getTomorrowPrayerTimes(
+              persistentAttributes.uuid,
+              userTimeZone,
+            );
+            if (tomorrowTimes?.times?.[prayerIndex]) {
+              timeForNextPrayer = tomorrowTimes.times[prayerIndex];
+            }
+          } catch (error) {
+            console.log("Error fetching tomorrow's prayer times: ", error);
+          }
+        }
         return helperFunctions.getPrayerTimeForSpecificPrayer(
           handlerInput,
           timeForNextPrayer,
@@ -665,8 +681,23 @@ const NextPrayerTimeIntentHandler = {
             .getResponse();
         }
         case 7: {
-          const firstNonNullShuruq = mosqueTimesData.shuruq;
+          let firstNonNullShuruq = mosqueTimesData.shuruq;
           if (firstNonNullShuruq) {
+            // Shuruq for today has passed → use tomorrow's shuruq time.
+            if (helperFunctions.hasPrayerTimePassed(firstNonNullShuruq, now)) {
+              try {
+                const tomorrowTimes =
+                  await helperFunctions.getTomorrowPrayerTimes(
+                    persistentAttributes.uuid,
+                    userTimeZone,
+                  );
+                if (tomorrowTimes?.shuruq) {
+                  firstNonNullShuruq = tomorrowTimes.shuruq;
+                }
+              } catch (error) {
+                console.log("Error fetching tomorrow's prayer times: ", error);
+              }
+            }
             return helperFunctions.getPrayerTimeForSpecificPrayer(
               handlerInput,
               firstNonNullShuruq,
@@ -724,11 +755,13 @@ const NextPrayerTimeIntentWithoutNameHandler = {
       return await helperFunctions.checkForPersistenceData(handlerInput);
     }
     try {
-      const prayerTimeDetails = helperFunctions.getNextPrayerTime(
+      const prayerTimeDetails = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
         await helperFunctions.getUserTimezone(handlerInput),
         requestAttributes.t("prayerNames"),
+        [],
+        persistentAttributes.uuid,
       );
       helperFunctions.checkForCharacterDisplay(
         handlerInput,
@@ -810,12 +843,13 @@ const NextIqamaTimeIntentHandler = {
       const month = currentDateTime.getMonth();
       const iqamaTimes = iqamaCalendar[month][String(date)];
       console.log("Iqama Times: ", iqamaTimes);
-      const nextIqamaTime = helperFunctions.getNextPrayerTime(
+      const nextIqamaTime = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
         userTimeZone,
         prayerNames,
         iqamaTimes,
+        persistentAttributes.uuid,
       );
       console.log("Next Iqama Time: ", nextIqamaTime);
       helperFunctions.checkForCharacterDisplay(
@@ -1372,11 +1406,13 @@ const PlayAdhanTaskHandler = {
       }
       let audioName = "Adhaan";
       const prayerNames = requestAttributes.t("prayerNames");
-      const prayerTimeDetails = helperFunctions.getNextPrayerTime(
+      const prayerTimeDetails = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
         userTimeZone,
         prayerNames,
+        [],
+        persistentAttributes.uuid,
       );
       const isFajrPrayer = prayerTimeDetails.name === prayerNames[0];
       let audioUrl = isFajrPrayer

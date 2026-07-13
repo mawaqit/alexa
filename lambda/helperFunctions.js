@@ -1,6 +1,6 @@
 const Alexa = require("ask-sdk-core");
 const { v4: uuidv4 } = require("uuid");
-const { getMosqueList } = require("./handlers/apiHandler.js");
+const { getMosqueList, getPrayerTimings } = require("./handlers/apiHandler.js");
 const { getDataSourceforMosqueList } = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
 const moment = require("moment-timezone");
@@ -63,12 +63,13 @@ const createDirectivePayload = (
   };
 };
 
-const getNextPrayerTime = (
+const getNextPrayerTime = async (
   requestAttributes,
   times,
   timezone,
   prayerNames,
   iqamaTime = [],
+  mosqueUuid = null,
 ) => {
   const currentDateTime = new Date(
     new Date().toLocaleString("en-US", { timeZone: timezone }),
@@ -104,9 +105,39 @@ const getNextPrayerTime = (
     };
   } else {
     console.log("No time is greater than or equal to current time: ", times[0]);
-    const nextTime = times[0];
-    const nextTimeMoment = `${moment(now).add(1, "days").format("YYYY-MM-DD")}T${nextTime}`;
+    // All of today's slots have passed → the next one is tomorrow's first
+    // prayer (or iqama). Their actual times can differ from today's, so fetch
+    // them from the calendar when we can rather than reusing today's times.
+    const isIqama = Array.isArray(iqamaTime) && iqamaTime.length > 0;
+    const tomorrowBase = moment(now).add(1, "days");
+    let firstPrayerTime = times[0];
+    let firstIqamaTime = iqamaTime[0];
+    if (mosqueUuid) {
+      try {
+        const tomorrowTimes = await getTomorrowPrayerTimes(mosqueUuid, timezone);
+        if (tomorrowTimes?.times?.[0]) {
+          firstPrayerTime = tomorrowTimes.times[0];
+        }
+        if (isIqama) {
+          const tomorrowIqama = await getTomorrowIqamaTimes(
+            mosqueUuid,
+            timezone,
+          );
+          if (tomorrowIqama?.[0]) {
+            firstIqamaTime = tomorrowIqama[0];
+          }
+        }
+      } catch (error) {
+        console.log("Error fetching tomorrow's times: ", error);
+      }
+    }
+    // For iqama, resolve tomorrow's first iqama moment (absolute or offset from
+    // the prayer time); otherwise use tomorrow's first prayer time directly.
+    const nextMoment = isIqama
+      ? resolveIqamaMoment(firstIqamaTime, tomorrowBase, firstPrayerTime)
+      : generateMomentObject(firstPrayerTime, tomorrowBase);
     const currentTime = now.format("YYYY-MM-DDTHH:mm");
+    const nextTimeMoment = nextMoment.format("YYYY-MM-DDTHH:mm");
     const diffInMinutesPrompt = calculateMinutes(
       requestAttributes,
       currentTime,
@@ -115,7 +146,7 @@ const getNextPrayerTime = (
     const diffInMinutes = getDifferenceInMinutes(currentTime, nextTimeMoment);
     return {
       name: prayerNames[0],
-      time: times[0],
+      time: nextMoment.format("HH:mm"),
       diffInMinutesPrompt: diffInMinutesPrompt,
       diffInMinutes: diffInMinutes,
     };
@@ -162,11 +193,13 @@ const getPrayerTimingsForMosque = async (
   try {
     const userTimeZone = await getUserTimezone(handlerInput);
     const prayerNames = requestAttributes.t("prayerNames");
-    const nextPrayerTime = getNextPrayerTime(
+    const nextPrayerTime = await getNextPrayerTime(
       requestAttributes,
       mosqueTimes.times,
       userTimeZone,
       prayerNames,
+      [],
+      persistentAttributes?.uuid,
     );
     speakOutput += requestAttributes.t(
       "nextPrayerTimePrompt",
@@ -535,6 +568,83 @@ const getPrayerTimeForSpecificPrayer = (
       .withShouldEndSession(true)
       .getResponse();
   }
+};
+
+/**
+ * Fetches the prayer times for the day following today (in the mosque's timezone).
+ *
+ * `mosqueTimes.times` only ever holds today's timings, so when a requested prayer
+ * has already passed we need the calendar to know the actual time for the same
+ * prayer tomorrow (prayer times drift by a minute or so from day to day).
+ *
+ * @returns {Promise<{times: string[], shuruq: string}|null>} Tomorrow's timings
+ *  aligned with `mosqueTimes.times` (index 0-4 = Fajr..Isha), plus the raw shuruq
+ *  time, or `null` when the calendar is unavailable.
+ */
+const getTomorrowPrayerTimes = async (uuid, timezone) => {
+  const data = await getPrayerTimings(uuid, timezone, false, true);
+  const calendar = data?.calendar;
+  if (!Array.isArray(calendar) || calendar.length === 0) {
+    return null;
+  }
+  const currentDateTime = new Date(
+    new Date().toLocaleString("en-US", { timeZone: timezone }),
+  );
+  const tomorrow = new Date(currentDateTime);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const timings = calendar?.[tomorrow.getMonth()]?.[String(tomorrow.getDate())];
+  if (!Array.isArray(timings)) {
+    return null;
+  }
+  // Mirror apiHandler: index 1 (shuruq) is dropped so indices 0-4 map to the
+  // five daily prayers, exactly like `mosqueTimes.times`.
+  return {
+    times: timings.filter((_, index) => index !== 1),
+    shuruq: timings[1],
+  };
+};
+
+/**
+ * Fetches the iqama timings for the day following today (in the mosque's
+ * timezone).
+ *
+ * Iqama times live in a separate `iqamaCalendar` and only today's slice is kept
+ * in the session, so we re-fetch the calendar to know tomorrow's first iqama.
+ * Each entry is either an absolute `HH:mm` time or a minutes-offset applied to
+ * the matching prayer time (see `resolveIqamaMoment`).
+ *
+ * @returns {Promise<Array|null>} Tomorrow's iqama entries aligned with the
+ *  prayer indices (index 0 = Fajr), or `null` when unavailable.
+ */
+const getTomorrowIqamaTimes = async (uuid, timezone) => {
+  const data = await getPrayerTimings(uuid, timezone, true);
+  const iqamaCalendar = data?.iqamaCalendar;
+  if (!Array.isArray(iqamaCalendar) || iqamaCalendar.length === 0) {
+    return null;
+  }
+  const currentDateTime = new Date(
+    new Date().toLocaleString("en-US", { timeZone: timezone }),
+  );
+  const tomorrow = new Date(currentDateTime);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const timings =
+    iqamaCalendar?.[tomorrow.getMonth()]?.[String(tomorrow.getDate())];
+  return Array.isArray(timings) ? timings : null;
+};
+
+/**
+ * Returns whether the given `HH:mm` prayer time has already passed relative to
+ * `now` (both interpreted in the same timezone as `now`).
+ */
+const hasPrayerTimePassed = (prayerTime, now) => {
+  const [hours, minutes] = prayerTime.split(":");
+  const prayerMoment = moment(now).set({
+    hour: parseInt(hours),
+    minute: parseInt(minutes),
+    second: 0,
+    millisecond: 0,
+  });
+  return prayerMoment.isBefore(now);
 };
 
 const generateNextPrayerTime = (
@@ -1248,6 +1358,9 @@ module.exports = {
   getUserTimezone,
   calculateMinutes,
   getPrayerTimeForSpecificPrayer,
+  getTomorrowPrayerTimes,
+  getTomorrowIqamaTimes,
+  hasPrayerTimePassed,
   generateNextPrayerTime,
   translateText,
   callDirectiveService,

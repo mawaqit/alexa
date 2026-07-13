@@ -1,0 +1,45 @@
+name: Pull Request Automation
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened, synchronize]
+
+jobs:
+  Auto-Assign:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auto assign Author as Assignee
+        uses: kentaro-m/auto-assign-action@v2.0.0
+        with:
+          configuration-path: ".github/auto_assign_config.yaml"
+
+  Auto-Labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Labeler
+        uses: actions/labeler@v5
+        with:
+          configuration-path: .github/labeler_config.yaml
+
+      - name: Size Label
+        uses: "pascalgn/size-label-action@v0.5.5"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          IGNORED: "**/package-lock.json"
+        with:
+          sizes: >
+            {
+              "0": "XS",
+              "30": "S",
+              "100": "M",
+              "300": "L",
+              "800": "XL",
+              "2000": "XXL"
+            }

@@ -9,7 +9,7 @@
     "author": "Amazon Alexa",
     "license": "Apache License",
     "dependencies": {
-        "@google-cloud/translate": "^8.3.0",
+        "@google-cloud/translate": "^9.4.2",
         "@iamtraction/google-translate": "^2.0.1",
         "ask-sdk-core": "^2.7.0",
         "ask-sdk-model": "^1.19.0",
@@ -19,7 +19,7 @@
         "moment": "^2.29.4",
         "moment-timezone": "^0.5.4",
         "util": "^0.12.5",
-        "uuid": "^10.0.0",
+        "uuid": "^14.0.1",
         "@aws-sdk/client-dynamodb": "^3.971.0",
         "@aws-sdk/lib-dynamodb": "^3.971.0",
         "@aws-sdk/client-scheduler": "^3.971.0",

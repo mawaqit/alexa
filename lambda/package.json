@@ -10,7 +10,6 @@
     "license": "Apache License",
     "dependencies": {
         "@google-cloud/translate": "^9.4.2",
-        "@iamtraction/google-translate": "^2.0.1",
         "ask-sdk-core": "^2.7.0",
         "ask-sdk-model": "^1.19.0",
         "axios": "^1.7.4",

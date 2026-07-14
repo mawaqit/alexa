@@ -45,7 +45,7 @@ module.exports = {
     iqamaNotEnabledPrompt:
       "Die Zeiten zwischen Adhan und Iqama werden von Ihrer Moschee nicht bereitgestellt.",
     mosqueInfoPrompt:
-      "Ihre Moschee ist %s, in %s gelegen, etwa %s Kilometer von Ihnen entfernt. ",
+      "Ihre Moschee ist %s, in %s gelegen, etwa %s von Ihnen entfernt. ",
     mosqueInfoErrorPrompt:
       "Entschuldigung, ich konnte keine Informationen zu Ihrer Moschee finden. Bitte versuchen Sie es erneut.",
     nextPrayerTimeWithNamePrompt: `Das %s-Gebet ist um %s, in %s. `,

@@ -43,7 +43,7 @@ module.exports = {
     selectedMosquePrompt: `Perfect, %s is now your favorite mosque! `,
     nextPrayerWithoutMosquePrompt: `The next prayer is %s at %s, in %s.`,
     iqamaNotEnabledPrompt: `The times between the adhan and the iqama are not provided by your mosque.`,
-    mosqueInfoPrompt: `Your mosque is %s, located at %s, about %s kilometers from you. `,
+    mosqueInfoPrompt: `Your mosque is %s, located at %s, about %s from you. `,
     mosqueInfoErrorPrompt: `Sorry, I couldn't find any information for your mosque. Please try again.`,
     nextPrayerTimeWithNamePrompt: `The %s prayer is at %s, in %s.`,
     allIqamaTimesPrompt: `For %s, iqama is at %s.`,

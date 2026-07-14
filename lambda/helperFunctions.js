@@ -161,6 +161,7 @@ const getPrayerTimingsForMosque = async (
   const { persistentAttributes } = attributesManager.getSessionAttributes();
   try {
     const userTimeZone = await getUserTimezone(handlerInput);
+    const locale = Alexa.getLocale(handlerInput.requestEnvelope);
     const prayerNames = requestAttributes.t("prayerNames");
     const nextPrayerTime = getNextPrayerTime(
       requestAttributes,
@@ -172,7 +173,7 @@ const getPrayerTimingsForMosque = async (
       "nextPrayerTimePrompt",
       nextPrayerTime.name, // 1st %s: Prayer Name
       nextPrayerTime.diffInMinutesPrompt, // 2nd %s: Time Left
-      nextPrayerTime.time, // 3rd %s: Hour
+      formatTime(nextPrayerTime.time, locale), // 3rd %s: Hour
       persistentAttributes.primaryText, // 4th %s: Mosque Name
     );
 
@@ -514,13 +515,14 @@ const getPrayerTimeForSpecificPrayer = (
         minutesDiff,
       );
     }
+    const locale = Alexa.getLocale(handlerInput.requestEnvelope);
     checkForCharacterDisplay(handlerInput, prayerTime);
     return handlerInput.responseBuilder
       .speak(
         requestAttributes.t(
           "nextPrayerTimeWithNamePrompt",
           prayerName,
-          prayerTime,
+          formatTime(prayerTime, locale),
           speakOutput,
         ) + requestAttributes.t("doYouNeedAnythingElsePrompt"),
       )
@@ -698,6 +700,7 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
   const userTimeZone = await getUserTimezone(handlerInput);
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
+  const locale = Alexa.getLocale(handlerInput.requestEnvelope);
   console.log("User Timezone: ", userTimeZone);
   const prayerNames = requestAttributes.t("prayerNames");
   let allPrayerTimes = "";
@@ -717,7 +720,7 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
       allPrayerTimes += requestAttributes.t(
         "allPrayerTimesPrompt",
         prayer,
-        prayerDetails.time.format("HH:mm"),
+        formatTime(prayerDetails.time.format("HH:mm"), locale),
       );
     }
   });
@@ -835,6 +838,7 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   const { persistentAttributes } = sessionAttributes;
   const { routinePrayers } = persistentAttributes;
   const requestAttributes = attributesManager.getRequestAttributes();
+  const locale = Alexa.getLocale(handlerInput.requestEnvelope);
   const mosqueTimes = sessionAttributes.mosqueTimes;
   console.log("Mosque Times: ", JSON.stringify(mosqueTimes));
   const prayerNames = requestAttributes.t("prayerNames");
@@ -1220,17 +1224,98 @@ const ALL_PRAYERS = (handlerInput) => {
   };
 };
 
-function formatDistance(distance) {
-    // Parse to float in case the input is passed as a string
-    const distNum = parseFloat(distance);
+const METERS_PER_KM = 1000;
+const METERS_PER_MILE = 1609.344;
+const FEET_PER_METER = 3.28084;
 
-    if (distNum < 10) {
-        // Less than 10 km: keep 1 decimal place
-        return `${distNum.toFixed(1)}`;
+/**
+ * Resolve the user's preferred distance system ("METRIC" | "IMPERIAL") from the
+ * Alexa device settings. Falls back to a locale-based default when the setting
+ * is unavailable (en-US uses imperial, everything else metric).
+ */
+const getUserDistanceUnits = async (handlerInput) => {
+  const { serviceClientFactory, requestEnvelope } = handlerInput;
+  const deviceId = Alexa.getDeviceId(requestEnvelope);
+  try {
+    const units = await serviceClientFactory
+      .getUpsServiceClient()
+      .getSystemDistanceUnits(deviceId);
+    return units === "IMPERIAL" ? "IMPERIAL" : "METRIC";
+  } catch (error) {
+    console.log("Error in fetching distance units, using default: ", error);
+    const locale = Alexa.getLocale(requestEnvelope) || "";
+    return locale.toLowerCase() === "en-us" ? "IMPERIAL" : "METRIC";
+  }
+};
+
+/**
+ * Format a raw distance (in meters) into a fully localized string including the
+ * unit word, e.g. "9,6 kilomètres" (fr-FR), "800 meters" or "5.3 miles".
+ *
+ * Uses Intl.NumberFormat so the decimal separator (',' vs '.'), pluralization
+ * and unit translation follow the locale natively. Short distances are rendered
+ * in the smaller unit with no decimals (< 1 km -> meters, < 1 mile -> feet).
+ */
+function formatDistance(meters, locale = "en-US", units = "METRIC") {
+  const distanceInMeters = parseFloat(meters);
+  if (!Number.isFinite(distanceInMeters)) {
+    return "";
+  }
+
+  let value;
+  let unit;
+  let maximumFractionDigits;
+
+  if (units === "IMPERIAL") {
+    if (distanceInMeters < METERS_PER_MILE) {
+      value = Math.round(distanceInMeters * FEET_PER_METER);
+      unit = "foot";
+      maximumFractionDigits = 0;
     } else {
-        // 10 km or more: round to the nearest whole number
-        return `${Math.round(distNum)}`;
+      value = distanceInMeters / METERS_PER_MILE;
+      unit = "mile";
+      maximumFractionDigits = 1;
     }
+  } else if (distanceInMeters < METERS_PER_KM) {
+    value = Math.round(distanceInMeters);
+    unit = "meter";
+    maximumFractionDigits = 0;
+  } else {
+    value = distanceInMeters / METERS_PER_KM;
+    unit = "kilometer";
+    maximumFractionDigits = 1;
+  }
+
+  return new Intl.NumberFormat(locale, {
+    style: "unit",
+    unit,
+    unitDisplay: "long",
+    maximumFractionDigits,
+  }).format(value);
+}
+
+/**
+ * Format a "HH:mm" (24h) time string for the given locale, letting Intl pick the
+ * separator and 12h/24h convention natively (e.g. "9:05 PM" for en-US, "21:05"
+ * for fr-FR). Falls back to the raw input if it can't be parsed.
+ *
+ * NB: this is display/speech only — internal logic keeps the raw "HH:mm" form.
+ */
+function formatTime(time, locale = "en-US") {
+  if (typeof time !== "string") {
+    return time;
+  }
+  const match = time.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) {
+    return time;
+  }
+  const hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const date = new Date(2000, 0, 1, hours, minutes);
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
 }
 
 module.exports = {
@@ -1280,5 +1365,7 @@ module.exports = {
   CANONICAL_PRAYER_NAMES,
   isTaskTrigger,
   ALL_PRAYERS,
-  formatDistance
+  formatDistance,
+  getUserDistanceUnits,
+  formatTime,
 };

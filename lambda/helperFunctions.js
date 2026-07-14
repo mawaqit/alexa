@@ -857,7 +857,7 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
         const time = prayerDetails.time.format("HH:mm");
         const prayerName = prayerNamesForApl[index];
         return {
-          primaryText: prayerName + " " + time,
+          primaryText: prayerName,
           time: time,
           name: prayerName,
           namePhoneme: prayer,

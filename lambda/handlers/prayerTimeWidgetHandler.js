@@ -27,11 +27,13 @@ const InstallPrayerTimeWidgetRequestHandler = {
         userTimeZone,
       );
       const prayerNames = requestAttributes.t("prayerNames");
-      const nextPrayerTime = helperFunctions.getNextPrayerTime(
+      const nextPrayerTime = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
         userTimeZone,
         prayerNames,
+        [],
+        persistentAttributes.uuid,
       );
       const prayerTime = requestAttributes.t(
         "nextPrayerWithoutMosqueAndTimePrompt",

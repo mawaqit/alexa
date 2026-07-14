@@ -1,6 +1,7 @@
 const axios = require("axios");
 const mawaqitBaseUrl = process.env.BASE_URL;
 const moment = require("moment-timezone");
+const { translateHonorifics } = require("../util/hadithHonorifics.js");
 
 const getMosqueList = async (
   searchWord,
@@ -132,7 +133,9 @@ const getRandomHadith = async (lang = "ar") => {
         throw new Error("No hadith text found in response");
       }
 
-      return response.data.text;
+      // The source text embeds Arabic honorific formulas that Alexa cannot
+      // pronounce; replace them with their translation in the target language.
+      return translateHonorifics(response.data.text, lang);
     })
     .catch((error) => {
       console.error("Error while fetching Hadith: ", error);

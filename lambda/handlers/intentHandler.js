@@ -51,7 +51,7 @@ const DeleteRoutineStartedHandler = {
 
       let routineList = routinePrayers
         .map(({ name, time, namePhoneme }) => ({
-          primaryText: `${name} ${time}`,
+          primaryText: `${name}`,
           name,
           time,
           namePhoneme: namePhoneme || name,

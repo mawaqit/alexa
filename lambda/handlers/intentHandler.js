@@ -1563,17 +1563,17 @@ const CreateRoutineStartedHandler = {
   },
 };
 
-const CreateRoutineIntentHandler = {
+const CreateRoutinePrayerIndexHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
       Alexa.getIntentName(handlerInput.requestEnvelope) ===
         "CreateRoutineIntent" &&
-      (Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex") ||
-        helperFunctions.getResolvedId(
-          handlerInput.requestEnvelope,
-          "prayerName",
-        ))
+      Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex") &&
+      !helperFunctions.getResolvedId(
+        handlerInput.requestEnvelope,
+        "prayerName",
+      )
     );
   },
   async handle(handlerInput) {
@@ -1583,10 +1583,6 @@ const CreateRoutineIntentHandler = {
       await helperFunctions.validateUserAccountStatus(handlerInput);
     if (validateUserAccountStatus) return validateUserAccountStatus;
     try {
-      const prayerNameResolvedId = helperFunctions.getResolvedId(
-        handlerInput.requestEnvelope,
-        "prayerName",
-      );
       let prayerIndex =
         parseInt(
           Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex"),
@@ -1602,8 +1598,11 @@ const CreateRoutineIntentHandler = {
         (await helperFunctions.generatePrayerNameDetailsForRoutine(
           handlerInput,
         ));
-      if (prayerNameResolvedId !== undefined && prayerNameResolvedId !== null) {
-        prayerIndex = parseInt(prayerNameResolvedId) + 1; // Adjusting index to match the slot value
+      if (prayerNameDetails.length === 0) {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("allRoutinesEnabled"))
+          .withShouldEndSession(false)
+          .getResponse();
       }
       if (
         (prayerIndex < 1 || prayerIndex > prayerNameDetails.length) &&
@@ -1649,27 +1648,101 @@ const CreateRoutineIntentHandler = {
       }
 
       console.log("Selected Prayer: ", selectedPrayer);
-      // await helperFunctions.saveRequestedRoutinePrayer(
-      //   handlerInput,
-      //   selectedPrayer
-      // );
-      // const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-      // const automationDirective = helperFunctions.offerAutomation(
-      //   userTimeZone,
-      //   selectedPrayer.time,
-      //   selectedPrayer.name,
-      //   selectedPrayer.namePhoneme === prayerNames[5]
-      // );
-      // return handlerInput.responseBuilder
-      //   .addDirective(automationDirective)
-      //   .getResponse();
       return await helperFunctions.logRoutineCreation(
         handlerInput,
         selectedPrayer,
         prayerNameDetails,
       );
     } catch (error) {
-      console.log("Error in CreateRoutineIntentHandler:", error);
+      console.log("Error in CreateRoutinePrayerIndexHandler:", error);
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("routineErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  },
+};
+
+const CreateRoutinePrayerNameHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "CreateRoutineIntent" &&
+      helperFunctions.getResolvedId(
+        handlerInput.requestEnvelope,
+        "prayerName",
+      )
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    const validateUserAccountStatus =
+      await helperFunctions.validateUserAccountStatus(handlerInput);
+    if (validateUserAccountStatus) return validateUserAccountStatus;
+    try {
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const { persistentAttributes } = sessionAttributes;
+      if (!persistentAttributes?.uuid) {
+        return await helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      let prayerNameDetails =
+        sessionAttributes.prayerNameDetails ||
+        (await helperFunctions.generatePrayerNameDetailsForRoutine(
+          handlerInput,
+        ));
+      if (prayerNameDetails.length === 0) {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("allRoutinesEnabled"))
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+
+      const prayerNameResolvedId = helperFunctions.getResolvedId(
+        handlerInput.requestEnvelope,
+        "prayerName",
+      );
+
+      let selectedPrayer;
+      if (prayerNameResolvedId === String(ALL_PRAYER_INDEX)) {
+        const allPrayersName = requestAttributes.t("allPrayers");
+        selectedPrayer = prayerNameDetails.find(
+          (prayer) => prayer.name === allPrayersName,
+        );
+      } else {
+        const canonicalName =
+          helperFunctions.CANONICAL_PRAYER_NAMES[
+            parseInt(prayerNameResolvedId)
+          ];
+        selectedPrayer = prayerNameDetails.find(
+          (prayer) => prayer.canonicalName === canonicalName,
+        );
+      }
+
+      if (!selectedPrayer) {
+        console.log("Selected prayer not found or already enabled for resolved ID: ", prayerNameResolvedId);
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("routineAlreadyEnabled"))
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+
+      console.log("Selected Prayer: ", selectedPrayer);
+      return await helperFunctions.logRoutineCreation(
+        handlerInput,
+        selectedPrayer,
+        prayerNameDetails,
+      );
+    } catch (error) {
+      console.log("Error in CreateRoutinePrayerNameHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1953,7 +2026,8 @@ module.exports = {
   FavoriteAdhaanReciterIntentHandler,
   HadithIntentHandler,
   CreateRoutineStartedHandler,
-  CreateRoutineIntentHandler,
+  CreateRoutinePrayerIndexHandler,
+  CreateRoutinePrayerNameHandler,
   SessionResumedRequestHandler,
   YesIntentHandler,
   NoIntentHandler,

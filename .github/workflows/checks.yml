@@ -1,4 +1,4 @@
-# Reusable quality gate: lint + format check.
+# Reusable quality gate: lint, format check, and tests.
 # Called by ci.yml (on PRs) and by the deploy workflows before any deploy runs,
 # so nothing ever ships without passing these.
 name: Quality Checks
@@ -33,3 +33,34 @@ jobs:
 
       - name: Check formatting
         run: npm run format:check
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22 # matches the nodejs22.x runtime both lambdas deploy to
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            lambda/package-lock.json
+            azan-lambda/package-lock.json
+
+      # Root workspace holds jest; each lambda holds the runtime deps that tests
+      # need in order to require the modules under test.
+      - name: Install tooling
+        run: npm ci
+
+      - name: Install lambda deps
+        run: npm ci --prefix lambda
+
+      - name: Install azan-lambda deps
+        run: npm ci --prefix azan-lambda
+
+      - name: Run tests
+        run: npm test

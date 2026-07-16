@@ -4,6 +4,12 @@ service: mawaqit-alexa-azan
 
 frameworkVersion: ^4.0.0
 
+# Tests live next to the code they cover, but must never ship in the Lambda zip.
+package:
+  patterns:
+    - "!tests/**"
+    - "!**/*.test.js"
+
 custom:
   defaultStage: dev
   defaultRegion: eu-west-1 # Compute is always in Ireland

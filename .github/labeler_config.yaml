@@ -1,21 +1,9 @@
-scope/lambda:
-  - changed-files:
-      - any-glob-to-any-file: "lambda/**"
-
-scope/azan:
-  - changed-files:
-      - any-glob-to-any-file: "azan-lambda/**"
-
-scope/skill:
+scope/skill-config:
   - changed-files:
       - any-glob-to-any-file:
           - "interactionModels/**"
           - "skill-package/**"
           - "skillManifest/**"
-
-scope/tooling:
-  - changed-files:
-      - any-glob-to-any-file: "utils/**"
 
 scope/ci:
   - changed-files:

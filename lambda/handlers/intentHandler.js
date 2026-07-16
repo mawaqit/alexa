@@ -1570,10 +1570,7 @@ const CreateRoutinePrayerIndexHandler = {
       Alexa.getIntentName(handlerInput.requestEnvelope) ===
         "CreateRoutineIntent" &&
       Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex") &&
-      !helperFunctions.getResolvedId(
-        handlerInput.requestEnvelope,
-        "prayerName",
-      )
+      !helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName")
     );
   },
   async handle(handlerInput) {
@@ -1675,10 +1672,7 @@ const CreateRoutinePrayerNameHandler = {
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
       Alexa.getIntentName(handlerInput.requestEnvelope) ===
         "CreateRoutineIntent" &&
-      helperFunctions.getResolvedId(
-        handlerInput.requestEnvelope,
-        "prayerName",
-      )
+      helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName")
     );
   },
   async handle(handlerInput) {
@@ -1728,7 +1722,10 @@ const CreateRoutinePrayerNameHandler = {
       }
 
       if (!selectedPrayer) {
-        console.log("Selected prayer not found or already enabled for resolved ID: ", prayerNameResolvedId);
+        console.log(
+          "Selected prayer not found or already enabled for resolved ID: ",
+          prayerNameResolvedId,
+        );
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("routineAlreadyEnabled"))
           .withShouldEndSession(false)

@@ -114,7 +114,10 @@ const getNextPrayerTime = async (
     let firstIqamaTime = iqamaTime[0];
     if (mosqueUuid) {
       try {
-        const tomorrowTimes = await getTomorrowPrayerTimes(mosqueUuid, timezone);
+        const tomorrowTimes = await getTomorrowPrayerTimes(
+          mosqueUuid,
+          timezone,
+        );
         if (tomorrowTimes?.times?.[0]) {
           firstPrayerTime = tomorrowTimes.times[0];
         }

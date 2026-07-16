@@ -1,0 +1,32 @@
+# Every push to main deploys the dev environment.
+name: Deploy dev
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Serialize dev deploys; a newer push supersedes an in-flight one, so cancel it
+# to avoid concurrent `serverless deploy` runs contending on the same stacks.
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+
+  deploy:
+    needs: checks
+    # Caller permissions are the ceiling for reusable workflows: the deploy
+    # jobs authenticate to AWS via OIDC, which needs id-token: write.
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
+    with:
+      stage: dev
+      environment: dev
+    secrets: inherit

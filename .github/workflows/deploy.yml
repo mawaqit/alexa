@@ -1,0 +1,218 @@
+# Reusable deploy workflow. Called by deploy-dev.yml (stage=dev) and
+# deploy-prod.yml (stage=prod). Deploys both Lambda services and pushes the
+# interaction models to the skill's `development` stage.
+#
+# The Alexa skill going *live* is intentionally NOT automated:
+# publishing to the `live` stage requires Amazon certification, which is a
+# manual review. On prod releases this workflow deploys the prod backend and
+# leaves a reminder to submit for certification from the Alexa console.
+#
+# Discord notifications: if the optional repo secret DISCORD_WEBHOOK_URL is set,
+# a message is posted when a deploy starts and when it finishes (success or
+# failure). If the secret is missing, the notification steps no-op.
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: Serverless stage (dev | prod)
+        required: true
+        type: string
+      environment:
+        description: GitHub Environment holding the secrets for this stage
+        required: true
+        type: string
+
+# SKILL_ID: the skill ID from the Alexa Developer Console (one skill, both
+# stages share it). ASK_PROFILE: a profile present in the ASK_CLI_CONFIG secret.
+env:
+  SKILL_ID: ${{ vars.SKILL_ID }}
+  ASK_PROFILE: ${{ vars.ASK_PROFILE }}
+
+jobs:
+  notify-start:
+    name: Notify deploy started
+    runs-on: ubuntu-latest
+    permissions: {}
+    env:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+    steps:
+      - name: Short SHA
+        id: meta
+        if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
+        run: echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Discord — deploy started
+        if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
+          username: GitHub Actions
+          embed-title: "🚀 Deploy started — ${{ inputs.environment }}"
+          embed-description: "Stage `${{ inputs.stage }}` · commit `${{ steps.meta.outputs.short }}` · [run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          embed-color: "3447003"
+
+  deploy-lambda:
+    name: Deploy lambda (${{ inputs.stage }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write # OIDC
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lambda/package-lock.json
+
+      # AWS auth: OIDC
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-west-3
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless@^4
+
+      - name: Deploy Alexa Skill Backend
+        working-directory: lambda
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        run: |
+          npm ci
+          serverless deploy --stage ${{ inputs.stage }}
+
+  deploy-azan:
+    name: Deploy Azan Lambda (${{ inputs.stage }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: azan-lambda/package-lock.json
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: eu-west-3
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless@^4
+
+      - name: Deploy Azan Dispatcher
+        working-directory: azan-lambda
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+        run: |
+          npm ci
+          serverless deploy --stage ${{ inputs.stage }}
+
+  push-interaction-models:
+    name: Push Interaction Models (Development Stage)
+    # Only publish the voice model once both backends deploy, so the skill's
+    # development stage never points at a model whose backend failed to ship.
+    needs: [deploy-lambda, deploy-azan]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install ASK CLI
+        run: npm install -g ask-cli@^2
+
+      - name: Configure ASK CLI
+        env:
+          ASK_CLI_CONFIG: ${{ secrets.ASK_CLI_CONFIG }}
+        run: |
+          mkdir -p ~/.ask
+          echo "$ASK_CLI_CONFIG" | base64 --decode > ~/.ask/cli_config
+
+      - name: Push every locale to the development stage
+        working-directory: interactionModels
+        run: |
+          set -e
+          for f in *.json; do
+            locale="${f%.json}"
+            echo "→ $locale"
+            ask smapi set-interaction-model \
+              --skill-id "$SKILL_ID" \
+              --stage development \
+              --locale "$locale" \
+              --interaction-model "file:$f" \
+              -p "$ASK_PROFILE"
+          done
+
+  certification-reminder:
+    name: Certification reminder
+    if: ${{ inputs.stage == 'prod' }}
+    needs: [deploy-lambda, deploy-azan, push-interaction-models]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remind to Submit for Certification
+        run: |
+          echo "::notice title=Skill not yet live::Prod Lambda deployed and the interaction models are on the skill's *development* stage."
+          echo "::notice title=Manual step::Go live is manual (option B). Review the development stage, then submit for certification from the Alexa Developer Console (or run 'ask smapi submit-skill-for-certification')."
+
+  notify-result:
+    name: Notify deploy result
+    if: always()
+    needs: [deploy-lambda, deploy-azan, push-interaction-models]
+    runs-on: ubuntu-latest
+    permissions: {}
+    env:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+    steps:
+      - name: Compute status
+        id: status
+        if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
+        env:
+          # 'success' only if none of the needed jobs failed or was cancelled.
+          RESULT: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+        run: |
+          if [ "$RESULT" = "success" ]; then
+            echo "title=✅ Deploy succeeded — ${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+            echo "color=3066993" >> "$GITHUB_OUTPUT"
+          else
+            echo "title=❌ Deploy failed — ${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+            echo "color=15158332" >> "$GITHUB_OUTPUT"
+          fi
+          echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          # On a successful prod deploy, add a call-to-action link (webhooks
+          # can't send real buttons — that needs a bot — so this is a clickable
+          # markdown link). Empty otherwise, so nothing is appended.
+          if [ "$RESULT" = "success" ] && [ "${{ inputs.stage }}" = "prod" ]; then
+            echo "cta= · [🎓 Submit for certification](https://developer.amazon.com/alexa/console/ask)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Discord — deploy result
+        if: ${{ env.DISCORD_WEBHOOK_URL != '' }}
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ env.DISCORD_WEBHOOK_URL }}
+          username: GitHub Actions
+          embed-title: ${{ steps.status.outputs.title }}
+          embed-description: "Stage `${{ inputs.stage }}` · commit `${{ steps.status.outputs.short }}` · [run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})${{ steps.status.outputs.cta }}"
+          embed-color: ${{ steps.status.outputs.color }}

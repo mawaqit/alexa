@@ -1,0 +1,14 @@
+# Runs on every pull request targeting main.
+# Pure quality gate — no deploy, no credentials needed.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml

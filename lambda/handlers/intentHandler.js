@@ -11,7 +11,7 @@ const {
   getDataSourceForDeleteRoutineList,
 } = require("../datasources.js");
 const listApl = require("../aplDocuments/mosqueListApl.json");
-const { v4: uuidv4 } = require("uuid");
+const { randomUUID: uuidv4 } = require("crypto");
 const adhaanTasks = [
   "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan",
 ];
@@ -471,6 +471,18 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const mosqueList = sessionAttributes.mosqueList;
+    // Alexa routes SelectMosqueIntent on the utterance alone, so a bare "two"
+    // can arrive without the list ever having been read out, and a recycled
+    // session drops it. Indexing undefined here throws before the try block
+    // below, surfacing as the global error prompt. Re-offer the list instead.
+    // (MosqueYesIntentHandler guards the same thing.)
+    if (!Array.isArray(mosqueList) || mosqueList.length === 0) {
+      console.log("SelectMosqueIntent without a mosque list in session.");
+      return await helperFunctions.getListOfMosque(
+        handlerInput,
+        requestAttributes.t("unableToFindMosquePrompt"),
+      );
+    }
     const selectedMosqueDetails = mosqueList[parseInt(selectedMosque) - 1];
     if (!selectedMosqueDetails) {
       return await helperFunctions.createResponseDirectiveForMosqueList(
@@ -607,6 +619,7 @@ const NextPrayerTimeIntentHandler = {
           currentMoment,
           now,
           prayerNameFromData,
+          userTimeZone,
         );
       }
       switch (parseInt(prayerNameResolvedId)) {
@@ -707,6 +720,7 @@ const NextPrayerTimeIntentHandler = {
               currentMoment,
               now,
               prayerNameFromData,
+              userTimeZone,
             );
           }
           return handlerInput.responseBuilder
@@ -845,8 +859,24 @@ const NextIqamaTimeIntentHandler = {
       );
       const date = currentDateTime.getDate();
       const month = currentDateTime.getMonth();
-      const iqamaTimes = iqamaCalendar[month][String(date)];
+      const iqamaTimes = iqamaCalendar?.[month]?.[String(date)];
       console.log("Iqama Times: ", iqamaTimes);
+      // Without today's row, getNextPrayerTime falls back to its `iqamaTime = []`
+      // default and resolves every slot to the adhan itself — which would be
+      // announced to the user as the iqama. Saying we don't have the times is
+      // correct; sending someone to the mosque at the call to prayer is not.
+      if (!Array.isArray(iqamaTimes)) {
+        console.log(
+          "No iqama row for today; refusing to fall back to adhan times.",
+        );
+        return handlerInput.responseBuilder
+          .speak(
+            requestAttributes.t("iqamaNotEnabledPrompt") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      }
       const nextIqamaTime = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
@@ -1093,8 +1123,24 @@ const AllIqamaTimeIntentHandler = {
       );
       const date = currentDateTime.getDate();
       const month = currentDateTime.getMonth();
-      const iqamaTimes = iqamaCalendar[month][String(date)];
+      const iqamaTimes = iqamaCalendar?.[month]?.[String(date)];
       console.log("Iqama Times: ", iqamaTimes);
+      // Without today's row, getNextPrayerTime falls back to its `iqamaTime = []`
+      // default and resolves every slot to the adhan itself — which would be
+      // announced to the user as the iqama. Saying we don't have the times is
+      // correct; sending someone to the mosque at the call to prayer is not.
+      if (!Array.isArray(iqamaTimes)) {
+        console.log(
+          "No iqama row for today; refusing to fall back to adhan times.",
+        );
+        return handlerInput.responseBuilder
+          .speak(
+            requestAttributes.t("iqamaNotEnabledPrompt") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      }
       const locale = Alexa.getLocale(handlerInput.requestEnvelope);
       let allIqamaTimes = "";
       prayerNames.forEach((prayer, index) => {
@@ -1107,6 +1153,7 @@ const AllIqamaTimeIntentHandler = {
             moment(currentDateTime),
             prayer,
             iqamaTime,
+            userTimeZone,
           );
           console.log("Iqama Details for %s: ", prayer, iqamaDetails);
           allIqamaTimes += requestAttributes.t(

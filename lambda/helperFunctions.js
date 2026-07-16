@@ -1,5 +1,5 @@
 const Alexa = require("ask-sdk-core");
-const { v4: uuidv4 } = require("uuid");
+const { randomUUID: uuidv4 } = require("crypto");
 const { getMosqueList, getPrayerTimings } = require("./handlers/apiHandler.js");
 const { getDataSourceforMosqueList } = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
@@ -86,6 +86,7 @@ const getNextPrayerTime = async (
       now,
       prayerNames[index],
       iqamaTime[index],
+      timezone,
     ),
   );
   console.log("Time Moments: ", timeMoments);
@@ -145,8 +146,13 @@ const getNextPrayerTime = async (
       requestAttributes,
       currentTime,
       nextTimeMoment,
+      timezone,
     );
-    const diffInMinutes = getDifferenceInMinutes(currentTime, nextTimeMoment);
+    const diffInMinutes = getDifferenceInMinutes(
+      currentTime,
+      nextTimeMoment,
+      timezone,
+    );
     return {
       name: prayerNames[0],
       time: nextMoment.format("HH:mm"),
@@ -484,7 +490,24 @@ function checkForCharacterDisplay(handlerInput, nextPrayerTime) {
   }
 }
 
-const getDifferenceInMinutes = (start, end) => {
+/**
+ * Minutes between two "YYYY-MM-DDTHH:mm" wall-clock stamps.
+ *
+ * Pass `timezone` whenever the answer is spoken to the user: wall-clock stamps
+ * carry no UTC offset, so on the two nights a year the clocks change, a plain
+ * subtraction is off by an hour — 23:30 to 06:30 across the spring jump reads
+ * as 7h when the user really waits 6h. Resolving both stamps in the mosque's
+ * zone measures the time actually elapsed.
+ *
+ * During the autumn repeat an ambiguous stamp resolves to its first (summer)
+ * occurrence, which is moment-timezone's default.
+ */
+const getDifferenceInMinutes = (start, end, timezone) => {
+  if (timezone) {
+    return moment
+      .tz(end, "YYYY-MM-DDTHH:mm", timezone)
+      .diff(moment.tz(start, "YYYY-MM-DDTHH:mm", timezone), "minutes");
+  }
   const startDate = new Date(start);
   const endDate = new Date(end);
 
@@ -492,8 +515,8 @@ const getDifferenceInMinutes = (start, end) => {
   return diffInMilliseconds / 1000 / 60;
 };
 
-function calculateMinutes(requestAttributes, start, end) {
-  const diffInMinutes = getDifferenceInMinutes(start, end);
+function calculateMinutes(requestAttributes, start, end, timezone) {
+  const diffInMinutes = getDifferenceInMinutes(start, end, timezone);
 
   let result;
 
@@ -528,6 +551,7 @@ const getPrayerTimeForSpecificPrayer = (
   currentMoment,
   now,
   prayerName,
+  timezone,
 ) => {
   try {
     const requestAttributes =
@@ -536,11 +560,19 @@ const getPrayerTimeForSpecificPrayer = (
     const timeMoment = moment(
       `${now.format("YYYY-MM-DD")}T${hours}:${minutes}`,
     );
-    const timeDifference = timeMoment.isSameOrAfter(currentMoment)
-      ? moment.duration(timeMoment.diff(currentMoment))
-      : moment.duration(timeMoment.add(1, "days").diff(currentMoment));
-    const hoursDiff = timeDifference.hours();
-    const minutesDiff = timeDifference.minutes();
+    // Already passed today → the user is asking about tomorrow's occurrence.
+    if (timeMoment.isBefore(currentMoment)) {
+      timeMoment.add(1, "days");
+    }
+    // Measured in the mosque's zone so the countdown stays true across a DST
+    // transition; see getDifferenceInMinutes.
+    const totalMinutes = getDifferenceInMinutes(
+      currentMoment.format("YYYY-MM-DDTHH:mm"),
+      timeMoment.format("YYYY-MM-DDTHH:mm"),
+      timezone,
+    );
+    const hoursDiff = Math.floor(totalMinutes / 60);
+    const minutesDiff = Math.floor(totalMinutes % 60);
     let speakOutput;
     if (minutesDiff <= 59 && hoursDiff < 1) {
       speakOutput = requestAttributes.t("minutesPrompt", minutesDiff);
@@ -658,6 +690,7 @@ const generateNextPrayerTime = (
   now,
   prayerName,
   iqamaTime,
+  timezone,
 ) => {
   const currentMoment = now.format("YYYY-MM-DDTHH:mm");
   const timeMoment = resolveIqamaMoment(iqamaTime, now, prayerTime);
@@ -668,10 +701,12 @@ const generateNextPrayerTime = (
       requestAttributes,
       currentMoment,
       timeMoment.format("YYYY-MM-DDTHH:mm"),
+      timezone,
     ),
     diffInMinutes: getDifferenceInMinutes(
       currentMoment,
       timeMoment.format("YYYY-MM-DDTHH:mm"),
+      timezone,
     ),
   };
 };
@@ -828,6 +863,8 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
         prayerTime,
         moment(currentDateTime),
         prayer,
+        undefined,
+        userTimeZone,
       );
       console.log("Prayer Details for %s: ", prayer, prayerDetails);
       allPrayerTimes += requestAttributes.t(
@@ -969,6 +1006,8 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
           prayerTime,
           moment(currentDateTime),
           prayer,
+          undefined,
+          userTimeZone,
         );
         console.log("Prayer Details for %s: ", prayer, prayerDetails);
         const time = prayerDetails.time.format("HH:mm");

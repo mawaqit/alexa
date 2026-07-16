@@ -2,3 +2,6 @@
 
 ask-resources.json
 .ask
+
+# Jest coverage output (`jest --coverage`)
+coverage

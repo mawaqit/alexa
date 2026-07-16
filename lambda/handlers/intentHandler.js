@@ -471,6 +471,18 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const mosqueList = sessionAttributes.mosqueList;
+    // Alexa routes SelectMosqueIntent on the utterance alone, so a bare "two"
+    // can arrive without the list ever having been read out, and a recycled
+    // session drops it. Indexing undefined here throws before the try block
+    // below, surfacing as the global error prompt. Re-offer the list instead.
+    // (MosqueYesIntentHandler guards the same thing.)
+    if (!Array.isArray(mosqueList) || mosqueList.length === 0) {
+      console.log("SelectMosqueIntent without a mosque list in session.");
+      return await helperFunctions.getListOfMosque(
+        handlerInput,
+        requestAttributes.t("unableToFindMosquePrompt"),
+      );
+    }
     const selectedMosqueDetails = mosqueList[parseInt(selectedMosque) - 1];
     if (!selectedMosqueDetails) {
       return await helperFunctions.createResponseDirectiveForMosqueList(

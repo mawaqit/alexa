@@ -19,6 +19,9 @@ const buildHandlerInput = ({
   timezone = "Europe/Paris",
   distanceUnits = "METRIC",
   timezoneError = null,
+  // A linked account is the normal state; pass null to exercise the
+  // "please link your account" branch.
+  accessToken = "access-token",
 } = {}) => {
   const session = { ...sessionAttributes };
   let persistent = { ...persistentAttributes };
@@ -30,7 +33,7 @@ const buildHandlerInput = ({
       System: {
         apiEndpoint: "https://api.eu.amazonalexa.com",
         device: { deviceId: "device-1", supportedInterfaces },
-        user: { userId: "user-1" },
+        user: { userId: "user-1", ...(accessToken ? { accessToken } : {}) },
       },
     },
     request: {

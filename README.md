@@ -40,6 +40,7 @@ alexa/
 │   ├── handlers/            # Intent handlers, DynamoDB, Alexa APIs, etc.
 │   ├── prompts/              # Locale-specific prompt strings (en, fr, de)
 │   ├── aplDocuments/         # Alexa Presentation Language (APL) templates
+│   ├── tests/                # Jest tests for this service
 │   ├── env.json              # Non-secret per-stage config, read by serverless.yml
 │   └── serverless.yml
 ├── azan-lambda/             # Smart Azan dispatcher (service: mawaqit-alexa-azan)
@@ -47,6 +48,7 @@ alexa/
 │   ├── src/dbHandler/          # DynamoDB access
 │   ├── src/authHandler/        # Amazon OAuth2 handling
 │   ├── src/ssmHandler/         # SSM parameter loading
+│   ├── tests/                 # Jest tests for this service
 │   ├── env.json
 │   └── serverless.yml
 ├── interactionModels/         # One JSON file per supported locale
@@ -63,6 +65,49 @@ Each Lambda service has its own dependencies and must be installed separately:
 cd lambda && npm install
 cd ../azan-lambda && npm install
 ```
+
+The repo root is a tooling workspace (eslint, prettier, jest). Install it too:
+
+```bash
+npm install
+```
+
+## Testing
+
+Tests run with [Jest](https://jestjs.io/) from the repo root and live next to the
+code they cover, in `lambda/tests/` and `azan-lambda/tests/`. Each
+`serverless.yml` excludes them from its deploy artifact via `package.patterns`.
+
+```bash
+npm test            # run the whole suite
+npm run test:watch  # re-run on change
+```
+
+The suite needs each service's own dependencies installed as well, because a test
+resolves the modules under test from that service's `node_modules`.
+
+### From your editor
+
+VS Code and Cursor: install the recommended [Jest extension](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest),
+then reload the window — it only activates on a workspace that already contains
+`jest.config.js`, so a window opened before Jest was set up will not show the
+Testing panel. Tests then run and debug from that panel. JetBrains IDEs need no
+setup.
+
+### Pre-push hook
+
+`npm install` at the root also installs a [husky](https://typicode.github.io/husky/)
+pre-push hook that runs the suite and blocks the push if it fails. There is
+nothing else to configure. If it ever stops firing, re-register it with:
+
+```bash
+npm run prepare
+```
+
+The hook checks your working tree rather than the commits being pushed, and
+`git push --no-verify` bypasses it — it is a convenience, not a guarantee. The
+real gate is CI: `.github/workflows/checks.yml` runs lint, format check, and
+tests on pull requests and ahead of every deploy.
 
 ## Configuring secrets (SSM Parameter Store)
 

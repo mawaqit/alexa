@@ -28,5 +28,13 @@ module.exports = [
       "no-empty": ["error", { allowEmptyCatch: true }],
     },
   },
+  {
+    files: ["**/*.test.js", "**/tests/**/*.js"],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+  },
   prettierConfig,
 ];

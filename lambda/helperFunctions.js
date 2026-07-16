@@ -1,5 +1,5 @@
 const Alexa = require("ask-sdk-core");
-const { v4: uuidv4 } = require("uuid");
+const { randomUUID: uuidv4 } = require("crypto");
 const { getMosqueList, getPrayerTimings } = require("./handlers/apiHandler.js");
 const { getDataSourceforMosqueList } = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");

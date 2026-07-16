@@ -18,7 +18,6 @@
         "moment": "^2.29.4",
         "moment-timezone": "^0.5.4",
         "util": "^0.12.5",
-        "uuid": "^14.0.1",
         "@aws-sdk/client-dynamodb": "^3.971.0",
         "@aws-sdk/lib-dynamodb": "^3.971.0",
         "@aws-sdk/client-scheduler": "^3.971.0",

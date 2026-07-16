@@ -607,6 +607,7 @@ const NextPrayerTimeIntentHandler = {
           currentMoment,
           now,
           prayerNameFromData,
+          userTimeZone,
         );
       }
       switch (parseInt(prayerNameResolvedId)) {
@@ -707,6 +708,7 @@ const NextPrayerTimeIntentHandler = {
               currentMoment,
               now,
               prayerNameFromData,
+              userTimeZone,
             );
           }
           return handlerInput.responseBuilder
@@ -845,8 +847,24 @@ const NextIqamaTimeIntentHandler = {
       );
       const date = currentDateTime.getDate();
       const month = currentDateTime.getMonth();
-      const iqamaTimes = iqamaCalendar[month][String(date)];
+      const iqamaTimes = iqamaCalendar?.[month]?.[String(date)];
       console.log("Iqama Times: ", iqamaTimes);
+      // Without today's row, getNextPrayerTime falls back to its `iqamaTime = []`
+      // default and resolves every slot to the adhan itself — which would be
+      // announced to the user as the iqama. Saying we don't have the times is
+      // correct; sending someone to the mosque at the call to prayer is not.
+      if (!Array.isArray(iqamaTimes)) {
+        console.log(
+          "No iqama row for today; refusing to fall back to adhan times.",
+        );
+        return handlerInput.responseBuilder
+          .speak(
+            requestAttributes.t("iqamaNotEnabledPrompt") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      }
       const nextIqamaTime = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
@@ -1093,8 +1111,24 @@ const AllIqamaTimeIntentHandler = {
       );
       const date = currentDateTime.getDate();
       const month = currentDateTime.getMonth();
-      const iqamaTimes = iqamaCalendar[month][String(date)];
+      const iqamaTimes = iqamaCalendar?.[month]?.[String(date)];
       console.log("Iqama Times: ", iqamaTimes);
+      // Without today's row, getNextPrayerTime falls back to its `iqamaTime = []`
+      // default and resolves every slot to the adhan itself — which would be
+      // announced to the user as the iqama. Saying we don't have the times is
+      // correct; sending someone to the mosque at the call to prayer is not.
+      if (!Array.isArray(iqamaTimes)) {
+        console.log(
+          "No iqama row for today; refusing to fall back to adhan times.",
+        );
+        return handlerInput.responseBuilder
+          .speak(
+            requestAttributes.t("iqamaNotEnabledPrompt") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      }
       const locale = Alexa.getLocale(handlerInput.requestEnvelope);
       let allIqamaTimes = "";
       prayerNames.forEach((prayer, index) => {
@@ -1107,6 +1141,7 @@ const AllIqamaTimeIntentHandler = {
             moment(currentDateTime),
             prayer,
             iqamaTime,
+            userTimeZone,
           );
           console.log("Iqama Details for %s: ", prayer, iqamaDetails);
           allIqamaTimes += requestAttributes.t(

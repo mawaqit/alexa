@@ -97,8 +97,9 @@ setup.
 ### Pre-push hook
 
 `npm install` at the root also installs a [husky](https://typicode.github.io/husky/)
-pre-push hook that runs the suite and blocks the push if it fails. There is
-nothing else to configure. If it ever stops firing, re-register it with:
+pre-push hook that runs lint then the test suite, and blocks the push if either
+fails. There is nothing else to configure. If it ever stops firing, re-register
+it with:
 
 ```bash
 npm run prepare

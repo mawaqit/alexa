@@ -62,33 +62,23 @@ const DeleteRoutineStartedHandler = {
           return timeA.diff(timeB);
         });
       if (routineList.length === 1) {
-        return handlerInput.responseBuilder
-          .speak(
-            requestAttributes.t(
-              "deleteRoutineConfirmPrompt",
-              routineList[0].namePhoneme,
-            ),
-          )
-          .addDirective({
-            type: "Dialog.ConfirmSlot",
-            slotToConfirm: "prayerIndex",
-            updatedIntent: {
-              name: "DeleteRoutineIntent",
-              confirmationStatus: "NONE",
-              slots: {
-                prayerName: {
-                  name: "prayerName",
-                  confirmationStatus: "NONE",
-                },
-                prayerIndex: {
-                  name: "prayerIndex",
-                  value: String(routinePrayers.length),
-                  confirmationStatus: "NONE",
-                },
-              },
-            },
-          })
-          .withShouldEndSession(false)
+        const routineName = routineList[0].name;
+        const deleted = await helperFunctions.deleteRoutine(
+          handlerInput,
+          routineName,
+        );
+        let speakOutput = requestAttributes.t("routineDeletedPrompt");
+        if (deleted) {
+          return responseBuilder
+            .speak(
+              speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
+            )
+            .withShouldEndSession(false)
+            .getResponse();
+        }
+        return responseBuilder
+          .speak(requestAttributes.t("deleteRoutineErrorPrompt"))
+          .withShouldEndSession(true)
           .getResponse();
       }
       routineList = [helperFunctions.ALL_PRAYERS(handlerInput), ...routineList];
@@ -206,72 +196,25 @@ const DeleteRoutinePrayerIndexHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
-      // Slot is present, check confirmation
-      const prayerIndexSlotObj =
-        requestEnvelope.request.intent.slots.prayerIndex;
-      const confirmationStatus = prayerIndexSlotObj.confirmationStatus;
+      // Slot is present, delete directly
       const selectedPrayer = routinePrayers[prayerIndex - 1];
       console.log("Selected Prayer: ", selectedPrayer);
-      if (confirmationStatus === "DENIED") {
+      const routineName = selectedPrayer.name; // or resolved name
+      const deleted = await helperFunctions.deleteRoutine(
+        handlerInput,
+        routineName,
+      );
+      let speakOutput = requestAttributes.t("routineDeletedPrompt");
+      if (routineName === requestAttributes.t("allPrayers")) {
+        speakOutput = requestAttributes.t("routinesDeletedPrompt");
+      }
+      if (deleted) {
         return responseBuilder
           .speak(
-            requestAttributes.t("okPrompt") +
-              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+            speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
           )
           .withShouldEndSession(false)
           .getResponse();
-      }
-
-      if (confirmationStatus === "NONE") {
-        return responseBuilder
-          .speak(
-            requestAttributes.t(
-              "deleteRoutineConfirmPrompt",
-              selectedPrayer.namePhoneme || selectedPrayer.name,
-            ),
-          )
-          .addDirective({
-            type: "Dialog.ConfirmSlot",
-            slotToConfirm: "prayerIndex",
-            updatedIntent: {
-              name: "DeleteRoutineIntent",
-              confirmationStatus: "NONE",
-              slots: {
-                prayerIndex: {
-                  name: "prayerIndex",
-                  value: String(prayerIndex),
-                  confirmationStatus: "NONE",
-                },
-                prayerName: {
-                  name: "prayerName",
-                  confirmationStatus: "NONE",
-                },
-              },
-            },
-          })
-          .withShouldEndSession(false)
-          .getResponse();
-      }
-
-      // Confirmed
-      if (confirmationStatus === "CONFIRMED") {
-        const routineName = selectedPrayer.name; // or resolved name
-        const deleted = await helperFunctions.deleteRoutine(
-          handlerInput,
-          routineName,
-        );
-        let speakOutput = requestAttributes.t("routineDeletedPrompt");
-        if (routineName === requestAttributes.t("allPrayers")) {
-          speakOutput = requestAttributes.t("routinesDeletedPrompt");
-        }
-        if (deleted) {
-          return responseBuilder
-            .speak(
-              speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
-            )
-            .withShouldEndSession(false)
-            .getResponse();
-        }
       }
       return responseBuilder
         .speak(requestAttributes.t("deleteRoutineErrorPrompt")) // Reuse error or "routine not found"
@@ -359,57 +302,29 @@ const DeleteRoutinePrayerNameHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
-      // Slot is present, check confirmation
-      const prayerNameSlotObj = requestEnvelope.request.intent.slots.prayerName;
-      const confirmationStatus = prayerNameSlotObj.confirmationStatus;
+      // Slot is present, delete directly
       const selectedPrayer =
         prayerNameResolvedId === String(ALL_PRAYER_INDEX)
           ? helperFunctions.ALL_PRAYERS(handlerInput)
           : routinePrayers[prayerIndex];
       console.log("Selected Prayer: ", selectedPrayer);
-      if (confirmationStatus === "DENIED") {
+      const routineName = selectedPrayer.name; // or resolved name
+      const deleted = await helperFunctions.deleteRoutine(
+        handlerInput,
+        routineName,
+      );
+      let speakOutput = requestAttributes.t("routineDeletedPrompt");
+      if (routineName === requestAttributes.t("allPrayers")) {
+        speakOutput = requestAttributes.t("routinesDeletedPrompt");
+      }
+
+      if (deleted) {
         return responseBuilder
           .speak(
-            requestAttributes.t("okPrompt") +
-              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+            speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
           )
           .withShouldEndSession(false)
           .getResponse();
-      }
-      const currentIntent = handlerInput.requestEnvelope.request.intent;
-      if (confirmationStatus === "NONE") {
-        return responseBuilder
-          .speak(
-            requestAttributes.t(
-              "deleteRoutineConfirmPrompt",
-              selectedPrayer.namePhoneme || selectedPrayer.name,
-            ),
-          )
-          .addConfirmSlotDirective("prayerName", currentIntent)
-          .withShouldEndSession(false)
-          .getResponse();
-      }
-
-      // Confirmed
-      if (confirmationStatus === "CONFIRMED") {
-        const routineName = selectedPrayer.name; // or resolved name
-        const deleted = await helperFunctions.deleteRoutine(
-          handlerInput,
-          routineName,
-        );
-        let speakOutput = requestAttributes.t("routineDeletedPrompt");
-        if (routineName === requestAttributes.t("allPrayers")) {
-          speakOutput = requestAttributes.t("routinesDeletedPrompt");
-        }
-
-        if (deleted) {
-          return responseBuilder
-            .speak(
-              speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
-            )
-            .withShouldEndSession(false)
-            .getResponse();
-        }
       }
       return responseBuilder
         .speak(requestAttributes.t("deleteRoutineErrorPrompt")) // Reuse error or "routine not found"

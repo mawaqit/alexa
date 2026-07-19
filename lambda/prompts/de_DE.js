@@ -51,6 +51,9 @@ module.exports = {
     nextPrayerTimeWithNamePrompt: `Das %s-Gebet ist um %s, in %s. `,
     allIqamaTimesPrompt: "Für %s ist die Iqama um %s. ",
     deleteDataPrompt: `Ihre Daten wurden erfolgreich gelöscht. Starten Sie die Skill neu, um ${process.env.SKILL_NAME} wieder zu nutzen.`,
+    deleteDataConfirmPrompt: `Sind Sie sicher, dass Sie alle Ihre Daten löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.`,
+    deleteDataDeniedPrompt: `Ok, Ihre Daten wurden nicht gelöscht.`,
+    errorDeleteDataPrompt: `Entschuldigung, beim Löschen Ihrer Daten ist ein Fehler aufgetreten. Bitte versuchen Sie es später noch einmal.`,
     okPrompt: "Ok. ",
     jummaTimePrompt:
       "Außerdem ist das Freitagsgebet, <sub alias='dschumua'>Jumua</sub>, um %s.",

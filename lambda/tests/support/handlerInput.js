@@ -13,6 +13,7 @@ const buildHandlerInput = ({
   requestType = "IntentRequest",
   intentName,
   slots = {},
+  confirmationStatus = "NONE",
   sessionAttributes = {},
   persistentAttributes = {},
   supportedInterfaces = {},
@@ -41,7 +42,7 @@ const buildHandlerInput = ({
       requestId: "request-1",
       locale,
       ...(intentName
-        ? { intent: { name: intentName, confirmationStatus: "NONE", slots } }
+        ? { intent: { name: intentName, confirmationStatus, slots } }
         : {}),
     },
   };

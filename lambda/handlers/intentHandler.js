@@ -1155,20 +1155,39 @@ const DeleteDataIntentHandler = {
     );
   },
   async handle(handlerInput) {
-    const requestAttributes =
-      handlerInput.attributesManager.getRequestAttributes();
-    const userId = Alexa.getUserId(handlerInput.requestEnvelope);
+    const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
+    const requestAttributes = attributesManager.getRequestAttributes();
+    const intent = requestEnvelope.request.intent;
+    const confirmationStatus = intent ? intent.confirmationStatus : "NONE";
+
+    if (confirmationStatus === "DENIED") {
+      return responseBuilder
+        .speak(requestAttributes.t("deleteDataDeniedPrompt") + requestAttributes.t("doYouNeedAnythingElsePrompt"))
+        .withShouldEndSession(false)
+        .getResponse();
+    }
+
+    if (confirmationStatus !== "CONFIRMED") {
+      const confirmPrompt = requestAttributes.t("deleteDataConfirmPrompt");
+      return responseBuilder
+        .speak(confirmPrompt)
+        .reprompt(confirmPrompt)
+        .addConfirmIntentDirective()
+        .getResponse();
+    }
+
+    const userId = Alexa.getUserId(requestEnvelope);
     console.log(`Skill was disabled for user: ${userId}`);
     try {
       await DeleteUserInfo(userId);
-      await handlerInput.attributesManager.deletePersistentAttributes();
-      return handlerInput.responseBuilder
+      await attributesManager.deletePersistentAttributes();
+      return responseBuilder
         .speak(requestAttributes.t("deleteDataPrompt"))
         .withShouldEndSession(true)
         .getResponse();
     } catch (error) {
       console.error(`Error while deleting data: ${error}`);
-      return handlerInput.responseBuilder
+      return responseBuilder
         .speak(requestAttributes.t("errorDeleteDataPrompt"))
         .withShouldEndSession(true)
         .getResponse();

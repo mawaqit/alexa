@@ -52,6 +52,9 @@ module.exports = {
     nextPrayerTimeWithNamePrompt: `La prière de %s est à %s, dans %s. `,
     allIqamaTimesPrompt: "Pour %s, l'iqama est à %s. ",
     deleteDataPrompt: `Vos données ont bien été supprimées. Relancez la skill pour réutiliser ${process.env.SKILL_NAME}.`,
+    deleteDataConfirmPrompt: `Êtes-vous sûr de vouloir supprimer toutes vos données ? Cette action est irréversible.`,
+    deleteDataDeniedPrompt: `D'accord, vos données n'ont pas été supprimées.`,
+    errorDeleteDataPrompt: `Désolé, une erreur est survenue lors de la suppression de vos données. Veuillez réessayer plus tard.`,
     okPrompt: "Ok. ",
     jummaTimePrompt:
       "De plus, la prière du vendredi, le <sub alias='joumoua'>jumua</sub>, est à %s.",

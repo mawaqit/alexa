@@ -244,7 +244,7 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
     ).not.toHaveBeenCalled();
   });
 
-  it("does not delete data and ends the session when confirmationStatus is DENIED", async () => {
+  it("does not delete data and asks if they need anything else when confirmationStatus is DENIED", async () => {
     const handlerInput = buildDeleteInput({ confirmationStatus: "DENIED" });
     dbHandler.DeleteUserInfo.mockResolvedValue({});
     handlerInput.attributesManager.deletePersistentAttributes = jest.fn(
@@ -254,7 +254,8 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
     const response = await DeleteDataIntentHandler.handle(handlerInput);
 
     expect(spokenText(response)).toContain("your data has not been deleted");
-    expect(response.shouldEndSession).toBe(true);
+    expect(spokenText(response)).toContain("Do you need anything else");
+    expect(response.shouldEndSession).toBe(false);
 
     // Verify nothing was deleted
     expect(dbHandler.DeleteUserInfo).not.toHaveBeenCalled();

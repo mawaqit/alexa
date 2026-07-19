@@ -988,7 +988,6 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   const { persistentAttributes } = sessionAttributes;
   const { routinePrayers } = persistentAttributes;
   const requestAttributes = attributesManager.getRequestAttributes();
-  const locale = Alexa.getLocale(handlerInput.requestEnvelope);
   const mosqueTimes = sessionAttributes.mosqueTimes;
   console.log("Mosque Times: ", JSON.stringify(mosqueTimes));
   const prayerNames = requestAttributes.t("prayerNames");

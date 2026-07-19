@@ -72,7 +72,7 @@ async function getUsersByMosqueId(mosqueId) {
 
 async function UpdateAzanUserInfo(
   id,
-  { refreshToken, endpointId, emailId, ...otherAttributes },
+  { refreshToken, endpointId, ...otherAttributes },
 ) {
   console.log(`[UpdateAzanUserInfo] Attempting atomic update for id: ${id}`);
 
@@ -99,11 +99,7 @@ async function UpdateAzanUserInfo(
     expressionAttributeNames["#endpointId"] = "endpointId";
     expressionAttributeValues[":endpointId"] = endpointId;
   }
-  if (emailId != null) {
-    updateExpression += ", #emailId = :emailId";
-    expressionAttributeNames["#emailId"] = "emailId";
-    expressionAttributeValues[":emailId"] = emailId;
-  }
+
 
   const RESERVED_KEYS = new Set(["updatedTimestamp", "createdTimestamp"]);
 

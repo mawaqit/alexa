@@ -107,7 +107,6 @@ async function handleAuthorization(event) {
     }
     await dbHandler.UpdateAzanUserInfo(userInfo.user_id, {
       refreshToken: accessToken.refresh_token,
-      emailId: userInfo.email,
     });
   } catch (error) {
     console.log("Error in Authorization Event: ", error);

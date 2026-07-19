@@ -7,7 +7,7 @@ const {
 
 /**
  * Custom Persistence Adapter for DynamoDB using AWS SDK v3.
- * Promotes 'emailId', 'mosqueId', and 'userId' to top-level columns.
+ * Promotes 'mosqueId' and 'userId' to top-level columns.
  */
 class CustomDynamoDbPersistenceAdapter {
   constructor(config) {
@@ -108,13 +108,6 @@ class CustomDynamoDbPersistenceAdapter {
     };
 
     // Promote specific fields to top-level columns for indexing/visibility
-    if (
-      attributes.emailId &&
-      typeof attributes.emailId === "string" &&
-      attributes.emailId.trim() !== ""
-    ) {
-      item.emailId = attributes.emailId;
-    }
     if (
       attributes.uuid &&
       typeof attributes.uuid === "string" &&

@@ -57,7 +57,6 @@ beforeEach(() => {
   freezeAt("2026-07-16 04:00", TZ);
   // Account linking is satisfied; this suite is about the prayer choice.
   authHandler.getUserInfo.mockResolvedValue({
-    email: "u@example.com",
     user_id: "user-1",
   });
   dbHandler.GetAzanUserInfo.mockResolvedValue({

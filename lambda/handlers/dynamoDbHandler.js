@@ -45,7 +45,7 @@ async function GetAzanUserInfo(id) {
 
 async function UpdateAzanUserInfo(
   id,
-  { refreshToken, endpointId, emailId, ...otherAttributes },
+  { refreshToken, endpointId, ...otherAttributes },
 ) {
   console.log(`[UpdateAzanUserInfo] Attempting update for id: ${id}`);
 
@@ -60,7 +60,6 @@ async function UpdateAzanUserInfo(
     id: id,
     refresh_token: refreshToken ?? existingUser?.refresh_token,
     endpointId: endpointId ?? existingUser?.endpointId,
-    emailId: emailId ?? existingUser?.emailId,
     updatedTimestamp: timestamp,
     ...otherAttributes,
   };
@@ -83,7 +82,6 @@ async function UpdateAzanUserInfo(
   try {
     const itemToLog = { ...item };
     if (itemToLog.refresh_token) itemToLog.refresh_token = "[REDACTED]";
-    if (itemToLog.emailId) itemToLog.emailId = "[REDACTED]";
 
     console.log(
       `[UpdateAzanUserInfo] Writing item to DynamoDB:`,

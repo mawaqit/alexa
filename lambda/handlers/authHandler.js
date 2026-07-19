@@ -28,7 +28,6 @@ const AuthHandler = {
 
       await dbHandler.UpdateAzanUserInfo(userInfo.user_id, {
         refreshToken: accessToken.refresh_token,
-        emailId: userInfo.email,
       });
     } catch (error) {
       console.error("Failed to save authorization code:", error);

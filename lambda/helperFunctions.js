@@ -1266,7 +1266,7 @@ const validateUserAccountStatus = async (handlerInput) => {
   try {
     const userInfo = await authHandler.getUserInfo(accessToken);
 
-    if (!userInfo?.email || !userInfo?.user_id) {
+    if (!userInfo?.user_id) {
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("refreshTokenMissing"))
         .withLinkAccountCard()

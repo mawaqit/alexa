@@ -104,7 +104,7 @@ exports.handler = async (event) => {
           return false;
         }
         return routinePrayers.some(
-          (p) => p.name.toLowerCase() === prayerName.toLowerCase(),
+          (p) => p.name.toLowerCase() === prayerName.toLowerCase() || p.canonicalName.toLowerCase() === prayerName.toLowerCase(),
         );
       })
       .map((pUser) => pUser.userId) // Extract userId (assuming it's mapped to userId in local object, or id from DB)

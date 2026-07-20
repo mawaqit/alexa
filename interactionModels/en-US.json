@@ -111,6 +111,28 @@
     "languageModel": {
       "intents": [
         {
+          "name": "UserIdIntent",
+          "slots": [],
+          "samples": [
+            "what is my user id",
+            "what is my support id",
+            "what is my support code",
+            "what is my customer support code",
+            "get my user id",
+            "get my support code",
+            "give me my support id",
+            "give me my customer service code",
+            "tell me my user id",
+            "tell me my support code",
+            "I need my support id",
+            "I need my user id",
+            "my support id",
+            "my user id",
+            "support code",
+            "customer support code"
+          ]
+        },
+        {
           "name": "AMAZON.CancelIntent",
           "samples": [
             "cancel",

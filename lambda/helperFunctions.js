@@ -1,5 +1,6 @@
 const Alexa = require("ask-sdk-core");
-const { randomUUID: uuidv4 } = require("crypto");
+const crypto = require("crypto");
+const { randomUUID: uuidv4 } = crypto;
 const { getMosqueList, getPrayerTimings } = require("./handlers/apiHandler.js");
 const { getDataSourceforMosqueList } = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
@@ -1469,6 +1470,15 @@ function formatTime(time, locale = "en-US") {
   }).format(date);
 }
 
+function generateMawaqitId(userId, attempt = 0) {
+  const hashInput = attempt === 0 ? userId : `${userId}-${attempt}`;
+  const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+  const intVal = parseInt(hash.substring(0, 8), 16);
+  const codeInt = intVal % 1000000;
+  const codeStr = String(codeInt).padStart(6, "0");
+  return `${codeStr.substring(0, 3)}-${codeStr.substring(3, 6)}`;
+}
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -1522,4 +1532,5 @@ module.exports = {
   formatDistance,
   getUserDistanceUnits,
   formatTime,
+  generateMawaqitId,
 };

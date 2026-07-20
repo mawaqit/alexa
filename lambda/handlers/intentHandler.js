@@ -11,11 +11,12 @@ const {
   getDataSourceForDeleteRoutineList,
 } = require("../datasources.js");
 const listApl = require("../aplDocuments/mosqueListApl.json");
-const { randomUUID: uuidv4 } = require("crypto");
+const crypto = require("crypto");
+const { randomUUID: uuidv4 } = crypto;
 const adhaanTasks = [
   "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan",
 ];
-const { DeleteUserInfo } = require("./dynamoDbHandler.js");
+const { DeleteUserInfo, GetUserByMawaqitId } = require("./dynamoDbHandler.js");
 const ALL_PRAYER_INDEX = 8;
 
 const DeleteRoutineStartedHandler = {
@@ -1992,6 +1993,76 @@ const MosqueNoIntentHandler = {
   },
 };
 
+const UserIdIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "UserIdIntent"
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    const responseBuilder = handlerInput.responseBuilder;
+
+    try {
+      const attributesManager = handlerInput.attributesManager;
+      const persistentAttributes =
+        (await attributesManager.getPersistentAttributes()) || {};
+      const userId = Alexa.getUserId(handlerInput.requestEnvelope);
+
+      let mawaqitId = persistentAttributes.mawaqit_id;
+
+      if (!mawaqitId) {
+        let attempt = 0;
+        let isUnique = false;
+
+        while (!isUnique && attempt < 100) {
+          const candidateCode = helperFunctions.generateMawaqitId(userId, attempt);
+          const existingUser = await GetUserByMawaqitId(candidateCode);
+          if (!existingUser) {
+            mawaqitId = candidateCode;
+            isUnique = true;
+          } else if (existingUser.id === userId) {
+            mawaqitId = candidateCode;
+            isUnique = true;
+          } else {
+            console.log(
+              `[UserIdIntentHandler] Collision detected for code: ${candidateCode}. Retrying...`,
+            );
+            attempt++;
+          }
+        }
+
+        if (!mawaqitId) {
+          throw new Error("Unable to generate unique mawaqit_id after 100 attempts");
+        }
+
+        // Save to persistent attributes
+        persistentAttributes.mawaqit_id = mawaqitId;
+        attributesManager.setPersistentAttributes(persistentAttributes);
+        await attributesManager.savePersistentAttributes();
+      }
+
+      const parts = mawaqitId.split("-");
+      const codeSsml = `<say-as interpret-as="digits">${parts[0]}</say-as><break time="200ms"/><say-as interpret-as="digits">${parts[1]}</say-as>`;
+
+      const speakOutput = requestAttributes.t("userIdPrompt", codeSsml);
+
+      return responseBuilder
+        .speak(speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"))
+        .withShouldEndSession(false)
+        .getResponse();
+    } catch (error) {
+      console.error("Error in UserIdIntentHandler: ", error);
+      return responseBuilder
+        .speak(requestAttributes.t("errorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  },
+};
+
 module.exports = {
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
@@ -2018,4 +2089,5 @@ module.exports = {
   DeleteRoutinePrayerNameHandler,
   MosqueYesIntentHandler,
   MosqueNoIntentHandler,
+  UserIdIntentHandler,
 };

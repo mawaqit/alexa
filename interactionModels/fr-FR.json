@@ -48,7 +48,7 @@
               }
             }
           ],
-          "name": "FavoriteAdhaanReciterIntent",          
+          "name": "FavoriteAdhaanReciterIntent",
           "delegationStrategy": "SKILL_RESPONSE",
           "confirmationRequired": false,
           "prompts": {}
@@ -110,6 +110,28 @@
     },
     "languageModel": {
       "intents": [
+        {
+          "name": "UserIdIntent",
+          "slots": [],
+          "samples": [
+            "quel est mon identifiant",
+            "quel est mon identifiant utilisateur",
+            "quel est mon code de support",
+            "quel est mon code d assistance",
+            "donne moi mon identifiant",
+            "donne moi mon code de support",
+            "donne moi mon code d assistance client",
+            "donne moi mon identifiant utilisateur",
+            "dis moi mon code de support",
+            "dis moi mon identifiant",
+            "j ai besoin de mon code de support",
+            "j ai besoin de mon identifiant",
+            "mon identifiant",
+            "mon code de support",
+            "code de support",
+            "code d assistance"
+          ]
+        },
         {
           "name": "AMAZON.CancelIntent",
           "samples": [

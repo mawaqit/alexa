@@ -121,5 +121,6 @@ module.exports = {
     allPrayers: "Toutes les prières",
     oneMosquePrompt:
       "La seule mosquée autour de vous est %s. Voulez-vous la choisir ?",
+    userIdPrompt: "Votre code d'assistance est %s. ",
   },
 };

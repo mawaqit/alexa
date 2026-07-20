@@ -248,6 +248,32 @@ async function UpdateMosqueAzanData(id, attributes) {
   }
 }
 
+async function GetUserByMawaqitId(mawaqitId) {
+  console.log(`[GetUserByMawaqitId] Fetching user for mawaqit_id: ${mawaqitId}`);
+  const params = {
+    TableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
+    IndexName: "mawaqit_id-index",
+    KeyConditionExpression: "mawaqit_id = :mawaqitId",
+    ExpressionAttributeValues: {
+      ":mawaqitId": mawaqitId,
+    },
+  };
+
+  try {
+    const data = await dynamo.send(new QueryCommand(params));
+    console.log(
+      `[GetUserByMawaqitId] Found ${data.Items?.length || 0} users.`,
+    );
+    return data.Items?.[0] || null;
+  } catch (error) {
+    console.error(
+      `[GetUserByMawaqitId] Error fetching user for mawaqit_id ${mawaqitId}:`,
+      error,
+    );
+    throw error;
+  }
+}
+
 module.exports = {
   GetAzanUserInfo,
   UpdateAzanUserInfo,
@@ -256,4 +282,5 @@ module.exports = {
   BatchGetAzanUserInfo,
   GetMosqueAzanData,
   UpdateMosqueAzanData,
+  GetUserByMawaqitId,
 };

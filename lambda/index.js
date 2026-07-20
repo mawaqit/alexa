@@ -40,6 +40,7 @@ const {
   NoIntentHandler,
   MosqueYesIntentHandler,
   MosqueNoIntentHandler,
+  UserIdIntentHandler,
 } = require("./handlers/intentHandler.js");
 const {
   MosqueListTouchEventHandler,
@@ -329,6 +330,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     DeleteRoutinePrayerNameHandler,
     DeleteRoutineTouchEventHandler,
     SkillEventHandler,
+    UserIdIntentHandler,
     CancelAndStopIntentHandler,
     FallbackIntentHandler,
     SessionEndedRequestHandler,

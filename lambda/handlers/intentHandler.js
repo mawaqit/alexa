@@ -2018,7 +2018,10 @@ const UserIdIntentHandler = {
         let isUnique = false;
 
         while (!isUnique && attempt < 100) {
-          const candidateCode = helperFunctions.generateMawaqitId(userId, attempt);
+          const candidateCode = helperFunctions.generateMawaqitId(
+            userId,
+            attempt,
+          );
           const existingUser = await GetUserByMawaqitId(candidateCode);
           if (!existingUser) {
             mawaqitId = candidateCode;
@@ -2035,7 +2038,9 @@ const UserIdIntentHandler = {
         }
 
         if (!mawaqitId) {
-          throw new Error("Unable to generate unique mawaqit_id after 100 attempts");
+          throw new Error(
+            "Unable to generate unique mawaqit_id after 100 attempts",
+          );
         }
 
         // Save to persistent attributes

@@ -32,7 +32,9 @@ describe("UserIdIntentHandler", () => {
     // Verify spoken output contains the formatted code
     const text = spokenText(response);
     expect(text).toContain("Your support code is");
-    expect(response.outputSpeech.ssml).toContain("<say-as interpret-as=\"digits\">");
+    expect(response.outputSpeech.ssml).toContain(
+      '<say-as interpret-as="digits">',
+    );
   });
 
   it("should reuse the existing mawaqit_id if already saved in persistence", async () => {
@@ -56,14 +58,17 @@ describe("UserIdIntentHandler", () => {
     // Verify response speaks the correct code
     const text = spokenText(response);
     expect(text).toContain("Your support code is 123456");
-    expect(response.outputSpeech.ssml).toContain("<say-as interpret-as=\"digits\">123</say-as><break time=\"200ms\"/><say-as interpret-as=\"digits\">456</say-as>");
+    expect(response.outputSpeech.ssml).toContain(
+      '<say-as interpret-as="digits">123</say-as><break time="200ms"/><say-as interpret-as="digits">456</say-as>',
+    );
   });
 
   it("should handle collisions by retrying until a unique mawaqit_id is found", async () => {
     // Mock the first query to return a collision (a different user)
     // and the second query to return null (success)
-    dbHandler.GetUserByMawaqitId
-      .mockResolvedValueOnce({ id: "another-user-id" }) // collision
+    dbHandler.GetUserByMawaqitId.mockResolvedValueOnce({
+      id: "another-user-id",
+    }) // collision
       .mockResolvedValueOnce(null); // unique
 
     const handlerInput = buildHandlerInput({
@@ -72,7 +77,9 @@ describe("UserIdIntentHandler", () => {
     });
 
     // Make sure our mock handlerInput has user-1 as userId
-    expect(handlerInput.requestEnvelope.context.System.user.userId).toBe("user-1");
+    expect(handlerInput.requestEnvelope.context.System.user.userId).toBe(
+      "user-1",
+    );
 
     await UserIdIntentHandler.handle(handlerInput);
 

@@ -249,7 +249,9 @@ async function UpdateMosqueAzanData(id, attributes) {
 }
 
 async function GetUserByMawaqitId(mawaqitId) {
-  console.log(`[GetUserByMawaqitId] Fetching user for mawaqit_id: ${mawaqitId}`);
+  console.log(
+    `[GetUserByMawaqitId] Fetching user for mawaqit_id: ${mawaqitId}`,
+  );
   const params = {
     TableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
     IndexName: "mawaqit_id-index",
@@ -261,9 +263,7 @@ async function GetUserByMawaqitId(mawaqitId) {
 
   try {
     const data = await dynamo.send(new QueryCommand(params));
-    console.log(
-      `[GetUserByMawaqitId] Found ${data.Items?.length || 0} users.`,
-    );
+    console.log(`[GetUserByMawaqitId] Found ${data.Items?.length || 0} users.`);
     return data.Items?.[0] || null;
   } catch (error) {
     console.error(

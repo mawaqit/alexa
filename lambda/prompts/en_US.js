@@ -1,7 +1,7 @@
 module.exports = {
   translation: {
-    skillName: process.env.SKILL_NAME, //new
-    welcomePrompt: `Salam Aleykoum! `,
+    skillName: process.env.SKILL_NAME,
+    welcomePrompt: `Assalamu Alaikum! `,
     chooseMosquePrompt: `Which mosque would you like to choose? Here are the nearest mosques: %s. To choose one, say its number`,
     chooseMosqueByTouchPrompt:
       " or you can tap the mosque of your choice on the screen.",

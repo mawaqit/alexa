@@ -25,11 +25,6 @@ const HONORIFICS = [
     translations: {
       en: "may Allah be pleased with them both",
       fr: "qu'Allah soit satisfait d'eux deux",
-      de: "möge Allah mit ihnen beiden zufrieden sein",
-      es: "que Allah esté complacido con ambos",
-      nl: "moge Allah tevreden met hen beiden zijn",
-      pt: "que Allah esteja satisfeito com ambos",
-      tr: "Allah ikisinden de razı olsun",
     },
   },
   {
@@ -38,11 +33,6 @@ const HONORIFICS = [
     translations: {
       en: "may Allah be pleased with them",
       fr: "qu'Allah soit satisfait d'eux",
-      de: "möge Allah mit ihnen zufrieden sein",
-      es: "que Allah esté complacido con ellos",
-      nl: "moge Allah tevreden met hen zijn",
-      pt: "que Allah esteja satisfeito com eles",
-      tr: "Allah onlardan razı olsun",
     },
   },
   {
@@ -51,11 +41,6 @@ const HONORIFICS = [
     translations: {
       en: "may Allah be pleased with her",
       fr: "qu'Allah soit satisfait d'elle",
-      de: "möge Allah mit ihr zufrieden sein",
-      es: "que Allah esté complacido con ella",
-      nl: "moge Allah tevreden met haar zijn",
-      pt: "que Allah esteja satisfeito com ela",
-      tr: "Allah ondan razı olsun",
     },
   },
   {
@@ -64,11 +49,6 @@ const HONORIFICS = [
     translations: {
       en: "may Allah be pleased with him",
       fr: "qu'Allah soit satisfait de lui",
-      de: "möge Allah mit ihm zufrieden sein",
-      es: "que Allah esté complacido con él",
-      nl: "moge Allah tevreden met hem zijn",
-      pt: "que Allah esteja satisfeito com ele",
-      tr: "Allah ondan razı olsun",
     },
   },
   {
@@ -79,11 +59,6 @@ const HONORIFICS = [
     translations: {
       en: "peace be upon him",
       fr: "que la paix et le salut d'Allah soient sur lui",
-      de: "Friede und Segen Allahs seien auf ihm",
-      es: "la paz y las bendiciones de Allah sean con él",
-      nl: "vrede en zegeningen zij met hem",
-      pt: "que a paz e as bênçãos de Allah estejam com ele",
-      tr: "Allah'ın selamı ve salatı onun üzerine olsun",
     },
   },
 ];
@@ -133,7 +108,7 @@ const pickTranslation = (translations, lang) =>
  * @returns {string}
  */
 const translateHonorifics = (text, lang) => {
-  if (!text || typeof text !== "string") {
+  if (!text || typeof text !== "string" || lang == "ar") {
     return text;
   }
 

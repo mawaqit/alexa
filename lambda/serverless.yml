@@ -39,7 +39,6 @@ provider:
     BASE_URL: ${file(env.json):${self:provider.stage}.baseUrl}
     PERSISTENCE_ADAPTER_TABLE_NAME: mawaqit-alexa-user-data-${self:provider.stage}
     SKILL_NAME: MAWAQIT
-    S3_BUCKET_NAME: mawaqit-alexa
     AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING: ${file(env.json):${self:provider.stage}.AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING}
     AZAN_DYNAMO_DB_TABLE: mawaqit-alexa-azan-users-data-${self:provider.stage}
     UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS: ${file(env.json):${self:provider.stage}.updateIntervalHadithWidgetInHours}
@@ -52,10 +51,6 @@ provider:
     - Effect: Allow
       Action:
         - lambda:InvokeFunction
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - s3:*
       Resource: "*"
     - Effect: Allow
       Action:

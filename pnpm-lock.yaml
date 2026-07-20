@@ -42,7 +42,7 @@ importers:
         specifier: ^3.971.0
         version: 3.1090.0(@aws-sdk/client-dynamodb@3.1090.0)
       axios:
-        specifier: ^1.16.0
+        specifier: ^1.18.0
         version: 1.18.1
       qs:
         specifier: ^6.15.2

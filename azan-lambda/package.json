@@ -14,12 +14,7 @@
     "@aws-sdk/client-dynamodb": "^3.971.0",
     "@aws-sdk/client-ssm": "^3.971.0",
     "@aws-sdk/lib-dynamodb": "^3.971.0",
-<<<<<<< HEAD
     "axios": "^1.18.0",
-    "uuid": "^14.0.0",
-=======
-    "axios": "^1.16.0",
->>>>>>> 5e05474 (fix: DST countdowns and adhan-as-iqama, with prayer-time test coverage (#41))
     "qs": "^6.15.2"
   }
 }

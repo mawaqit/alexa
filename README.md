@@ -1,10 +1,8 @@
 # MAWAQIT - Alexa Skill
 
-Backend for the MAWAQIT Alexa skill: prayer time lookups, routines, widgets,
-and the Smart Azan (adhan) notification system.
+Backend for the MAWAQIT Alexa skill: prayer time lookups, routines, widgets, and the Smart Azan (adhan) notification system.
 
-The project is split into two independently deployed Serverless Framework
-services, plus the Alexa skill configuration itself:
+The project is split into two independently deployed Serverless Framework services, plus the Alexa skill configuration itself:
 
 | Path                 | Service name         | What it does                                                         |
 | -------------------- | -------------------- | -------------------------------------------------------------------- |
@@ -47,9 +45,7 @@ alexa/
 
 - [Node.js](https://nodejs.org/) 22.x (matches the Lambda runtime — `nodejs22.x`)
 
-That is all you need to install dependencies and run the test suite. Deploying
-the services and managing the live skill require additional tooling and MAWAQIT
-infrastructure access — see [Deployment](#deployment).
+That is all you need to install dependencies and run the test suite. Deploying the services and managing the live skill require additional tooling and MAWAQIT infrastructure access — see [Deployment](#deployment).
 
 ## Installing dependencies
 
@@ -95,15 +91,10 @@ Contributions are welcome. To propose a change:
    [pre-push hook](#pre-push-hook) and in CI.
 3. Open a pull request describing what you changed and why.
 
-You can work on the entire codebase — handlers, prayer-time logic, routines,
-prompts, interaction models, and tests — with only Node.js installed. Deploying
-to live infrastructure is handled by the MAWAQIT team.
+You can work on the entire codebase — handlers, prayer-time logic, routines, prompts, interaction models, and tests — with only Node.js installed. Deploying to live infrastructure is handled by the MAWAQIT team.
 
 ## Deployment
 
-Deploying the Lambda services, configuring AWS / Alexa credentials, managing
-secrets, and updating the live interaction model are handled by the MAWAQIT
-team and are **not** required to contribute code or tests.
+Deploying the Lambda services, configuring AWS / Alexa credentials, managing secrets, and updating the live interaction model are handled internally by the MAWAQIT team and are **not** required to contribute code or tests.
 
-➡️ **MAWAQIT team:** the full deployment and infrastructure runbook lives in
-Notion — [MAWAQIT Alexa — Internal runbook](https://www.notion.so/) <!-- TODO: replace with the actual Notion page URL -->.
+➡️ **MAWAQIT team:** the full deployment and infrastructure runbook lives in our internal Notion — [Click here](https://app.notion.com/p/mawaqit/Alexa-Devs-How-to-deploy-3a331aaf3291809f965ceda28dd76c7c)

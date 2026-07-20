@@ -10,7 +10,12 @@ const { buildHandlerInput, spokenText } = require("./support/handlerInput");
 
 const TZ = "Europe/Paris";
 
-const buildInput = ({ slots = {}, routinePrayers = [], intentName = "DeleteRoutineIntent", requestType = "IntentRequest" } = {}) => {
+const buildInput = ({
+  slots = {},
+  routinePrayers = [],
+  intentName = "DeleteRoutineIntent",
+  requestType = "IntentRequest",
+} = {}) => {
   const persistentAttributes = {
     uuid: "mosque-uuid",
     routinePrayers,
@@ -29,7 +34,9 @@ const buildInput = ({ slots = {}, routinePrayers = [], intentName = "DeleteRouti
 
 describe("DeleteRoutineStartedHandler", () => {
   it("directly deletes the routine when there is only one routine", async () => {
-    const routinePrayers = [{ name: "Fajr", canonicalName: "Fajr", time: "05:30" }];
+    const routinePrayers = [
+      { name: "Fajr", canonicalName: "Fajr", time: "05:30" },
+    ];
     const handlerInput = buildInput({ routinePrayers });
 
     const response = await DeleteRoutineStartedHandler.handle(handlerInput);
@@ -80,7 +87,11 @@ describe("DeleteRoutinePrayerIndexHandler", () => {
     const handlerInput = buildInput({
       routinePrayers,
       slots: {
-        prayerIndex: { name: "prayerIndex", value: "2", confirmationStatus: "NONE" },
+        prayerIndex: {
+          name: "prayerIndex",
+          value: "2",
+          confirmationStatus: "NONE",
+        },
       },
     });
 
@@ -104,7 +115,11 @@ describe("DeleteRoutinePrayerIndexHandler", () => {
     const handlerInput = buildInput({
       routinePrayers,
       slots: {
-        prayerIndex: { name: "prayerIndex", value: "99", confirmationStatus: "NONE" },
+        prayerIndex: {
+          name: "prayerIndex",
+          value: "99",
+          confirmationStatus: "NONE",
+        },
       },
     });
 
@@ -182,12 +197,12 @@ describe("DeleteRoutineTouchEventHandler", () => {
       requestType: "Alexa.Presentation.APL.UserEvent",
       routinePrayers,
     });
-    
+
     // Mock the APL user event request
     handlerInput.requestEnvelope.request.arguments = [
       "ListItemSelected",
       "Delete Routine List", // will match titleForDeleteRoutineList translation
-      { name: "Fajr" }
+      { name: "Fajr" },
     ];
 
     const response = await DeleteRoutineTouchEventHandler.handle(handlerInput);

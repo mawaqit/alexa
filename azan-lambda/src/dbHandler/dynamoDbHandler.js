@@ -100,7 +100,6 @@ async function UpdateAzanUserInfo(
     expressionAttributeValues[":endpointId"] = endpointId;
   }
 
-
   const RESERVED_KEYS = new Set(["updatedTimestamp", "createdTimestamp"]);
 
   // Atomically set any other attributes provided

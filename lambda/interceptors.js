@@ -229,11 +229,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
   try {
     const userInfo = await GetUserInfo.process(handlerInput);
     console.log("User Info Retrieved Successfully");
-    if (
-      userInfo &&
-      userInfo?.user_id &&
-      !persistentAttributes?.user_id
-    ) {
+    if (userInfo && userInfo?.user_id && !persistentAttributes?.user_id) {
       persistentAttributes.user_id = userInfo?.user_id;
       handlerInput.attributesManager.setPersistentAttributes(
         persistentAttributes,

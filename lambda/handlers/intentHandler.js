@@ -1155,14 +1155,18 @@ const DeleteDataIntentHandler = {
     );
   },
   async handle(handlerInput) {
-    const { requestEnvelope, responseBuilder, attributesManager } = handlerInput;
+    const { requestEnvelope, responseBuilder, attributesManager } =
+      handlerInput;
     const requestAttributes = attributesManager.getRequestAttributes();
     const intent = requestEnvelope.request.intent;
     const confirmationStatus = intent ? intent.confirmationStatus : "NONE";
 
     if (confirmationStatus === "DENIED") {
       return responseBuilder
-        .speak(requestAttributes.t("deleteDataDeniedPrompt") + requestAttributes.t("doYouNeedAnythingElsePrompt"))
+        .speak(
+          requestAttributes.t("deleteDataDeniedPrompt") +
+            requestAttributes.t("doYouNeedAnythingElsePrompt"),
+        )
         .withShouldEndSession(false)
         .getResponse();
     }

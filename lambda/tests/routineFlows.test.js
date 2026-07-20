@@ -217,7 +217,11 @@ describe('"set up the adhan" — prerequisites', () => {
 
 describe('"delete my data" — irreversible, so it must be complete', () => {
   const buildDeleteInput = (options = {}) =>
-    buildHandlerInput({ intentName: "DeleteDataIntent", timezone: TZ, ...options });
+    buildHandlerInput({
+      intentName: "DeleteDataIntent",
+      timezone: TZ,
+      ...options,
+    });
 
   it("asks for confirmation when confirmationStatus is NONE", async () => {
     const handlerInput = buildDeleteInput({ confirmationStatus: "NONE" });
@@ -234,7 +238,9 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
         type: "Dialog.ConfirmIntent",
       }),
     );
-    expect(spokenText(response)).toContain("Are you sure you want to delete all your data");
+    expect(spokenText(response)).toContain(
+      "Are you sure you want to delete all your data",
+    );
 
     // Verify nothing was deleted
     expect(dbHandler.DeleteUserInfo).not.toHaveBeenCalled();

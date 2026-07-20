@@ -18,21 +18,23 @@ jobs:
         with:
           persist-credentials: false
 
+      # pnpm must be set up before setup-node so its cache can resolve the store.
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: package-lock.json
+          cache: pnpm
 
-      # Root workspace holds eslint + prettier (see root package.json).
-      - name: Install tooling
-        run: npm ci
+      # One install sets up the whole workspace (root tooling + both services).
+      - name: Install
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: npm run lint
+        run: pnpm lint
 
       - name: Check formatting
-        run: npm run format:check
+        run: pnpm run format:check
 
   test:
     name: Tests
@@ -42,25 +44,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v6
         with:
           node-version: 22 # matches the nodejs22.x runtime both lambdas deploy to
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            lambda/package-lock.json
-            azan-lambda/package-lock.json
+          cache: pnpm
 
-      # Root workspace holds jest; each lambda holds the runtime deps that tests
-      # need in order to require the modules under test.
-      - name: Install tooling
-        run: npm ci
-
-      - name: Install lambda deps
-        run: npm ci --prefix lambda
-
-      - name: Install azan-lambda deps
-        run: npm ci --prefix azan-lambda
+      # One workspace install pulls in jest plus each service's runtime deps that
+      # the tests require in order to resolve the modules under test.
+      - name: Install
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        run: npm test
+        run: pnpm test

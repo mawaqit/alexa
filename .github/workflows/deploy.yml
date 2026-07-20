@@ -6,10 +6,6 @@
 # publishing to the `live` stage requires Amazon certification, which is a
 # manual review. On prod releases this workflow deploys the prod backend and
 # leaves a reminder to submit for certification from the Alexa console.
-#
-# Discord notifications: if the optional repo secret DISCORD_WEBHOOK_URL is set,
-# a message is posted when a deploy starts and when it finishes (success or
-# failure). If the secret is missing, the notification steps no-op.
 name: Deploy
 
 on:
@@ -53,8 +49,8 @@ jobs:
           embed-description: "Stage `${{ inputs.stage }}` · commit `${{ steps.meta.outputs.short }}` · [run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           embed-color: "3447003"
 
-  deploy-lambda:
-    name: Deploy lambda (${{ inputs.stage }})
+  deploy:
+    name: Deploy backends (${{ inputs.stage }})
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
@@ -65,11 +61,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: lambda/package-lock.json
+          cache: pnpm
 
       # AWS auth: OIDC
       - uses: aws-actions/configure-aws-credentials@v4
@@ -80,53 +77,24 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@^4
 
-      - name: Deploy Alexa Skill Backend
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy main skill backend (lambda)
         working-directory: lambda
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-        run: |
-          npm ci
-          serverless deploy --stage ${{ inputs.stage }}
+        run: pnpm deploy:${{ inputs.stage }}
 
-  deploy-azan:
-    name: Deploy Azan Lambda (${{ inputs.stage }})
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: azan-lambda/package-lock.json
-
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: eu-west-3
-
-      - name: Install Serverless Framework
-        run: npm install -g serverless@^4
-
-      - name: Deploy Azan Dispatcher
+      - name: Deploy Smart Azan dispatcher (azan-lambda)
         working-directory: azan-lambda
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-        run: |
-          npm ci
-          serverless deploy --stage ${{ inputs.stage }}
+        run: pnpm deploy:${{ inputs.stage }}
 
   push-interaction-models:
     name: Push Interaction Models (Development Stage)
-    # Only publish the voice model once both backends deploy, so the skill's
-    # development stage never points at a model whose backend failed to ship.
-    needs: [deploy-lambda, deploy-azan]
+    needs: [deploy]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
@@ -151,35 +119,12 @@ jobs:
           echo "$ASK_CLI_CONFIG" | base64 --decode > ~/.ask/cli_config
 
       - name: Push every locale to the development stage
-        working-directory: interactionModels
-        run: |
-          set -e
-          for f in *.json; do
-            locale="${f%.json}"
-            echo "→ $locale"
-            ask smapi set-interaction-model \
-              --skill-id "$SKILL_ID" \
-              --stage development \
-              --locale "$locale" \
-              --interaction-model "file:$f" \
-              -p "$ASK_PROFILE"
-          done
-
-  certification-reminder:
-    name: Certification reminder
-    if: ${{ inputs.stage == 'prod' }}
-    needs: [deploy-lambda, deploy-azan, push-interaction-models]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Remind to Submit for Certification
-        run: |
-          echo "::notice title=Skill not yet live::Prod Lambda deployed and the interaction models are on the skill's *development* stage."
-          echo "::notice title=Manual step::Go live is manual (option B). Review the development stage, then submit for certification from the Alexa Developer Console (or run 'ask smapi submit-skill-for-certification')."
+        run: bash scripts/push-interaction-models.sh
 
   notify-result:
     name: Notify deploy result
     if: always()
-    needs: [deploy-lambda, deploy-azan, push-interaction-models]
+    needs: [deploy, push-interaction-models]
     runs-on: ubuntu-latest
     permissions: {}
     env:
@@ -200,9 +145,7 @@ jobs:
             echo "color=15158332" >> "$GITHUB_OUTPUT"
           fi
           echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          # On a successful prod deploy, add a call-to-action link (webhooks
-          # can't send real buttons — that needs a bot — so this is a clickable
-          # markdown link). Empty otherwise, so nothing is appended.
+          # On a successful prod deploy, add the certification link
           if [ "$RESULT" = "success" ] && [ "${{ inputs.stage }}" = "prod" ]; then
             echo "cta= · [🎓 Submit for certification](https://developer.amazon.com/alexa/console/ask)" >> "$GITHUB_OUTPUT"
           fi

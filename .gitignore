@@ -1,5 +1,8 @@
 **/node_modules
 
+# Serverless Framework build/deploy artifacts (esbuild bundles, zips, state)
+**/.serverless
+
 ask-resources.json
 .ask
 

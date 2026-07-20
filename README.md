@@ -44,17 +44,16 @@ alexa/
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 22.x (matches the Lambda runtime — `nodejs22.x`)
+- [pnpm](https://pnpm.io/) 9+ — `corepack enable` (or `npm install -g pnpm`); the repo is a pnpm workspace
 
 That is all you need to install dependencies and run the test suite. Deploying the services and managing the live skill require additional tooling and MAWAQIT infrastructure access — see [Deployment](#deployment).
 
 ## Installing dependencies
 
-The repo root is a tooling workspace (eslint, prettier, jest) and each Lambda service has its own dependencies and must be installed separately:
+The repo is a [pnpm workspace](https://pnpm.io/workspaces): the root holds the shared tooling (eslint, prettier, jest) and the `lambda` and `azan-lambda` services are workspace packages. A single install at the root sets up all three:
 
 ```bash
-npm install
-cd lambda && npm install
-cd ../azan-lambda && npm install
+pnpm install
 ```
 
 ## Testing
@@ -63,8 +62,8 @@ Tests run with [Jest](https://jestjs.io/) from the repo root and live next to th
 code they cover, in `lambda/tests/` and `azan-lambda/tests/`.
 
 ```bash
-npm test            # run the whole suite
-npm run test:watch  # re-run on change
+pnpm test            # run the whole suite
+pnpm test:watch      # re-run on change
 ```
 
 ### From your editor
@@ -75,10 +74,10 @@ JetBrains IDEs need no additional setup.
 
 ### Pre-push hook
 
-`npm install` at the root also installs a [husky](https://typicode.github.io/husky/) pre-push hook that runs lint then the test suite, and blocks the push if either fails. There is nothing else to configure. Register it with:
+`pnpm install` at the root also installs a [husky](https://typicode.github.io/husky/) pre-push hook that runs lint then the test suite, and blocks the push if either fails. There is nothing else to configure. Register it with:
 
 ```bash
-npm run prepare
+pnpm run prepare
 ```
 
 ## Contributing
@@ -87,7 +86,7 @@ Contributions are welcome. To propose a change:
 
 1. Fork the repo and create a branch.
 2. Make your change with tests covering it, and keep the existing suite green
-   (`npm test`). Lint and tests also run automatically on push via the
+   (`pnpm test`). Lint and tests also run automatically on push via the
    [pre-push hook](#pre-push-hook) and in CI.
 3. Open a pull request describing what you changed and why.
 

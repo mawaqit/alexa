@@ -4,6 +4,17 @@ service: alexa
 
 frameworkVersion: ^4.0.0
 
+# Bundle each function with esbuild (Serverless v4 native) instead of zipping
+# node_modules.
+build:
+  esbuild:
+    bundle: true
+    # keep it readable, not minified: CloudWatch stack traces then point at real
+    # function names/lines, and the zip is already tiny
+    minify: false
+    # sourcemap off to avoid shipping multi-MB .map files.
+    sourcemap: false
+
 # Tests live next to the code they cover, but must never ship in the Lambda zip.
 package:
   patterns:

@@ -9,6 +9,10 @@
         "title": "Play Adhaan",
         "description": "Alexa will play Adhaan"
       },
+      "fr-FR": {
+        "title": "Lancer l'Adhaan",
+        "description": "Alexa lancera l'Adhaan"
+      },
       "en-AU": {
         "title": "Play Adhaan",
         "description": "Alexa will play Adhaan"
@@ -25,17 +29,17 @@
         "title": "Play Adhaan",
         "description": "Alexa will play Adhaan"
       },
-      "fr-FR": {
-        "title": "Play Adhaan ",
-        "description": "Alexa lancera l'Adhaan"
-      },
       "fr-CA": {
-        "title": "Play Adhaan",
+        "title": "Lancer l'Adhaan",
         "description": "Alexa lancera l'Adhaan"
       }
     }
   },
-  "tags": [{ "name": "Play Adhaan" }],
+  "tags": [
+    {
+      "name": "Play Adhaan"
+    }
+  ],
   "paths": {
     "/PlayAdhaan": {
       "summary": "Play Adhaan",

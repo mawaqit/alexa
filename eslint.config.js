@@ -1,18 +1,13 @@
+const path = require("node:path");
+const { includeIgnoreFile } = require("@eslint/compat");
 const js = require("@eslint/js");
 const globals = require("globals");
-const prettierConfig = require("eslint-config-prettier");
+const prettierRecommended = require("eslint-plugin-prettier/recommended");
 
 module.exports = [
-  {
-    ignores: [
-      "**/node_modules/**",
-      "**/.history/**",
-      "**/aplDocuments/**",
-      "**/package-lock.json",
-      "lambda/.serverless/**",
-      "azan-lambda/.serverless/**",
-    ],
-  },
+  // Reuse .gitignore so build artifacts (node_modules, .serverless, coverage…)
+  // are ignored in one place and stay in sync automatically.
+  includeIgnoreFile(path.resolve(__dirname, ".gitignore")),
   js.configs.recommended,
   {
     languageOptions: {
@@ -36,5 +31,5 @@ module.exports = [
       },
     },
   },
-  prettierConfig,
+  prettierRecommended,
 ];

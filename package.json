@@ -10,16 +10,17 @@
     "lint": "eslint lambda azan-lambda",
     "lint:fix": "eslint lambda azan-lambda --fix",
     "format": "prettier --write \"{lambda,azan-lambda}/**/*.js\"",
-    "format:check": "prettier --check \"{lambda,azan-lambda}/**/*.js\"",
     "prepare": "husky",
     "deploy:dev": "pnpm --filter ./lambda deploy:dev && pnpm --filter ./azan-lambda deploy:dev && pnpm push:interaction-models",
     "deploy:prod": "pnpm --filter ./lambda deploy:prod && pnpm --filter ./azan-lambda deploy:prod",
     "push:interaction-models": "bash scripts/push-interaction-models.sh"
   },
   "devDependencies": {
+    "@eslint/compat": "^2.1.0",
     "@eslint/js": "^9.17.0",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.5.6",
     "globals": "^15.14.0",
     "husky": "^9.1.7",
     "jest": "^30.4.2",

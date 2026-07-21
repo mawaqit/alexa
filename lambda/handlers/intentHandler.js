@@ -2050,7 +2050,11 @@ const UserIdIntentHandler = {
       }
 
       const parts = mawaqitId.split("-");
-      const codeSsml = `<say-as interpret-as="digits">${parts[0]}</say-as><break time="200ms"/><say-as interpret-as="digits">${parts[1]}</say-as>`;
+      // Convert "231" -> "2 3 1" for speech alias
+      const part1Spoken = parts[0].split("").join(" ");
+      const part2Spoken = parts[1].split("").join(" ");
+
+      const codeSsml = `<sub alias="${part1Spoken}, ${part2Spoken}">${mawaqitId}</sub>`;
 
       const speakOutput = requestAttributes.t("userIdPrompt", codeSsml);
 

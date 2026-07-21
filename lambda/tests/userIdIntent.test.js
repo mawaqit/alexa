@@ -32,9 +32,7 @@ describe("UserIdIntentHandler", () => {
     // Verify spoken output contains the formatted code
     const text = spokenText(response);
     expect(text).toContain("Your support code is");
-    expect(response.outputSpeech.ssml).toContain(
-      '<say-as interpret-as="digits">',
-    );
+    expect(response.outputSpeech.ssml).toContain("<sub alias=");
   });
 
   it("should reuse the existing mawaqit_id if already saved in persistence", async () => {
@@ -57,9 +55,9 @@ describe("UserIdIntentHandler", () => {
 
     // Verify response speaks the correct code
     const text = spokenText(response);
-    expect(text).toContain("Your support code is 123456");
+    expect(text).toContain("Your support code is 123-456");
     expect(response.outputSpeech.ssml).toContain(
-      '<say-as interpret-as="digits">123</say-as><break time="200ms"/><say-as interpret-as="digits">456</say-as>',
+      '<sub alias="1 2 3, 4 5 6">123-456</sub>',
     );
   });
 

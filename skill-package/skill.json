@@ -1,5 +1,226 @@
 {
   "manifest": {
+    "manifestVersion": "1.0",
+    "publishingInformation": {
+      "category": "SMART_HOME",
+      "distributionMode": "PUBLIC",
+      "distributionCountries": [],
+      "isAvailableWorldwide": true,
+      "automaticDistribution": {
+        "isActive": false
+      },
+      "testingInstructions": "{\"ask_dist_username\":\" \",\"ask_dist_password\":\" \",\"ask_dist_testing_instructions\":\" Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\\nWe have specific permission to use the trademark/brand \\\"Mawaqit\\\". Kindly refer the above links. \\nWe would like to use 'mawaqit' as invocation word in all locales. \\n\\nFor testing purposes, \\nIf there is no mosque nearby your location, Kindly set a location/address of the device which is near France where there are lot of mosques to choose. \\n\\nIn a real-world scenario, if no mosque is found nearby, the user will receive a prompt informing them accordingly.\\n\\nRegarding PlayAdhanIntent,\\nThe sound of the Azan will be in Arabic irrespective of the customer's locale. \\n\\nFor every language saying mawakit instead of mawaqit it will better skill recognition as mentioned in skill description.\\n\\nFor French locales say ikama instead of iqama it will work better for NextIqamaTimeIntent.\\n\\n Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\\n\\nTesting Instructions for Azan:\\nhttps://docs.google.com/document/d/1CsfZ3kHJO9npcxhfhwjzPtYuAW-4EVBpWPXSS8Qvyjc/edit?usp=sharing\"}",
+      "locales": {
+        "en-US": {
+          "name": "MAWAQIT",
+          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
+          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
+          "examplePhrases": [
+            "Alexa, open MAWAQIT.",
+            "Alexa, ask MAWAQIT when is the next prayer.",
+            "Alexa, ask MAWAQIT when is Maghrib."
+          ],
+          "keywords": [
+            "prayer",
+            "prayers",
+            "mosque",
+            "mosques",
+            "MAWAQIT",
+            "times",
+            "schedule",
+            "salat",
+            "salah",
+            "fajr",
+            "dohr",
+            "asr",
+            "maghrib",
+            "isha",
+            "jumua"
+          ],
+          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
+          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
+          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
+        },
+        "fr-FR": {
+          "name": "MAWAQIT",
+          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée.",
+          "description": "Pour être sûr que la Skill se lance bien, dites plutôt Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de prières de la mosquée de votre choix !\n\nDemandez par exemple quelle est la prochaine prière, à quelle heure est la prière du vendredi, ou encore à quelle heure est la troisième prière ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosquée, de lancer l'Adhan classique ou celui de la première prière de la journée (Fajr).\n\nPour connaître toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal à reconnaître les noms de prière, nous vous conseillons de donner le numéro de la prière qui vous intéresse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, à quelle heure est la première prière ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour à nous faire parvenir, n'hésitez pas à nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn espérant que la Skill vous plaise, assalamu aleykoum !",
+          "examplePhrases": [
+            "Alexa, ouvre MAWAQIT.",
+            "Alexa, demande à MAWAQIT quand est la prochaine prière.",
+            "Alexa, demande à MAWAQIT quand est la quatrième prière."
+          ],
+          "keywords": [
+            "prière",
+            "prières",
+            "mosquée",
+            "mosquées",
+            "MAWAQIT",
+            "horaires",
+            "salat",
+            "salah",
+            "fajr",
+            "dohr",
+            "asr",
+            "maghrib",
+            "isha",
+            "jumua"
+          ],
+          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
+          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
+          "updatesDescription": "Recevez maintenant l'Adhan automatiquement sur votre appareil Alexa ! Voici comment procéder :\n\nÉtape 1 - Liez votre compte et configurez la sonnette virtuelle\nLiez votre compte Amazon dans les paramètres de la skill Mawaqit.\nUn appareil de sonnette virtuelle (\"Mawaqit Azan\") apparaître dans votre liste Smart Home Alexa.\nDans l'appli Alexa, allez dans Routines, puis Nouvelle routine, puis \"Quand ceci se produit\", puis Maison connectée, puis \"Mawaqit Azan Appuyé\".\nPour l'action, allez dans Skills, puis Mes Skills, puis Mawaqit, puis Jouer l'Adhaan et sauvegardez.\nDésactivez la notification de sonnette par défaut dans les paramètres de l'appareil pour éviter les alertes en double.\n\nÉtape 2 - Créez une notification par commande vocale\nDites simplement :\n\"Alexa, demande à Mawaqit de créer une routine pour la prière du Fajr\"\n\"Alexa, demande à Mawaqit de rappelle-moi pour la prière Asr\"\n\"Alexa, demande à Mawaqit de configurer ma routine\"\n\nMawaqit vous demandera pour quelle prière, puis configurera le rappel automatiquement.\n\nPour supprimer une notification, dites :\n\"Alexa, demande à Mawaqit de supprimer la routine pour la prière du Maghrib\"\n\"Alexa, demande à Mawaqit d'effacer l'alerte pour la prière Isha\"\n\"Alexa, demande à Mawaqit d'annuler mes alertes\""
+        },
+        "en-AU": {
+          "name": "MAWAQIT",
+          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
+          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
+          "examplePhrases": [
+            "Alexa, open MAWAQIT.",
+            "Alexa, ask MAWAQIT when is the next prayer.",
+            "Alexa, ask MAWAQIT when is Maghrib."
+          ],
+          "keywords": [
+            "prayer",
+            "prayers",
+            "mosque",
+            "mosques",
+            "MAWAQIT",
+            "times",
+            "schedule",
+            "salat",
+            "salah",
+            "fajr",
+            "dohr",
+            "asr",
+            "maghrib",
+            "isha",
+            "jumua"
+          ],
+          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
+          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
+          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
+        },
+        "en-CA": {
+          "name": "MAWAQIT",
+          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
+          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
+          "examplePhrases": [
+            "Alexa, open MAWAQIT.",
+            "Alexa, ask MAWAQIT when is the next prayer.",
+            "Alexa, ask MAWAQIT when is Maghrib."
+          ],
+          "keywords": [
+            "prayer",
+            "prayers",
+            "mosque",
+            "mosques",
+            "MAWAQIT",
+            "times",
+            "schedule",
+            "salat",
+            "salah",
+            "fajr",
+            "dohr",
+            "asr",
+            "maghrib",
+            "isha",
+            "jumua"
+          ],
+          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
+          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
+          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
+        },
+        "en-GB": {
+          "name": "MAWAQIT",
+          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
+          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
+          "examplePhrases": [
+            "Alexa, open MAWAQIT.",
+            "Alexa, ask MAWAQIT when is the next prayer.",
+            "Alexa, ask MAWAQIT when is Maghrib."
+          ],
+          "keywords": [
+            "prayer",
+            "prayers",
+            "mosque",
+            "mosques",
+            "MAWAQIT",
+            "times",
+            "schedule",
+            "salat",
+            "salah",
+            "fajr",
+            "dohr",
+            "asr",
+            "maghrib",
+            "isha",
+            "jumua"
+          ],
+          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
+          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
+          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
+        },
+        "en-IN": {
+          "name": "MAWAQIT",
+          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
+          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
+          "examplePhrases": [
+            "Alexa, open MAWAQIT.",
+            "Alexa, ask MAWAQIT when is the next prayer.",
+            "Alexa, ask MAWAQIT when is Maghrib."
+          ],
+          "keywords": [
+            "prayer",
+            "prayers",
+            "mosque",
+            "mosques",
+            "MAWAQIT",
+            "times",
+            "schedule",
+            "salat",
+            "salah",
+            "fajr",
+            "dohr",
+            "asr",
+            "maghrib",
+            "isha",
+            "jumua"
+          ],
+          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
+          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
+          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
+        },
+        "fr-CA": {
+          "name": "MAWAQIT",
+          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée.",
+          "description": "Pour être sûr que la Skill se lance bien, dites plutôt Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de prières de la mosquée de votre choix !\n\nDemandez par exemple quelle est la prochaine prière, à quelle heure est la prière du vendredi, ou encore à quelle heure est la troisième prière ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosquée, de lancer l'Adhan classique ou celui de la première prière de la journée (Fajr).\n\nPour connaître toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal à reconnaître les noms de prière, nous vous conseillons de donner le numéro de la prière qui vous intéresse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, à quelle heure est la première prière ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour à nous faire parvenir, n'hésitez pas à nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn espérant que la Skill vous plaise, assalamu aleykoum !",
+          "examplePhrases": [
+            "Alexa, ouvre MAWAQIT.",
+            "Alexa, demande à MAWAQIT quand est la prochaine prière.",
+            "Alexa, demande à MAWAQIT quand est la quatrième prière."
+          ],
+          "keywords": [
+            "prière",
+            "prières",
+            "mosquée",
+            "mosquées",
+            "MAWAQIT",
+            "horaires",
+            "salat",
+            "salah",
+            "fajr",
+            "dohr",
+            "asr",
+            "maghrib",
+            "isha",
+            "jumua"
+          ],
+          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
+          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
+          "updatesDescription": "Recevez maintenant l'Adhan automatiquement sur votre appareil Alexa ! Voici comment procéder :\n\nÉtape 1 - Liez votre compte et configurez la sonnette virtuelle\nLiez votre compte Amazon dans les paramètres de la skill Mawaqit.\nUn appareil de sonnette virtuelle (\"Mawaqit Azan\") apparaître dans votre liste Smart Home Alexa.\nDans l'appli Alexa, allez dans Routines, puis Nouvelle routine, puis \"Quand ceci se produit\", puis Maison connectée, puis \"Mawaqit Azan Appuyé\".\nPour l'action, allez dans Skills, puis Mes Skills, puis Mawaqit, puis Jouer l'Adhaan et sauvegardez.\nDésactivez la notification de sonnette par défaut dans les paramètres de l'appareil pour éviter les alertes en double.\n\nÉtape 2 - Créez une notification par commande vocale\nDites simplement :\n\"Alexa, demande à Mawaqit de créer une routine pour la prière du Fajr\"\n\"Alexa, demande à Mawaqit de rappelle-moi pour la prière Asr\"\n\"Alexa, demande à Mawaqit de configurer ma routine\"\n\nMawaqit vous demandera pour quelle prière, puis configurera le rappel automatiquement.\n\nPour supprimer une notification, dites :\n\"Alexa, demande à Mawaqit de supprimer la routine pour la prière du Maghrib\"\n\"Alexa, demande à Mawaqit d'effacer l'alerte pour la prière Isha\"\n\"Alexa, demande à Mawaqit d'annuler mes alertes\""
+        }
+      }
+    },
     "apis": {
       "custom": {
         "endpoint": {
@@ -9,84 +230,84 @@
           {
             "supportedViewports": [
               {
-                "maxHeight": 540,
+                "mode": "TV",
+                "shape": "RECTANGLE",
+                "minWidth": 960,
                 "maxWidth": 960,
                 "minHeight": 540,
-                "minWidth": 960,
-                "mode": "TV",
-                "shape": "RECTANGLE"
+                "maxHeight": 540
               },
               {
-                "maxHeight": 599,
+                "mode": "HUB",
+                "shape": "ROUND",
+                "minWidth": 100,
                 "maxWidth": 599,
                 "minHeight": 100,
-                "minWidth": 100,
-                "mode": "HUB",
-                "shape": "ROUND"
+                "maxHeight": 599
               },
               {
-                "maxHeight": 959,
+                "mode": "HUB",
+                "shape": "RECTANGLE",
+                "minWidth": 960,
                 "maxWidth": 1279,
                 "minHeight": 600,
-                "minWidth": 960,
-                "mode": "HUB",
-                "shape": "RECTANGLE"
+                "maxHeight": 959
               },
               {
-                "maxHeight": 1279,
+                "mode": "HUB",
+                "shape": "RECTANGLE",
+                "minWidth": 1280,
                 "maxWidth": 1920,
                 "minHeight": 600,
-                "minWidth": 1280,
-                "mode": "HUB",
-                "shape": "RECTANGLE"
+                "maxHeight": 1279
               },
               {
-                "maxHeight": 599,
+                "mode": "HUB",
+                "shape": "RECTANGLE",
+                "minWidth": 960,
                 "maxWidth": 1279,
                 "minHeight": 100,
-                "minWidth": 960,
-                "mode": "HUB",
-                "shape": "RECTANGLE"
+                "maxHeight": 599
               },
               {
-                "maxHeight": 1279,
+                "mode": "HUB",
+                "shape": "RECTANGLE",
+                "minWidth": 1920,
                 "maxWidth": 2560,
                 "minHeight": 960,
-                "minWidth": 1920,
-                "mode": "HUB",
-                "shape": "RECTANGLE"
+                "maxHeight": 1279
               },
               {
-                "maxHeight": 2560,
+                "mode": "HUB",
+                "shape": "RECTANGLE",
+                "minWidth": 960,
                 "maxWidth": 1279,
                 "minHeight": 1920,
-                "minWidth": 960,
-                "mode": "HUB",
-                "shape": "RECTANGLE"
+                "maxHeight": 2560
               },
               {
-                "maxHeight": 1920,
+                "mode": "MOBILE",
+                "shape": "RECTANGLE",
+                "minWidth": 600,
                 "maxWidth": 959,
                 "minHeight": 320,
-                "minWidth": 600,
-                "mode": "MOBILE",
-                "shape": "RECTANGLE"
+                "maxHeight": 1920
               },
               {
-                "maxHeight": 1920,
+                "mode": "MOBILE",
+                "shape": "RECTANGLE",
+                "minWidth": 960,
                 "maxWidth": 1279,
                 "minHeight": 320,
-                "minWidth": 960,
-                "mode": "MOBILE",
-                "shape": "RECTANGLE"
+                "maxHeight": 1920
               },
               {
-                "maxHeight": 1920,
+                "mode": "MOBILE",
+                "shape": "RECTANGLE",
+                "minWidth": 1280,
                 "maxWidth": 1920,
                 "minHeight": 320,
-                "minWidth": 1280,
-                "mode": "MOBILE",
-                "shape": "RECTANGLE"
+                "maxHeight": 1920
               }
             ],
             "type": "ALEXA_PRESENTATION_APL"
@@ -111,10 +332,10 @@
           {
             "autoInitializedExtensions": [
               {
+                "uri": "alexaext:smartmotion:10",
                 "settings": {
                   "wakeWordResponse": "turnToWakeWord"
-                },
-                "uri": "alexaext:smartmotion:10"
+                }
               }
             ],
             "requestedExtensions": [
@@ -125,13 +346,13 @@
             "type": "ALEXA_EXTENSION"
           }
         ],
-        "locales": {},
         "tasks": [
           {
             "name": "PlayAdhaan",
             "version": "1"
           }
-        ]
+        ],
+        "locales": {}
       },
       "smartHome": {
         "endpoint": {
@@ -140,17 +361,6 @@
         "protocolVersion": "3"
       }
     },
-    "events": {
-      "endpoint": {
-        "uri": "arn:aws:lambda:eu-west-3:275854128200:function:alexa-prod-indexHandler:live"
-      },
-      "subscriptions": [
-        {
-          "eventName": "SKILL_DISABLED"
-        }
-      ]
-    },
-    "manifestVersion": "1.0",
     "permissions": [
       {
         "name": "alexa::devices:all:address:full:read"
@@ -162,291 +372,56 @@
         "name": "alexa::devices:all:geolocation:read"
       }
     ],
+    "events": {
+      "endpoint": {
+        "uri": "arn:aws:lambda:eu-west-3:275854128200:function:alexa-prod-indexHandler:live"
+      },
+      "subscriptions": [
+        {
+          "eventName": "SKILL_DISABLED"
+        }
+      ]
+    },
     "privacyAndCompliance": {
+      "usesPersonalInfo": false,
       "allowsPurchases": false,
       "containsAds": false,
       "isChildDirected": false,
       "isExportCompliant": true,
-      "locales": {
-        "en-US": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
-        },
-        "fr-FR": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/fr/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/fr/legal-notice"
-        },
-        "en-AU": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
-        },
-        "en-CA": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
-        },
-        "en-GB": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
-        },
-        "en-IN": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
-        },
-        "fr-CA": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/fr/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/fr/legal-notice"
-        }
-      },
       "shoppingKit": {
         "isAmazonAssociatesOnAlexaEnabled": false,
         "isShoppingActionsEnabled": false
       },
-      "usesPersonalInfo": false
-    },
-    "publishingInformation": {
-      "automaticDistribution": {
-        "isActive": false
-      },
-      "category": "SMART_HOME",
-      "distributionCountries": [],
-      "distributionMode": "PUBLIC",
-      "isAvailableWorldwide": true,
       "locales": {
-        "en-US": {
-          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
-          "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is Maghrib."
-          ],
-          "keywords": [
-            "prayer",
-            "prayers",
-            "mosque",
-            "mosques",
-            "MAWAQIT",
-            "prayer",
-            "times",
-            "schedule",
-            "prayer",
-            "time",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
-          "name": "MAWAQIT",
-          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
-          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
-        },
-        "fr-FR": {
-          "description": "Pour être sûr que la Skill se lance bien, dites plutôt Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de prières de la mosquée de votre choix !\n\nDemandez par exemple quelle est la prochaine prière, à quelle heure est la prière du vendredi, ou encore à quelle heure est la troisième prière ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosquée, de lancer l'Adhan classique ou celui de la première prière de la journée (Fajr).\n\nPour connaître toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal à reconnaître les noms de prière, nous vous conseillons de donner le numéro de la prière qui vous intéresse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, à quelle heure est la première prière ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour à nous faire parvenir, n'hésitez pas à nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn espérant que la Skill vous plaise, assalamu aleykoum !",
-          "examplePhrases": [
-            "Alexa, ouvre MAWAQIT.",
-            "Alexa, demande à MAWAQIT quand est la prochaine prière.",
-            "Alexa, demande à MAWAQIT quand est la quatrième prière."
-          ],
-          "keywords": [
-            "prière",
-            "prières",
-            "mosquée",
-            "mosquées",
-            "MAWAQIT",
-            "horaires",
-            "de",
-            "prière",
-            "horaire",
-            "de",
-            "prière",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
-          "name": "MAWAQIT",
-          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
-          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée.",
-          "updatesDescription": "Recevez maintenant l'Adhan automatiquement sur votre appareil Alexa ! Voici comment procéder :\n\nÉtape 1 - Liez votre compte et configurez la sonnette virtuelle\nLiez votre compte Amazon dans les paramètres de la compétence Mawaqit.\nUn appareil de sonnette virtuelle (\"Mawaqit Azan\") apparaître dans votre liste Smart Home Alexa.\nDans l'appli Alexa, allez dans Routines, puis Nouvelle routine, puis \"Quand ceci se produit\", puis Maison connectée, puis \"Mawaqit Azan Appuyé\".\nPour l'action, allez dans Compétences, puis Mes compétences, puis Mawaqit, puis Jouer l'Adhaan et sauvegardez.\nDésactivez la notification de sonnette par défaut dans les paramètres de l'appareil pour éviter les alertes en double.\n\nÉtape 2 - Créez une notification par commande vocale\nDites simplement :\n\"Alexa, demande à Mawaqit de créer une routine pour la prière du Fajr\"\n\"Alexa, demande à Mawaqit de rappelle-moi pour la prière Asr\"\n\"Alexa, demande à Mawaqit de configurer ma routine\"\n\nMawaqit vous demandera pour quelle prière, puis configurera le rappel automatiquement.\n\nPour supprimer une notification, dites :\n\"Alexa, demande à Mawaqit de supprimer la routine pour la prière du Maghrib\"\n\"Alexa, demande à Mawaqit d'effacer l'alerte pour la prière Isha\"\n\"Alexa, demande à Mawaqit d'annuler mes alertes\""
-        },
         "en-AU": {
-          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
-          "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is Maghrib."
-          ],
-          "keywords": [
-            "prayer",
-            "prayers",
-            "mosque",
-            "mosques",
-            "MAWAQIT",
-            "prayer",
-            "times",
-            "schedule",
-            "prayer",
-            "time",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
-          "name": "MAWAQIT",
-          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
-          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
+          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
+          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
         },
         "en-CA": {
-          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
-          "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is Maghrib."
-          ],
-          "keywords": [
-            "prayer",
-            "prayers",
-            "mosque",
-            "mosques",
-            "MAWAQIT",
-            "prayer",
-            "times",
-            "schedule",
-            "prayer",
-            "time",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
-          "name": "MAWAQIT",
-          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
-          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
+          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
+          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
         },
         "en-GB": {
-          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
-          "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is Maghrib."
-          ],
-          "keywords": [
-            "prayer",
-            "prayers",
-            "mosque",
-            "mosques",
-            "MAWAQIT",
-            "prayer",
-            "times",
-            "schedule",
-            "prayer",
-            "time",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
-          "name": "MAWAQIT",
-          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
-          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
+          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
+          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
         },
         "en-IN": {
-          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
-          "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is Maghrib."
-          ],
-          "keywords": [
-            "prayer",
-            "prayers",
-            "mosque",
-            "mosques",
-            "MAWAQIT",
-            "prayer",
-            "times",
-            "schedule",
-            "prayer",
-            "time",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
-          "name": "MAWAQIT",
-          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
-          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
+          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
+          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
+        },
+        "en-US": {
+          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
+          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
         },
         "fr-CA": {
-          "description": "Pour être sûr que la Skill se lance bien, dites plutôt Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de prières de la mosquée de votre choix !\n\nDemandez par exemple quelle est la prochaine prière, à quelle heure est la prière du vendredi, ou encore à quelle heure est la troisième prière ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosquée, de lancer l'Adhan classique ou celui de la première prière de la journée (Fajr).\n\nPour connaître toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal à reconnaître les noms de prière, nous vous conseillons de donner le numéro de la prière qui vous intéresse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, à quelle heure est la première prière ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour à nous faire parvenir, n'hésitez pas à nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn espérant que la Skill vous plaise, assalamu aleykoum !",
-          "examplePhrases": [
-            "Alexa, ouvre MAWAQIT.",
-            "Alexa, demande à MAWAQIT quand est la prochaine prière.",
-            "Alexa, demande à MAWAQIT quand est la quatrième prière."
-          ],
-          "keywords": [
-            "prière",
-            "prières",
-            "mosquée",
-            "mosquées",
-            "MAWAQIT",
-            "horaires",
-            "de",
-            "prière",
-            "horaire",
-            "de",
-            "prière",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "file://assets/images/large-mawaqit-icon.png",
-          "name": "MAWAQIT",
-          "smallIconUri": "file://assets/images/small-mawaqit-icon.png",
-          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée.",
-          "updatesDescription": "Recevez maintenant l'Adhan automatiquement sur votre appareil Alexa ! Voici comment procéder :\n\nÉtape 1 - Liez votre compte et configurez la sonnette virtuelle\nLiez votre compte Amazon dans les paramètres de la compétence Mawaqit.\nUn appareil de sonnette virtuelle (\"Mawaqit Azan\") apparaître dans votre liste Smart Home Alexa.\nDans l'appli Alexa, allez dans Routines, puis Nouvelle routine, puis \"Quand ceci se produit\", puis Maison connectée, puis \"Mawaqit Azan Appuyé\".\nPour l'action, allez dans Compétences, puis Mes compétences, puis Mawaqit, puis Jouer l'Adhaan et sauvegardez.\nDésactivez la notification de sonnette par défaut dans les paramètres de l'appareil pour éviter les alertes en double.\n\nÉtape 2 - Créez une notification par commande vocale\nDites simplement :\n\"Alexa, demande à Mawaqit de créer une routine pour la prière du Fajr\"\n\"Alexa, demande à Mawaqit de rappelle-moi pour la prière Asr\"\n\"Alexa, demande à Mawaqit de configurer ma routine\"\n\nMawaqit vous demandera pour quelle prière, puis configurera le rappel automatiquement.\n\nPour supprimer une notification, dites :\n\"Alexa, demande à Mawaqit de supprimer la routine pour la prière du Maghrib\"\n\"Alexa, demande à Mawaqit d'effacer l'alerte pour la prière Isha\"\n\"Alexa, demande à Mawaqit d'annuler mes alertes\""
+          "privacyPolicyUrl": "https://MAWAQIT.net/fr/legal-notice",
+          "termsOfUseUrl": "https://MAWAQIT.net/fr/legal-notice"
+        },
+        "fr-FR": {
+          "privacyPolicyUrl": "https://MAWAQIT.net/fr/legal-notice",
+          "termsOfUseUrl": "https://MAWAQIT.net/fr/legal-notice"
         }
-      },
-      "testingInstructions": "{\"ask_dist_username\":\" \",\"ask_dist_password\":\" \",\"ask_dist_testing_instructions\":\" Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\\nWe have specific permission to use the trademark/brand \\\"Mawaqit\\\". Kindly refer the above links. \\nWe would like to use 'mawaqit' as invocation word in all locales. \\n\\nFor testing purposes, \\nIf there is no mosque nearby your location, Kindly set a location/address of the device which is near France where there are lot of mosques to choose. \\n\\nIn a real-world scenario, if no mosque is found nearby, the user will receive a prompt informing them accordingly.\\n\\nRegarding PlayAdhanIntent,\\nThe sound of the Azan will be in Arabic irrespective of the customer's locale. \\n\\nFor every language saying mawakit instead of mawaqit it will better skill recognition as mentioned in skill description.\\n\\nFor French locales say ikama instead of iqama it will work better for NextIqamaTimeIntent.\\n\\n Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\\n\\nTesting Instructions for Azan:\\nhttps://docs.google.com/document/d/1CsfZ3kHJO9npcxhfhwjzPtYuAW-4EVBpWPXSS8Qvyjc/edit?usp=sharing\"}"
+      }
     }
   }
 }

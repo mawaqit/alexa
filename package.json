@@ -12,7 +12,8 @@
     "deploy:dev": "pnpm --filter ./lambda deploy:dev && pnpm --filter ./azan-lambda deploy:dev && pnpm push:skill-config && pnpm push:account-linking-config",
     "deploy:prod": "pnpm --filter ./lambda deploy:prod && pnpm --filter ./azan-lambda deploy:prod",
     "push:skill-config": "ask deploy --target skill-metadata --profile ${ASK_PROFILE:-MAWAQIT}",
-    "push:account-linking-config": "node .ask/push-account-linking.js"
+    "push:account-linking-config": "node .ask/push-account-linking.js",
+    "sync:locales": "node .ask/sync-locales.js"
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.0",

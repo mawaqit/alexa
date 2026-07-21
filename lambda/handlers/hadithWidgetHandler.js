@@ -8,14 +8,16 @@ const InstallHadithWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesInstalled" &&
-      helperFunctions.getPackageId(handlerInput) === "RandomHadith"
+      helperFunctions.getPackageId(handlerInput) === "HadithOfTheDay"
     );
   },
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
     const requestAttributes = attributesManager.getRequestAttributes();
-    const title = requestAttributes.t("hadithWidgetTitle");
-    const description = requestAttributes.t("hadithWidgetDescription");
+    const title = requestAttributes.t("widgets.hadithOfTheDay.title");
+    const description = requestAttributes.t(
+      "widgets.hadithOfTheDay.description",
+    );
     const attributes =
       (await attributesManager.getPersistentAttributes()) || {};
     const locale = helperFunctions.splitLanguage(
@@ -42,8 +44,12 @@ const InstallHadithWidgetRequestHandler = {
           namespace: "hadithOfTheDay",
           key: "hadith",
           content: {
-            title: title,
-            randomHadith: hadith || description,
+            labels: {
+              title: title,
+            },
+            content: {
+              hadithText: hadith || description,
+            },
             nextUpdateTime: nextUpdateTime,
             formattedNextUpdateTime: formattedNextUpdateTime,
           },
@@ -85,7 +91,7 @@ const RemoveHadithWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesRemoved" &&
-      helperFunctions.getPackageId(handlerInput) === "RandomHadith"
+      helperFunctions.getPackageId(handlerInput) === "HadithOfTheDay"
     );
   },
   async handle(handlerInput) {
@@ -111,7 +117,7 @@ const UpdateHadithWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UpdateRequest" &&
-      helperFunctions.getPackageId(handlerInput) === "RandomHadith"
+      helperFunctions.getPackageId(handlerInput) === "HadithOfTheDay"
     );
   },
   async handle(handlerInput) {
@@ -142,7 +148,7 @@ const WidgetInstallationErrorHandler = {
     );
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
-    const speakOutput = requestAttributes.t("widgetInstallationErrorPrompt");
+    const speakOutput = requestAttributes.t("widgets.installationErrorPrompt");
 
     return handlerInput.responseBuilder.speak(speakOutput).getResponse();
   },
@@ -187,7 +193,7 @@ const ReadHadithAPLEventHandler = {
       handlerInput.attributesManager.getRequestAttributes();
     const hadith =
       helperFunctions.getAplArgument(handlerInput, 1) ||
-      requestAttributes.t("hadithWidgetDescription");
+      requestAttributes.t("widgets.hadithOfTheDay.description");
     const sessionAttributes = handlerInput.requestEnvelope?.session
       ? handlerInput.attributesManager.getSessionAttributes()
       : {};

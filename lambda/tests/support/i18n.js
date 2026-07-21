@@ -14,9 +14,10 @@ const createTranslate = (locale = "en-US") => {
     lng: locale,
     resources: languageStrings,
     returnObjects: true,
-    // i18next treats "." and ":" as key/namespace separators; prompt keys are
-    // flat, and disabling them keeps values such as "20:00" from being mangled.
-    keySeparator: false,
+    // i18next treats "." as the key separator (needed for nested keys such as
+    // "widgets.nextPrayerTime.title") and ":" as the namespace separator. We keep
+    // "." enabled to match production, but disable ":" so values like "20:00"
+    // passed as keys aren't mangled.
     nsSeparator: false,
   });
 

@@ -87,10 +87,18 @@ module.exports = {
     timezoneErrorPrompt: `Sorry, I couldn't retrieve your timezone. Please check your location settings in the Alexa app and try again.`,
     requestRoutinePrompt:
       "Would you like to set up a notification for this prayer?",
-    hadithWidgetTitle: "Hadith of the day",
-    hadithWidgetDescription: "Loading...",
-    widgetInstallationErrorPrompt:
-      "Sorry, an error occurred while installing the widget. Please try again later.",
+    widgets: {
+      nextPrayerTime: {
+        title: "Next Prayer",
+        at: "at",
+      },
+      hadithOfTheDay: {
+        title: "Hadith of the day",
+        description: "Loading...",
+      },
+      installationErrorPrompt:
+        "Sorry, an error occurred while installing the widget. Please try again later.",
+    },
     nextPrayerWithoutMosqueAndTimePrompt: `The next prayer is %s at %s.`,
     linkAccountPrompt:
       "To enable the notification, please link your Amazon account in the Alexa app and try again.",

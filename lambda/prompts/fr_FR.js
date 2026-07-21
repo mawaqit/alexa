@@ -94,10 +94,18 @@ module.exports = {
     timezoneErrorPrompt: `Désolé, je n'ai pas pu récupérer votre fuseau horaire. Vérifiez vos paramètres de localisation dans l'application Alexa, puis réessayez.`,
     requestRoutinePrompt:
       "Souhaitez-vous configurer une notification pour cette prière ?",
-    hadithWidgetTitle: "Hadith du jour",
-    hadithWidgetDescription: "Chargement...",
-    widgetInstallationErrorPrompt:
-      "Désolé, une erreur est survenue lors de l'installation du widget. Veuillez réessayer plus tard.",
+    widgets: {
+      nextPrayerTime: {
+        title: "Prochaine prière",
+        at: "à",
+      },
+      hadithOfTheDay: {
+        title: "Hadith du jour",
+        description: "Chargement...",
+      },
+      installationErrorPrompt:
+        "Désolé, une erreur est survenue lors de l'installation du widget. Veuillez réessayer plus tard.",
+    },
     nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s.",
     linkAccountPrompt:
       "Pour activer la notification, veuillez connecter votre compte Amazon dans l'application Alexa, puis réessayez.",

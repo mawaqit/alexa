@@ -10,7 +10,12 @@
           "metadata": {
             "name": "Next prayer",
             "description": "Displays the next prayer time for your mosque.",
-            "keywords": ["prayer", "mosque", "mawaqit", "salat"],
+            "keywords": [
+              "prayer",
+              "mosque",
+              "mawaqit",
+              "salat"
+            ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
             "previews": [
               "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
@@ -24,7 +29,107 @@
           "metadata": {
             "name": "Prochaine prière",
             "description": "Affiche l'heure de la prochaine prière de votre mosquée.",
-            "keywords": ["prière", "mosquée", "mawaqit", "salat"],
+            "keywords": [
+              "prière",
+              "mosquée",
+              "mawaqit",
+              "salat"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-fr.png"
+            ]
+          }
+        }
+      ],
+      "en-AU": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Next prayer",
+            "description": "Displays the next prayer time for your mosque.",
+            "keywords": [
+              "prayer",
+              "mosque",
+              "mawaqit",
+              "salat"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
+          }
+        }
+      ],
+      "en-CA": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Next prayer",
+            "description": "Displays the next prayer time for your mosque.",
+            "keywords": [
+              "prayer",
+              "mosque",
+              "mawaqit",
+              "salat"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
+          }
+        }
+      ],
+      "en-GB": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Next prayer",
+            "description": "Displays the next prayer time for your mosque.",
+            "keywords": [
+              "prayer",
+              "mosque",
+              "mawaqit",
+              "salat"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
+          }
+        }
+      ],
+      "en-IN": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Next prayer",
+            "description": "Displays the next prayer time for your mosque.",
+            "keywords": [
+              "prayer",
+              "mosque",
+              "mawaqit",
+              "salat"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
+          }
+        }
+      ],
+      "fr-CA": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Prochaine prière",
+            "description": "Affiche l'heure de la prochaine prière de votre mosquée.",
+            "keywords": [
+              "prière",
+              "mosquée",
+              "mawaqit",
+              "salat"
+            ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
             "previews": [
               "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-fr.png"

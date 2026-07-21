@@ -11,14 +11,16 @@
  * variants from it:
  *   - whole interaction-model files (skill-package/interactionModels/custom/),
  *   - the per-locale fields of skill-package/skill.json,
- *   - the per-locale x-amzn-display-details of each skill-package/tasks/ file.
+ *   - the per-locale x-amzn-display-details of each skill-package/tasks/ file,
+ *   - the per-locale publishingInformation.locales of each
+ *     skill-package/dataStorePackages/<pkg>/manifest.json.
  *
  * Run from the repo root after editing a source locale:
  *   node .ask/sync-locales.js
  *
  * To support new locales, extend LOCALE_MAP (source -> variants). To sync a new
- * per-locale JSON section, add its dotted path to SKILL_LOCALE_PATHS or
- * TASK_LOCALE_PATHS.
+ * per-locale JSON section, add its dotted path to SKILL_LOCALE_PATHS,
+ * TASK_LOCALE_PATHS, or DATASTORE_LOCALE_PATHS.
  *
  * Generated interaction-model files carry a top-level `_generated` marker and
  * must never be hand-edited — edit the source locale and re-run this script.
@@ -42,10 +44,14 @@ const SKILL_LOCALE_PATHS = [
 // Per-locale maps in each skill-package/tasks/*.json file.
 const TASK_LOCALE_PATHS = ["info.x-amzn-display-details"];
 
+// Per-locale maps in each skill-package/dataStorePackages/<pkg>/manifest.json.
+const DATASTORE_LOCALE_PATHS = ["publishingInformation.locales"];
+
 const ROOT = path.resolve(__dirname, "..");
 const PACKAGE_DIR = path.join(ROOT, "skill-package");
 const MODELS_DIR = path.join(PACKAGE_DIR, "interactionModels", "custom");
 const TASKS_DIR = path.join(PACKAGE_DIR, "tasks");
+const DATASTORE_DIR = path.join(PACKAGE_DIR, "dataStorePackages");
 const SKILL_JSON = path.join(PACKAGE_DIR, "skill.json");
 
 const NOTICE =
@@ -117,7 +123,8 @@ function syncJsonLocaleFields(target) {
   return done;
 }
 
-// skill.json plus every task definition file get their locale fields synced.
+// skill.json, every task definition file, and every dataStore package manifest
+// get their locale fields synced.
 function jsonLocaleTargets() {
   const targets = [
     { file: SKILL_JSON, label: "skill.json", paths: SKILL_LOCALE_PATHS },
@@ -129,6 +136,18 @@ function jsonLocaleTargets() {
           file: path.join(TASKS_DIR, entry),
           label: `tasks/${entry}`,
           paths: TASK_LOCALE_PATHS,
+        });
+      }
+    }
+  }
+  if (fs.existsSync(DATASTORE_DIR)) {
+    for (const pkg of fs.readdirSync(DATASTORE_DIR)) {
+      const manifest = path.join(DATASTORE_DIR, pkg, "manifest.json");
+      if (fs.existsSync(manifest)) {
+        targets.push({
+          file: manifest,
+          label: `dataStorePackages/${pkg}/manifest.json`,
+          paths: DATASTORE_LOCALE_PATHS,
         });
       }
     }

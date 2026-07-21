@@ -10,9 +10,16 @@
           "metadata": {
             "name": "Hadith of the day",
             "description": "Displays a random hadith that refreshes throughout the day.",
-            "keywords": ["hadith", "islam", "mawaqit", "quote"],
+            "keywords": [
+              "hadith",
+              "islam",
+              "mawaqit",
+              "quote"
+            ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
-            "previews": ["https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"]
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
           }
         }
       ],
@@ -22,9 +29,111 @@
           "metadata": {
             "name": "Hadith du jour",
             "description": "Affiche un hadith aléatoire qui se renouvelle au fil de la journée.",
-            "keywords": ["hadith", "islam", "mawaqit", "citation"],
+            "keywords": [
+              "hadith",
+              "islam",
+              "mawaqit",
+              "citation"
+            ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
-            "previews": ["https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-fr.png"]
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-fr.png"
+            ]
+          }
+        }
+      ],
+      "en-AU": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Hadith of the day",
+            "description": "Displays a random hadith that refreshes throughout the day.",
+            "keywords": [
+              "hadith",
+              "islam",
+              "mawaqit",
+              "quote"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
+          }
+        }
+      ],
+      "en-CA": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Hadith of the day",
+            "description": "Displays a random hadith that refreshes throughout the day.",
+            "keywords": [
+              "hadith",
+              "islam",
+              "mawaqit",
+              "quote"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
+          }
+        }
+      ],
+      "en-GB": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Hadith of the day",
+            "description": "Displays a random hadith that refreshes throughout the day.",
+            "keywords": [
+              "hadith",
+              "islam",
+              "mawaqit",
+              "quote"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
+          }
+        }
+      ],
+      "en-IN": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Hadith of the day",
+            "description": "Displays a random hadith that refreshes throughout the day.",
+            "keywords": [
+              "hadith",
+              "islam",
+              "mawaqit",
+              "quote"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
+          }
+        }
+      ],
+      "fr-CA": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Hadith du jour",
+            "description": "Affiche un hadith aléatoire qui se renouvelle au fil de la journée.",
+            "keywords": [
+              "hadith",
+              "islam",
+              "mawaqit",
+              "citation"
+            ],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-fr.png"
+            ]
           }
         }
       ]

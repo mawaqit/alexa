@@ -1,6 +1,7 @@
 # Reusable deploy workflow. Called by deploy-dev.yml (stage=dev) and
-# deploy-prod.yml (stage=prod). Deploys both Lambda services and pushes the
-# interaction models to the skill's `development` stage.
+# deploy-prod.yml (stage=prod). Deploys both Lambda services and deploys the
+# skill package (manifest + interaction models) to the skill's `development`
+# stage via `ask deploy`.
 #
 # The Alexa skill going *live* is intentionally NOT automated:
 # publishing to the `live` stage requires Amazon certification, which is a
@@ -20,10 +21,9 @@ on:
         required: true
         type: string
 
-# SKILL_ID: the skill ID from the Alexa Developer Console (one skill, both
-# stages share it). ASK_PROFILE: a profile present in the ASK_CLI_CONFIG secret.
+# ASK_PROFILE: a profile present in the ASK_CLI_CONFIG secret. It must match a
+# profile declared in ask-resources.json (skill id lives in .ask/ask-states.json).
 env:
-  SKILL_ID: ${{ vars.SKILL_ID }}
   ASK_PROFILE: ${{ vars.ASK_PROFILE }}
 
 jobs:
@@ -80,51 +80,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Deploy main skill backend (lambda)
+      - name: Deploy lambda, azan-lambda and skill-package
         working-directory: lambda
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         run: pnpm deploy:${{ inputs.stage }}
 
-      - name: Deploy Smart Azan dispatcher (azan-lambda)
-        working-directory: azan-lambda
-        env:
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-        run: pnpm deploy:${{ inputs.stage }}
-
-  push-interaction-models:
-    name: Push Interaction Models (Development Stage)
-    needs: [deploy]
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-
-      - name: Install ASK CLI
-        run: npm install -g ask-cli@^2
-
-      - name: Configure ASK CLI
-        env:
-          ASK_CLI_CONFIG: ${{ secrets.ASK_CLI_CONFIG }}
-        run: |
-          mkdir -p ~/.ask
-          echo "$ASK_CLI_CONFIG" | base64 --decode > ~/.ask/cli_config
-
-      - name: Push every locale to the development stage
-        run: bash scripts/push-interaction-models.sh
-
   notify-result:
     name: Notify deploy result
     if: always()
-    needs: [deploy, push-interaction-models]
+    needs: [deploy]
     runs-on: ubuntu-latest
     permissions: {}
     env:

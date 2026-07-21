@@ -8,9 +8,7 @@ The project is split into two independently deployed Serverless Framework servic
 | -------------------- | -------------------- | -------------------------------------------------------------------- |
 | `lambda/`            | `alexa`              | Main skill backend: intent handling, prayer times, routines, widgets |
 | `azan-lambda/`       | `mawaqit-alexa-azan` | Smart Azan: scheduled adhan playback dispatch                        |
-| `interactionModels/` | -                    | Alexa interaction models (voice model) per locale                    |
-| `skill-package/`     | -                    | Skill package assets (tasks, routine triggers)                       |
-| `skillManifest/`     | -                    | Skill manifest (`skill.json`) used by the ASK CLI                    |
+| `skill-package/`     | -                    | Alexa skill package: manifest (`skill.json`), interaction models, tasks, routine triggers — deployed via `ask deploy` |
 | `utils/`             | -                    | One-off Python script for generating locale files                    |
 
 ## Repository structure
@@ -35,9 +33,12 @@ alexa/
 │   ├── tests/                 # Jest tests for this service
 │   ├── env.json
 │   └── serverless.yml
-├── interactionModels/         # One JSON file per supported locale
-├── skill-package/             # Routines/tasks skill package assets
-├── skillManifest/             # skill.json manifest for the ASK CLI
+├── skill-package/             # Alexa skill package, deployed via `ask deploy`
+│   ├── skill.json             # Skill manifest (endpoints, publishing info)
+│   ├── interactionModels/     # custom/<locale>.json — one voice model per locale
+│   ├── tasks/                 # Custom task definitions (PlayAdhaan)
+│   └── routines/              # Ready-made routine triggers
+├── ask-resources.json         # ASK CLI deploy config (points at skill-package/)
 └── utils/                     # create_locale_files.py (locale scaffolding script)
 ```
 

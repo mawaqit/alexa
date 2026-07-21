@@ -1,15 +1,9 @@
 {
-  "name": "mawaqitazan",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "mawaqit-azan-lambda",
   "scripts": {
     "deploy:dev": "serverless deploy --stage dev",
     "deploy:prod": "serverless deploy --stage prod"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.971.0",
     "@aws-sdk/client-ssm": "^3.971.0",

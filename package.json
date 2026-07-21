@@ -1,19 +1,17 @@
 {
   "name": "mawaqit-alexa",
   "private": true,
-  "version": "1.0.0",
   "description": "Tooling workspace for the MAWAQIT Alexa skill (lambda + azan-lambda)",
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint": "eslint lambda azan-lambda",
-    "lint:fix": "eslint lambda azan-lambda --fix",
-    "format": "prettier --write \"{lambda,azan-lambda}/**/*.js\"",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "prepare": "husky",
-    "deploy:dev": "pnpm --filter ./lambda deploy:dev && pnpm --filter ./azan-lambda deploy:dev && pnpm push:interaction-models",
+    "deploy:dev": "pnpm --filter ./lambda deploy:dev && pnpm --filter ./azan-lambda deploy:dev && pnpm deploy:skill-config",
     "deploy:prod": "pnpm --filter ./lambda deploy:prod && pnpm --filter ./azan-lambda deploy:prod",
-    "push:interaction-models": "bash scripts/push-interaction-models.sh"
+    "deploy:skill-config": "ask deploy --target skill-metadata --profile ${ASK_PROFILE:-MAWAQIT}"
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.0",

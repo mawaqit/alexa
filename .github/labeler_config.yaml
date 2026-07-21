@@ -1,9 +1,8 @@
 scope/skill-config:
   - changed-files:
       - any-glob-to-any-file:
-          - "interactionModels/**"
           - "skill-package/**"
-          - "skillManifest/**"
+          - "ask-resources.json"
 
 scope/ci:
   - changed-files:

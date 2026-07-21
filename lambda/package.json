@@ -1,14 +1,10 @@
 {
   "name": "mawaqit-alexa-skill",
-  "version": "1.2.0",
-  "description": "mawaqit-alexa-skill-backend",
   "main": "index.js",
   "scripts": {
     "deploy:dev": "serverless deploy --stage dev",
     "deploy:prod": "serverless deploy --stage prod"
   },
-  "author": "Amazon Alexa",
-  "license": "Apache License",
   "dependencies": {
     "@google-cloud/translate": "^9.4.2",
     "ask-sdk-core": "^2.7.0",

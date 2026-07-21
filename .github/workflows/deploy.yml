@@ -84,6 +84,8 @@ jobs:
         working-directory: lambda
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+          # Injected into .ask/account-linking.json
+          ACCOUNT_LINKING_CLIENT_SECRET: ${{ secrets.ACCOUNT_LINKING_CLIENT_SECRET }}
         run: pnpm deploy:${{ inputs.stage }}
 
   notify-result:

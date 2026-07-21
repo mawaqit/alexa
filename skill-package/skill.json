@@ -1,6 +1,5 @@
 {
   "manifest": {
-    "manifestVersion": "1.0",
     "apis": {
       "custom": {
         "endpoint": {
@@ -151,12 +150,10 @@
         }
       ]
     },
+    "manifestVersion": "1.0",
     "permissions": [
       {
         "name": "alexa::devices:all:address:full:read"
-      },
-      {
-        "name": "alexa::profile:email:read"
       },
       {
         "name": "alexa::async_event:write"
@@ -178,31 +175,18 @@
         "fr-FR": {
           "privacyPolicyUrl": "https://MAWAQIT.net/fr/legal-notice",
           "termsOfUseUrl": "https://MAWAQIT.net/fr/legal-notice"
-        },
-        "en-AU": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
-        },
-        "en-CA": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
-        },
-        "en-GB": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
-        },
-        "en-IN": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/en/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/en/legal-notice"
-        },
-        "fr-CA": {
-          "privacyPolicyUrl": "https://MAWAQIT.net/fr/legal-notice",
-          "termsOfUseUrl": "https://MAWAQIT.net/fr/legal-notice"
         }
+      },
+      "shoppingKit": {
+        "isAmazonAssociatesOnAlexaEnabled": false,
+        "isShoppingActionsEnabled": false
       },
       "usesPersonalInfo": false
     },
     "publishingInformation": {
+      "automaticDistribution": {
+        "isActive": false
+      },
       "category": "SMART_HOME",
       "distributionCountries": [],
       "distributionMode": "PUBLIC",
@@ -213,7 +197,7 @@
           "examplePhrases": [
             "Alexa, open MAWAQIT.",
             "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is the fourth prayer."
+            "Alexa, ask MAWAQIT when is Maghrib."
           ],
           "keywords": [
             "prayer",
@@ -235,10 +219,25 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c1154d6dcacdfb893b12966639acbf89d4a71ed3d6a1b1f5cdfa19203f1bf144",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260721T045851Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QAJVSXSHR%2F20260721%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=07478180a680b118c7c193f887517c691d08a154ec63008377b73d5d04599c38",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=3ce8d0806640cf84af24b5361aac86c9165ab1ca4e226335ff841d6aed3625b0",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque."
+          "preview": {
+            "assets": {
+              "mobileRectangle": {
+                "images": [
+                  {
+                    "source": {
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/9b27/e4762a1f1ec64ffa9110994113050600/APP_PREVIEW_IMAGE?versionId=svJg7HifNLNECdHHvmTopHENOUSmsyrV&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260721T045851Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QAJVSXSHR%2F20260721%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c99d2faaf7d7acd890da47154cd6c40eaed47205f12dad408eae9d140a5c8211",
+                      "type": "URI"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260721T045851Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QAJVSXSHR%2F20260721%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=565d9ee94c2d93a5eda3803a526b788993e08e38b0b9c5aa07c453e7f684a805",
+          "summary": "MAWAQIT allows you to get the prayer times for your mosque.",
+          "updatesDescription": "Automatic Azan Notifications via Alexa Routines\nYou can now receive automatic Azan alerts directly through your Alexa device — no manual trigger needed! Here's how to set it up:\n\nStep 1 - Link your account and set up the virtual doorbell\nLink your Amazon account in the Mawaqit skill settings.\nA virtual doorbell device (\"Mawaqit Azan\") will appear in your Alexa Smart Home device list.\nIn your Alexa app, go to Routines, then New Routine, then \"When this happens\", then Smart Home, then \"Mawaqit Azan Pressed\".\nFor the action, go to Skills, then Your Skills, then Mawaqit, then Play Adhaan and save.\nDisable the default Doorbell Press notification in the device settings to avoid duplicate alerts.\n\nStep 2 - Create a notification using voice\nSimply say:\n\"Alexa, ask Mawaqit to create a routine for Fajr prayer\"\n\"Alexa, ask Mawaqit to remind me for Asr prayer\"\n\"Alexa, ask Mawaqit to set a prayer reminder\"\n\nMawaqit will ask which prayer you'd like, then set it up automatically.\n\nTo delete a notification, say:\n\"Alexa, ask Mawaqit to delete the routine for Maghrib prayer\"\n\"Alexa, ask Mawaqit to remove Isha notification\"\n\"Alexa, ask Mawaqit to cancel all reminders\""
         },
         "fr-FR": {
           "description": "Pour être sûr que la Skill se lance bien, dites plutôt Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de prières de la mosquée de votre choix !\n\nDemandez par exemple quelle est la prochaine prière, à quelle heure est la prière du vendredi, ou encore à quelle heure est la troisième prière ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosquée, de lancer l'Adhan classique ou celui de la première prière de la journée (Fajr).\n\nPour connaître toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal à reconnaître les noms de prière, nous vous conseillons de donner le numéro de la prière qui vous intéresse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, à quelle heure est la première prière ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour à nous faire parvenir, n'hésitez pas à nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn espérant que la Skill vous plaise, assalamu aleykoum !",
@@ -268,174 +267,28 @@
             "isha",
             "jumua"
           ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c1154d6dcacdfb893b12966639acbf89d4a71ed3d6a1b1f5cdfa19203f1bf144",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260721T045851Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QAJVSXSHR%2F20260721%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=07478180a680b118c7c193f887517c691d08a154ec63008377b73d5d04599c38",
           "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=3ce8d0806640cf84af24b5361aac86c9165ab1ca4e226335ff841d6aed3625b0",
-          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée."
-        },
-        "en-AU": {
-          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
-          "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is the fourth prayer."
-          ],
-          "keywords": [
-            "prayer",
-            "prayers",
-            "mosque",
-            "mosques",
-            "MAWAQIT",
-            "prayer",
-            "times",
-            "schedule",
-            "prayer",
-            "time",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c1154d6dcacdfb893b12966639acbf89d4a71ed3d6a1b1f5cdfa19203f1bf144",
-          "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=3ce8d0806640cf84af24b5361aac86c9165ab1ca4e226335ff841d6aed3625b0",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque."
-        },
-        "en-CA": {
-          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
-          "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is the fourth prayer."
-          ],
-          "keywords": [
-            "prayer",
-            "prayers",
-            "mosque",
-            "mosques",
-            "MAWAQIT",
-            "prayer",
-            "times",
-            "schedule",
-            "prayer",
-            "time",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c1154d6dcacdfb893b12966639acbf89d4a71ed3d6a1b1f5cdfa19203f1bf144",
-          "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=3ce8d0806640cf84af24b5361aac86c9165ab1ca4e226335ff841d6aed3625b0",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque."
-        },
-        "en-GB": {
-          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
-          "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is the fourth prayer."
-          ],
-          "keywords": [
-            "prayer",
-            "prayers",
-            "mosque",
-            "mosques",
-            "MAWAQIT",
-            "prayer",
-            "times",
-            "schedule",
-            "prayer",
-            "time",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c1154d6dcacdfb893b12966639acbf89d4a71ed3d6a1b1f5cdfa19203f1bf144",
-          "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=3ce8d0806640cf84af24b5361aac86c9165ab1ca4e226335ff841d6aed3625b0",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque."
-        },
-        "en-IN": {
-          "description": "To make sure the Skill launches correctly, please say Mawakit.\n\nThe MAWAQIT skill allows you to get the prayer times for the mosque of your choice!\n\nFor example, you can ask when the next prayer is, what time the Friday prayer is, or what time the third prayer ('Asr) is.\nThe Skill also allows you to get information about your mosque, to play the classic Adhan or the Adhan for the first prayer of the day (Fajr).\n\nTo know all available commands, just say \"Alexa, what are the available commands?\".\n\nPS: Since Alexa struggles with recognizing the names of prayers, we recommend giving the number of the prayer you are interested in instead of the Arabic name.\nFor example, if you want to know the time of Fajr, say \"Alexa, what time is the first prayer?\".\nThe Adhan will play in Arabic.\n\nIf you have any feedback to share with us, feel free to contact us, especially on Twitter/X @MAWAQIT.\n\nWe hope you enjoy the Skill, assalamu aleykoum!",
-          "examplePhrases": [
-            "Alexa, open MAWAQIT.",
-            "Alexa, ask MAWAQIT when is the next prayer.",
-            "Alexa, ask MAWAQIT when is the fourth prayer."
-          ],
-          "keywords": [
-            "prayer",
-            "prayers",
-            "mosque",
-            "mosques",
-            "MAWAQIT",
-            "prayer",
-            "times",
-            "schedule",
-            "prayer",
-            "time",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c1154d6dcacdfb893b12966639acbf89d4a71ed3d6a1b1f5cdfa19203f1bf144",
-          "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=3ce8d0806640cf84af24b5361aac86c9165ab1ca4e226335ff841d6aed3625b0",
-          "summary": "MAWAQIT allows you to get the prayer times for your mosque."
-        },
-        "fr-CA": {
-          "description": "Pour être sûr que la Skill se lance bien, dites plutôt Mawakit.\n\nLa skill MAWAQIT vous permet d'obtenir les heures de prières de la mosquée de votre choix !\n\nDemandez par exemple quelle est la prochaine prière, à quelle heure est la prière du vendredi, ou encore à quelle heure est la troisième prière ('Asr).\nLa Skill vous permet aussi d'avoir des informations sur votre mosquée, de lancer l'Adhan classique ou celui de la première prière de la journée (Fajr).\n\nPour connaître toutes les commandes disponibles, dites simplement \"Alexa, quelles sont les commandes disponibles ?\".\n\nPS : Comme Alexa a du mal à reconnaître les noms de prière, nous vous conseillons de donner le numéro de la prière qui vous intéresse au lieu du nom en arabe.\nPar exemple, si vous voulez savoir l'heure du Fajr, dites \"Alexa, à quelle heure est la première prière ?\". L'Adhan se lancera en arabe.\n\nSi vous avez quelconque retour à nous faire parvenir, n'hésitez pas à nous contacter notamment sur Twitter/X @MAWAQIT.\n\nEn espérant que la Skill vous plaise, assalamu aleykoum !",
-          "examplePhrases": [
-            "Alexa, ouvre MAWAQIT.",
-            "Alexa, demande à MAWAQIT quand est la prochaine prière.",
-            "Alexa, demande à MAWAQIT quand est la quatrième prière."
-          ],
-          "keywords": [
-            "prière",
-            "prières",
-            "mosquée",
-            "mosquées",
-            "MAWAQIT",
-            "horaires",
-            "de",
-            "prière",
-            "horaire",
-            "de",
-            "prière",
-            "salat",
-            "salah",
-            "fajr",
-            "dohr",
-            "asr",
-            "maghrib",
-            "isha",
-            "jumua"
-          ],
-          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/1eca/891e3a00ad2c4ecf90a6e4d13df27230/APP_ICON_LARGE?versionId=LoUvHnx6tHMo6TJPGYWN93bepfXBijmH&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c1154d6dcacdfb893b12966639acbf89d4a71ed3d6a1b1f5cdfa19203f1bf144",
-          "name": "MAWAQIT",
-          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260502T165936Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QK2ASUWK3%2F20260502%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=3ce8d0806640cf84af24b5361aac86c9165ab1ca4e226335ff841d6aed3625b0",
-          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée."
+          "preview": {
+            "assets": {
+              "mobileRectangle": {
+                "images": [
+                  {
+                    "source": {
+                      "location": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/8fec/04d0e27e6d30496a939b986ff1af9adb/APP_PREVIEW_IMAGE?versionId=dTLpqT_tmd99Dzzt4h4mybNzS.3wTWzO&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260721T045851Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIAWBV6LQ4QAJVSXSHR%2F20260721%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=8a47befb92b2ecfaae4f9948f503429ab2bcbc9c16c025a965c94f096e107009",
+                      "type": "URI"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/b6a6/54910c97c490439187e20f9d2605d04e/APP_ICON?versionId=fPFakByZCo0vxrKJ2JYTWCZ2egokrncI&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260721T045851Z&X-Amz-SignedHeaders=host&X-Amz-Expires=604799&X-Amz-Credential=AKIAWBV6LQ4QAJVSXSHR%2F20260721%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=565d9ee94c2d93a5eda3803a526b788993e08e38b0b9c5aa07c453e7f684a805",
+          "summary": "MAWAQIT vous permet d'obtenir les heures de prières de votre mosquée.",
+          "updatesDescription": "Recevez maintenant l'Adhan automatiquement sur votre appareil Alexa ! Voici comment procéder :\n\nÉtape 1 - Liez votre compte et configurez la sonnette virtuelle\nLiez votre compte Amazon dans les paramètres de la compétence Mawaqit.\nUn appareil de sonnette virtuelle (\"Mawaqit Azan\") apparaître dans votre liste Smart Home Alexa.\nDans l'appli Alexa, allez dans Routines, puis Nouvelle routine, puis \"Quand ceci se produit\", puis Maison connectée, puis \"Mawaqit Azan Appuyé\".\nPour l'action, allez dans Compétences, puis Mes compétences, puis Mawaqit, puis Jouer l'Adhaan et sauvegardez.\nDésactivez la notification de sonnette par défaut dans les paramètres de l'appareil pour éviter les alertes en double.\n\nÉtape 2 - Créez une notification par commande vocale\nDites simplement :\n\"Alexa, demande à Mawaqit de créer une routine pour la prière du Fajr\"\n\"Alexa, demande à Mawaqit de rappelle-moi pour la prière Asr\"\n\"Alexa, demande à Mawaqit de configurer ma routine\"\n\nMawaqit vous demandera pour quelle prière, puis configurera le rappel automatiquement.\n\nPour supprimer une notification, dites :\n\"Alexa, demande à Mawaqit de supprimer la routine pour la prière du Maghrib\"\n\"Alexa, demande à Mawaqit d'effacer l'alerte pour la prière Isha\"\n\"Alexa, demande à Mawaqit d'annuler mes alertes\""
         }
       },
-      "testingInstructions": "{\"ask_dist_username\":\"\",\"ask_dist_password\":\"\",\"ask_dist_testing_instructions\":\" Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\\nWe have specific permission to use the trademark/brand \\\"Mawaqit\\\". Kindly refer the above links. \\nWe would like to use 'mawaqit' as invocation word in all locales. \\n\\nFor testing purposes, \\nIf there is no mosque nearby your location, Kindly set a location/address of the device which is near France where there are lot of mosques to choose. \\n\\nIn a real-world scenario, if no mosque is found nearby, the user will receive a prompt informing them accordingly.\\n\\nRegarding PlayAdhanIntent,\\nThe sound of the Azan will be in Arabic irrespective of the customer's locale. \\n\\nFor every language saying mawakit instead of mawaqit it will better skill recognition as mentioned in skill description.\\n\\nFor French locales say ikama instead of iqama it will work better for NextIqamaTimeIntent.\\n\\n Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\"}"
+      "testingInstructions": "{\"ask_dist_username\":\" \",\"ask_dist_password\":\" \",\"ask_dist_testing_instructions\":\" Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\\nWe have specific permission to use the trademark/brand \\\"Mawaqit\\\". Kindly refer the above links. \\nWe would like to use 'mawaqit' as invocation word in all locales. \\n\\nFor testing purposes, \\nIf there is no mosque nearby your location, Kindly set a location/address of the device which is near France where there are lot of mosques to choose. \\n\\nIn a real-world scenario, if no mosque is found nearby, the user will receive a prompt informing them accordingly.\\n\\nRegarding PlayAdhanIntent,\\nThe sound of the Azan will be in Arabic irrespective of the customer's locale. \\n\\nFor every language saying mawakit instead of mawaqit it will better skill recognition as mentioned in skill description.\\n\\nFor French locales say ikama instead of iqama it will work better for NextIqamaTimeIntent.\\n\\n Intellectual property documentation links:\\nhttps://annuaire-entreprises.data.gouv.fr/entreprise/mawaqit-917868135\\nhttps://avis-situation-sirene.insee.fr/siege\\n\\nTesting Instructions for Azan:\\nhttps://docs.google.com/document/d/1CsfZ3kHJO9npcxhfhwjzPtYuAW-4EVBpWPXSS8Qvyjc/edit?usp=sharing\"}"
     }
   }
 }

@@ -1,0 +1,112 @@
+{
+  "type": "APL",
+  "version": "2024.2",
+  "theme": "dark",
+  "extensions": [
+    {
+      "name": "DataStore",
+      "uri": "alexaext:datastore:10"
+    }
+  ],
+  "settings": {
+    "DataStore": {
+      "dataBindings": [
+        {
+          "namespace": "hadithOfTheDay",
+          "key": "hadith",
+          "dataBindingName": "DS_Hadith",
+          "dataType": "OBJECT"
+        }
+      ]
+    }
+  },
+  "import": [
+    {
+      "name": "alexa-layouts",
+      "version": "1.7.0"
+    }
+  ],
+  "mainTemplate": {
+    "parameters": ["payload"],
+    "item": {
+      "type": "TouchWrapper",
+      "width": "100vw",
+      "height": "100vh",
+      "onMount": [
+        {
+          "type": "DataStore:WatchObject",
+          "namespace": "hadithOfTheDay",
+          "key": "hadith"
+        },
+        {
+          "type": "SendEvent",
+          "arguments": ["FETCH_NEW_HADITH", "${DS_Hadith.nextUpdateTime}"]
+        }
+      ],
+      "onPress": [
+        {
+          "type": "SendEvent",
+          "arguments": [
+            "READ_HADITH",
+            "${DS_Hadith.randomHadith ? DS_Hadith.randomHadith : payload.hadith.randomHadith}"
+          ]
+        }
+      ],
+      "item": {
+        "type": "Container",
+        "width": "100%",
+        "height": "100%",
+        "items": [
+          {
+            "type": "AlexaBackground",
+            "backgroundImageSource": "https://cdn.mawaqit.net/images/background-arabic-calligraphy.png",
+            "backgroundScale": "best-fill"
+          },
+          {
+            "type": "Container",
+            "position": "absolute",
+            "width": "100%",
+            "height": "100%",
+            "paddingLeft": "20dp",
+            "paddingRight": "20dp",
+            "paddingTop": "18dp",
+            "paddingBottom": "18dp",
+            "direction": "column",
+            "items": [
+              {
+                "type": "Text",
+                "text": "${DS_Hadith.title ? DS_Hadith.title : payload.hadith.title}",
+                "fontSize": "16dp",
+                "fontWeight": "300",
+                "color": "#d5e0dc",
+                "paddingBottom": "10dp",
+                "maxLines": 1
+              },
+              {
+                "type": "ScrollView",
+                "width": "100%",
+                "grow": 1,
+                "item": {
+                  "type": "Text",
+                  "text": "${DS_Hadith.randomHadith ? DS_Hadith.randomHadith : payload.hadith.randomHadith}",
+                  "fontSize": "16dp",
+                  "fontWeight": "400",
+                  "color": "#ffffff"
+                }
+              },
+              {
+                "type": "Text",
+                "text": "MAWAQIT",
+                "fontSize": "14dp",
+                "fontWeight": "700",
+                "color": "#d5e0dc",
+                "paddingTop": "10dp",
+                "maxLines": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

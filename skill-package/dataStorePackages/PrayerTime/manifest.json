@@ -1,0 +1,47 @@
+{
+  "packageVersion": "1.0",
+  "packageType": "APL_PACKAGE",
+  "publishingInformation": {
+    "schemaVersion": "1.0",
+    "locales": {
+      "en-US": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Next prayer",
+            "description": "Displays the next prayer time for your mosque.",
+            "keywords": ["prayer", "mosque", "mawaqit", "salat"],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-en.png"
+            ]
+          }
+        }
+      ],
+      "fr-FR": [
+        {
+          "targetViewport": "WIDGET_M",
+          "metadata": {
+            "name": "Prochaine prière",
+            "description": "Affiche l'heure de la prochaine prière de votre mosquée.",
+            "keywords": ["prière", "mosquée", "mawaqit", "salat"],
+            "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
+            "previews": [
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/1-fr.png"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "manifest": {
+    "id": "PrayerTime",
+    "version": "1.0.0",
+    "presentationDefinitions": [
+      {
+        "url": "presentations/default.tpl"
+      }
+    ],
+    "appliesTo": "${viewport.mode == 'HUB'}"
+  }
+}

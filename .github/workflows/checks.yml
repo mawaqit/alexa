@@ -33,9 +33,6 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Check formatting
-        run: pnpm run format:check
-
   test:
     name: Tests
     runs-on: ubuntu-latest

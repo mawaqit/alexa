@@ -86,7 +86,8 @@ jobs:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
           # Injected into .ask/account-linking.json
           ACCOUNT_LINKING_CLIENT_SECRET: ${{ secrets.ACCOUNT_LINKING_CLIENT_SECRET }}
-        run: pnpm deploy:${{ inputs.stage }}
+          STAGE: ${{ inputs.stage }}
+        run: pnpm deploy:"$STAGE"
 
   notify-result:
     name: Notify deploy result
@@ -103,17 +104,19 @@ jobs:
         env:
           # 'success' only if none of the needed jobs failed or was cancelled.
           RESULT: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) && 'failure' || 'success' }}
+          STAGE: ${{ inputs.stage }}
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
           if [ "$RESULT" = "success" ]; then
-            echo "title=✅ Deploy succeeded — ${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+            echo "title=✅ Deploy succeeded — $ENVIRONMENT" >> "$GITHUB_OUTPUT"
             echo "color=3066993" >> "$GITHUB_OUTPUT"
           else
-            echo "title=❌ Deploy failed — ${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+            echo "title=❌ Deploy failed — $ENVIRONMENT" >> "$GITHUB_OUTPUT"
             echo "color=15158332" >> "$GITHUB_OUTPUT"
           fi
           echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           # On a successful prod deploy, add the certification link
-          if [ "$RESULT" = "success" ] && [ "${{ inputs.stage }}" = "prod" ]; then
+          if [ "$RESULT" = "success" ] && [ "$STAGE" = "prod" ]; then
             echo "cta= · [🎓 Submit for certification](https://developer.amazon.com/alexa/console/ask)" >> "$GITHUB_OUTPUT"
           fi
 

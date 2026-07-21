@@ -35,7 +35,7 @@
     }
   },
   "manifest": {
-    "id": "PrayerTime",
+    "id": "NextPrayerTime",
     "version": "1.0.0",
     "presentationDefinitions": [
       {

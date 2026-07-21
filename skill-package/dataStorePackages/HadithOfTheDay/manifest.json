@@ -31,7 +31,7 @@
     }
   },
   "manifest": {
-    "id": "RandomHadith",
+    "id": "HadithOfTheDay",
     "version": "1.0.0",
     "presentationDefinitions": [
       {

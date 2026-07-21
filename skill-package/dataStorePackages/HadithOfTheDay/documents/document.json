@@ -48,7 +48,7 @@
           "type": "SendEvent",
           "arguments": [
             "READ_HADITH",
-            "${DS_Hadith.randomHadith ? DS_Hadith.randomHadith : payload.hadith.randomHadith}"
+            "${DS_Hadith.content.hadithText ? DS_Hadith.content.hadithText : payload.hadith.content.hadithText}"
           ]
         }
       ],
@@ -75,7 +75,7 @@
             "items": [
               {
                 "type": "Text",
-                "text": "${DS_Hadith.title ? DS_Hadith.title : payload.hadith.title}",
+                "text": "${DS_Hadith.labels.title ? DS_Hadith.labels.title : payload.hadith.labels.title}",
                 "fontSize": "16dp",
                 "fontWeight": "300",
                 "color": "#d5e0dc",
@@ -88,7 +88,7 @@
                 "grow": 1,
                 "item": {
                   "type": "Text",
-                  "text": "${DS_Hadith.randomHadith ? DS_Hadith.randomHadith : payload.hadith.randomHadith}",
+                  "text": "${DS_Hadith.content.hadithText ? DS_Hadith.content.hadithText : payload.hadith.content.hadithText}",
                   "fontSize": "16dp",
                   "fontWeight": "400",
                   "color": "#ffffff"

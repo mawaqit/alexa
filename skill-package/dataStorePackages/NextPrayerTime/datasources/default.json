@@ -1,0 +1,15 @@
+{
+  "nextPrayerData": {
+    "labels": {
+      "title": "Next Prayer",
+      "at": "at"
+    },
+    "content": {
+      "nextPrayerName": "Maghrib",
+      "nextPrayerTime": "9:15 PM",
+      "mosqueName": "Al-Noor Mosque"
+    },
+    "nextUpdateTime": 0,
+    "formattedNextUpdateTime": ""
+  }
+}

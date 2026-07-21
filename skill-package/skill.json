@@ -318,10 +318,10 @@
           {
             "packages": [
               {
-                "id": "PrayerTime"
+                "id": "NextPrayerTime"
               },
               {
-                "id": "RandomHadith"
+                "id": "HadithOfTheDay"
               }
             ],
             "type": "ALEXA_DATASTORE_PACKAGEMANAGER"

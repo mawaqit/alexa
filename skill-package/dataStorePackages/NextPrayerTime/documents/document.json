@@ -72,7 +72,7 @@
             "items": [
               {
                 "type": "Text",
-                "text": "${DS_PrayerTime.labels.nextPrayer ? DS_PrayerTime.labels.nextPrayer : payload.nextPrayerData.labels.nextPrayer}",
+                "text": "${DS_PrayerTime.labels.title ? DS_PrayerTime.labels.title : payload.nextPrayerData.labels.title}",
                 "fontSize": "16dp",
                 "fontWeight": "300",
                 "color": "#d5e0dc",
@@ -87,7 +87,7 @@
                 "items": [
                   {
                     "type": "Text",
-                    "text": "${String.toUpperCase(DS_PrayerTime.nextPrayerTime.name ? DS_PrayerTime.nextPrayerTime.name : payload.nextPrayerData.nextPrayerTime.name)}",
+                    "text": "${String.toUpperCase(DS_PrayerTime.content.nextPrayerName ? DS_PrayerTime.content.nextPrayerName : payload.nextPrayerData.content.nextPrayerName)}",
                     "fontSize": "40dp",
                     "fontWeight": "700",
                     "color": "#ffffff",
@@ -107,7 +107,7 @@
                   },
                   {
                     "type": "Text",
-                    "text": "${DS_PrayerTime.nextPrayerTime.time ? DS_PrayerTime.nextPrayerTime.time : payload.nextPrayerData.nextPrayerTime.time}",
+                    "text": "${DS_PrayerTime.content.nextPrayerTime ? DS_PrayerTime.content.nextPrayerTime : payload.nextPrayerData.content.nextPrayerTime}",
                     "fontSize": "40dp",
                     "fontWeight": "700",
                     "color": "#ffffff",
@@ -116,7 +116,7 @@
                   },
                   {
                     "type": "Text",
-                    "text": "${DS_PrayerTime.mosqueName ? DS_PrayerTime.mosqueName : payload.nextPrayerData.mosqueName}",
+                    "text": "${DS_PrayerTime.content.mosqueName ? DS_PrayerTime.content.mosqueName : payload.nextPrayerData.content.mosqueName}",
                     "fontSize": "16dp",
                     "color": "#d5e0dc",
                     "textAlign": "center",

@@ -9,9 +9,10 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "prepare": "husky",
-    "deploy:dev": "pnpm --filter ./lambda deploy:dev && pnpm --filter ./azan-lambda deploy:dev && pnpm deploy:skill-config",
+    "deploy:dev": "pnpm --filter ./lambda deploy:dev && pnpm --filter ./azan-lambda deploy:dev && pnpm push:skill-config && pnpm push:account-linking-config",
     "deploy:prod": "pnpm --filter ./lambda deploy:prod && pnpm --filter ./azan-lambda deploy:prod",
-    "deploy:skill-config": "ask deploy --target skill-metadata --profile ${ASK_PROFILE:-MAWAQIT}"
+    "push:skill-config": "ask deploy --target skill-metadata --profile ${ASK_PROFILE:-MAWAQIT}",
+    "push:account-linking-config": "node .ask/push-account-linking.js"
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.0",

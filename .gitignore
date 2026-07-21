@@ -3,8 +3,5 @@
 # Serverless Framework build/deploy artifacts (esbuild bundles, zips, state)
 **/.serverless
 
-ask-resources.json
-.ask
-
 # Jest coverage output (`jest --coverage`)
 coverage

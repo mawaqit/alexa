@@ -915,14 +915,20 @@ const MosqueInfoIntentHandler = {
         jumua3,
         image,
       } = persistentAttributes;
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
+      const distanceUnits =
+        await helperFunctions.getUserDistanceUnits(handlerInput);
+      const distanceLabel = helperFunctions.formatDistance(
+        proximity,
+        locale,
+        distanceUnits,
+      );
       const mosqueInfo = {
         mosqueName: primaryText,
         mosqueDescription: localisation,
         mosqueImage: image,
+        mosqueDistance: distanceLabel,
       };
-      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
-      const distanceUnits =
-        await helperFunctions.getUserDistanceUnits(handlerInput);
       // Extract only the Jumu'ah times
       const jumuaTimes = [jumua, jumua2, jumua3];
       const prayers = helperFunctions.buildPrayerBoard({
@@ -937,7 +943,7 @@ const MosqueInfoIntentHandler = {
         "mosqueInfoPrompt",
         primaryText,
         localisation,
-        helperFunctions.formatDistance(proximity, locale, distanceUnits),
+        distanceLabel,
       );
       // Find the first non-null Jumu'ah time
       const firstNonNullJumua = jumuaTimes.filter(

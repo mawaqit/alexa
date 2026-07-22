@@ -121,6 +121,9 @@ const getDataSourceforMosqueInfo = async (
           ? mosqueInfo.mosqueDescription
           : "",
         mosquePicture: mosqueInfo.mosqueImage || null,
+        // Already localized by the handler (same string Alexa speaks), because
+        // APL cannot run Intl.NumberFormat to pick the unit and separator.
+        mosqueDistance: mosqueInfo.mosqueDistance || "",
         nextLabel: requestAttributes.t("nextPrayerLabel"),
         skillName: process.env.SKILL_NAME,
         skillLogoUrl: logoUrl,

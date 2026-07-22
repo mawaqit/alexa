@@ -27,6 +27,7 @@
         "colorTextMuted": "#FFFFFFA3",
         "colorAccent": "#F2C86B",
         "colorAccentSoft": "#F2C86B24",
+        "colorAccentEdge": "#F2C86B5C",
         "colorDivider": "#FFFFFF1F"
       },
       "gradients": {
@@ -63,15 +64,20 @@
         "rowRadius": "14dp",
         "accentBar": "24dp",
         "brandLogo": "30dp",
-        "rowGap": "5dp"
+        "rowGap": "5dp",
+        "avatarSize": "96dp",
+        "pillRadius": "100dp",
+        "pillPadH": "12dp",
+        "pillPadV": "6dp",
+        "pinSize": "16dp"
       },
       "numbers": {
         "fsTitle": 34,
         "fsAddress": 17,
         "fsName": 17,
-        "fsTime": 26,
+        "fsTime": 20,
         "fsBrand": 13,
-        "fsNextBig": 54
+        "fsDistance": 16
       }
     },
     {
@@ -89,7 +95,10 @@
         "rowRadius": "9dp",
         "accentBar": "15dp",
         "brandLogo": "20dp",
-        "rowGap": "2dp"
+        "rowGap": "2dp",
+        "pillPadH": "8dp",
+        "pillPadV": "3dp",
+        "pinSize": "12dp"
       },
       "numbers": {
         "fsTitle": 21,
@@ -97,7 +106,7 @@
         "fsName": 12,
         "fsTime": 17,
         "fsBrand": 10,
-        "fsNextBig": 34
+        "fsDistance": 12
       }
     },
     {
@@ -115,15 +124,18 @@
         "rowRadius": "13dp",
         "accentBar": "22dp",
         "brandLogo": "26dp",
-        "rowGap": "5dp"
+        "rowGap": "5dp",
+        "pillPadH": "11dp",
+        "pillPadV": "5dp",
+        "pinSize": "15dp"
       },
       "numbers": {
         "fsTitle": 27,
         "fsAddress": 15,
         "fsName": 15,
-        "fsTime": 22,
+        "fsTime": 20,
         "fsBrand": 12,
-        "fsNextBig": 44
+        "fsDistance": 15
       }
     },
     {
@@ -141,41 +153,48 @@
         "rowRadius": "18dp",
         "accentBar": "36dp",
         "brandLogo": "42dp",
-        "rowGap": "8dp"
+        "rowGap": "8dp",
+        "pillPadH": "18dp",
+        "pillPadV": "9dp",
+        "pinSize": "24dp"
       },
       "numbers": {
         "fsTitle": 46,
         "fsAddress": 25,
         "fsName": 25,
-        "fsTime": 37,
+        "fsTime": 28,
         "fsBrand": 18,
-        "fsNextBig": 66
+        "fsDistance": 24
       }
     },
     {
       "when": "${viewport.shape == 'round'}",
-      "description": "Metrics — round viewports. Generous inset keeps content off the bezel.",
+      "description": "Metrics — round viewports. Insets are in dp, not %: a percentage in a resource has no parent to resolve against, so it collapses to zero and content runs to the bezel.",
       "dimensions": {
-        "gutter": "13%",
-        "gutterV": "8%",
+        "gutter": "24dp",
+        "gutterV": "24dp",
         "colGap": "8dp",
         "colWidth": "100%",
         "cardRadius": "18dp",
         "cardPad": "10dp",
-        "rowPadV": "3dp",
-        "rowPadH": "6dp",
-        "rowRadius": "8dp",
-        "accentBar": "13dp",
+        "rowPadV": "4dp",
+        "rowPadH": "8dp",
+        "rowRadius": "10dp",
+        "accentBar": "14dp",
         "brandLogo": "18dp",
-        "rowGap": "2dp"
+        "rowGap": "2dp",
+        "avatarSize": "92dp",
+        "pillPadH": "9dp",
+        "pillPadV": "3dp",
+        "pinSize": "12dp"
       },
       "numbers": {
-        "fsTitle": 15,
+        "fsTitle": 20,
         "fsAddress": 12,
-        "fsName": 13,
-        "fsTime": 14,
-        "fsBrand": 10,
-        "fsNextBig": 44
+        "fsName": 14,
+        "fsTime": 15,
+        "fsBrand": 9,
+        "fsDistance": 12
       }
     },
     {
@@ -193,18 +212,47 @@
         "rowRadius": "12dp",
         "accentBar": "20dp",
         "brandLogo": "24dp",
-        "rowGap": "4dp"
+        "rowGap": "4dp",
+        "pillPadH": "14dp",
+        "pillPadV": "7dp",
+        "pinSize": "18dp"
       },
       "numbers": {
         "fsTitle": 28,
         "fsAddress": 15,
         "fsName": 15,
-        "fsTime": 22,
+        "fsTime": 20,
         "fsBrand": 12,
-        "fsNextBig": 44
+        "fsDistance": 17
       }
     }
   ],
+  "graphics": {
+    "pinGlyph": {
+      "type": "AVG",
+      "version": "1.2",
+      "width": 24,
+      "height": 24,
+      "viewportWidth": 24,
+      "viewportHeight": 24,
+      "description": "Map pin drawn as a vector so the chip stays crisp at every viewport scale and needs no CDN round-trip.",
+      "parameters": [
+        {
+          "name": "tint",
+          "type": "color",
+          "default": "#F2C86B"
+        }
+      ],
+      "items": [
+        {
+          "type": "path",
+          "pathData": "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z",
+          "fill": "${tint}",
+          "fillType": "evenOdd"
+        }
+      ]
+    }
+  },
   "styles": {
     "brandLabel": {
       "values": [
@@ -263,6 +311,18 @@
         }
       ]
     },
+    "distanceText": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsDistance",
+          "fontWeight": 700,
+          "letterSpacing": "0.3dp",
+          "color": "@colorAccent",
+          "maxLines": 1
+        }
+      ]
+    },
     "nextLabel": {
       "values": [
         {
@@ -270,17 +330,6 @@
           "fontSize": "@fsBrand",
           "fontWeight": 600,
           "letterSpacing": "2.2dp",
-          "color": "@colorAccent",
-          "maxLines": 1
-        }
-      ]
-    },
-    "nextTime": {
-      "values": [
-        {
-          "fontFamily": "Amazon Ember Display",
-          "fontSize": "@fsNextBig",
-          "fontWeight": 700,
           "color": "@colorAccent",
           "maxLines": 1
         }
@@ -412,7 +461,6 @@
                   "type": "Text",
                   "style": "prayerTime",
                   "text": "${prayer.timeLabel}",
-                  "fontSize": "20dp",
                   "color": "${prayer.isNext ? '@colorAccent' : '@colorTextPrimary'}",
                   "paddingLeft": "8dp"
                 }
@@ -561,8 +609,154 @@
         }
       ]
     },
+    "DistanceChip": {
+      "description": "How far the mosque is, as a gold pill. Gold is the document's 'pay attention here' colour, so the chip reads at a glance without competing with the mosque name below it. Absent when the skill has no distance — the whole chip is skipped rather than rendered empty.",
+      "parameters": [
+        {
+          "name": "distance",
+          "type": "string"
+        },
+        {
+          "name": "align",
+          "type": "string",
+          "default": "start",
+          "description": "'start' to hug the lead edge (hero scrim), 'center' for the round layout."
+        }
+      ],
+      "items": [
+        {
+          "type": "Container",
+          "when": "${distance}",
+          "direction": "row",
+          "width": "100%",
+          "justifyContent": "${align}",
+          "items": [
+            {
+              "type": "Frame",
+              "borderRadius": "@pillRadius",
+              "borderWidth": "1dp",
+              "borderColor": "@colorAccentEdge",
+              "background": "@colorAccentSoft",
+              "item": {
+                "type": "Container",
+                "direction": "row",
+                "alignItems": "center",
+                "paddingLeft": "@pillPadH",
+                "paddingRight": "@pillPadH",
+                "paddingTop": "@pillPadV",
+                "paddingBottom": "@pillPadV",
+                "items": [
+                  {
+                    "type": "VectorGraphic",
+                    "source": "pinGlyph",
+                    "width": "@pinSize",
+                    "height": "@pinSize",
+                    "scale": "best-fit",
+                    "tint": "@colorAccent"
+                  },
+                  {
+                    "type": "Text",
+                    "style": "distanceText",
+                    "text": "${distance}",
+                    "paddingLeft": "6dp"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "MosqueAvatar": {
+      "description": "Circular crop of the mosque picture, ringed in gold. On a round screen the photo has to be a distinct object at the top of the card — used as a full-bleed backdrop it just reads as texture.",
+      "parameters": [
+        {
+          "name": "picture",
+          "type": "string"
+        },
+        {
+          "name": "size",
+          "type": "any"
+        }
+      ],
+      "items": [
+        {
+          "type": "Frame",
+          "width": "${size}",
+          "height": "${size}",
+          "borderRadius": "${size}",
+          "borderWidth": "2dp",
+          "borderColor": "@colorAccentEdge",
+          "background": "@colorGlass",
+          "item": {
+            "type": "Image",
+            "source": "${picture}",
+            "width": "100%",
+            "height": "100%",
+            "scale": "best-fill",
+            "align": "center",
+            "borderRadius": "${size}"
+          }
+        }
+      ]
+    },
+    "NextPrayerStrip": {
+      "description": "Next prayer condensed to a single gold pill — the round card is a mosque profile, so the upcoming time is a footnote here, not the headline it is on the prayer-times board.",
+      "parameters": [
+        {
+          "name": "prayer",
+          "type": "any"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "items": [
+        {
+          "type": "Container",
+          "when": "${prayer}",
+          "direction": "row",
+          "width": "100%",
+          "justifyContent": "center",
+          "items": [
+            {
+              "type": "Frame",
+              "borderRadius": "@pillRadius",
+              "borderWidth": "1dp",
+              "borderColor": "@colorAccentEdge",
+              "background": "@colorAccentSoft",
+              "item": {
+                "type": "Container",
+                "direction": "row",
+                "alignItems": "center",
+                "paddingLeft": "@pillPadH",
+                "paddingRight": "@pillPadH",
+                "paddingTop": "@pillPadV",
+                "paddingBottom": "@pillPadV",
+                "items": [
+                  {
+                    "type": "Text",
+                    "style": "nextLabel",
+                    "text": "${label}",
+                    "shrink": 1
+                  },
+                  {
+                    "type": "Text",
+                    "style": "prayerTime",
+                    "text": "${prayer.name} ${prayer.timeLabel}",
+                    "color": "@colorAccent",
+                    "paddingLeft": "8dp"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
     "MosqueHero": {
-      "description": "The mosque picture as the hero: full-bleed inside a rounded card, with a bottom gradient scrim carrying the name and address.",
+      "description": "The mosque picture as the hero: full-bleed inside a rounded card, with a bottom gradient scrim carrying the distance chip, the name and the address.",
       "parameters": [
         {
           "name": "picture",
@@ -574,6 +768,10 @@
         },
         {
           "name": "address",
+          "type": "string"
+        },
+        {
+          "name": "distance",
           "type": "string"
         }
       ],
@@ -611,6 +809,11 @@
                 "paddingRight": "@cardPad",
                 "paddingBottom": "@cardPad",
                 "items": [
+                  {
+                    "type": "DistanceChip",
+                    "distance": "${distance}",
+                    "paddingBottom": "6dp"
+                  },
                   {
                     "type": "Text",
                     "style": "mosqueTitle",
@@ -667,49 +870,6 @@
           ]
         }
       ]
-    },
-    "NextPrayerBlock": {
-      "description": "Glanceable focus for small screens: label, prayer name, and the time in gold.",
-      "parameters": [
-        {
-          "name": "prayer",
-          "type": "any"
-        },
-        {
-          "name": "label",
-          "type": "string"
-        }
-      ],
-      "items": [
-        {
-          "type": "Container",
-          "when": "${prayer}",
-          "width": "100%",
-          "alignItems": "center",
-          "items": [
-            {
-              "type": "Text",
-              "style": "nextLabel",
-              "text": "${label}",
-              "textAlign": "center"
-            },
-            {
-              "type": "Text",
-              "style": "prayerName",
-              "text": "${prayer.name}",
-              "color": "@colorTextPrimary",
-              "textAlign": "center",
-              "paddingTop": "2dp"
-            },
-            {
-              "type": "Text",
-              "style": "nextTime",
-              "text": "${prayer.timeLabel}",
-              "textAlign": "center"
-            }
-          ]
-        }
-      ]
     }
   },
   "mainTemplate": {
@@ -718,7 +878,7 @@
       {
         "type": "Container",
         "when": "${viewport.shape == 'round'}",
-        "description": "ROUND — the mosque picture becomes the backdrop; one glanceable next prayer, the rest of the day scrolls underneath.",
+        "description": "ROUND — a mosque profile card, not a prayer board: photo, name, distance, address, then the Jumu'a slots. The five daily prayers are deliberately absent; this screen answers 'tell me about my mosque', and the prayer-times board already answers the other question.",
         "width": "100%",
         "height": "100%",
         "bind": [
@@ -767,51 +927,86 @@
             ],
             "items": [
               {
-                "type": "Text",
-                "style": "mosqueTitle",
-                "text": "${props.mosqueTitle}",
-                "textAlign": "center",
-                "maxLines": 1,
-                "width": "72%"
-              },
-              {
-                "type": "NextPrayerBlock",
-                "prayer": "${props.nextPrayer}",
-                "label": "${props.nextLabel}",
-                "paddingTop": "2dp"
-              },
-              {
-                "type": "Frame",
-                "width": "44dp",
-                "height": "1dp",
-                "background": "@colorDivider",
-                "paddingTop": "4dp"
-              },
-              {
-                "type": "Sequence",
-                "width": "60%",
-                "height": "40%",
+                "type": "ScrollView",
+                "width": "72%",
+                "grow": 1,
                 "shrink": 1,
-                "scrollDirection": "vertical",
-                "paddingTop": "6dp",
-                "data": [
-                  "${props.prayers.fajr}",
-                  "${props.prayers.dhuhr}",
-                  "${props.prayers.asr}",
-                  "${props.prayers.maghrib}",
-                  "${props.prayers.isha}",
-                  "${props.prayers.jumua}",
-                  "${props.prayers.jumua2}",
-                  "${props.prayers.jumua3}",
-                  "${props.prayers.shuruq}"
-                ],
-                "items": [
-                  {
-                    "type": "PrayerRow",
-                    "when": "${data.name}",
-                    "prayer": "${data}"
-                  }
-                ]
+                "description": "72% is the widest box that stays inside the circle over the vertical band the card occupies — the inset lives here, on a component, where a percentage actually resolves against its parent. Everything scrolls together, photo included: a long name plus three Jumu'a slots will not fit a 480dp circle, and a clipped card is worse than a scrolled one.",
+                "item": {
+                  "type": "Container",
+                  "width": "100%",
+                  "minHeight": "100%",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "description": "minHeight + centered: a short card sits in the middle of the circle, a long one grows past it and scrolls. Plain 'height: 100%' would clip the overflow instead.",
+                  "items": [
+                    {
+                      "type": "MosqueAvatar",
+                      "picture": "${mosquePicture}",
+                      "size": "@avatarSize"
+                    },
+                    {
+                      "type": "Text",
+                      "style": "mosqueTitle",
+                      "text": "${props.mosqueTitle}",
+                      "textAlign": "center",
+                      "maxLines": 2,
+                      "width": "100%",
+                      "paddingTop": "8dp"
+                    },
+                    {
+                      "type": "DistanceChip",
+                      "distance": "${props.mosqueDistance}",
+                      "align": "center",
+                      "paddingTop": "6dp"
+                    },
+                    {
+                      "type": "Text",
+                      "when": "${props.mosqueDescription}",
+                      "style": "mosqueAddress",
+                      "text": "${props.mosqueDescription}",
+                      "textAlign": "center",
+                      "maxLines": 2,
+                      "width": "100%",
+                      "paddingTop": "6dp"
+                    },
+                    {
+                      "type": "Container",
+                      "width": "100%",
+                      "alignItems": "center",
+                      "paddingTop": "10dp",
+                      "paddingBottom": "6dp",
+                      "description": "The rule is wrapped rather than padded directly: padding on a Frame insets its content but still paints the background over the padded box, which turns a 1dp rule into a grey slab.",
+                      "item": {
+                        "type": "Frame",
+                        "width": "44dp",
+                        "height": "1dp",
+                        "background": "@colorDivider"
+                      }
+                    },
+                    {
+                      "type": "PrayerRow",
+                      "when": "${props.prayers.jumua}",
+                      "prayer": "${props.prayers.jumua}"
+                    },
+                    {
+                      "type": "PrayerRow",
+                      "when": "${props.prayers.jumua2}",
+                      "prayer": "${props.prayers.jumua2}"
+                    },
+                    {
+                      "type": "PrayerRow",
+                      "when": "${props.prayers.jumua3}",
+                      "prayer": "${props.prayers.jumua3}"
+                    },
+                    {
+                      "type": "NextPrayerStrip",
+                      "prayer": "${props.nextPrayer}",
+                      "label": "${props.nextLabel}",
+                      "paddingTop": "10dp"
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -908,6 +1103,7 @@
                     "picture": "${mosquePicture}",
                     "title": "${props.mosqueTitle}",
                     "address": "${props.mosqueDescription}",
+                    "distance": "${props.mosqueDistance}",
                     "grow": 1,
                     "shrink": 1
                   },
@@ -1007,6 +1203,7 @@
                       "picture": "${mosquePicture}",
                       "title": "${props.mosqueTitle}",
                       "address": "${props.mosqueDescription}",
+                      "distance": "${props.mosqueDistance}",
                       "width": "100%",
                       "height": "34vh"
                     },

@@ -1470,6 +1470,69 @@ function formatTime(time, locale = "en-US") {
   }).format(date);
 }
 
+const DAILY_PRAYER_IDS = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+
+/**
+ * Id of the next of today's five daily prayers, in the mosque's timezone.
+ * Times are raw "HH:mm" strings, so a plain string compare orders them. When
+ * every slot has passed, the next one is tomorrow's Fajr.
+ */
+function getNextDailyPrayerId(times = [], timezone) {
+  const now = new Date(
+    new Date().toLocaleString("en-US", timezone ? { timeZone: timezone } : {}),
+  );
+  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+    now.getMinutes(),
+  ).padStart(2, "0")}`;
+  const index = times.findIndex(
+    (time) => typeof time === "string" && time >= currentTime,
+  );
+  return DAILY_PRAYER_IDS[index === -1 ? 0 : index];
+}
+
+/**
+ * Build the id-keyed prayer board consumed by mosqueInfoApl.json.
+ *
+ * Keying by id rather than by position lets the APL document place Fajr,
+ * Jumu'a, Shuruq… wherever each layout needs them without juggling indexes.
+ * Every entry carries both the raw "HH:mm" time (null when the mosque doesn't
+ * provide it) and a locale-formatted `timeLabel` ready to display, plus the
+ * `isNext` flag the templates use to highlight the upcoming prayer.
+ */
+function buildPrayerBoard({
+  requestAttributes,
+  locale,
+  times = [],
+  shuruq,
+  jumuaTimes = [],
+  timezone,
+}) {
+  const names = extractPhonemeText(requestAttributes.t("prayerNames"));
+  const noneLabel = requestAttributes.t("none");
+  const nextId = getNextDailyPrayerId(times, timezone);
+  const entry = (id, name, time) => ({
+    id,
+    name,
+    time: time || null,
+    timeLabel: time ? formatTime(time, locale) : noneLabel,
+    isNext: id === nextId,
+  });
+
+  const board = {};
+  DAILY_PRAYER_IDS.forEach((id, index) => {
+    board[id] = entry(id, names[index], times[index]);
+  });
+  board.shuruq = shuruq ? entry("shuruq", names[7], shuruq) : null;
+
+  // Jumu'a is always rendered (as "None" when the mosque has no Friday time)
+  // so the layout keeps a stable shape; the extra slots only appear if set.
+  const [jumua, jumua2, jumua3] = jumuaTimes;
+  board.jumua = entry("jumua", names[5], jumua);
+  board.jumua2 = jumua2 ? entry("jumua2", `${names[5]} 2`, jumua2) : null;
+  board.jumua3 = jumua3 ? entry("jumua3", `${names[5]} 3`, jumua3) : null;
+  return board;
+}
+
 function generateMawaqitId(userId, attempt = 0) {
   const hashInput = attempt === 0 ? userId : `${userId}-${attempt}`;
   const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
@@ -1533,4 +1596,7 @@ module.exports = {
   getUserDistanceUnits,
   formatTime,
   generateMawaqitId,
+  buildPrayerBoard,
+  getNextDailyPrayerId,
+  DAILY_PRAYER_IDS,
 };

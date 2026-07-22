@@ -61,6 +61,7 @@ module.exports = {
     noJummaTimePrompt:
       "Il n'y a pas de prière du <sub alias='joumoua'>jumua</sub> dans cette mosquée.",
     none: "None",
+    nextPrayerLabel: "Prochaine prière",
     thankYouPrompt: `Merci d'utiliser ${process.env.SKILL_NAME} pour les horaires de prière de votre mosquée. `,
     globalErrorPrompt:
       "Désolé, je n'ai pas bien compris. Pouvez-vous répéter, s'il vous plaît ?",

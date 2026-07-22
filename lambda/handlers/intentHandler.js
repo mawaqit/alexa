@@ -925,12 +925,13 @@ const MosqueInfoIntentHandler = {
         await helperFunctions.getUserDistanceUnits(handlerInput);
       // Extract only the Jumu'ah times
       const jumuaTimes = [jumua, jumua2, jumua3];
-      const prayerNames = requestAttributes.t("prayerNames");
-      let prayerTimeApl = prayerNames.slice(0, 5).map((prayer, index) => {
-        const prayerTime = mosqueTimes.times[index];
-        return {
-          primaryText: `${prayer} ${helperFunctions.formatTime(prayerTime, locale)}`,
-        };
+      const prayers = helperFunctions.buildPrayerBoard({
+        requestAttributes,
+        locale,
+        times: mosqueTimes.times,
+        shuruq: mosqueTimes.shuruq,
+        jumuaTimes,
+        timezone: await helperFunctions.getUserTimezone(handlerInput),
       });
       let speakOutput = requestAttributes.t(
         "mosqueInfoPrompt",
@@ -949,21 +950,8 @@ const MosqueInfoIntentHandler = {
             .map((jumuaTime) => helperFunctions.formatTime(jumuaTime, locale))
             .join(", "),
         );
-        firstNonNullJumua.forEach((jumuaTime, index) => {
-          prayerTimeApl.push({
-            primaryText: `${prayerNames[5]} ${index + 1} ${helperFunctions.formatTime(jumuaTime, locale)}`,
-          });
-        });
       } else {
         speakOutput += requestAttributes.t("noJumuaTime");
-        prayerTimeApl.push({
-          primaryText: `${prayerNames[5]}  ${requestAttributes.t("none")}`,
-        });
-      }
-      if (mosqueTimes.shuruq) {
-        prayerTimeApl.push({
-          primaryText: `${prayerNames[7]}  ${helperFunctions.formatTime(mosqueTimes.shuruq, locale)}`,
-        });
       }
       if (
         Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
@@ -972,7 +960,7 @@ const MosqueInfoIntentHandler = {
       ) {
         const dataSource = await getDataSourceforMosqueInfo(
           handlerInput,
-          prayerTimeApl,
+          prayers,
           mosqueInfo,
         );
         console.log("Data Source: ", JSON.stringify(dataSource));

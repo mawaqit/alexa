@@ -55,6 +55,7 @@ module.exports = {
     jummaTimePrompt: `Also, the Friday prayer, <sub alias='joomua'>Jumua</sub>, is at %s.`,
     noJummaTimePrompt: `There is no <sub alias='joomua'>Jumua</sub> prayer at this mosque.`,
     none: `None`,
+    nextPrayerLabel: `Next prayer`,
     thankYouPrompt: `Thank you for using ${process.env.SKILL_NAME} for the prayer times of your mosque. `,
     globalErrorPrompt: `Sorry, I didn't quite catch that. Could you say it again, please?`,
     fallbackPrompt: `Sorry, I didn't quite catch that. Could you say it again, please?`,

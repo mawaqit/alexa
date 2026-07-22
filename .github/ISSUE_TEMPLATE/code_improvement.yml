@@ -1,0 +1,90 @@
+name: Code improvement
+description: Refactor, clean-up, tests, tooling, or technical debt — no user-visible change
+title: "[Refactor]: "
+labels: ["type/refactor"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For changes to how the code is written rather than what it does.
+        If users would notice the difference, open a bug or a feature request
+        instead.
+
+  - type: input
+    id: location
+    attributes:
+      label: Where?
+      description: Paths, or a directory. Be specific enough to open the file.
+      placeholder: "lambda/handlers/intentHandler.js, lambda/helperFunctions.js"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong with it today?
+      description: |
+        The cost, not the aesthetic. What does this make slow, risky, or easy to
+        get wrong?
+      placeholder: |
+        `intentHandler.js` is ~2k lines holding every intent, so any change to
+        one intent risks the others and the file is impossible to review.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What should it look like instead?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Which service?
+      options:
+        - lambda (main skill backend, JavaScript)
+        - azan-lambda (Smart Home dispatcher, TypeScript)
+        - skill-package (manifest, interaction models, widgets)
+        - Repo tooling (CI, lint, tests, build)
+        - More than one
+    validations:
+      required: true
+
+  - type: dropdown
+    id: coverage
+    attributes:
+      label: Is the current behaviour covered by tests?
+      description: |
+        This decides how the work starts. Untested code gets characterization
+        tests written against it **first**, while it still behaves the old way —
+        that is what makes the refactor provably safe rather than hopefully safe.
+      options:
+        - "Yes — existing tests cover it"
+        - "Partly — some paths are covered"
+        - "No — characterization tests needed first"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: nature
+    attributes:
+      label: Nature of the change
+      options:
+        - label: Behaviour-preserving — the deployed skill acts exactly the same afterwards
+          required: false
+        - label: Touches something on a deploy path (serverless.yml, handler paths, env vars)
+          required: false
+
+  - type: textarea
+    id: risk
+    attributes:
+      label: What could this break?
+      description: |
+        What else reads this code or data? Two things worth checking here: the
+        Azan tables are written by both services at once, and `serverless.yml`
+        pins handler paths that a file move would silently break.
+    validations:
+      required: false

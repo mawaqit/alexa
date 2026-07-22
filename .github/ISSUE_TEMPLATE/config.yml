@@ -1,0 +1,7 @@
+# Blank issues are off so that bug reports always carry a Support Code — it is
+# what turns "the azan didn't play" into a log we can actually search.
+blank_issues_enabled: false
+contact_links:
+  - name: MAWAQIT support (not the Alexa skill)
+    url: https://mawaqit.net/en/contact
+    about: Questions about a mosque's listing or prayer times on mawaqit.net — those come from the mosque, not from this skill.

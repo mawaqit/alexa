@@ -123,11 +123,11 @@ class CustomDynamoDbPersistenceAdapter {
       item.userId = attributes.user_id;
     }
     if (
-      attributes.mawaqit_id &&
-      typeof attributes.mawaqit_id === "string" &&
-      attributes.mawaqit_id.trim() !== ""
+      attributes.supportId &&
+      typeof attributes.supportId === "string" &&
+      attributes.supportId.trim() !== ""
     ) {
-      item.mawaqit_id = attributes.mawaqit_id;
+      item.supportId = attributes.supportId;
     }
 
     const params = {

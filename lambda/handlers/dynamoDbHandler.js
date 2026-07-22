@@ -248,26 +248,24 @@ async function UpdateMosqueAzanData(id, attributes) {
   }
 }
 
-async function GetUserByMawaqitId(mawaqitId) {
-  console.log(
-    `[GetUserByMawaqitId] Fetching user for mawaqit_id: ${mawaqitId}`,
-  );
+async function GetUserBySupportId(supportId) {
+  console.log(`[GetUserBySupportId] Fetching user for supportId: ${supportId}`);
   const params = {
     TableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
-    IndexName: "mawaqit_id-index",
-    KeyConditionExpression: "mawaqit_id = :mawaqitId",
+    IndexName: "supportId-index",
+    KeyConditionExpression: "supportId = :supportId",
     ExpressionAttributeValues: {
-      ":mawaqitId": mawaqitId,
+      ":supportId": supportId,
     },
   };
 
   try {
     const data = await dynamo.send(new QueryCommand(params));
-    console.log(`[GetUserByMawaqitId] Found ${data.Items?.length || 0} users.`);
+    console.log(`[GetUserBySupportId] Found ${data.Items?.length || 0} users.`);
     return data.Items?.[0] || null;
   } catch (error) {
     console.error(
-      `[GetUserByMawaqitId] Error fetching user for mawaqit_id ${mawaqitId}:`,
+      `[GetUserBySupportId] Error fetching user for supportId ${supportId}:`,
       error,
     );
     throw error;
@@ -282,5 +280,5 @@ module.exports = {
   BatchGetAzanUserInfo,
   GetMosqueAzanData,
   UpdateMosqueAzanData,
-  GetUserByMawaqitId,
+  GetUserBySupportId,
 };

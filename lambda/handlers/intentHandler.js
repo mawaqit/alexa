@@ -16,7 +16,7 @@ const { randomUUID: uuidv4 } = crypto;
 const adhaanTasks = [
   "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan",
 ];
-const { DeleteUserInfo, GetUserByMawaqitId } = require("./dynamoDbHandler.js");
+const { DeleteUserInfo, GetUserBySupportId } = require("./dynamoDbHandler.js");
 const ALL_PRAYER_INDEX = 8;
 
 const DeleteRoutineStartedHandler = {
@@ -1999,23 +1999,23 @@ const UserIdIntentHandler = {
         (await attributesManager.getPersistentAttributes()) || {};
       const userId = Alexa.getUserId(handlerInput.requestEnvelope);
 
-      let mawaqitId = persistentAttributes.mawaqit_id;
+      let supportId = persistentAttributes.supportId;
 
-      if (!mawaqitId) {
+      if (!supportId) {
         let attempt = 0;
         let isUnique = false;
 
         while (!isUnique && attempt < 100) {
-          const candidateCode = helperFunctions.generateMawaqitId(
+          const candidateCode = helperFunctions.generateSupportId(
             userId,
             attempt,
           );
-          const existingUser = await GetUserByMawaqitId(candidateCode);
+          const existingUser = await GetUserBySupportId(candidateCode);
           if (!existingUser) {
-            mawaqitId = candidateCode;
+            supportId = candidateCode;
             isUnique = true;
           } else if (existingUser.id === userId) {
-            mawaqitId = candidateCode;
+            supportId = candidateCode;
             isUnique = true;
           } else {
             console.log(
@@ -2025,24 +2025,24 @@ const UserIdIntentHandler = {
           }
         }
 
-        if (!mawaqitId) {
+        if (!supportId) {
           throw new Error(
-            "Unable to generate unique mawaqit_id after 100 attempts",
+            "Unable to generate unique supportId after 100 attempts",
           );
         }
 
         // Save to persistent attributes
-        persistentAttributes.mawaqit_id = mawaqitId;
+        persistentAttributes.supportId = supportId;
         attributesManager.setPersistentAttributes(persistentAttributes);
         await attributesManager.savePersistentAttributes();
       }
 
-      const parts = mawaqitId.split("-");
+      const parts = supportId.split("-");
       // Convert "231" -> "2 3 1" for speech alias
       const part1Spoken = parts[0].split("").join(" ");
       const part2Spoken = parts[1].split("").join(" ");
 
-      const codeSsml = `<sub alias="${part1Spoken}, ${part2Spoken}">${mawaqitId}</sub>`;
+      const codeSsml = `<sub alias="${part1Spoken}, ${part2Spoken}">${supportId}</sub>`;
 
       const speakOutput = requestAttributes.t("userIdPrompt", codeSsml);
 

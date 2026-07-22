@@ -1533,7 +1533,7 @@ function buildPrayerBoard({
   return board;
 }
 
-function generateMawaqitId(userId, attempt = 0) {
+function generateSupportId(userId, attempt = 0) {
   const hashInput = attempt === 0 ? userId : `${userId}-${attempt}`;
   const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
   const intVal = parseInt(hash.substring(0, 8), 16);
@@ -1595,7 +1595,7 @@ module.exports = {
   formatDistance,
   getUserDistanceUnits,
   formatTime,
-  generateMawaqitId,
+  generateSupportId,
   buildPrayerBoard,
   getNextDailyPrayerId,
   DAILY_PRAYER_IDS,

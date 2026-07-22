@@ -24,7 +24,7 @@ on:
 # ASK_PROFILE: a profile present in the ASK_CLI_CONFIG secret. It must match a
 # profile declared in ask-resources.json (skill id lives in .ask/ask-states.json).
 env:
-  ASK_PROFILE: ${{ vars.ASK_PROFILE }}
+  ASK_PROFILE: ${{ vars.ASK_PROFILE || 'MAWAQIT' }}
 
 jobs:
   notify-start:
@@ -74,14 +74,26 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: eu-west-3
 
-      - name: Install Serverless Framework
-        run: npm install -g serverless@^4
+      - name: Install Serverless Framework and ASK CLI
+        run: npm install -g serverless@^4 ask-cli
+
+      # `ask deploy` / `ask smapi` read their credentials from ~/.ask/cli_config.
+      # Only the dev stage pushes the skill package + account linking.
+      - name: Configure ASK CLI
+        if: ${{ inputs.stage == 'dev' }}
+        env:
+          ASK_CLI_CONFIG: ${{ secrets.ASK_CLI_CONFIG }}
+        run: |
+          if [ -z "$ASK_CLI_CONFIG" ]; then
+            echo "::error::ASK_CLI_CONFIG secret is not set — the skill package and account linking cannot be deployed."
+            exit 1
+          fi
+          mkdir -p "$HOME/.ask"
+          printf '%s' "$ASK_CLI_CONFIG" > "$HOME/.ask/cli_config"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Deploy lambda, azan-lambda and skill-package
-        working-directory: lambda
         env:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
           # Injected into .ask/account-linking.json

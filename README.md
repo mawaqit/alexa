@@ -4,12 +4,15 @@ Backend for the MAWAQIT Alexa skill: prayer time lookups, routines, widgets, and
 
 The project is split into two independently deployed Serverless Framework services, plus the Alexa skill configuration itself:
 
-| Path                 | Service name         | What it does                                                         |
-| -------------------- | -------------------- | -------------------------------------------------------------------- |
-| `lambda/`            | `alexa`              | Main skill backend: intent handling, prayer times, routines, widgets |
-| `azan-lambda/`       | `mawaqit-alexa-azan` | Smart Azan: scheduled adhan playback dispatch                        |
-| `skill-package/`     | -                    | Alexa skill package: manifest (`skill.json`), interaction models, tasks, routine triggers — deployed via `ask deploy` |
-| `utils/`             | -                    | One-off Python script for generating locale files                    |
+| Path                 | Service name         | Language   | What it does                                                         |
+| -------------------- | -------------------- | ---------- | -------------------------------------------------------------------- |
+| `lambda/`            | `alexa`              | JavaScript | Main skill backend: intent handling, prayer times, routines, widgets |
+| `azan-lambda/`       | `mawaqit-alexa-azan` | TypeScript | Smart Azan: scheduled adhan playback dispatch                        |
+| `skill-package/`     | -                    | -          | Alexa skill package: manifest (`skill.json`), interaction models, tasks, routine triggers — deployed via `ask deploy` |
+| `utils/`             | -                    | -          | One-off Python script for generating locale files                    |
+
+The codebase is migrating to TypeScript one service at a time — see
+[TypeScript](#typescript).
 
 ## Repository structure
 
@@ -25,11 +28,12 @@ alexa/
 │   ├── tests/                # Jest tests for this service
 │   ├── env.json              # Non-secret per-stage config, read by serverless.yml
 │   └── serverless.yml
-├── azan-lambda/             # Smart Azan dispatcher (service: mawaqit-alexa-azan)
-│   ├── src/handlers/          # dispatcherHandler entry point
-│   ├── src/dbHandler/          # DynamoDB access
-│   ├── src/authHandler/        # Amazon OAuth2 handling
-│   ├── src/ssmHandler/         # SSM parameter loading
+├── azan-lambda/             # Smart Azan dispatcher (TypeScript, service: mawaqit-alexa-azan)
+│   ├── src/handlers/          # Lambda entry point + one file per Alexa directive
+│   ├── src/alexa/             # Smart Home response builder, error envelope, constants
+│   ├── src/services/          # I/O: Amazon OAuth2, DynamoDB, SSM secrets
+│   ├── src/types/             # Interfaces only — one file per domain
+│   ├── src/logging/           # The Powertools logger instance
 │   ├── tests/                 # Jest tests for this service
 │   ├── env.json
 │   └── serverless.yml
@@ -39,6 +43,7 @@ alexa/
 │   ├── tasks/                 # Custom task definitions (PlayAdhaan)
 │   └── routines/              # Ready-made routine triggers
 ├── ask-resources.json         # ASK CLI deploy config (points at skill-package/)
+├── tsconfig.json              # TypeScript config for the whole workspace
 └── utils/                     # create_locale_files.py (locale scaffolding script)
 ```
 
@@ -57,15 +62,70 @@ The repo is a [pnpm workspace](https://pnpm.io/workspaces): the root holds the s
 pnpm install
 ```
 
+## TypeScript
+
+`azan-lambda` is TypeScript; `lambda` is still JavaScript. Both build and test
+from the same root tooling, so the two can coexist indefinitely and the rest of
+the codebase can be migrated service by service.
+
+```bash
+pnpm typecheck       # tsc --noEmit over every TypeScript file
+```
+
+Things worth knowing before you touch the TypeScript:
+
+- **Nothing compiles to disk.** `tsc` only ever type-checks. Serverless v4
+  bundles the `.ts` handlers with esbuild at deploy time, and ts-jest compiles
+  them for the test run — there is no build step and no `dist/`.
+- **esbuild strips types without checking them**, so a type error will bundle
+  and deploy happily. `pnpm typecheck` is the only thing that catches it, which
+  is why it runs in CI and in the pre-push hook.
+- **The settings are strict**, including `noUncheckedIndexedAccess` and
+  `exactOptionalPropertyTypes`. `any` is banned by lint rather than by
+  convention (`@typescript-eslint/no-explicit-any`), and linting is type-aware,
+  so it also catches unsafe values and floating promises.
+- **Interfaces live in `src/types/`, one file per domain**, and hold no logic.
+  `smartHomeRequest.ts` and `smartHomeResponse.ts` split the Alexa wire format
+  in two on purpose: incoming fields are optional (untrusted input — a handler
+  proves a field is there before reading it), outgoing fields are required (we
+  build those, so they must be complete). Keep that asymmetry.
+- **Modules use `import` / `export` only.** There is no `require` anywhere in
+  `azan-lambda`, and the root configs (`eslint.config.mjs`, `jest.config.mjs`)
+  are ESM too. CommonJS is only the *output* format esbuild emits for the
+  Lambda runtime — an artifact detail, never something you write.
+- **Logging goes through `src/logging/logger`** (AWS Lambda Powertools), never
+  `console` — a lint rule enforces it. Every line then carries the Lambda
+  request id, which is the only way to follow one invocation through a log
+  stream shared with every concurrent one. Verbosity is set by `LOG_LEVEL`.
+  Secrets are never logged: only whether a token was present.
+
+### Layout
+
+| Directory       | Holds                                                              |
+| --------------- | ------------------------------------------------------------------ |
+| `src/handlers/` | `dispatcher.ts` (entry: validate + route), one file per directive  |
+| `src/alexa/`    | Response builder, error envelope, and the Alexa string constants   |
+| `src/services/` | Everything that does I/O: `amazonAuth`, `azanUsers`, `secrets`     |
+| `src/types/`    | Interfaces and type aliases only                                   |
+| `src/logging/`  | The configured logger — the only place `console` is allowed        |
+
+Migrating another service means adding its directories to `include` in
+`tsconfig.json` and renaming its files; the jest, eslint, and CI wiring already
+handles both languages.
+
 ## Testing
 
 Tests run with [Jest](https://jestjs.io/) from the repo root and live next to the
-code they cover, in `lambda/tests/` and `azan-lambda/tests/`.
+code they cover, in `lambda/tests/` (`.test.js`) and `azan-lambda/tests/`
+(`.test.ts`). A single run covers both.
 
 ```bash
 pnpm test            # run the whole suite
 pnpm test:watch      # re-run on change
 ```
+
+Both services log verbosely on every code path, so the suite silences them.
+`VERBOSE_LOGS=1 pnpm test` restores the output when you are debugging a failure.
 
 ### From your editor
 
@@ -75,7 +135,7 @@ JetBrains IDEs need no additional setup.
 
 ### Pre-push hook
 
-`pnpm install` at the root also installs a [husky](https://typicode.github.io/husky/) pre-push hook that runs lint then the test suite, and blocks the push if either fails. There is nothing else to configure. Register it with:
+`pnpm install` at the root also installs a [husky](https://typicode.github.io/husky/) pre-push hook that runs lint, then the typecheck, then the test suite, and blocks the push if any of them fails. There is nothing else to configure. Register it with:
 
 ```bash
 pnpm run prepare
@@ -87,7 +147,8 @@ Contributions are welcome. To propose a change:
 
 1. Fork the repo and create a branch.
 2. Make your change with tests covering it, and keep the existing suite green
-   (`pnpm test`). Lint and tests also run automatically on push via the
+   (`pnpm test`, plus `pnpm typecheck` if you touched TypeScript). Lint,
+   typecheck, and tests also run automatically on push via the
    [pre-push hook](#pre-push-hook) and in CI.
 3. Open a pull request describing what you changed and why.
 

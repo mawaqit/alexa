@@ -1,0 +1,51 @@
+{
+  // Single tsconfig for the whole workspace. `azan-lambda` is TypeScript;
+  // `lambda` is still JavaScript and is deliberately left out of `include`
+  // until it is migrated too — add its directories here when it is.
+  "compilerOptions": {
+    // The Lambda runtime is nodejs22.x, so everything ES2022 ships natively —
+    // no downlevelling. ES2022 is also what makes `Object.hasOwn` type-check.
+    "target": "ES2022",
+    "lib": ["ES2022"],
+
+    // We never emit from `tsc`, we hand the source to a bundler — so resolve
+    // the way that bundler does. `bundler` reads package.json `exports`, which
+    // the legacy `node10` algorithm ignores, and unlike `node16` it does not
+    // demand file extensions on relative imports.
+    //
+    // `preserve` is the only `module` value `bundler` accepts, and it does what
+    // it says: import/export (and `import()`) are left exactly as written, for
+    // esbuild to deal with. ts-jest overrides this to CommonJS for the test run
+    // — see jest.config.mjs.
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Nothing is emitted from `tsc`: Serverless v4's esbuild compiles the
+    // handlers at deploy time and ts-jest compiles them for the test run.
+    // `tsc` is only ever run as a type checker (`pnpm typecheck`).
+    "noEmit": true,
+    "isolatedModules": true,
+
+    // Type-check our code, not the third-party .d.ts files we cannot fix.
+    "skipLibCheck": true,
+
+    // Strict, plus the checks that are not in `strict` but catch the mistakes
+    // this codebase is actually exposed to: unchecked array/record indexing
+    // (Alexa ids split on "."), and `undefined` silently satisfying an
+    // optional property (an absent field and a field set to undefined are
+    // different things on the Alexa wire).
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+
+    "types": ["node", "jest"]
+  },
+  "include": ["azan-lambda/src", "azan-lambda/tests"]
+}

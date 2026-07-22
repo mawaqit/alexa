@@ -5,6 +5,7 @@
     "deploy:prod": "serverless deploy --stage prod"
   },
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.34.0",
     "@aws-sdk/client-dynamodb": "^3.971.0",
     "@aws-sdk/client-ssm": "^3.971.0",
     "@aws-sdk/lib-dynamodb": "^3.971.0",

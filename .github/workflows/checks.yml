@@ -1,4 +1,4 @@
-# Reusable quality gate: lint, format check, and tests.
+# Reusable quality gate: lint, format check, typecheck, and tests.
 # Called by ci.yml (on PRs) and by the deploy workflows before any deploy runs,
 # so nothing ever ships without passing these.
 name: Quality Checks
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   quality:
-    name: Lint & format
+    name: Lint, format & types
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -32,6 +32,12 @@ jobs:
 
       - name: Lint
         run: pnpm lint
+
+      # `tsc --noEmit` over azan-lambda. Serverless bundles the .ts handlers
+      # with esbuild, which strips types without checking them — so this is the
+      # only place a type error is caught before it ships.
+      - name: Typecheck
+        run: pnpm typecheck
 
   test:
     name: Tests

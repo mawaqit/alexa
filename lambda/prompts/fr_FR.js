@@ -99,6 +99,12 @@ module.exports = {
       nextPrayerTime: {
         title: "Prochaine prière",
         at: "à",
+        remaining: "restant",
+        itsTime: "C'est l'heure",
+        // Rendu "2h15" / "23 min" — le widget les concatène sans séparateur
+        // au-dessus de l'heure, donc pas d'espace autour.
+        hourUnit: "h",
+        minuteUnit: "min",
       },
       hadithOfTheDay: {
         title: "Hadith du jour",

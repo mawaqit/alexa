@@ -58,6 +58,14 @@ const InstallPrayerTimeWidgetRequestHandler = {
             labels: {
               title: requestAttributes.t("widgets.nextPrayerTime.title"),
               at: requestAttributes.t("widgets.nextPrayerTime.at"),
+              remaining: requestAttributes.t(
+                "widgets.nextPrayerTime.remaining",
+              ),
+              itsTime: requestAttributes.t("widgets.nextPrayerTime.itsTime"),
+              hourUnit: requestAttributes.t("widgets.nextPrayerTime.hourUnit"),
+              minuteUnit: requestAttributes.t(
+                "widgets.nextPrayerTime.minuteUnit",
+              ),
             },
             content: {
               nextPrayerName: nextPrayerTime.name,

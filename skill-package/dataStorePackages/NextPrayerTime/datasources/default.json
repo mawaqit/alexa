@@ -2,7 +2,11 @@
   "nextPrayerData": {
     "labels": {
       "title": "Next Prayer",
-      "at": "at"
+      "at": "at",
+      "remaining": "remaining",
+      "itsTime": "It's time",
+      "hourUnit": "h",
+      "minuteUnit": "min"
     },
     "content": {
       "nextPrayerName": "Maghrib",

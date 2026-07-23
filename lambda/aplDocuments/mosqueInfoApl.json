@@ -82,31 +82,60 @@
     },
     {
       "when": "${viewport.width > viewport.height && viewport.height < 600}",
-      "description": "Metrics — short landscape (Echo Show 5).",
+      "description": "Metrics — short landscape (Echo Show 5). Sized for a 5.5\" panel seen from across a room, not for the authoring-tool preview: the 960x480 canvas is ~195dp per physical inch against a 160dp reference, so every dp lands about 20% smaller than the authoring tool suggests. The panels have height to spare here — the binding constraint is the 27% column width, not the 480dp height.",
       "dimensions": {
-        "gutter": "18dp",
-        "gutterV": "12dp",
+        "gutter": "22dp",
+        "gutterV": "14dp",
         "colGap": "10dp",
         "colWidth": "27%",
         "cardRadius": "16dp",
-        "cardPad": "10dp",
-        "rowPadV": "4dp",
+        "cardPad": "12dp",
+        "rowPadV": "6dp",
         "rowPadH": "8dp",
-        "rowRadius": "9dp",
-        "accentBar": "15dp",
+        "rowRadius": "10dp",
+        "accentBar": "20dp",
         "brandLogo": "20dp",
-        "rowGap": "2dp",
-        "pillPadH": "8dp",
-        "pillPadV": "3dp",
-        "pinSize": "12dp"
+        "rowGap": "3dp",
+        "pillPadH": "9dp",
+        "pillPadV": "4dp",
+        "pinSize": "14dp"
       },
       "numbers": {
-        "fsTitle": 21,
-        "fsAddress": 12,
-        "fsName": 12,
-        "fsTime": 17,
-        "fsBrand": 10,
-        "fsDistance": 12
+        "fsTitle": 26,
+        "fsAddress": 14,
+        "fsName": 16,
+        "fsTime": 21,
+        "fsBrand": 11,
+        "fsDistance": 15
+      }
+    },
+    {
+      "when": "${viewport.width > viewport.height && viewport.width >= 1600}",
+      "description": "Metrics — large landscape (Echo Show 15 landscape, 1920x1080). The base block is tuned for the 1280x800 of a Show 8/10; reused as-is on a canvas 2.25x the area it leaves the type stranded in half-empty panels. Values track the large-portrait block, which already scales for the same physical panel. Must stay above the TV block: a Fire TV is also 1920x1080 and has to keep its own overscan-safe metrics.",
+      "dimensions": {
+        "gutter": "54dp",
+        "gutterV": "42dp",
+        "colGap": "24dp",
+        "colWidth": "25%",
+        "cardRadius": "38dp",
+        "cardPad": "28dp",
+        "rowPadV": "16dp",
+        "rowPadH": "18dp",
+        "rowRadius": "20dp",
+        "accentBar": "36dp",
+        "brandLogo": "44dp",
+        "rowGap": "8dp",
+        "pillPadH": "18dp",
+        "pillPadV": "9dp",
+        "pinSize": "24dp"
+      },
+      "numbers": {
+        "fsTitle": 50,
+        "fsAddress": 26,
+        "fsName": 26,
+        "fsTime": 30,
+        "fsBrand": 20,
+        "fsDistance": 24
       }
     },
     {

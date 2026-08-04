@@ -941,13 +941,14 @@ const generateRenderingData = (time, prayerName) => {
 const generateOperationId = (time, prayerName) =>
   "PlayAdhaan_" + prayerName + "_" + generateRoutineTime(time);
 
-function extractPhonemeText(phonemeArray) {
-  return phonemeArray.map((phoneme) => {
-    if (typeof phoneme !== "string") return phoneme;
-    // Match text between > and <
-    const match = phoneme.match(/>([^<]+)</);
-    return match ? match[1] : phoneme;
-  });
+function extractPhonemeText(input) {
+  if (!input) return input;
+  if (Array.isArray(input)) {
+    return input.map((item) => extractPhonemeText(item));
+  }
+  if (typeof input !== "string") return input;
+  const match = input.match(/>([^<]+)</);
+  return match ? match[1] : input;
 }
 
 const generateRoutineErrorMessage = (message) => {

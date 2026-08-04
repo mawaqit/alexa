@@ -12,7 +12,8 @@
     "prepare": "husky",
     "deploy:dev": "pnpm --filter ./lambda deploy:dev && pnpm --filter ./azan-lambda deploy:dev && pnpm push:skill-config && pnpm push:account-linking-config",
     "deploy:prod": "pnpm --filter ./lambda deploy:prod && pnpm --filter ./azan-lambda deploy:prod",
-    "push:skill-config": "[ -f .ask/ask-states.json ] || cp .ask/ask-states.json.example .ask/ask-states.json; ask deploy --target skill-metadata --profile ${ASK_PROFILE:-MAWAQIT}",
+    "push:skill-config": "node .ask/push-skill-config.js",
+    "push:widget": "pnpm push:skill-config",
     "push:account-linking-config": "node .ask/push-account-linking.js",
     "sync:locales": "node .ask/sync-locales.js"
   },

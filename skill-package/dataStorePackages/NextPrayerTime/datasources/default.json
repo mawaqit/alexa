@@ -8,7 +8,7 @@
       "hourUnit": "h",
       "minuteUnit": "min"
     },
-    "content": {
+    "data": {
       "nextPrayerName": "Maghrib",
       "nextPrayerTime": "9:15 PM",
       "mosqueName": "Al-Noor Mosque"

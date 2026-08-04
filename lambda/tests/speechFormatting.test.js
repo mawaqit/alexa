@@ -180,6 +180,12 @@ describe("extractPhonemeText", () => {
     ]);
   });
 
+  it("handles single string inputs as well as arrays", () => {
+    expect(extractPhonemeText("<sub alias='magrib'>Maghrib</sub>")).toBe(
+      "Maghrib",
+    );
+  });
+
   it("passes plain names through untouched", () => {
     expect(extractPhonemeText(["All Prayers"])).toEqual(["All Prayers"]);
   });

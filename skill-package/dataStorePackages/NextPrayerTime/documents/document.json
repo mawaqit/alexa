@@ -2,7 +2,7 @@
   "type": "APL",
   "version": "2024.2",
   "theme": "dark",
-  "description": "Next prayer widget. Two things carry the tile: the prayer name and a live countdown driven by ${utcTime}. The prayer time and mosque name sit under a hairline as supporting detail, and the MAWAQIT mark stays in the bottom corner. Palette and type match mosqueInfoApl.json so the widget and the board read as one product.",
+  "description": "Next prayer widget. Displays prayer name, live countdown, and handles a fetching state using the display property.",
   "extensions": [
     {
       "name": "DataStore",
@@ -29,14 +29,14 @@
   ],
   "resources": [
     {
-      "description": "Artwork owned by the presentation layer. Swap these to restyle the widget without touching the skill code.",
+      "description": "Artwork owned by the presentation layer.",
       "strings": {
         "pageBackground": "https://cdn.mawaqit.net/images/background-arabic-calligraphy.png",
         "logoUrl": "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA"
       }
     },
     {
-      "description": "Palette — kept identical to mosqueInfoApl.json on purpose; the widget is the same product seen through a smaller window.",
+      "description": "Palette matching mosqueInfoApl.json.",
       "colors": {
         "colorGlass": "#FFFFFF14",
         "colorStroke": "#FFFFFF2B",
@@ -49,7 +49,6 @@
       "gradients": {
         "gradientPage": {
           "type": "linear",
-          "angle": 160,
           "colorRange": ["#0B0A1FD9", "#0B0A1FF2", "#150F33E6"],
           "inputRange": [0, 0.55, 1]
         }
@@ -75,7 +74,7 @@
     },
     {
       "when": "${viewport.width < 340}",
-      "description": "Metrics — compact widget. The countdown keeps the most weight; everything around it gives ground first.",
+      "description": "Metrics — compact widget.",
       "dimensions": {
         "padH": "16dp",
         "padV": "14dp",
@@ -125,7 +124,9 @@
           "fontSize": "@fsCountdown",
           "fontWeight": 700,
           "color": "@colorAccent",
-          "maxLines": 1
+          "maxLines": 1,
+          "adjustsFontSizeToFit": true,
+          "minimumFontSize": 24
         }
       ]
     },
@@ -190,15 +191,9 @@
   },
   "layouts": {
     "PageBackdrop": {
-      "description": "Brand artwork plus a gradient wash, so the calligraphy never fights the type in front of it.",
       "items": [
         {
           "type": "Container",
-          "position": "absolute",
-          "top": 0,
-          "left": 0,
-          "right": 0,
-          "bottom": 0,
           "items": [
             {
               "type": "Image",
@@ -222,7 +217,6 @@
       ]
     },
     "BrandMark": {
-      "description": "Discreet skill attribution, pinned to the bottom corner.",
       "items": [
         {
           "type": "Container",
@@ -253,6 +247,7 @@
     "parameters": ["payload"],
     "item": {
       "type": "TouchWrapper",
+      "id": "mainWidget",
       "width": "100vw",
       "height": "100vh",
       "bind": [
@@ -261,40 +256,28 @@
           "value": "${DS_PrayerTime.labels ? DS_PrayerTime.labels : payload.nextPrayerData.labels}"
         },
         {
-          "name": "content",
-          "value": "${DS_PrayerTime.content ? DS_PrayerTime.content : payload.nextPrayerData.content}"
+          "name": "data",
+          "value": "${DS_PrayerTime.data ? DS_PrayerTime.data : payload.nextPrayerData.data}"
         },
         {
-          "name": "target",
-          "value": "${DS_PrayerTime.nextUpdateTime ? DS_PrayerTime.nextUpdateTime : payload.nextPrayerData.nextUpdateTime}",
-          "description": "Absolute UTC epoch (ms) of the next prayer, written by prayerTimeWidgetHandler as Date.now() + diffInMinutes*60000."
+          "name": "targetTime",
+          "value": "${DS_PrayerTime.nextUpdateTime != null ? DS_PrayerTime.nextUpdateTime : payload.nextPrayerData.nextUpdateTime}",
+          "type": "number"
         },
         {
-          "name": "remainingMs",
-          "value": "${target - utcTime}",
-          "description": "utcTime is a live binding, so every property derived from this re-evaluates on its own — no command loop and no handler round-trip to keep the countdown moving."
+          "name": "diffMs",
+          "value": "${Math.max(0, targetTime - utcTime)}",
+          "type": "number"
         },
         {
-          "name": "hasCountdown",
-          "value": "${target > 0}",
-          "description": "False before the first PUT_OBJECT, when the packaged placeholder datasource is still in play. That case shows the prayer time large instead of a bogus countdown."
+          "name": "hrs",
+          "value": "${Math.floor(diffMs / 3600000)}",
+          "type": "number"
         },
         {
-          "name": "isExpired",
-          "value": "${target > 0 && remainingMs <= 0}"
-        },
-        {
-          "name": "totalMinutes",
-          "value": "${Math.ceil(remainingMs / 60000)}",
-          "description": "Rounded up, the way a countdown reads: the last minute shows '1 min' and then flips straight to the expired state. Math.floor would sit on '0 min' for a full minute."
-        },
-        {
-          "name": "hours",
-          "value": "${Math.floor(totalMinutes / 60)}"
-        },
-        {
-          "name": "minutes",
-          "value": "${totalMinutes % 60}"
+          "name": "mins",
+          "value": "${Math.floor((diffMs % 3600000) / 60000)}",
+          "type": "number"
         }
       ],
       "onMount": [
@@ -304,21 +287,21 @@
           "key": "nextPrayerData"
         },
         {
-          "type": "SendEvent",
-          "arguments": ["FETCH_PRAYER_TIME", "${target}"]
+          "type": "Idle",
+          "delay": 1000
         },
         {
           "type": "SendEvent",
-          "when": "${hasCountdown && remainingMs > 0}",
-          "delay": "${remainingMs + 2000}",
-          "arguments": ["FETCH_PRAYER_TIME", "${target}"],
-          "description": "Best-effort self-refresh the moment the countdown expires, so a widget parked on the home screen rolls to the next prayer without waiting to be re-mounted. The 2s cushion absorbs the sub-minute truncation in getDifferenceInMinutes. If the viewhost drops a delay this long, the mount-time event above is still the safety net."
+          "arguments": ["FETCH_PRAYER_TIME", "${targetTime}"]
         }
       ],
       "onPress": [
         {
           "type": "SendEvent",
-          "arguments": ["READ_PRAYER_TIME"]
+          "arguments": ["READ_PRAYER_TIME"],
+          "flags": {
+            "interactionMode": "STANDARD"
+          }
         }
       ],
       "item": {
@@ -346,6 +329,26 @@
               },
               {
                 "type": "Container",
+                "display": "${targetTime == 0 ? 'normal' : 'none'}",
+                "grow": 1,
+                "shrink": 1,
+                "width": "100%",
+                "justifyContent": "center",
+                "alignItems": "center",
+                "items": [
+                  {
+                    "type": "Text",
+                    "style": "secondaryTime",
+                    "text": "Fetching...",
+                    "color": "@colorAccent",
+                    "textAlign": "center",
+                    "width": "100%"
+                  }
+                ]
+              },
+              {
+                "type": "Container",
+                "display": "${targetTime > 0 ? 'normal' : 'none'}",
                 "grow": 1,
                 "shrink": 1,
                 "width": "100%",
@@ -355,60 +358,38 @@
                   {
                     "type": "Text",
                     "style": "prayerName",
-                    "text": "${String.toUpperCase(content.nextPrayerName)}",
+                    "text": "${String.toUpperCase(data.nextPrayerName)}",
                     "textAlign": "center",
                     "width": "100%"
                   },
                   {
                     "type": "Text",
-                    "when": "${hasCountdown && !isExpired && hours > 0}",
                     "style": "countdown",
-                    "text": "${hours}${labels.hourUnit}${minutes < 10 ? '0' : ''}${minutes}",
+                    "text": "${diffMs <= 0 ? labels.itsTime : (hrs > 0 ? hrs + ' ' + labels.hourUnit + ' ' : '') + mins + ' ' + labels.minuteUnit}",
                     "textAlign": "center",
-                    "paddingTop": "2dp",
-                    "description": "Compact form above the hour — '2h15'. Reads in one glance and cannot be mistaken for a clock time."
+                    "paddingTop": "2dp"
                   },
                   {
                     "type": "Text",
-                    "when": "${hasCountdown && !isExpired && hours <= 0}",
-                    "style": "countdown",
-                    "text": "${minutes} ${labels.minuteUnit}",
-                    "textAlign": "center",
-                    "paddingTop": "2dp",
-                    "description": "Under the hour the unit changes rather than padding an empty hours slot: '23 min' beats '0h23'."
-                  },
-                  {
-                    "type": "Text",
-                    "when": "${isExpired}",
-                    "style": "countdown",
-                    "text": "${labels.itsTime}",
-                    "fontSize": "@fsPrayer",
-                    "textAlign": "center",
-                    "width": "100%",
-                    "maxLines": 2,
-                    "paddingTop": "4dp"
-                  },
-                  {
-                    "type": "Text",
-                    "when": "${!hasCountdown}",
-                    "style": "countdown",
-                    "text": "${content.nextPrayerTime}",
-                    "textAlign": "center",
-                    "paddingTop": "2dp",
-                    "description": "No countdown target yet: the prayer time takes the hero slot so the tile is never empty."
-                  },
-                  {
-                    "type": "Text",
-                    "when": "${hasCountdown && !isExpired}",
                     "style": "caption",
-                    "text": "${String.toUpperCase(labels.remaining)}",
+                    "text": "${labels.remaining} ${labels.at}",
+                    "display": "${diffMs > 0 ? 'normal' : 'none'}",
                     "textAlign": "center",
-                    "paddingTop": "4dp"
+                    "paddingTop": "6dp"
+                  },
+                  {
+                    "type": "Text",
+                    "style": "secondaryTime",
+                    "text": "${data.nextPrayerTime}",
+                    "display": "${diffMs > 0 ? 'normal' : 'none'}",
+                    "textAlign": "center",
+                    "paddingTop": "2dp"
                   }
                 ]
               },
               {
                 "type": "Container",
+                "display": "${targetTime > 0 ? 'normal' : 'none'}",
                 "width": "100%",
                 "alignItems": "center",
                 "items": [
@@ -419,37 +400,12 @@
                     "background": "@colorDivider"
                   },
                   {
-                    "type": "Container",
-                    "when": "${hasCountdown}",
-                    "direction": "row",
-                    "width": "100%",
-                    "justifyContent": "center",
-                    "alignItems": "center",
-                    "paddingTop": "10dp",
-                    "description": "Supporting line while the countdown owns the hero slot. Split in two on purpose: the preposition is grammar and stays muted at label size, the time is the data and carries the weight — sized as one block they would have read as equally important.",
-                    "items": [
-                      {
-                        "type": "Text",
-                        "style": "preposition",
-                        "text": "${labels.at}",
-                        "textAlignVertical": "bottom",
-                        "paddingRight": "6dp",
-                        "shrink": 1
-                      },
-                      {
-                        "type": "Text",
-                        "style": "secondaryTime",
-                        "text": "${content.nextPrayerTime}"
-                      }
-                    ]
-                  },
-                  {
                     "type": "Text",
                     "style": "mosqueName",
-                    "text": "${content.mosqueName}",
+                    "text": "${data.mosqueName}",
                     "textAlign": "center",
                     "width": "100%",
-                    "paddingTop": "3dp"
+                    "paddingTop": "8dp"
                   }
                 ]
               },

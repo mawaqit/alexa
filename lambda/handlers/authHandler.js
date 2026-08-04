@@ -69,7 +69,7 @@ async function getRefreshToken(authCode) {
 }
 
 async function getUserInfo(accessToken) {
-  console.log("Access Token: ", accessToken);
+  // console.log("Access Token: ", accessToken);
   if (!accessToken) {
     throw new Error("Access token is required");
   }

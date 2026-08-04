@@ -32,6 +32,13 @@
       "type": "TouchWrapper",
       "width": "100vw",
       "height": "100vh",
+      "bind": [
+        {
+          "name": "updateTime",
+          "value": "${DS_Hadith.nextUpdateTime != null ? DS_Hadith.nextUpdateTime : payload.hadith.nextUpdateTime}",
+          "type": "number"
+        }
+      ],
       "onMount": [
         {
           "type": "DataStore:WatchObject",
@@ -39,8 +46,15 @@
           "key": "hadith"
         },
         {
+          "type": "Idle",
+          "delay": 1000
+        },
+        {
           "type": "SendEvent",
-          "arguments": ["FETCH_NEW_HADITH", "${DS_Hadith.nextUpdateTime}"]
+          "arguments": ["FETCH_NEW_HADITH", "${updateTime}"],
+          "flags": {
+            "interactionMode": "STANDARD"
+          }
         }
       ],
       "onPress": [
@@ -49,7 +63,10 @@
           "arguments": [
             "READ_HADITH",
             "${DS_Hadith.content.hadithText ? DS_Hadith.content.hadithText : payload.hadith.content.hadithText}"
-          ]
+          ],
+          "flags": {
+            "interactionMode": "STANDARD"
+          }
         }
       ],
       "item": {

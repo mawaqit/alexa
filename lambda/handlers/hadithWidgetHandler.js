@@ -176,7 +176,9 @@ const UpdateHadithAPLEventHandler = {
       return InstallHadithWidgetRequestHandler.handle(handlerInput);
     }
 
-    return handlerInput.responseBuilder.getResponse();
+    return handlerInput.responseBuilder
+      .withShouldEndSession(true)
+      .getResponse();
   },
 };
 

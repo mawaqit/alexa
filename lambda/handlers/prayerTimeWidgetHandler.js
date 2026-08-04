@@ -67,8 +67,10 @@ const InstallPrayerTimeWidgetRequestHandler = {
                 "widgets.nextPrayerTime.minuteUnit",
               ),
             },
-            content: {
-              nextPrayerName: nextPrayerTime.name,
+            data: {
+              nextPrayerName: helperFunctions.extractPhonemeText(
+                nextPrayerTime.name,
+              ),
               nextPrayerTime: nextPrayerTime.time,
               mosqueName,
             },
@@ -172,11 +174,13 @@ const UpdatePrayerTimeAPLEventHandler = {
 
     const currentTime = Date.now();
 
-    if (currentTime >= nextUpdateTime) {
+    if (!nextUpdateTime || currentTime >= nextUpdateTime) {
       return InstallPrayerTimeWidgetRequestHandler.handle(handlerInput);
     }
 
-    return handlerInput.responseBuilder.getResponse();
+    return handlerInput.responseBuilder
+      .withShouldEndSession(true)
+      .getResponse();
   },
 };
 

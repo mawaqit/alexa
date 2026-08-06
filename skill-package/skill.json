@@ -224,7 +224,7 @@
     "apis": {
       "custom": {
         "endpoint": {
-          "uri": "arn:aws:lambda:eu-west-3:275854128200:function:alexa-dev-indexHandler:dev"
+          "uri": "arn:aws:lambda:eu-west-3:275854128200:function:alexa-prod-indexHandler:live"
         },
         "interfaces": [
           {

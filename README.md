@@ -158,4 +158,4 @@ You can work on the entire codebase — handlers, prayer-time logic, routines, p
 
 Deploying the Lambda services, configuring AWS / Alexa credentials, managing secrets, and updating the live interaction model are handled internally by the MAWAQIT team and are **not** required to contribute code or tests.
 
-➡️ **MAWAQIT team:** the full deployment and infrastructure runbook lives in our internal Notion — [Click here](https://app.notion.com/p/mawaqit/Alexa-Devs-How-to-deploy-3a331aaf3291809f965ceda28dd76c7c)
+➡️ **MAWAQIT team:** see the [internal deployment and infrastructure runbook](https://app.notion.com/p/mawaqit/Alexa-Devs-How-to-deploy-3a331aaf3291809f965ceda28dd76c7c)

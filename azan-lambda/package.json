@@ -1,20 +1,15 @@
 {
-  "name": "mawaqitazan",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "mawaqit-azan-lambda",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.34.0",
     "@aws-sdk/client-dynamodb": "^3.971.0",
     "@aws-sdk/client-ssm": "^3.971.0",
     "@aws-sdk/lib-dynamodb": "^3.971.0",
     "axios": "^1.18.0",
-    "uuid": "^14.0.0",
     "qs": "^6.15.2"
   }
 }

@@ -1,0 +1,7 @@
+# Without set -e the hook would exit with the status of the last command only,
+# so a failing lint followed by a passing suite would let the push through.
+set -e
+
+pnpm lint
+pnpm typecheck
+pnpm test

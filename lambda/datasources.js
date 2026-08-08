@@ -93,9 +93,17 @@ const getDataSourceForPrayerTime = async (handlerInput, text) => {
   };
 };
 
+/**
+ * Data source for mosqueInfoApl.json.
+ *
+ * `prayers` is the id-keyed board from helperFunctions.buildPrayerBoard, so the
+ * APL document addresses each prayer by name (`prayers.fajr`, `prayers.jumua`…)
+ * instead of by index. `nextPrayer` is a convenience alias to the entry flagged
+ * as upcoming, used by the compact layouts that only show one prayer.
+ */
 const getDataSourceforMosqueInfo = async (
   handlerInput,
-  prayerTimes,
+  prayers,
   mosqueInfo,
 ) => {
   const requestAttributes =
@@ -104,17 +112,22 @@ const getDataSourceforMosqueInfo = async (
   return {
     data: {
       properties: {
-        prayerTimes: prayerTimes,
+        prayers: prayers,
+        nextPrayer:
+          Object.values(prayers).find((prayer) => prayer && prayer.isNext) ||
+          null,
         mosqueTitle: mosqueInfo.mosqueName,
         mosqueDescription: mosqueInfo.mosqueDescription
           ? mosqueInfo.mosqueDescription
           : "",
-        mosqueImage: mosqueInfo.mosqueImage
-          ? mosqueInfo.mosqueImage
-          : "https://cdn.mawaqit.net/images/backend/mosque_default_picture.png",
+        mosquePicture: mosqueInfo.mosqueImage || null,
+        // Already localized by the handler (same string Alexa speaks), because
+        // APL cannot run Intl.NumberFormat to pick the unit and separator.
+        mosqueDistance: mosqueInfo.mosqueDistance || "",
+        nextLabel: requestAttributes.t("nextPrayerLabel"),
         skillName: process.env.SKILL_NAME,
         skillLogoUrl: logoUrl,
-        backgroundImageUrl: backgroundImage,
+        layoutDirection: requestAttributes.t("layoutDirection"),
       },
     },
   };

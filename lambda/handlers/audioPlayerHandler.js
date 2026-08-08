@@ -13,6 +13,7 @@ const AudioPlayerEventHandler = {
     if (audioPlayerEvent === "AudioPlayer.PlaybackFinished") {
       return handlerInput.responseBuilder
         .addAudioPlayerStopDirective()
+        .withShouldEndSession(true)
         .getResponse();
     }
     return handlerInput.responseBuilder.getResponse();

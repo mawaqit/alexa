@@ -1,4 +1,7 @@
 **/node_modules
 
-ask-resources.json
-.ask
+# Serverless Framework build/deploy artifacts (esbuild bundles, zips, state)
+**/.serverless
+
+# Jest coverage output (`jest --coverage`)
+coverage

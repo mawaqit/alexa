@@ -11,11 +11,12 @@ const {
   getDataSourceForDeleteRoutineList,
 } = require("../datasources.js");
 const listApl = require("../aplDocuments/mosqueListApl.json");
-const { v4: uuidv4 } = require("uuid");
+const crypto = require("crypto");
+const { randomUUID: uuidv4 } = crypto;
 const adhaanTasks = [
   "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan",
 ];
-const { DeleteUserInfo } = require("./dynamoDbHandler.js");
+const { DeleteUserInfo, GetUserBySupportId } = require("./dynamoDbHandler.js");
 const ALL_PRAYER_INDEX = 8;
 
 const DeleteRoutineStartedHandler = {
@@ -51,7 +52,7 @@ const DeleteRoutineStartedHandler = {
 
       let routineList = routinePrayers
         .map(({ name, time, namePhoneme }) => ({
-          primaryText: `${name} ${time}`,
+          primaryText: `${name}`,
           name,
           time,
           namePhoneme: namePhoneme || name,
@@ -62,40 +63,30 @@ const DeleteRoutineStartedHandler = {
           return timeA.diff(timeB);
         });
       if (routineList.length === 1) {
-        return handlerInput.responseBuilder
-          .speak(
-            requestAttributes.t(
-              "deleteRoutineConfirmPrompt",
-              routineList[0].namePhoneme,
-            ),
-          )
-          .addDirective({
-            type: "Dialog.ConfirmSlot",
-            slotToConfirm: "prayerIndex",
-            updatedIntent: {
-              name: "DeleteRoutineIntent",
-              confirmationStatus: "NONE",
-              slots: {
-                prayerName: {
-                  name: "prayerName",
-                  confirmationStatus: "NONE",
-                },
-                prayerIndex: {
-                  name: "prayerIndex",
-                  value: String(routinePrayers.length),
-                  confirmationStatus: "NONE",
-                },
-              },
-            },
-          })
-          .withShouldEndSession(false)
+        const routineName = routineList[0].name;
+        const deleted = await helperFunctions.deleteRoutine(
+          handlerInput,
+          routineName,
+        );
+        let speakOutput = requestAttributes.t("routineDeletedPrompt");
+        if (deleted) {
+          return responseBuilder
+            .speak(
+              speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
+            )
+            .withShouldEndSession(false)
+            .getResponse();
+        }
+        return responseBuilder
+          .speak(requestAttributes.t("deleteRoutineErrorPrompt"))
+          .withShouldEndSession(true)
           .getResponse();
       }
       routineList = [helperFunctions.ALL_PRAYERS(handlerInput), ...routineList];
       let speakOutput = requestAttributes.t(
         "deleteRoutinePrompt",
         routineList
-          .map((r, index) => `${index + 1}. ${r.namePhoneme} ${r.time}`)
+          .map((r, index) => `${index + 1}. ${r.namePhoneme}`)
           .join(", "),
       );
       // Create APL if supported
@@ -206,72 +197,25 @@ const DeleteRoutinePrayerIndexHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
-      // Slot is present, check confirmation
-      const prayerIndexSlotObj =
-        requestEnvelope.request.intent.slots.prayerIndex;
-      const confirmationStatus = prayerIndexSlotObj.confirmationStatus;
+      // Slot is present, delete directly
       const selectedPrayer = routinePrayers[prayerIndex - 1];
       console.log("Selected Prayer: ", selectedPrayer);
-      if (confirmationStatus === "DENIED") {
+      const routineName = selectedPrayer.name; // or resolved name
+      const deleted = await helperFunctions.deleteRoutine(
+        handlerInput,
+        routineName,
+      );
+      let speakOutput = requestAttributes.t("routineDeletedPrompt");
+      if (routineName === requestAttributes.t("allPrayers")) {
+        speakOutput = requestAttributes.t("routinesDeletedPrompt");
+      }
+      if (deleted) {
         return responseBuilder
           .speak(
-            requestAttributes.t("okPrompt") +
-              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+            speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
           )
           .withShouldEndSession(false)
           .getResponse();
-      }
-
-      if (confirmationStatus === "NONE") {
-        return responseBuilder
-          .speak(
-            requestAttributes.t(
-              "deleteRoutineConfirmPrompt",
-              selectedPrayer.namePhoneme || selectedPrayer.name,
-            ),
-          )
-          .addDirective({
-            type: "Dialog.ConfirmSlot",
-            slotToConfirm: "prayerIndex",
-            updatedIntent: {
-              name: "DeleteRoutineIntent",
-              confirmationStatus: "NONE",
-              slots: {
-                prayerIndex: {
-                  name: "prayerIndex",
-                  value: String(prayerIndex),
-                  confirmationStatus: "NONE",
-                },
-                prayerName: {
-                  name: "prayerName",
-                  confirmationStatus: "NONE",
-                },
-              },
-            },
-          })
-          .withShouldEndSession(false)
-          .getResponse();
-      }
-
-      // Confirmed
-      if (confirmationStatus === "CONFIRMED") {
-        const routineName = selectedPrayer.name; // or resolved name
-        const deleted = await helperFunctions.deleteRoutine(
-          handlerInput,
-          routineName,
-        );
-        let speakOutput = requestAttributes.t("routineDeletedPrompt");
-        if (routineName === requestAttributes.t("allPrayers")) {
-          speakOutput = requestAttributes.t("routinesDeletedPrompt");
-        }
-        if (deleted) {
-          return responseBuilder
-            .speak(
-              speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
-            )
-            .withShouldEndSession(false)
-            .getResponse();
-        }
       }
       return responseBuilder
         .speak(requestAttributes.t("deleteRoutineErrorPrompt")) // Reuse error or "routine not found"
@@ -359,57 +303,29 @@ const DeleteRoutinePrayerNameHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
-      // Slot is present, check confirmation
-      const prayerNameSlotObj = requestEnvelope.request.intent.slots.prayerName;
-      const confirmationStatus = prayerNameSlotObj.confirmationStatus;
+      // Slot is present, delete directly
       const selectedPrayer =
         prayerNameResolvedId === String(ALL_PRAYER_INDEX)
           ? helperFunctions.ALL_PRAYERS(handlerInput)
           : routinePrayers[prayerIndex];
       console.log("Selected Prayer: ", selectedPrayer);
-      if (confirmationStatus === "DENIED") {
+      const routineName = selectedPrayer.name; // or resolved name
+      const deleted = await helperFunctions.deleteRoutine(
+        handlerInput,
+        routineName,
+      );
+      let speakOutput = requestAttributes.t("routineDeletedPrompt");
+      if (routineName === requestAttributes.t("allPrayers")) {
+        speakOutput = requestAttributes.t("routinesDeletedPrompt");
+      }
+
+      if (deleted) {
         return responseBuilder
           .speak(
-            requestAttributes.t("okPrompt") +
-              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+            speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
           )
           .withShouldEndSession(false)
           .getResponse();
-      }
-      const currentIntent = handlerInput.requestEnvelope.request.intent;
-      if (confirmationStatus === "NONE") {
-        return responseBuilder
-          .speak(
-            requestAttributes.t(
-              "deleteRoutineConfirmPrompt",
-              selectedPrayer.namePhoneme || selectedPrayer.name,
-            ),
-          )
-          .addConfirmSlotDirective("prayerName", currentIntent)
-          .withShouldEndSession(false)
-          .getResponse();
-      }
-
-      // Confirmed
-      if (confirmationStatus === "CONFIRMED") {
-        const routineName = selectedPrayer.name; // or resolved name
-        const deleted = await helperFunctions.deleteRoutine(
-          handlerInput,
-          routineName,
-        );
-        let speakOutput = requestAttributes.t("routineDeletedPrompt");
-        if (routineName === requestAttributes.t("allPrayers")) {
-          speakOutput = requestAttributes.t("routinesDeletedPrompt");
-        }
-
-        if (deleted) {
-          return responseBuilder
-            .speak(
-              speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
-            )
-            .withShouldEndSession(false)
-            .getResponse();
-        }
       }
       return responseBuilder
         .speak(requestAttributes.t("deleteRoutineErrorPrompt")) // Reuse error or "routine not found"
@@ -471,6 +387,18 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const mosqueList = sessionAttributes.mosqueList;
+    // Alexa routes SelectMosqueIntent on the utterance alone, so a bare "two"
+    // can arrive without the list ever having been read out, and a recycled
+    // session drops it. Indexing undefined here throws before the try block
+    // below, surfacing as the global error prompt. Re-offer the list instead.
+    // (MosqueYesIntentHandler guards the same thing.)
+    if (!Array.isArray(mosqueList) || mosqueList.length === 0) {
+      console.log("SelectMosqueIntent without a mosque list in session.");
+      return await helperFunctions.getListOfMosque(
+        handlerInput,
+        requestAttributes.t("unableToFindMosquePrompt"),
+      );
+    }
     const selectedMosqueDetails = mosqueList[parseInt(selectedMosque) - 1];
     if (!selectedMosqueDetails) {
       return await helperFunctions.createResponseDirectiveForMosqueList(
@@ -487,8 +415,8 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       selectedMosqueDetails.localisation,
       locale,
     );
-    selectedMosqueDetails.proximity =
-      parseInt(selectedMosqueDetails.proximity) / 1000;
+    // Keep the raw distance in meters; it is localized at display time.
+    selectedMosqueDetails.proximity = parseInt(selectedMosqueDetails.proximity);
     console.log("Selected Mosque Details: ", selectedMosqueDetails);
     sessionAttributes.persistentAttributes = selectedMosqueDetails;
     handlerInput.attributesManager.setPersistentAttributes(
@@ -579,17 +507,35 @@ const NextPrayerTimeIntentHandler = {
       );
       const now = moment(currentDateTime);
       const currentMoment = moment(now.format("YYYY-MM-DDTHH:mm"));
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
       console.log("Now: ", JSON.stringify(now));
       console.log("Prayer Name From Data: ", prayerNameFromData);
       if (parseInt(prayerNameResolvedId) < 5) {
-        const timeForNextPrayer =
-          mosqueTimesData.times[parseInt(prayerNameResolvedId)];
+        const prayerIndex = parseInt(prayerNameResolvedId);
+        let timeForNextPrayer = mosqueTimesData.times[prayerIndex];
+        // When today's prayer has already passed, the next occurrence is
+        // tomorrow — and tomorrow's actual time can differ from today's, so we
+        // fetch it from the calendar instead of reusing today's time.
+        if (helperFunctions.hasPrayerTimePassed(timeForNextPrayer, now)) {
+          try {
+            const tomorrowTimes = await helperFunctions.getTomorrowPrayerTimes(
+              persistentAttributes.uuid,
+              userTimeZone,
+            );
+            if (tomorrowTimes?.times?.[prayerIndex]) {
+              timeForNextPrayer = tomorrowTimes.times[prayerIndex];
+            }
+          } catch (error) {
+            console.log("Error fetching tomorrow's prayer times: ", error);
+          }
+        }
         return helperFunctions.getPrayerTimeForSpecificPrayer(
           handlerInput,
           timeForNextPrayer,
           currentMoment,
           now,
           prayerNameFromData,
+          userTimeZone,
         );
       }
       switch (parseInt(prayerNameResolvedId)) {
@@ -603,6 +549,7 @@ const NextPrayerTimeIntentHandler = {
           // Find the first non-null Jumu'ah time
           const firstNonNullJumua = jumuaTimes
             .filter((time) => time !== null && time !== undefined)
+            .map((time) => helperFunctions.formatTime(time, locale))
             .join(", ");
           if (firstNonNullJumua) {
             helperFunctions.checkForCharacterDisplay(
@@ -638,6 +585,7 @@ const NextPrayerTimeIntentHandler = {
           // Find the first non-null Eid time
           const firstNonNullEid = eidTimes
             .filter((time) => time !== null && time !== undefined)
+            .map((time) => helperFunctions.formatTime(time, locale))
             .join(", ");
           if (firstNonNullEid) {
             helperFunctions.checkForCharacterDisplay(
@@ -665,14 +613,30 @@ const NextPrayerTimeIntentHandler = {
             .getResponse();
         }
         case 7: {
-          const firstNonNullShuruq = mosqueTimesData.shuruq;
+          let firstNonNullShuruq = mosqueTimesData.shuruq;
           if (firstNonNullShuruq) {
+            // Shuruq for today has passed → use tomorrow's shuruq time.
+            if (helperFunctions.hasPrayerTimePassed(firstNonNullShuruq, now)) {
+              try {
+                const tomorrowTimes =
+                  await helperFunctions.getTomorrowPrayerTimes(
+                    persistentAttributes.uuid,
+                    userTimeZone,
+                  );
+                if (tomorrowTimes?.shuruq) {
+                  firstNonNullShuruq = tomorrowTimes.shuruq;
+                }
+              } catch (error) {
+                console.log("Error fetching tomorrow's prayer times: ", error);
+              }
+            }
             return helperFunctions.getPrayerTimeForSpecificPrayer(
               handlerInput,
               firstNonNullShuruq,
               currentMoment,
               now,
               prayerNameFromData,
+              userTimeZone,
             );
           }
           return handlerInput.responseBuilder
@@ -724,21 +688,24 @@ const NextPrayerTimeIntentWithoutNameHandler = {
       return await helperFunctions.checkForPersistenceData(handlerInput);
     }
     try {
-      const prayerTimeDetails = helperFunctions.getNextPrayerTime(
+      const prayerTimeDetails = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
         await helperFunctions.getUserTimezone(handlerInput),
         requestAttributes.t("prayerNames"),
+        [],
+        persistentAttributes.uuid,
       );
       helperFunctions.checkForCharacterDisplay(
         handlerInput,
         prayerTimeDetails.time,
       );
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
       const speakOutput =
         requestAttributes.t(
           "nextPrayerWithoutMosquePrompt",
           prayerTimeDetails.name,
-          prayerTimeDetails.time,
+          helperFunctions.formatTime(prayerTimeDetails.time, locale),
           prayerTimeDetails.diffInMinutesPrompt,
         ) + requestAttributes.t("doYouNeedAnythingElsePrompt");
       return handlerInput.responseBuilder
@@ -808,14 +775,31 @@ const NextIqamaTimeIntentHandler = {
       );
       const date = currentDateTime.getDate();
       const month = currentDateTime.getMonth();
-      const iqamaTimes = iqamaCalendar[month][String(date)];
+      const iqamaTimes = iqamaCalendar?.[month]?.[String(date)];
       console.log("Iqama Times: ", iqamaTimes);
-      const nextIqamaTime = helperFunctions.getNextPrayerTime(
+      // Without today's row, getNextPrayerTime falls back to its `iqamaTime = []`
+      // default and resolves every slot to the adhan itself — which would be
+      // announced to the user as the iqama. Saying we don't have the times is
+      // correct; sending someone to the mosque at the call to prayer is not.
+      if (!Array.isArray(iqamaTimes)) {
+        console.log(
+          "No iqama row for today; refusing to fall back to adhan times.",
+        );
+        return handlerInput.responseBuilder
+          .speak(
+            requestAttributes.t("iqamaNotEnabledPrompt") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      const nextIqamaTime = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
         userTimeZone,
         prayerNames,
         iqamaTimes,
+        persistentAttributes.uuid,
       );
       console.log("Next Iqama Time: ", nextIqamaTime);
       helperFunctions.checkForCharacterDisplay(
@@ -931,25 +915,35 @@ const MosqueInfoIntentHandler = {
         jumua3,
         image,
       } = persistentAttributes;
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
+      const distanceUnits =
+        await helperFunctions.getUserDistanceUnits(handlerInput);
+      const distanceLabel = helperFunctions.formatDistance(
+        proximity,
+        locale,
+        distanceUnits,
+      );
       const mosqueInfo = {
         mosqueName: primaryText,
         mosqueDescription: localisation,
         mosqueImage: image,
+        mosqueDistance: distanceLabel,
       };
       // Extract only the Jumu'ah times
       const jumuaTimes = [jumua, jumua2, jumua3];
-      const prayerNames = requestAttributes.t("prayerNames");
-      let prayerTimeApl = prayerNames.slice(0, 5).map((prayer, index) => {
-        const prayerTime = mosqueTimes.times[index];
-        return {
-          primaryText: `${prayer} ${prayerTime}`,
-        };
+      const prayers = helperFunctions.buildPrayerBoard({
+        requestAttributes,
+        locale,
+        times: mosqueTimes.times,
+        shuruq: mosqueTimes.shuruq,
+        jumuaTimes,
+        timezone: await helperFunctions.getUserTimezone(handlerInput),
       });
       let speakOutput = requestAttributes.t(
         "mosqueInfoPrompt",
         primaryText,
         localisation,
-        proximity,
+        distanceLabel,
       );
       // Find the first non-null Jumu'ah time
       const firstNonNullJumua = jumuaTimes.filter(
@@ -958,23 +952,12 @@ const MosqueInfoIntentHandler = {
       if (firstNonNullJumua.length > 0) {
         speakOutput += requestAttributes.t(
           "jummaTimePrompt",
-          firstNonNullJumua.join(", "),
+          firstNonNullJumua
+            .map((jumuaTime) => helperFunctions.formatTime(jumuaTime, locale))
+            .join(", "),
         );
-        firstNonNullJumua.forEach((jumuaTime, index) => {
-          prayerTimeApl.push({
-            primaryText: `${prayerNames[5]} ${index + 1} ${jumuaTime}`,
-          });
-        });
       } else {
         speakOutput += requestAttributes.t("noJumuaTime");
-        prayerTimeApl.push({
-          primaryText: `${prayerNames[5]}  ${requestAttributes.t("none")}`,
-        });
-      }
-      if (mosqueTimes.shuruq) {
-        prayerTimeApl.push({
-          primaryText: `${prayerNames[7]}  ${mosqueTimes.shuruq}`,
-        });
       }
       if (
         Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
@@ -983,7 +966,7 @@ const MosqueInfoIntentHandler = {
       ) {
         const dataSource = await getDataSourceforMosqueInfo(
           handlerInput,
-          prayerTimeApl,
+          prayers,
           mosqueInfo,
         );
         console.log("Data Source: ", JSON.stringify(dataSource));
@@ -1050,8 +1033,25 @@ const AllIqamaTimeIntentHandler = {
       );
       const date = currentDateTime.getDate();
       const month = currentDateTime.getMonth();
-      const iqamaTimes = iqamaCalendar[month][String(date)];
+      const iqamaTimes = iqamaCalendar?.[month]?.[String(date)];
       console.log("Iqama Times: ", iqamaTimes);
+      // Without today's row, getNextPrayerTime falls back to its `iqamaTime = []`
+      // default and resolves every slot to the adhan itself — which would be
+      // announced to the user as the iqama. Saying we don't have the times is
+      // correct; sending someone to the mosque at the call to prayer is not.
+      if (!Array.isArray(iqamaTimes)) {
+        console.log(
+          "No iqama row for today; refusing to fall back to adhan times.",
+        );
+        return handlerInput.responseBuilder
+          .speak(
+            requestAttributes.t("iqamaNotEnabledPrompt") +
+              requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+      const locale = Alexa.getLocale(handlerInput.requestEnvelope);
       let allIqamaTimes = "";
       prayerNames.forEach((prayer, index) => {
         const iqamaTime = iqamaTimes[index];
@@ -1063,12 +1063,16 @@ const AllIqamaTimeIntentHandler = {
             moment(currentDateTime),
             prayer,
             iqamaTime,
+            userTimeZone,
           );
           console.log("Iqama Details for %s: ", prayer, iqamaDetails);
           allIqamaTimes += requestAttributes.t(
             "allIqamaTimesPrompt",
             prayer,
-            iqamaDetails.time.format("HH:mm"),
+            helperFunctions.formatTime(
+              iqamaDetails.time.format("HH:mm"),
+              locale,
+            ),
           );
         }
       });
@@ -1146,20 +1150,43 @@ const DeleteDataIntentHandler = {
     );
   },
   async handle(handlerInput) {
-    const requestAttributes =
-      handlerInput.attributesManager.getRequestAttributes();
-    const userId = Alexa.getUserId(handlerInput.requestEnvelope);
+    const { requestEnvelope, responseBuilder, attributesManager } =
+      handlerInput;
+    const requestAttributes = attributesManager.getRequestAttributes();
+    const intent = requestEnvelope.request.intent;
+    const confirmationStatus = intent ? intent.confirmationStatus : "NONE";
+
+    if (confirmationStatus === "DENIED") {
+      return responseBuilder
+        .speak(
+          requestAttributes.t("deleteDataDeniedPrompt") +
+            requestAttributes.t("doYouNeedAnythingElsePrompt"),
+        )
+        .withShouldEndSession(false)
+        .getResponse();
+    }
+
+    if (confirmationStatus !== "CONFIRMED") {
+      const confirmPrompt = requestAttributes.t("deleteDataConfirmPrompt");
+      return responseBuilder
+        .speak(confirmPrompt)
+        .reprompt(confirmPrompt)
+        .addConfirmIntentDirective()
+        .getResponse();
+    }
+
+    const userId = Alexa.getUserId(requestEnvelope);
     console.log(`Skill was disabled for user: ${userId}`);
     try {
       await DeleteUserInfo(userId);
-      await handlerInput.attributesManager.deletePersistentAttributes();
-      return handlerInput.responseBuilder
+      await attributesManager.deletePersistentAttributes();
+      return responseBuilder
         .speak(requestAttributes.t("deleteDataPrompt"))
         .withShouldEndSession(true)
         .getResponse();
     } catch (error) {
       console.error(`Error while deleting data: ${error}`);
-      return handlerInput.responseBuilder
+      return responseBuilder
         .speak(requestAttributes.t("errorDeleteDataPrompt"))
         .withShouldEndSession(true)
         .getResponse();
@@ -1372,11 +1399,13 @@ const PlayAdhanTaskHandler = {
       }
       let audioName = "Adhaan";
       const prayerNames = requestAttributes.t("prayerNames");
-      const prayerTimeDetails = helperFunctions.getNextPrayerTime(
+      const prayerTimeDetails = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
         userTimeZone,
         prayerNames,
+        [],
+        persistentAttributes.uuid,
       );
       const isFajrPrayer = prayerTimeDetails.name === prayerNames[0];
       let audioUrl = isFajrPrayer
@@ -1462,13 +1491,13 @@ const CreateRoutineStartedHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
-      const prayerNameTimePrompt = prayerNameDetails.map(
-        (prayer, index) => `${index + 1}. ${prayer.namePhoneme} ${prayer.time}`,
+      const prayerNameChoices = prayerNameDetails.map(
+        (prayer, index) => `${index + 1}. ${prayer.namePhoneme}`,
       );
 
       let speechPrompt = requestAttributes.t(
         "prayerNamePrompt",
-        prayerNameTimePrompt.join(", "),
+        prayerNameChoices.join(", "),
       );
       if (
         Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
@@ -1514,17 +1543,14 @@ const CreateRoutineStartedHandler = {
   },
 };
 
-const CreateRoutineIntentHandler = {
+const CreateRoutinePrayerIndexHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
       Alexa.getIntentName(handlerInput.requestEnvelope) ===
         "CreateRoutineIntent" &&
-      (Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex") ||
-        helperFunctions.getResolvedId(
-          handlerInput.requestEnvelope,
-          "prayerName",
-        ))
+      Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex") &&
+      !helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName")
     );
   },
   async handle(handlerInput) {
@@ -1534,10 +1560,6 @@ const CreateRoutineIntentHandler = {
       await helperFunctions.validateUserAccountStatus(handlerInput);
     if (validateUserAccountStatus) return validateUserAccountStatus;
     try {
-      const prayerNameResolvedId = helperFunctions.getResolvedId(
-        handlerInput.requestEnvelope,
-        "prayerName",
-      );
       let prayerIndex =
         parseInt(
           Alexa.getSlotValue(handlerInput.requestEnvelope, "prayerIndex"),
@@ -1553,8 +1575,11 @@ const CreateRoutineIntentHandler = {
         (await helperFunctions.generatePrayerNameDetailsForRoutine(
           handlerInput,
         ));
-      if (prayerNameResolvedId !== undefined && prayerNameResolvedId !== null) {
-        prayerIndex = parseInt(prayerNameResolvedId) + 1; // Adjusting index to match the slot value
+      if (prayerNameDetails.length === 0) {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("allRoutinesEnabled"))
+          .withShouldEndSession(false)
+          .getResponse();
       }
       if (
         (prayerIndex < 1 || prayerIndex > prayerNameDetails.length) &&
@@ -1600,27 +1625,101 @@ const CreateRoutineIntentHandler = {
       }
 
       console.log("Selected Prayer: ", selectedPrayer);
-      // await helperFunctions.saveRequestedRoutinePrayer(
-      //   handlerInput,
-      //   selectedPrayer
-      // );
-      // const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-      // const automationDirective = helperFunctions.offerAutomation(
-      //   userTimeZone,
-      //   selectedPrayer.time,
-      //   selectedPrayer.name,
-      //   selectedPrayer.namePhoneme === prayerNames[5]
-      // );
-      // return handlerInput.responseBuilder
-      //   .addDirective(automationDirective)
-      //   .getResponse();
       return await helperFunctions.logRoutineCreation(
         handlerInput,
         selectedPrayer,
         prayerNameDetails,
       );
     } catch (error) {
-      console.log("Error in CreateRoutineIntentHandler:", error);
+      console.log("Error in CreateRoutinePrayerIndexHandler:", error);
+      if (error?.message === "Unable to fetch user timezone") {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("timezoneErrorPrompt"))
+          .withShouldEndSession(true)
+          .getResponse();
+      }
+      return handlerInput.responseBuilder
+        .speak(requestAttributes.t("routineErrorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  },
+};
+
+const CreateRoutinePrayerNameHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) ===
+        "CreateRoutineIntent" &&
+      helperFunctions.getResolvedId(handlerInput.requestEnvelope, "prayerName")
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    const validateUserAccountStatus =
+      await helperFunctions.validateUserAccountStatus(handlerInput);
+    if (validateUserAccountStatus) return validateUserAccountStatus;
+    try {
+      const sessionAttributes =
+        handlerInput.attributesManager.getSessionAttributes();
+      const { persistentAttributes } = sessionAttributes;
+      if (!persistentAttributes?.uuid) {
+        return await helperFunctions.checkForPersistenceData(handlerInput);
+      }
+      let prayerNameDetails =
+        sessionAttributes.prayerNameDetails ||
+        (await helperFunctions.generatePrayerNameDetailsForRoutine(
+          handlerInput,
+        ));
+      if (prayerNameDetails.length === 0) {
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("allRoutinesEnabled"))
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+
+      const prayerNameResolvedId = helperFunctions.getResolvedId(
+        handlerInput.requestEnvelope,
+        "prayerName",
+      );
+
+      let selectedPrayer;
+      if (prayerNameResolvedId === String(ALL_PRAYER_INDEX)) {
+        const allPrayersName = requestAttributes.t("allPrayers");
+        selectedPrayer = prayerNameDetails.find(
+          (prayer) => prayer.name === allPrayersName,
+        );
+      } else {
+        const canonicalName =
+          helperFunctions.CANONICAL_PRAYER_NAMES[
+            parseInt(prayerNameResolvedId)
+          ];
+        selectedPrayer = prayerNameDetails.find(
+          (prayer) => prayer.canonicalName === canonicalName,
+        );
+      }
+
+      if (!selectedPrayer) {
+        console.log(
+          "Selected prayer not found or already enabled for resolved ID: ",
+          prayerNameResolvedId,
+        );
+        return handlerInput.responseBuilder
+          .speak(requestAttributes.t("routineAlreadyEnabled"))
+          .withShouldEndSession(false)
+          .getResponse();
+      }
+
+      console.log("Selected Prayer: ", selectedPrayer);
+      return await helperFunctions.logRoutineCreation(
+        handlerInput,
+        selectedPrayer,
+        prayerNameDetails,
+      );
+    } catch (error) {
+      console.log("Error in CreateRoutinePrayerNameHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1817,8 +1916,10 @@ const MosqueYesIntentHandler = {
         selectedMosqueDetails.localisation,
         locale,
       );
-      selectedMosqueDetails.proximity =
-        parseInt(selectedMosqueDetails.proximity) / 1000;
+      // Keep the raw distance in meters; it is localized at display time.
+      selectedMosqueDetails.proximity = parseInt(
+        selectedMosqueDetails.proximity,
+      );
       console.log("Selected Mosque Details: ", selectedMosqueDetails);
       sessionAttributes.persistentAttributes = selectedMosqueDetails;
       handlerInput.attributesManager.setPersistentAttributes(
@@ -1886,6 +1987,85 @@ const MosqueNoIntentHandler = {
   },
 };
 
+const UserIdIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === "IntentRequest" &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === "UserIdIntent"
+    );
+  },
+  async handle(handlerInput) {
+    const requestAttributes =
+      handlerInput.attributesManager.getRequestAttributes();
+    const responseBuilder = handlerInput.responseBuilder;
+
+    try {
+      const attributesManager = handlerInput.attributesManager;
+      const persistentAttributes =
+        (await attributesManager.getPersistentAttributes()) || {};
+      const userId = Alexa.getUserId(handlerInput.requestEnvelope);
+
+      let supportId = persistentAttributes.supportId;
+
+      if (!supportId) {
+        let attempt = 0;
+        let isUnique = false;
+
+        while (!isUnique && attempt < 100) {
+          const candidateCode = helperFunctions.generateSupportId(
+            userId,
+            attempt,
+          );
+          const existingUser = await GetUserBySupportId(candidateCode);
+          if (!existingUser) {
+            supportId = candidateCode;
+            isUnique = true;
+          } else if (existingUser.id === userId) {
+            supportId = candidateCode;
+            isUnique = true;
+          } else {
+            console.log(
+              `[UserIdIntentHandler] Collision detected for code: ${candidateCode}. Retrying...`,
+            );
+            attempt++;
+          }
+        }
+
+        if (!supportId) {
+          throw new Error(
+            "Unable to generate unique supportId after 100 attempts",
+          );
+        }
+
+        // Save to persistent attributes
+        persistentAttributes.supportId = supportId;
+        attributesManager.setPersistentAttributes(persistentAttributes);
+        await attributesManager.savePersistentAttributes();
+      }
+
+      const parts = supportId.split("-");
+      // Convert "231" -> "2 3 1" for speech alias
+      const part1Spoken = parts[0].split("").join(" ");
+      const part2Spoken = parts[1].split("").join(" ");
+
+      const codeSsml = `<sub alias="${part1Spoken}, ${part2Spoken}">${supportId}</sub>`;
+
+      const speakOutput = requestAttributes.t("userIdPrompt", codeSsml);
+
+      return responseBuilder
+        .speak(speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"))
+        .withShouldEndSession(false)
+        .getResponse();
+    } catch (error) {
+      console.error("Error in UserIdIntentHandler: ", error);
+      return responseBuilder
+        .speak(requestAttributes.t("errorPrompt"))
+        .withShouldEndSession(true)
+        .getResponse();
+    }
+  },
+};
+
 module.exports = {
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
@@ -1902,7 +2082,8 @@ module.exports = {
   FavoriteAdhaanReciterIntentHandler,
   HadithIntentHandler,
   CreateRoutineStartedHandler,
-  CreateRoutineIntentHandler,
+  CreateRoutinePrayerIndexHandler,
+  CreateRoutinePrayerNameHandler,
   SessionResumedRequestHandler,
   YesIntentHandler,
   NoIntentHandler,
@@ -1911,4 +2092,5 @@ module.exports = {
   DeleteRoutinePrayerNameHandler,
   MosqueYesIntentHandler,
   MosqueNoIntentHandler,
+  UserIdIntentHandler,
 };

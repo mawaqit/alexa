@@ -7,7 +7,7 @@ const InstallPrayerTimeWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesInstalled" &&
-      helperFunctions.getPackageId(handlerInput) === "PrayerTime"
+      helperFunctions.getPackageId(handlerInput) === "NextPrayerTime"
     );
   },
   async handle(handlerInput) {
@@ -27,19 +27,15 @@ const InstallPrayerTimeWidgetRequestHandler = {
         userTimeZone,
       );
       const prayerNames = requestAttributes.t("prayerNames");
-      const nextPrayerTime = helperFunctions.getNextPrayerTime(
+      const nextPrayerTime = await helperFunctions.getNextPrayerTime(
         requestAttributes,
         mosqueTimes.times,
         userTimeZone,
         prayerNames,
-      );
-      const prayerTime = requestAttributes.t(
-        "nextPrayerWithoutMosqueAndTimePrompt",
-        nextPrayerTime.name,
-        nextPrayerTime.time,
+        [],
+        persistentAttributes.uuid,
       );
       const mosqueName = persistentAttributes.primaryText;
-      const title = requestAttributes.t("skillName");
       const currentDateTime = new Date(
         new Date().toLocaleString("en-US", { timeZone: userTimeZone }),
       );
@@ -59,10 +55,25 @@ const InstallPrayerTimeWidgetRequestHandler = {
           namespace: "nextPrayerTimeWidget",
           key: "nextPrayerData",
           content: {
-            title,
-            prayerTime,
-            nextPrayerTime,
-            mosqueName,
+            labels: {
+              title: requestAttributes.t("widgets.nextPrayerTime.title"),
+              at: requestAttributes.t("widgets.nextPrayerTime.at"),
+              remaining: requestAttributes.t(
+                "widgets.nextPrayerTime.remaining",
+              ),
+              itsTime: requestAttributes.t("widgets.nextPrayerTime.itsTime"),
+              hourUnit: requestAttributes.t("widgets.nextPrayerTime.hourUnit"),
+              minuteUnit: requestAttributes.t(
+                "widgets.nextPrayerTime.minuteUnit",
+              ),
+            },
+            data: {
+              nextPrayerName: helperFunctions.extractPhonemeText(
+                nextPrayerTime.name,
+              ),
+              nextPrayerTime: nextPrayerTime.time,
+              mosqueName,
+            },
             nextUpdateTime,
             formattedNextUpdateTime,
           },
@@ -104,7 +115,7 @@ const RemovePrayerTimeWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesRemoved" &&
-      helperFunctions.getPackageId(handlerInput) === "PrayerTime"
+      helperFunctions.getPackageId(handlerInput) === "NextPrayerTime"
     );
   },
   async handle(handlerInput) {
@@ -130,7 +141,7 @@ const UpdatePrayerTimeWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UpdateRequest" &&
-      helperFunctions.getPackageId(handlerInput) === "PrayerTime"
+      helperFunctions.getPackageId(handlerInput) === "NextPrayerTime"
     );
   },
   async handle(handlerInput) {
@@ -147,7 +158,7 @@ const UpdatePrayerTimeWidgetRequestHandler = {
 
 /* *
  * Handler to process any incoming APL UserEvent that originates from a SendEvent command
- * from within the PrayerTime widget or the PrayerTime skill APL experience
+ * from within the NextPrayerTime widget or the NextPrayerTime skill APL experience
  * */
 const UpdatePrayerTimeAPLEventHandler = {
   canHandle(handlerInput) {
@@ -163,11 +174,13 @@ const UpdatePrayerTimeAPLEventHandler = {
 
     const currentTime = Date.now();
 
-    if (currentTime >= nextUpdateTime) {
+    if (!nextUpdateTime || currentTime >= nextUpdateTime) {
       return InstallPrayerTimeWidgetRequestHandler.handle(handlerInput);
     }
 
-    return handlerInput.responseBuilder.getResponse();
+    return handlerInput.responseBuilder
+      .withShouldEndSession(true)
+      .getResponse();
   },
 };
 

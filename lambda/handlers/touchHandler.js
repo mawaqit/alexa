@@ -33,7 +33,8 @@ const MosqueListTouchEventHandler = {
       selectedMosque.localisation,
       locale,
     );
-    selectedMosque.proximity = parseInt(selectedMosque.proximity) / 1000;
+    // Keep the raw distance in meters; it is localized at display time.
+    selectedMosque.proximity = parseInt(selectedMosque.proximity);
     sessionAttributes.persistentAttributes = selectedMosque;
     try {
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
@@ -187,49 +188,26 @@ const DeleteRoutineTouchEventHandler = {
     try {
       const selectedRoutine = helperFunctions.getAplArgument(handlerInput, 2);
       console.log("Selected Routine for deletion: ", selectedRoutine);
-      const sessionAttributes =
-        handlerInput.attributesManager.getSessionAttributes();
-      const { persistentAttributes } = sessionAttributes;
-      const { routinePrayers } = persistentAttributes;
-      let routinePrayerIndex = routinePrayers.findIndex(
-        (routine) =>
-          routine.name.toLowerCase() === selectedRoutine.name.toLowerCase(),
+      const routineName = selectedRoutine.name;
+      const deleted = await helperFunctions.deleteRoutine(
+        handlerInput,
+        routineName,
       );
-
-      if (
-        routinePrayerIndex === -1 &&
-        selectedRoutine.name === helperFunctions.ALL_PRAYERS(handlerInput).name
-      ) {
-        routinePrayerIndex = 0;
+      let speakOutput = requestAttributes.t("routineDeletedPrompt");
+      if (routineName === requestAttributes.t("allPrayers")) {
+        speakOutput = requestAttributes.t("routinesDeletedPrompt");
       }
-      // Trigger DeleteRoutineIntent confirmation
+      if (deleted) {
+        return handlerInput.responseBuilder
+          .speak(
+            speakOutput + requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          )
+          .withShouldEndSession(false)
+          .getResponse();
+      }
       return handlerInput.responseBuilder
-        .speak(
-          requestAttributes.t(
-            "deleteRoutineConfirmPrompt",
-            selectedRoutine.namePhoneme,
-          ),
-        )
-        .addDirective({
-          type: "Dialog.ConfirmSlot",
-          slotToConfirm: "prayerIndex",
-          updatedIntent: {
-            name: "DeleteRoutineIntent",
-            confirmationStatus: "NONE",
-            slots: {
-              prayerName: {
-                name: "prayerName",
-                confirmationStatus: "NONE",
-              },
-              prayerIndex: {
-                name: "prayerIndex",
-                value: String(routinePrayerIndex + 1),
-                confirmationStatus: "NONE",
-              },
-            },
-          },
-        })
-        .withShouldEndSession(false)
+        .speak(requestAttributes.t("deleteRoutineErrorPrompt"))
+        .withShouldEndSession(true)
         .getResponse();
     } catch (error) {
       console.log("Error in DeleteRoutineTouchEventHandler: ", error);

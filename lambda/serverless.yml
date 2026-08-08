@@ -1,6 +1,25 @@
+org: mawaqit
+app: alexa
 service: alexa
 
 frameworkVersion: ^4.0.0
+
+# Bundle each function with esbuild (Serverless v4 native) instead of zipping
+# node_modules.
+build:
+  esbuild:
+    bundle: true
+    # keep it readable, not minified: CloudWatch stack traces then point at real
+    # function names/lines, and the zip is already tiny
+    minify: false
+    # sourcemap off to avoid shipping multi-MB .map files.
+    sourcemap: false
+
+# Tests live next to the code they cover, but must never ship in the Lambda zip.
+package:
+  patterns:
+    - "!tests/**"
+    - "!**/*.test.js"
 
 custom:
   defaultStage: dev
@@ -20,7 +39,6 @@ provider:
     BASE_URL: ${file(env.json):${self:provider.stage}.baseUrl}
     PERSISTENCE_ADAPTER_TABLE_NAME: mawaqit-alexa-user-data-${self:provider.stage}
     SKILL_NAME: MAWAQIT
-    S3_BUCKET_NAME: mawaqit-alexa
     AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING: ${file(env.json):${self:provider.stage}.AWS_LAMBDA_NODEJS_DISABLE_CALLBACK_WARNING}
     AZAN_DYNAMO_DB_TABLE: mawaqit-alexa-azan-users-data-${self:provider.stage}
     UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS: ${file(env.json):${self:provider.stage}.updateIntervalHadithWidgetInHours}
@@ -33,10 +51,6 @@ provider:
     - Effect: Allow
       Action:
         - lambda:InvokeFunction
-      Resource: "*"
-    - Effect: Allow
-      Action:
-        - s3:*
       Resource: "*"
     - Effect: Allow
       Action:
@@ -93,7 +107,7 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: mawaqit-alexa-azan-dlq-${self:provider.stage}
-        MessageRetentionPeriod: 1209600  # 14 days (maximum)
+        MessageRetentionPeriod: 1209600 # 14 days (maximum)
 
     MawaqitAzanScheduleGroup:
       Type: AWS::Scheduler::ScheduleGroup

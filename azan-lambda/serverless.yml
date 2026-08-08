@@ -1,11 +1,30 @@
+org: mawaqit
+app: alexa
 service: mawaqit-alexa-azan
 
 frameworkVersion: ^4.0.0
 
+# Bundle each function with esbuild (Serverless v4 native) instead of zipping
+# node_modules.
+build:
+  esbuild:
+    bundle: true
+    # keep it readable, not minified: CloudWatch stack traces then point at real
+    # function names/lines, and the zip is already tiny
+    minify: false
+    # sourcemap off to avoid shipping multi-MB .map files.
+    sourcemap: false
+
+# Tests live next to the code they cover, but must never ship in the Lambda zip.
+package:
+  patterns:
+    - "!tests/**"
+    - "!**/*.test.js"
+
 custom:
   defaultStage: dev
   defaultRegion: eu-west-1 # Compute is always in Ireland
-  dynamoRegion: eu-west-3  # Data is always in Paris
+  dynamoRegion: eu-west-3 # Data is always in Paris
   ssmRegion: eu-west-3
 
 provider:
@@ -13,7 +32,7 @@ provider:
   runtime: nodejs22.x
   stage: ${opt:stage, self:custom.defaultStage}
   region: ${opt:region, self:custom.defaultRegion}
-  
+
   # Load env vars dynamically based on stage
   environment: ${file(env.json):${self:provider.stage}}
   # deploymentBucket:
@@ -33,9 +52,9 @@ provider:
             - arn:aws:dynamodb:${self:custom.dynamoRegion}:${aws:accountId}:table/*
         - Effect: Allow
           Action:
-            - 'ssm:GetParameter'
-            - 'ssm:GetParameters'
-          Resource: 
+            - "ssm:GetParameter"
+            - "ssm:GetParameters"
+          Resource:
             - arn:aws:ssm:${self:custom.ssmRegion}:${aws:accountId}:parameter/alexa/*
 
 functions:

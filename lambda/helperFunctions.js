@@ -1,6 +1,7 @@
 const Alexa = require("ask-sdk-core");
-const { v4: uuidv4 } = require("uuid");
-const { getMosqueList } = require("./handlers/apiHandler.js");
+const crypto = require("crypto");
+const { randomUUID: uuidv4 } = crypto;
+const { getMosqueList, getPrayerTimings } = require("./handlers/apiHandler.js");
 const { getDataSourceforMosqueList } = require("./datasources.js");
 const mosqueListApl = require("./aplDocuments/mosqueListApl.json");
 const moment = require("moment-timezone");
@@ -63,12 +64,13 @@ const createDirectivePayload = (
   };
 };
 
-const getNextPrayerTime = (
+const getNextPrayerTime = async (
   requestAttributes,
   times,
   timezone,
   prayerNames,
   iqamaTime = [],
+  mosqueUuid = null,
 ) => {
   const currentDateTime = new Date(
     new Date().toLocaleString("en-US", { timeZone: timezone }),
@@ -85,6 +87,7 @@ const getNextPrayerTime = (
       now,
       prayerNames[index],
       iqamaTime[index],
+      timezone,
     ),
   );
   console.log("Time Moments: ", timeMoments);
@@ -104,18 +107,56 @@ const getNextPrayerTime = (
     };
   } else {
     console.log("No time is greater than or equal to current time: ", times[0]);
-    const nextTime = times[0];
-    const nextTimeMoment = `${moment(now).add(1, "days").format("YYYY-MM-DD")}T${nextTime}`;
+    // All of today's slots have passed → the next one is tomorrow's first
+    // prayer (or iqama). Their actual times can differ from today's, so fetch
+    // them from the calendar when we can rather than reusing today's times.
+    const isIqama = Array.isArray(iqamaTime) && iqamaTime.length > 0;
+    const tomorrowBase = moment(now).add(1, "days");
+    let firstPrayerTime = times[0];
+    let firstIqamaTime = iqamaTime[0];
+    if (mosqueUuid) {
+      try {
+        const tomorrowTimes = await getTomorrowPrayerTimes(
+          mosqueUuid,
+          timezone,
+        );
+        if (tomorrowTimes?.times?.[0]) {
+          firstPrayerTime = tomorrowTimes.times[0];
+        }
+        if (isIqama) {
+          const tomorrowIqama = await getTomorrowIqamaTimes(
+            mosqueUuid,
+            timezone,
+          );
+          if (tomorrowIqama?.[0]) {
+            firstIqamaTime = tomorrowIqama[0];
+          }
+        }
+      } catch (error) {
+        console.log("Error fetching tomorrow's times: ", error);
+      }
+    }
+    // For iqama, resolve tomorrow's first iqama moment (absolute or offset from
+    // the prayer time); otherwise use tomorrow's first prayer time directly.
+    const nextMoment = isIqama
+      ? resolveIqamaMoment(firstIqamaTime, tomorrowBase, firstPrayerTime)
+      : generateMomentObject(firstPrayerTime, tomorrowBase);
     const currentTime = now.format("YYYY-MM-DDTHH:mm");
+    const nextTimeMoment = nextMoment.format("YYYY-MM-DDTHH:mm");
     const diffInMinutesPrompt = calculateMinutes(
       requestAttributes,
       currentTime,
       nextTimeMoment,
+      timezone,
     );
-    const diffInMinutes = getDifferenceInMinutes(currentTime, nextTimeMoment);
+    const diffInMinutes = getDifferenceInMinutes(
+      currentTime,
+      nextTimeMoment,
+      timezone,
+    );
     return {
       name: prayerNames[0],
-      time: times[0],
+      time: nextMoment.format("HH:mm"),
       diffInMinutesPrompt: diffInMinutesPrompt,
       diffInMinutes: diffInMinutes,
     };
@@ -161,18 +202,21 @@ const getPrayerTimingsForMosque = async (
   const { persistentAttributes } = attributesManager.getSessionAttributes();
   try {
     const userTimeZone = await getUserTimezone(handlerInput);
+    const locale = Alexa.getLocale(handlerInput.requestEnvelope);
     const prayerNames = requestAttributes.t("prayerNames");
-    const nextPrayerTime = getNextPrayerTime(
+    const nextPrayerTime = await getNextPrayerTime(
       requestAttributes,
       mosqueTimes.times,
       userTimeZone,
       prayerNames,
+      [],
+      persistentAttributes?.uuid,
     );
     speakOutput += requestAttributes.t(
       "nextPrayerTimePrompt",
       nextPrayerTime.name, // 1st %s: Prayer Name
       nextPrayerTime.diffInMinutesPrompt, // 2nd %s: Time Left
-      nextPrayerTime.time, // 3rd %s: Hour
+      formatTime(nextPrayerTime.time, locale), // 3rd %s: Hour
       persistentAttributes.primaryText, // 4th %s: Mosque Name
     );
 
@@ -447,7 +491,24 @@ function checkForCharacterDisplay(handlerInput, nextPrayerTime) {
   }
 }
 
-const getDifferenceInMinutes = (start, end) => {
+/**
+ * Minutes between two "YYYY-MM-DDTHH:mm" wall-clock stamps.
+ *
+ * Pass `timezone` whenever the answer is spoken to the user: wall-clock stamps
+ * carry no UTC offset, so on the two nights a year the clocks change, a plain
+ * subtraction is off by an hour — 23:30 to 06:30 across the spring jump reads
+ * as 7h when the user really waits 6h. Resolving both stamps in the mosque's
+ * zone measures the time actually elapsed.
+ *
+ * During the autumn repeat an ambiguous stamp resolves to its first (summer)
+ * occurrence, which is moment-timezone's default.
+ */
+const getDifferenceInMinutes = (start, end, timezone) => {
+  if (timezone) {
+    return moment
+      .tz(end, "YYYY-MM-DDTHH:mm", timezone)
+      .diff(moment.tz(start, "YYYY-MM-DDTHH:mm", timezone), "minutes");
+  }
   const startDate = new Date(start);
   const endDate = new Date(end);
 
@@ -455,8 +516,8 @@ const getDifferenceInMinutes = (start, end) => {
   return diffInMilliseconds / 1000 / 60;
 };
 
-function calculateMinutes(requestAttributes, start, end) {
-  const diffInMinutes = getDifferenceInMinutes(start, end);
+function calculateMinutes(requestAttributes, start, end, timezone) {
+  const diffInMinutes = getDifferenceInMinutes(start, end, timezone);
 
   let result;
 
@@ -491,6 +552,7 @@ const getPrayerTimeForSpecificPrayer = (
   currentMoment,
   now,
   prayerName,
+  timezone,
 ) => {
   try {
     const requestAttributes =
@@ -499,11 +561,19 @@ const getPrayerTimeForSpecificPrayer = (
     const timeMoment = moment(
       `${now.format("YYYY-MM-DD")}T${hours}:${minutes}`,
     );
-    const timeDifference = timeMoment.isSameOrAfter(currentMoment)
-      ? moment.duration(timeMoment.diff(currentMoment))
-      : moment.duration(timeMoment.add(1, "days").diff(currentMoment));
-    const hoursDiff = timeDifference.hours();
-    const minutesDiff = timeDifference.minutes();
+    // Already passed today → the user is asking about tomorrow's occurrence.
+    if (timeMoment.isBefore(currentMoment)) {
+      timeMoment.add(1, "days");
+    }
+    // Measured in the mosque's zone so the countdown stays true across a DST
+    // transition; see getDifferenceInMinutes.
+    const totalMinutes = getDifferenceInMinutes(
+      currentMoment.format("YYYY-MM-DDTHH:mm"),
+      timeMoment.format("YYYY-MM-DDTHH:mm"),
+      timezone,
+    );
+    const hoursDiff = Math.floor(totalMinutes / 60);
+    const minutesDiff = Math.floor(totalMinutes % 60);
     let speakOutput;
     if (minutesDiff <= 59 && hoursDiff < 1) {
       speakOutput = requestAttributes.t("minutesPrompt", minutesDiff);
@@ -514,13 +584,14 @@ const getPrayerTimeForSpecificPrayer = (
         minutesDiff,
       );
     }
+    const locale = Alexa.getLocale(handlerInput.requestEnvelope);
     checkForCharacterDisplay(handlerInput, prayerTime);
     return handlerInput.responseBuilder
       .speak(
         requestAttributes.t(
           "nextPrayerTimeWithNamePrompt",
           prayerName,
-          prayerTime,
+          formatTime(prayerTime, locale),
           speakOutput,
         ) + requestAttributes.t("doYouNeedAnythingElsePrompt"),
       )
@@ -537,12 +608,90 @@ const getPrayerTimeForSpecificPrayer = (
   }
 };
 
+/**
+ * Fetches the prayer times for the day following today (in the mosque's timezone).
+ *
+ * `mosqueTimes.times` only ever holds today's timings, so when a requested prayer
+ * has already passed we need the calendar to know the actual time for the same
+ * prayer tomorrow (prayer times drift by a minute or so from day to day).
+ *
+ * @returns {Promise<{times: string[], shuruq: string}|null>} Tomorrow's timings
+ *  aligned with `mosqueTimes.times` (index 0-4 = Fajr..Isha), plus the raw shuruq
+ *  time, or `null` when the calendar is unavailable.
+ */
+const getTomorrowPrayerTimes = async (uuid, timezone) => {
+  const data = await getPrayerTimings(uuid, timezone, false, true);
+  const calendar = data?.calendar;
+  if (!Array.isArray(calendar) || calendar.length === 0) {
+    return null;
+  }
+  const currentDateTime = new Date(
+    new Date().toLocaleString("en-US", { timeZone: timezone }),
+  );
+  const tomorrow = new Date(currentDateTime);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const timings = calendar?.[tomorrow.getMonth()]?.[String(tomorrow.getDate())];
+  if (!Array.isArray(timings)) {
+    return null;
+  }
+  // Mirror apiHandler: index 1 (shuruq) is dropped so indices 0-4 map to the
+  // five daily prayers, exactly like `mosqueTimes.times`.
+  return {
+    times: timings.filter((_, index) => index !== 1),
+    shuruq: timings[1],
+  };
+};
+
+/**
+ * Fetches the iqama timings for the day following today (in the mosque's
+ * timezone).
+ *
+ * Iqama times live in a separate `iqamaCalendar` and only today's slice is kept
+ * in the session, so we re-fetch the calendar to know tomorrow's first iqama.
+ * Each entry is either an absolute `HH:mm` time or a minutes-offset applied to
+ * the matching prayer time (see `resolveIqamaMoment`).
+ *
+ * @returns {Promise<Array|null>} Tomorrow's iqama entries aligned with the
+ *  prayer indices (index 0 = Fajr), or `null` when unavailable.
+ */
+const getTomorrowIqamaTimes = async (uuid, timezone) => {
+  const data = await getPrayerTimings(uuid, timezone, true);
+  const iqamaCalendar = data?.iqamaCalendar;
+  if (!Array.isArray(iqamaCalendar) || iqamaCalendar.length === 0) {
+    return null;
+  }
+  const currentDateTime = new Date(
+    new Date().toLocaleString("en-US", { timeZone: timezone }),
+  );
+  const tomorrow = new Date(currentDateTime);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const timings =
+    iqamaCalendar?.[tomorrow.getMonth()]?.[String(tomorrow.getDate())];
+  return Array.isArray(timings) ? timings : null;
+};
+
+/**
+ * Returns whether the given `HH:mm` prayer time has already passed relative to
+ * `now` (both interpreted in the same timezone as `now`).
+ */
+const hasPrayerTimePassed = (prayerTime, now) => {
+  const [hours, minutes] = prayerTime.split(":");
+  const prayerMoment = moment(now).set({
+    hour: parseInt(hours),
+    minute: parseInt(minutes),
+    second: 0,
+    millisecond: 0,
+  });
+  return prayerMoment.isBefore(now);
+};
+
 const generateNextPrayerTime = (
   requestAttributes,
   prayerTime,
   now,
   prayerName,
   iqamaTime,
+  timezone,
 ) => {
   const currentMoment = now.format("YYYY-MM-DDTHH:mm");
   const timeMoment = resolveIqamaMoment(iqamaTime, now, prayerTime);
@@ -553,10 +702,12 @@ const generateNextPrayerTime = (
       requestAttributes,
       currentMoment,
       timeMoment.format("YYYY-MM-DDTHH:mm"),
+      timezone,
     ),
     diffInMinutes: getDifferenceInMinutes(
       currentMoment,
       timeMoment.format("YYYY-MM-DDTHH:mm"),
+      timezone,
     ),
   };
 };
@@ -698,6 +849,7 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
   const userTimeZone = await getUserTimezone(handlerInput);
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
+  const locale = Alexa.getLocale(handlerInput.requestEnvelope);
   console.log("User Timezone: ", userTimeZone);
   const prayerNames = requestAttributes.t("prayerNames");
   let allPrayerTimes = "";
@@ -712,12 +864,14 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
         prayerTime,
         moment(currentDateTime),
         prayer,
+        undefined,
+        userTimeZone,
       );
       console.log("Prayer Details for %s: ", prayer, prayerDetails);
       allPrayerTimes += requestAttributes.t(
         "allPrayerTimesPrompt",
         prayer,
-        prayerDetails.time.format("HH:mm"),
+        formatTime(prayerDetails.time.format("HH:mm"), locale),
       );
     }
   });
@@ -787,13 +941,14 @@ const generateRenderingData = (time, prayerName) => {
 const generateOperationId = (time, prayerName) =>
   "PlayAdhaan_" + prayerName + "_" + generateRoutineTime(time);
 
-function extractPhonemeText(phonemeArray) {
-  return phonemeArray.map((phoneme) => {
-    if (typeof phoneme !== "string") return phoneme;
-    // Match text between > and <
-    const match = phoneme.match(/>([^<]+)</);
-    return match ? match[1] : phoneme;
-  });
+function extractPhonemeText(input) {
+  if (!input) return input;
+  if (Array.isArray(input)) {
+    return input.map((item) => extractPhonemeText(item));
+  }
+  if (typeof input !== "string") return input;
+  const match = input.match(/>([^<]+)</);
+  return match ? match[1] : input;
 }
 
 const generateRoutineErrorMessage = (message) => {
@@ -852,12 +1007,14 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
           prayerTime,
           moment(currentDateTime),
           prayer,
+          undefined,
+          userTimeZone,
         );
         console.log("Prayer Details for %s: ", prayer, prayerDetails);
         const time = prayerDetails.time.format("HH:mm");
         const prayerName = prayerNamesForApl[index];
         return {
-          primaryText: prayerName + " " + time,
+          primaryText: prayerName,
           time: time,
           name: prayerName,
           namePhoneme: prayer,
@@ -1111,7 +1268,7 @@ const validateUserAccountStatus = async (handlerInput) => {
   try {
     const userInfo = await authHandler.getUserInfo(accessToken);
 
-    if (!userInfo?.email || !userInfo?.user_id) {
+    if (!userInfo?.user_id) {
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("refreshTokenMissing"))
         .withLinkAccountCard()
@@ -1220,6 +1377,172 @@ const ALL_PRAYERS = (handlerInput) => {
   };
 };
 
+const METERS_PER_KM = 1000;
+const METERS_PER_MILE = 1609.344;
+const FEET_PER_METER = 3.28084;
+
+/**
+ * Resolve the user's preferred distance system ("METRIC" | "IMPERIAL") from the
+ * Alexa device settings. Falls back to a locale-based default when the setting
+ * is unavailable (en-US uses imperial, everything else metric).
+ */
+const getUserDistanceUnits = async (handlerInput) => {
+  const { serviceClientFactory, requestEnvelope } = handlerInput;
+  const deviceId = Alexa.getDeviceId(requestEnvelope);
+  try {
+    const units = await serviceClientFactory
+      .getUpsServiceClient()
+      .getSystemDistanceUnits(deviceId);
+    return units === "IMPERIAL" ? "IMPERIAL" : "METRIC";
+  } catch (error) {
+    console.log("Error in fetching distance units, using default: ", error);
+    const locale = Alexa.getLocale(requestEnvelope) || "";
+    return locale.toLowerCase() === "en-us" ? "IMPERIAL" : "METRIC";
+  }
+};
+
+/**
+ * Format a raw distance (in meters) into a fully localized string including the
+ * unit word, e.g. "9,6 kilomètres" (fr-FR), "800 meters" or "5.3 miles".
+ *
+ * Uses Intl.NumberFormat so the decimal separator (',' vs '.'), pluralization
+ * and unit translation follow the locale natively. Short distances are rendered
+ * in the smaller unit with no decimals (< 1 km -> meters, < 1 mile -> feet).
+ */
+function formatDistance(meters, locale = "en-US", units = "METRIC") {
+  const distanceInMeters = parseFloat(meters);
+  if (!Number.isFinite(distanceInMeters)) {
+    return "";
+  }
+
+  let value;
+  let unit;
+  let maximumFractionDigits;
+
+  if (units === "IMPERIAL") {
+    if (distanceInMeters < METERS_PER_MILE) {
+      value = Math.round(distanceInMeters * FEET_PER_METER);
+      unit = "foot";
+      maximumFractionDigits = 0;
+    } else {
+      value = distanceInMeters / METERS_PER_MILE;
+      unit = "mile";
+      maximumFractionDigits = 1;
+    }
+  } else if (distanceInMeters < METERS_PER_KM) {
+    value = Math.round(distanceInMeters);
+    unit = "meter";
+    maximumFractionDigits = 0;
+  } else {
+    value = distanceInMeters / METERS_PER_KM;
+    unit = "kilometer";
+    maximumFractionDigits = 1;
+  }
+
+  return new Intl.NumberFormat(locale, {
+    style: "unit",
+    unit,
+    unitDisplay: "long",
+    maximumFractionDigits,
+  }).format(value);
+}
+
+/**
+ * Format a "HH:mm" (24h) time string for the given locale, letting Intl pick the
+ * separator and 12h/24h convention natively (e.g. "9:05 PM" for en-US, "21:05"
+ * for fr-FR). Falls back to the raw input if it can't be parsed.
+ *
+ * NB: this is display/speech only — internal logic keeps the raw "HH:mm" form.
+ */
+function formatTime(time, locale = "en-US") {
+  if (typeof time !== "string") {
+    return time;
+  }
+  const match = time.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) {
+    return time;
+  }
+  const hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const date = new Date(2000, 0, 1, hours, minutes);
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+const DAILY_PRAYER_IDS = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+
+/**
+ * Id of the next of today's five daily prayers, in the mosque's timezone.
+ * Times are raw "HH:mm" strings, so a plain string compare orders them. When
+ * every slot has passed, the next one is tomorrow's Fajr.
+ */
+function getNextDailyPrayerId(times = [], timezone) {
+  const now = new Date(
+    new Date().toLocaleString("en-US", timezone ? { timeZone: timezone } : {}),
+  );
+  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+    now.getMinutes(),
+  ).padStart(2, "0")}`;
+  const index = times.findIndex(
+    (time) => typeof time === "string" && time >= currentTime,
+  );
+  return DAILY_PRAYER_IDS[index === -1 ? 0 : index];
+}
+
+/**
+ * Build the id-keyed prayer board consumed by mosqueInfoApl.json.
+ *
+ * Keying by id rather than by position lets the APL document place Fajr,
+ * Jumu'a, Shuruq… wherever each layout needs them without juggling indexes.
+ * Every entry carries both the raw "HH:mm" time (null when the mosque doesn't
+ * provide it) and a locale-formatted `timeLabel` ready to display, plus the
+ * `isNext` flag the templates use to highlight the upcoming prayer.
+ */
+function buildPrayerBoard({
+  requestAttributes,
+  locale,
+  times = [],
+  shuruq,
+  jumuaTimes = [],
+  timezone,
+}) {
+  const names = extractPhonemeText(requestAttributes.t("prayerNames"));
+  const noneLabel = requestAttributes.t("none");
+  const nextId = getNextDailyPrayerId(times, timezone);
+  const entry = (id, name, time) => ({
+    id,
+    name,
+    time: time || null,
+    timeLabel: time ? formatTime(time, locale) : noneLabel,
+    isNext: id === nextId,
+  });
+
+  const board = {};
+  DAILY_PRAYER_IDS.forEach((id, index) => {
+    board[id] = entry(id, names[index], times[index]);
+  });
+  board.shuruq = shuruq ? entry("shuruq", names[7], shuruq) : null;
+
+  // Jumu'a is always rendered (as "None" when the mosque has no Friday time)
+  // so the layout keeps a stable shape; the extra slots only appear if set.
+  const [jumua, jumua2, jumua3] = jumuaTimes;
+  board.jumua = entry("jumua", names[5], jumua);
+  board.jumua2 = jumua2 ? entry("jumua2", `${names[5]} 2`, jumua2) : null;
+  board.jumua3 = jumua3 ? entry("jumua3", `${names[5]} 3`, jumua3) : null;
+  return board;
+}
+
+function generateSupportId(userId, attempt = 0) {
+  const hashInput = attempt === 0 ? userId : `${userId}-${attempt}`;
+  const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+  const intVal = parseInt(hash.substring(0, 8), 16);
+  const codeInt = intVal % 1000000;
+  const codeStr = String(codeInt).padStart(6, "0");
+  return `${codeStr.substring(0, 3)}-${codeStr.substring(3, 6)}`;
+}
+
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
@@ -1235,6 +1558,9 @@ module.exports = {
   getUserTimezone,
   calculateMinutes,
   getPrayerTimeForSpecificPrayer,
+  getTomorrowPrayerTimes,
+  getTomorrowIqamaTimes,
+  hasPrayerTimePassed,
   generateNextPrayerTime,
   translateText,
   callDirectiveService,
@@ -1267,4 +1593,11 @@ module.exports = {
   CANONICAL_PRAYER_NAMES,
   isTaskTrigger,
   ALL_PRAYERS,
+  formatDistance,
+  getUserDistanceUnits,
+  formatTime,
+  generateSupportId,
+  buildPrayerBoard,
+  getNextDailyPrayerId,
+  DAILY_PRAYER_IDS,
 };

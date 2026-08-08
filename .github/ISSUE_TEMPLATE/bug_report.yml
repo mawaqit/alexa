@@ -1,0 +1,117 @@
+name: Bug report
+description: Something in the skill does not work as expected
+title: "[Bug]: "
+labels: ["bug", "type/fix"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this.
+
+        The single most useful thing you can give us is your **Support Code** —
+        it is what lets us find your logs instead of guessing.
+
+  - type: input
+    id: support-code
+    attributes:
+      label: Support Code
+      description: |
+        **How to get it:** open the skill, then ask Alexa for the code.
+
+        | | Say |
+        |---|---|
+        | 🇬🇧 | *"Alexa, open MAWAQIT"* then *"What is my Support Code"* |
+        | 🇫🇷 | *"Alexa, ouvre MAWAQIT"* puis *"Quel est mon code d'assistance"* |
+
+        Alexa answers with six digits, e.g. **123-456**. The code identifies your
+        account so we can pull the matching logs and resolve this faster — it
+        contains no personal information.
+
+        *Put `N/A` for a bug that is not tied to a user session.*
+      placeholder: "123-456"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did Alexa do or say?
+      placeholder: Alexa answered "I can't find prayer times for that mosque" instead of reading them out.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What you said, in order. Include the exact wording if you can.
+      placeholder: |
+        1. "Alexa, open MAWAQIT"
+        2. "What time is Maghrib"
+        3. Alexa answers with …
+    validations:
+      required: true
+
+  - type: input
+    id: when
+    attributes:
+      label: When did it happen?
+      description: |
+        Date, time and timezone. Approximate is fine — it narrows the log
+        search considerably.
+      placeholder: "2026-07-22 around 18:30, Europe/Paris"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the skill?
+      options:
+        - Prayer times (asking Alexa for a time)
+        - Smart Azan (the adhan not playing, or playing at the wrong time)
+        - Routines (creating, deleting, or triggering one)
+        - Widgets (Next Prayer Time, Hadith of the Day)
+        - Account linking / device discovery
+        - Mosque selection
+        - Something else / not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: locale
+    attributes:
+      label: Language your device is set to
+      options:
+        - English
+        - Français
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: Echo Dot, Echo Show, the Alexa phone app, a Fire TV…
+      placeholder: Echo Show 8
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and did not find this one
+          required: true
+        - label: I have not pasted any password, token, or personal address above
+          required: true

@@ -1,0 +1,6 @@
+packages:
+  - "lambda"
+  - "azan-lambda"
+allowBuilds:
+  protobufjs: true
+  unrs-resolver: true

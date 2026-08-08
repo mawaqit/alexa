@@ -45,7 +45,7 @@ async function GetAzanUserInfo(id) {
 
 async function UpdateAzanUserInfo(
   id,
-  { refreshToken, endpointId, emailId, ...otherAttributes },
+  { refreshToken, endpointId, ...otherAttributes },
 ) {
   console.log(`[UpdateAzanUserInfo] Attempting update for id: ${id}`);
 
@@ -60,7 +60,6 @@ async function UpdateAzanUserInfo(
     id: id,
     refresh_token: refreshToken ?? existingUser?.refresh_token,
     endpointId: endpointId ?? existingUser?.endpointId,
-    emailId: emailId ?? existingUser?.emailId,
     updatedTimestamp: timestamp,
     ...otherAttributes,
   };
@@ -83,7 +82,6 @@ async function UpdateAzanUserInfo(
   try {
     const itemToLog = { ...item };
     if (itemToLog.refresh_token) itemToLog.refresh_token = "[REDACTED]";
-    if (itemToLog.emailId) itemToLog.emailId = "[REDACTED]";
 
     console.log(
       `[UpdateAzanUserInfo] Writing item to DynamoDB:`,
@@ -250,6 +248,30 @@ async function UpdateMosqueAzanData(id, attributes) {
   }
 }
 
+async function GetUserBySupportId(supportId) {
+  console.log(`[GetUserBySupportId] Fetching user for supportId: ${supportId}`);
+  const params = {
+    TableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
+    IndexName: "supportId-index",
+    KeyConditionExpression: "supportId = :supportId",
+    ExpressionAttributeValues: {
+      ":supportId": supportId,
+    },
+  };
+
+  try {
+    const data = await dynamo.send(new QueryCommand(params));
+    console.log(`[GetUserBySupportId] Found ${data.Items?.length || 0} users.`);
+    return data.Items?.[0] || null;
+  } catch (error) {
+    console.error(
+      `[GetUserBySupportId] Error fetching user for supportId ${supportId}:`,
+      error,
+    );
+    throw error;
+  }
+}
+
 module.exports = {
   GetAzanUserInfo,
   UpdateAzanUserInfo,
@@ -258,4 +280,5 @@ module.exports = {
   BatchGetAzanUserInfo,
   GetMosqueAzanData,
   UpdateMosqueAzanData,
+  GetUserBySupportId,
 };

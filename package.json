@@ -1,19 +1,38 @@
 {
   "name": "mawaqit-alexa",
   "private": true,
-  "version": "1.0.0",
-  "description": "Tooling workspace for the MAWAQIT Alexa skill (lambda + azan-lambda)",
+  "description": "Tooling workspace for the MAWAQIT Alexa skill",
+  "packageManager": "pnpm@11.9.0",
   "scripts": {
-    "lint": "eslint lambda azan-lambda",
-    "lint:fix": "eslint lambda azan-lambda --fix",
-    "format": "prettier --write \"{lambda,azan-lambda}/**/*.js\"",
-    "format:check": "prettier --check \"{lambda,azan-lambda}/**/*.js\""
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "prepare": "husky",
+    "deploy:dev": "pnpm --filter ./lambda deploy:dev && pnpm --filter ./azan-lambda deploy:dev && pnpm push:skill-config && pnpm push:account-linking-config",
+    "deploy:prod": "pnpm --filter ./lambda deploy:prod && pnpm --filter ./azan-lambda deploy:prod",
+    "push:skill-config": "node .ask/push-skill-config.js",
+    "push:widget": "pnpm push:skill-config",
+    "push:account-linking-config": "node .ask/push-account-linking.js",
+    "sync:locales": "node .ask/sync-locales.js"
   },
   "devDependencies": {
+    "@eslint/compat": "^2.1.0",
     "@eslint/js": "^9.17.0",
+    "@types/aws-lambda": "^8.10.162",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.1.1",
+    "babel-jest": "^30.4.1",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.5.6",
     "globals": "^15.14.0",
-    "prettier": "^3.4.2"
+    "husky": "^9.1.7",
+    "jest": "^30.4.2",
+    "prettier": "^3.4.2",
+    "ts-jest": "^29.4.11",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.65.0"
   }
 }

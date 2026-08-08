@@ -1,353 +1,1266 @@
 {
-    "type": "APL",
-    "version": "1.8",
-    "import": [
-        {
-            "name": "alexa-layouts",
-            "version": "1.5.0"
-        }
-    ],
-    "resources": [],
-    "layouts": {
-        "BandButton": {
-            "parameters": [
-                {
-                    "name": "primaryAction",
-                    "type": "any"
-                },
-                {
-                    "name": "primaryText",
-                    "type": "string"
-                },
-                {
-                    "name": "secondaryText",
-                    "type": "string"
-                },
-                {
-                    "name": "ternaryText",
-                    "type": "string"
-                },
-                {
-                    "name": "backgroundImageSource",
-                    "type": "string"
-                }
-            ],
-            "width": "100%",
-            "items": [
-                {
-                    "type": "Container",
-                    "width": "100%",
-                    "when": "${primaryText}",
-                    "items": [
-                        {
-                            "type": "AlexaBackground",
-                            "backgroundImageSource": "${backgroundImageSource}"
-                        },
-                        {
-                            "text": "${primaryText}",
-                            "textAlign": "left",
-                            "type": "Text",
-                            "style": "baseSub",
-                            "paddingLeft": "10dp"
-                        },
-                        {
-                            "text": "${secondaryText}",
-                            "type": "Text",
-                            "style": "baseText",
-                            "when": "${secondaryText}"
-                        },
-                        {
-                            "when": "${ternaryText}",
-                            "type": "Text",
-                            "style": "baseSmall",
-                            "text": "${ternaryText}"
-                        }
-                    ]
-                }
-            ]
-        }
+  "type": "APL",
+  "version": "2023.3",
+  "theme": "dark",
+  "description": "Mosque info board. Deep-indigo glass surfaces, hero mosque picture with a gradient scrim, and prayer rows that highlight the upcoming prayer in gold. Three layouts: round, landscape and portrait.",
+  "import": [
+    {
+      "name": "alexa-layouts",
+      "version": "1.7.0"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Artwork owned by the presentation layer. Swap these to restyle the board without touching the skill code.",
+      "strings": {
+        "pageBackground": "https://cdn.mawaqit.net/images/background-arabic-calligraphy.png",
+        "defaultMosquePicture": "https://cdn.mawaqit.net/images/backend/mosque_default_picture.png"
+      }
     },
-    "mainTemplate": {
-        "parameters": [
-            "payload"
-        ],
-        "items": [
+    {
+      "description": "Palette — deep indigo ink, frosted glass surfaces, warm gold accent.",
+      "colors": {
+        "colorInk": "#0B0A1F",
+        "colorGlass": "#FFFFFF14",
+        "colorStroke": "#FFFFFF2B",
+        "colorTextPrimary": "#F7F5FF",
+        "colorTextMuted": "#FFFFFFA3",
+        "colorAccent": "#F2C86B",
+        "colorAccentSoft": "#F2C86B24",
+        "colorAccentEdge": "#F2C86B5C",
+        "colorDivider": "#FFFFFF1F"
+      },
+      "gradients": {
+        "gradientPage": {
+          "type": "linear",
+          "angle": 160,
+          "colorRange": ["#0B0A1FD9", "#0B0A1FF2", "#150F33E6"],
+          "inputRange": [0, 0.55, 1]
+        },
+        "gradientScrim": {
+          "type": "linear",
+          "angle": 180,
+          "colorRange": ["#0B0A1F00", "#0B0A1F8C", "#0B0A1FF7"],
+          "inputRange": [0, 0.45, 1]
+        },
+        "gradientRound": {
+          "type": "radial",
+          "colorRange": ["#0B0A1FB8", "#0B0A1FFA"],
+          "inputRange": [0, 1]
+        }
+      }
+    },
+    {
+      "description": "Metrics — landscape, tall viewports (Echo Show 8/10/15, Fire TV).",
+      "dimensions": {
+        "gutter": "36dp",
+        "gutterV": "28dp",
+        "colGap": "16dp",
+        "colWidth": "25%",
+        "cardRadius": "26dp",
+        "cardPad": "18dp",
+        "rowPadV": "10dp",
+        "rowPadH": "12dp",
+        "rowRadius": "14dp",
+        "accentBar": "24dp",
+        "brandLogo": "30dp",
+        "rowGap": "5dp",
+        "avatarSize": "96dp",
+        "pillRadius": "100dp",
+        "pillPadH": "12dp",
+        "pillPadV": "6dp",
+        "pinSize": "16dp"
+      },
+      "numbers": {
+        "fsTitle": 34,
+        "fsAddress": 17,
+        "fsName": 17,
+        "fsTime": 20,
+        "fsBrand": 13,
+        "fsDistance": 16
+      }
+    },
+    {
+      "when": "${viewport.width > viewport.height && viewport.height < 600}",
+      "description": "Metrics — short landscape (Echo Show 5). Sized for a 5.5\" panel seen from across a room, not for the authoring-tool preview: the 960x480 canvas is ~195dp per physical inch against a 160dp reference, so every dp lands about 20% smaller than the authoring tool suggests. The panels have height to spare here — the binding constraint is the 27% column width, not the 480dp height.",
+      "dimensions": {
+        "gutter": "22dp",
+        "gutterV": "14dp",
+        "colGap": "10dp",
+        "colWidth": "27%",
+        "cardRadius": "16dp",
+        "cardPad": "12dp",
+        "rowPadV": "6dp",
+        "rowPadH": "8dp",
+        "rowRadius": "10dp",
+        "accentBar": "20dp",
+        "brandLogo": "20dp",
+        "rowGap": "3dp",
+        "pillPadH": "9dp",
+        "pillPadV": "4dp",
+        "pinSize": "14dp"
+      },
+      "numbers": {
+        "fsTitle": 26,
+        "fsAddress": 14,
+        "fsName": 16,
+        "fsTime": 21,
+        "fsBrand": 11,
+        "fsDistance": 15
+      }
+    },
+    {
+      "when": "${viewport.width > viewport.height && viewport.width >= 1600}",
+      "description": "Metrics — large landscape (Echo Show 15 landscape, 1920x1080). The base block is tuned for the 1280x800 of a Show 8/10; reused as-is on a canvas 2.25x the area it leaves the type stranded in half-empty panels. Values track the large-portrait block, which already scales for the same physical panel. Must stay above the TV block: a Fire TV is also 1920x1080 and has to keep its own overscan-safe metrics.",
+      "dimensions": {
+        "gutter": "54dp",
+        "gutterV": "42dp",
+        "colGap": "24dp",
+        "colWidth": "25%",
+        "cardRadius": "38dp",
+        "cardPad": "28dp",
+        "rowPadV": "16dp",
+        "rowPadH": "18dp",
+        "rowRadius": "20dp",
+        "accentBar": "36dp",
+        "brandLogo": "44dp",
+        "rowGap": "8dp",
+        "pillPadH": "18dp",
+        "pillPadV": "9dp",
+        "pinSize": "24dp"
+      },
+      "numbers": {
+        "fsTitle": 50,
+        "fsAddress": 26,
+        "fsName": 26,
+        "fsTime": 30,
+        "fsBrand": 20,
+        "fsDistance": 24
+      }
+    },
+    {
+      "when": "${viewport.height >= viewport.width}",
+      "description": "Metrics — portrait viewports up to ~960dp wide.",
+      "dimensions": {
+        "gutter": "22dp",
+        "gutterV": "20dp",
+        "colGap": "14dp",
+        "colWidth": "100%",
+        "cardRadius": "24dp",
+        "cardPad": "16dp",
+        "rowPadV": "9dp",
+        "rowPadH": "12dp",
+        "rowRadius": "13dp",
+        "accentBar": "22dp",
+        "brandLogo": "26dp",
+        "rowGap": "5dp",
+        "pillPadH": "11dp",
+        "pillPadV": "5dp",
+        "pinSize": "15dp"
+      },
+      "numbers": {
+        "fsTitle": 27,
+        "fsAddress": 15,
+        "fsName": 15,
+        "fsTime": 20,
+        "fsBrand": 12,
+        "fsDistance": 15
+      }
+    },
+    {
+      "when": "${viewport.height >= viewport.width && viewport.width >= 960}",
+      "description": "Metrics — large portrait (Echo Show 15 portrait, 1080x1920). Scaled up so the board still reads from across the room.",
+      "dimensions": {
+        "gutter": "48dp",
+        "gutterV": "44dp",
+        "colGap": "24dp",
+        "colWidth": "100%",
+        "cardRadius": "34dp",
+        "cardPad": "28dp",
+        "rowPadV": "16dp",
+        "rowPadH": "20dp",
+        "rowRadius": "18dp",
+        "accentBar": "36dp",
+        "brandLogo": "42dp",
+        "rowGap": "8dp",
+        "pillPadH": "18dp",
+        "pillPadV": "9dp",
+        "pinSize": "24dp"
+      },
+      "numbers": {
+        "fsTitle": 46,
+        "fsAddress": 25,
+        "fsName": 25,
+        "fsTime": 28,
+        "fsBrand": 18,
+        "fsDistance": 24
+      }
+    },
+    {
+      "when": "${viewport.shape == 'round'}",
+      "description": "Metrics — round viewports. Insets are in dp, not %: a percentage in a resource has no parent to resolve against, so it collapses to zero and content runs to the bezel.",
+      "dimensions": {
+        "gutter": "24dp",
+        "gutterV": "24dp",
+        "colGap": "8dp",
+        "colWidth": "100%",
+        "cardRadius": "18dp",
+        "cardPad": "10dp",
+        "rowPadV": "4dp",
+        "rowPadH": "8dp",
+        "rowRadius": "10dp",
+        "accentBar": "14dp",
+        "brandLogo": "18dp",
+        "rowGap": "2dp",
+        "avatarSize": "92dp",
+        "pillPadH": "9dp",
+        "pillPadV": "3dp",
+        "pinSize": "12dp"
+      },
+      "numbers": {
+        "fsTitle": 20,
+        "fsAddress": 12,
+        "fsName": 14,
+        "fsTime": 15,
+        "fsBrand": 9,
+        "fsDistance": 12
+      }
+    },
+    {
+      "when": "${viewport.mode == 'tv'}",
+      "description": "Metrics — TV. Overscan-safe gutters and larger type for lean-back distance.",
+      "dimensions": {
+        "gutter": "5%",
+        "gutterV": "6%",
+        "colGap": "16dp",
+        "colWidth": "25%",
+        "cardRadius": "20dp",
+        "cardPad": "14dp",
+        "rowPadV": "6dp",
+        "rowPadH": "10dp",
+        "rowRadius": "12dp",
+        "accentBar": "20dp",
+        "brandLogo": "24dp",
+        "rowGap": "4dp",
+        "pillPadH": "14dp",
+        "pillPadV": "7dp",
+        "pinSize": "18dp"
+      },
+      "numbers": {
+        "fsTitle": 28,
+        "fsAddress": 15,
+        "fsName": 15,
+        "fsTime": 20,
+        "fsBrand": 12,
+        "fsDistance": 17
+      }
+    }
+  ],
+  "graphics": {
+    "pinGlyph": {
+      "type": "AVG",
+      "version": "1.2",
+      "width": 24,
+      "height": 24,
+      "viewportWidth": 24,
+      "viewportHeight": 24,
+      "description": "Map pin drawn as a vector so the chip stays crisp at every viewport scale and needs no CDN round-trip.",
+      "parameters": [
+        {
+          "name": "tint",
+          "type": "color",
+          "default": "#F2C86B"
+        }
+      ],
+      "items": [
+        {
+          "type": "path",
+          "pathData": "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z",
+          "fill": "${tint}",
+          "fillType": "evenOdd"
+        }
+      ]
+    }
+  },
+  "styles": {
+    "brandLabel": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsBrand",
+          "fontWeight": 500,
+          "letterSpacing": "1.6dp",
+          "color": "@colorTextMuted",
+          "maxLines": 1
+        }
+      ]
+    },
+    "prayerName": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsName",
+          "fontWeight": 500,
+          "letterSpacing": "0.5dp",
+          "color": "@colorTextMuted",
+          "maxLines": 1
+        }
+      ]
+    },
+    "prayerTime": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember Display",
+          "fontSize": "@fsTime",
+          "fontWeight": 700,
+          "color": "@colorTextPrimary",
+          "maxLines": 1
+        }
+      ]
+    },
+    "mosqueTitle": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember Display",
+          "fontSize": "@fsTitle",
+          "fontWeight": 700,
+          "color": "@colorTextPrimary",
+          "maxLines": 2
+        }
+      ]
+    },
+    "mosqueAddress": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsAddress",
+          "fontWeight": 400,
+          "color": "@colorTextMuted",
+          "maxLines": 2
+        }
+      ]
+    },
+    "distanceText": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsDistance",
+          "fontWeight": 700,
+          "letterSpacing": "0.3dp",
+          "color": "@colorAccent",
+          "maxLines": 1
+        }
+      ]
+    },
+    "nextLabel": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsBrand",
+          "fontWeight": 600,
+          "letterSpacing": "2.2dp",
+          "color": "@colorAccent",
+          "maxLines": 1
+        }
+      ]
+    }
+  },
+  "layouts": {
+    "PageBackdrop": {
+      "description": "Blurred brand backdrop plus a gradient wash, so any artwork stays readable behind the content.",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "string"
+        },
+        {
+          "name": "blurRadius",
+          "type": "number",
+          "default": 0
+        },
+        {
+          "name": "wash",
+          "type": "any"
+        }
+      ],
+      "items": [
+        {
+          "type": "Container",
+          "position": "absolute",
+          "top": 0,
+          "left": 0,
+          "right": 0,
+          "bottom": 0,
+          "items": [
             {
+              "type": "Image",
+              "when": "${source && blurRadius > 0}",
+              "source": "${source}",
+              "scale": "best-fill",
+              "align": "center",
+              "width": "100%",
+              "height": "100%",
+              "filters": [
+                {
+                  "type": "Blur",
+                  "radius": "${blurRadius}"
+                }
+              ]
+            },
+            {
+              "type": "Image",
+              "when": "${source && blurRadius <= 0}",
+              "source": "${source}",
+              "scale": "best-fill",
+              "align": "center",
+              "width": "100%",
+              "height": "100%"
+            },
+            {
+              "type": "Frame",
+              "position": "absolute",
+              "top": 0,
+              "left": 0,
+              "right": 0,
+              "bottom": 0,
+              "background": "${wash}"
+            }
+          ]
+        }
+      ]
+    },
+    "Hairline": {
+      "description": "1dp rule used to separate prayer rows.",
+      "items": [
+        {
+          "type": "Frame",
+          "width": "100%",
+          "height": "1dp",
+          "background": "@colorDivider"
+        }
+      ]
+    },
+    "PrayerRow": {
+      "description": "One prayer: name on the lead edge, time on the trailing edge. The upcoming prayer gets a gold accent bar, gold type and a soft tinted pill.",
+      "parameters": [
+        {
+          "name": "prayer",
+          "type": "any"
+        }
+      ],
+      "items": [
+        {
+          "type": "Container",
+          "width": "100%",
+          "paddingTop": "@rowGap",
+          "paddingBottom": "@rowGap",
+          "item": {
+            "type": "Frame",
+            "width": "100%",
+            "borderRadius": "@rowRadius",
+            "background": "${prayer.isNext ? '@colorAccentSoft' : 'transparent'}",
+            "item": {
+              "type": "Container",
+              "direction": "row",
+              "alignItems": "center",
+              "width": "100%",
+              "paddingLeft": "@rowPadH",
+              "paddingRight": "@rowPadH",
+              "paddingTop": "@rowPadV",
+              "paddingBottom": "@rowPadV",
+              "items": [
+                {
+                  "type": "Frame",
+                  "width": "3dp",
+                  "height": "@accentBar",
+                  "borderRadius": "2dp",
+                  "background": "@colorAccent",
+                  "opacity": "${prayer.isNext ? 1 : 0}"
+                },
+                {
+                  "type": "Text",
+                  "style": "prayerName",
+                  "text": "${prayer.name}",
+                  "color": "${prayer.isNext ? '@colorAccent' : '@colorTextMuted'}",
+                  "paddingLeft": "10dp",
+                  "grow": 1,
+                  "shrink": 1
+                },
+                {
+                  "type": "Text",
+                  "style": "prayerTime",
+                  "text": "${prayer.timeLabel}",
+                  "color": "${prayer.isNext ? '@colorAccent' : '@colorTextPrimary'}",
+                  "paddingLeft": "8dp"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "DailyPanel": {
+      "description": "Frosted panel holding the five daily prayers. Order is declared here — move a line to move the prayer on screen; no index juggling.",
+      "parameters": [
+        {
+          "name": "prayers",
+          "type": "any"
+        },
+        {
+          "name": "panelHeight",
+          "type": "any",
+          "default": "auto",
+          "description": "'100%' to fill a stretched column (landscape), 'auto' to hug its rows (portrait)."
+        }
+      ],
+      "items": [
+        {
+          "type": "Frame",
+          "width": "100%",
+          "height": "${panelHeight}",
+          "borderRadius": "@cardRadius",
+          "borderWidth": "1dp",
+          "borderColor": "@colorStroke",
+          "background": "@colorGlass",
+          "item": {
+            "type": "Container",
+            "width": "100%",
+            "height": "${panelHeight}",
+            "paddingLeft": "@cardPad",
+            "paddingRight": "@cardPad",
+            "paddingTop": "@cardPad",
+            "paddingBottom": "@cardPad",
+            "justifyContent": "center",
+            "items": [
+              {
+                "type": "PrayerRow",
+                "prayer": "${prayers.fajr}"
+              },
+              {
+                "type": "Hairline"
+              },
+              {
+                "type": "PrayerRow",
+                "prayer": "${prayers.dhuhr}"
+              },
+              {
+                "type": "Hairline"
+              },
+              {
+                "type": "PrayerRow",
+                "prayer": "${prayers.asr}"
+              },
+              {
+                "type": "Hairline"
+              },
+              {
+                "type": "PrayerRow",
+                "prayer": "${prayers.maghrib}"
+              },
+              {
+                "type": "Hairline"
+              },
+              {
+                "type": "PrayerRow",
+                "prayer": "${prayers.isha}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "FridayPanel": {
+      "description": "Frosted panel for the Jumu'a slots and Shuruq. Written out row by row so optional times can be reordered or dropped without shifting anything else.",
+      "parameters": [
+        {
+          "name": "prayers",
+          "type": "any"
+        },
+        {
+          "name": "panelHeight",
+          "type": "any",
+          "default": "auto",
+          "description": "'100%' to fill a stretched column (landscape), 'auto' to hug its rows (portrait)."
+        }
+      ],
+      "items": [
+        {
+          "type": "Frame",
+          "width": "100%",
+          "height": "${panelHeight}",
+          "borderRadius": "@cardRadius",
+          "borderWidth": "1dp",
+          "borderColor": "@colorStroke",
+          "background": "@colorGlass",
+          "item": {
+            "type": "Container",
+            "width": "100%",
+            "height": "${panelHeight}",
+            "paddingLeft": "@cardPad",
+            "paddingRight": "@cardPad",
+            "paddingTop": "@cardPad",
+            "paddingBottom": "@cardPad",
+            "justifyContent": "center",
+            "items": [
+              {
+                "type": "PrayerRow",
+                "prayer": "${prayers.jumua}"
+              },
+              {
+                "type": "Hairline",
+                "when": "${prayers.jumua2 || prayers.jumua3 || prayers.shuruq}"
+              },
+              {
+                "type": "PrayerRow",
+                "when": "${prayers.jumua2}",
+                "prayer": "${prayers.jumua2}"
+              },
+              {
+                "type": "Hairline",
+                "when": "${prayers.jumua2 && (prayers.jumua3 || prayers.shuruq)}"
+              },
+              {
+                "type": "PrayerRow",
+                "when": "${prayers.jumua3}",
+                "prayer": "${prayers.jumua3}"
+              },
+              {
+                "type": "Hairline",
+                "when": "${prayers.jumua3 && prayers.shuruq}"
+              },
+              {
+                "type": "PrayerRow",
+                "when": "${prayers.shuruq}",
+                "prayer": "${prayers.shuruq}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "DistanceChip": {
+      "description": "How far the mosque is, as a gold pill. Gold is the document's 'pay attention here' colour, so the chip reads at a glance without competing with the mosque name below it. Absent when the skill has no distance — the whole chip is skipped rather than rendered empty.",
+      "parameters": [
+        {
+          "name": "distance",
+          "type": "string"
+        },
+        {
+          "name": "align",
+          "type": "string",
+          "default": "start",
+          "description": "'start' to hug the lead edge (hero scrim), 'center' for the round layout."
+        }
+      ],
+      "items": [
+        {
+          "type": "Container",
+          "when": "${distance}",
+          "direction": "row",
+          "width": "100%",
+          "justifyContent": "${align}",
+          "items": [
+            {
+              "type": "Frame",
+              "borderRadius": "@pillRadius",
+              "borderWidth": "1dp",
+              "borderColor": "@colorAccentEdge",
+              "background": "@colorAccentSoft",
+              "item": {
                 "type": "Container",
+                "direction": "row",
+                "alignItems": "center",
+                "paddingLeft": "@pillPadH",
+                "paddingRight": "@pillPadH",
+                "paddingTop": "@pillPadV",
+                "paddingBottom": "@pillPadV",
+                "items": [
+                  {
+                    "type": "VectorGraphic",
+                    "source": "pinGlyph",
+                    "width": "@pinSize",
+                    "height": "@pinSize",
+                    "scale": "best-fit",
+                    "tint": "@colorAccent"
+                  },
+                  {
+                    "type": "Text",
+                    "style": "distanceText",
+                    "text": "${distance}",
+                    "paddingLeft": "6dp"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "MosqueAvatar": {
+      "description": "Circular crop of the mosque picture, ringed in gold. On a round screen the photo has to be a distinct object at the top of the card — used as a full-bleed backdrop it just reads as texture.",
+      "parameters": [
+        {
+          "name": "picture",
+          "type": "string"
+        },
+        {
+          "name": "size",
+          "type": "any"
+        }
+      ],
+      "items": [
+        {
+          "type": "Frame",
+          "width": "${size}",
+          "height": "${size}",
+          "borderRadius": "${size}",
+          "borderWidth": "2dp",
+          "borderColor": "@colorAccentEdge",
+          "background": "@colorGlass",
+          "item": {
+            "type": "Image",
+            "source": "${picture}",
+            "width": "100%",
+            "height": "100%",
+            "scale": "best-fill",
+            "align": "center",
+            "borderRadius": "${size}"
+          }
+        }
+      ]
+    },
+    "NextPrayerStrip": {
+      "description": "Next prayer condensed to a single gold pill — the round card is a mosque profile, so the upcoming time is a footnote here, not the headline it is on the prayer-times board.",
+      "parameters": [
+        {
+          "name": "prayer",
+          "type": "any"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "items": [
+        {
+          "type": "Container",
+          "when": "${prayer}",
+          "direction": "row",
+          "width": "100%",
+          "justifyContent": "center",
+          "items": [
+            {
+              "type": "Frame",
+              "borderRadius": "@pillRadius",
+              "borderWidth": "1dp",
+              "borderColor": "@colorAccentEdge",
+              "background": "@colorAccentSoft",
+              "item": {
+                "type": "Container",
+                "direction": "row",
+                "alignItems": "center",
+                "paddingLeft": "@pillPadH",
+                "paddingRight": "@pillPadH",
+                "paddingTop": "@pillPadV",
+                "paddingBottom": "@pillPadV",
+                "items": [
+                  {
+                    "type": "Text",
+                    "style": "nextLabel",
+                    "text": "${label}",
+                    "shrink": 1
+                  },
+                  {
+                    "type": "Text",
+                    "style": "prayerTime",
+                    "text": "${prayer.name} ${prayer.timeLabel}",
+                    "color": "@colorAccent",
+                    "paddingLeft": "8dp"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "MosqueHero": {
+      "description": "The mosque picture as the hero: full-bleed inside a rounded card, with a bottom gradient scrim carrying the distance chip, the name and the address.",
+      "parameters": [
+        {
+          "name": "picture",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "type": "string"
+        },
+        {
+          "name": "distance",
+          "type": "string"
+        }
+      ],
+      "items": [
+        {
+          "type": "Frame",
+          "width": "100%",
+          "height": "100%",
+          "borderRadius": "@cardRadius",
+          "borderWidth": "1dp",
+          "borderColor": "@colorStroke",
+          "background": "@colorGlass",
+          "item": {
+            "type": "Container",
+            "width": "100%",
+            "height": "100%",
+            "items": [
+              {
+                "type": "Image",
+                "source": "${picture}",
+                "scale": "best-fill",
+                "align": "center",
                 "width": "100%",
                 "height": "100%",
+                "borderRadius": "@cardRadius",
+                "overlayGradient": "@gradientScrim"
+              },
+              {
+                "type": "Container",
+                "position": "absolute",
+                "left": 0,
+                "right": 0,
+                "bottom": 0,
+                "paddingLeft": "@cardPad",
+                "paddingRight": "@cardPad",
+                "paddingBottom": "@cardPad",
                 "items": [
+                  {
+                    "type": "DistanceChip",
+                    "distance": "${distance}",
+                    "paddingBottom": "6dp"
+                  },
+                  {
+                    "type": "Text",
+                    "style": "mosqueTitle",
+                    "text": "${title}"
+                  },
+                  {
+                    "type": "Text",
+                    "when": "${address}",
+                    "style": "mosqueAddress",
+                    "text": "${address}",
+                    "paddingTop": "4dp"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "BrandHeader": {
+      "description": "Discreet skill attribution.",
+      "parameters": [
+        {
+          "name": "logo",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "items": [
+        {
+          "type": "Container",
+          "direction": "row",
+          "alignItems": "center",
+          "width": "100%",
+          "items": [
+            {
+              "type": "Image",
+              "when": "${logo}",
+              "source": "${logo}",
+              "width": "@brandLogo",
+              "height": "@brandLogo",
+              "scale": "best-fill",
+              "borderRadius": "6dp"
+            },
+            {
+              "type": "Text",
+              "style": "brandLabel",
+              "text": "${label}",
+              "paddingLeft": "10dp"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "mainTemplate": {
+    "parameters": ["payload"],
+    "items": [
+      {
+        "type": "Container",
+        "when": "${viewport.shape == 'round'}",
+        "description": "ROUND — a mosque profile card, not a prayer board: photo, name, distance, address, then the Jumu'a slots. The five daily prayers are deliberately absent; this screen answers 'tell me about my mosque', and the prayer-times board already answers the other question.",
+        "width": "100%",
+        "height": "100%",
+        "bind": [
+          {
+            "name": "props",
+            "value": "${payload.data.properties}"
+          },
+          {
+            "name": "mosquePicture",
+            "value": "${payload.data.properties.mosquePicture ? payload.data.properties.mosquePicture : @defaultMosquePicture}"
+          }
+        ],
+        "items": [
+          {
+            "type": "PageBackdrop",
+            "source": "${mosquePicture}",
+            "blurRadius": 12,
+            "wash": "@gradientRound"
+          },
+          {
+            "type": "Container",
+            "id": "roundContent",
+            "width": "100%",
+            "height": "100%",
+            "alignItems": "center",
+            "justifyContent": "center",
+            "paddingLeft": "@gutter",
+            "paddingRight": "@gutter",
+            "paddingTop": "@gutterV",
+            "paddingBottom": "@gutterV",
+            "layoutDirection": "${props.layoutDirection == 'RTL' ? 'RTL' : 'LTR'}",
+            "onMount": [
+              {
+                "type": "AnimateItem",
+                "componentId": "roundContent",
+                "duration": 550,
+                "easing": "ease-out",
+                "value": [
+                  {
+                    "property": "opacity",
+                    "from": 0,
+                    "to": 1
+                  }
+                ]
+              }
+            ],
+            "items": [
+              {
+                "type": "ScrollView",
+                "width": "72%",
+                "grow": 1,
+                "shrink": 1,
+                "description": "72% is the widest box that stays inside the circle over the vertical band the card occupies — the inset lives here, on a component, where a percentage actually resolves against its parent. Everything scrolls together, photo included: a long name plus three Jumu'a slots will not fit a 480dp circle, and a clipped card is worse than a scrolled one.",
+                "item": {
+                  "type": "Container",
+                  "width": "100%",
+                  "minHeight": "100%",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "description": "minHeight + centered: a short card sits in the middle of the circle, a long one grows past it and scrolls. Plain 'height: 100%' would clip the overflow instead.",
+                  "items": [
                     {
-                        "type": "AlexaBackground",
-                        "backgroundImageSource": "${payload.data.properties.backgroundImageUrl}",
-                        "paddingTop": "0",
-                        "paddingBottom": "0"
+                      "type": "MosqueAvatar",
+                      "picture": "${mosquePicture}",
+                      "size": "@avatarSize"
                     },
                     {
-                        "type": "GridSequence",
-                        "width": "100%",
-                        "height": "100%",
-                        "scrollDirection": "vertical",
-                        "childWidth": [
-                            "22%",
-                            "56%",
-                            "22%"
-                        ],
-                        "childHeight": "auto",
-                        "item": [
-                            {
-                                "type": "Container",
-                                "opacity": 0.9,
-                                "height": "auto",
-                                "width": "100%",
-                                "paddingTop": "@spacingSmall",
-                                "paddingLeft": "0",
-                                "paddingRight": "0",
-                                "items": [
-                                    {
-                                        "scrollDirection": "vertical",
-                                        "type": "Sequence",
-                                        "data": "${Array.slice(payload.data.properties.prayerTimes, 0, 5)}",
-                                        "height": "100%",
-                                        "width": "100%",
-                                        "items": [
-                                            {
-                                                "type": "Container",
-                                                "items": [
-                                                    {
-                                                        "type": "BandButton",
-                                                        "backgroundImageSource": "https://chriscastle.com/alexa/ars/images/marble.jpg",
-                                                        "primaryText": "${data.primaryText}",
-                                                        "secondaryText": "${data.secondaryText}",
-                                                        "ternaryText": "${data.ternaryText}",
-                                                        "id": "buttonCriticalApproval"
-                                                    },
-                                                    {
-                                                        "type": "Frame",
-                                                        "height": "${viewport.width > 600 ? '10dp' : '2dp'}",
-                                                        "width": "300dp"
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "Frame",
-                                "borderRadius": 0,
-                                "width": "auto",
-                                "height": "100%",
-                                "borderColor": "#ccc",
-                                "borderWidth": "0",
-                                "item": [
-                                    {
-                                        "alignItems": "center",
-                                        "type": "Container",
-                                        "height": "100%",
-                                        "width": "100%",
-                                        "items": [
-                                            {
-                                                "type": "Frame",
-                                                "borderRadius": 0,
-                                                "width": "92%",
-                                                "height": "90%",
-                                                "borderColor": "#9E9E9E",
-                                                "borderWidth": "2",
-                                                "item": [
-                                                    {
-                                                        "type": "Container",
-                                                        "width": "100%",
-                                                        "height": "100%",
-                                                        "paddingTop": "@spacingSmall",
-                                                        "items": [
-                                                            {
-                                                                "paddingTop": "0",
-                                                                "paddingBottom": "0",
-                                                                "type": "AlexaBackground",
-                                                                "opacity": 0.9,
-                                                                "backgroundColor": "white",
-                                                                "backgroundBlur": false,
-                                                                "videoAutoPlay": true,
-                                                                "videoAudioTrack": "none"
-                                                            },
-                                                            {
-                                                                "type": "Container",
-                                                                "height": "100%",
-                                                                "width": "100%",
-                                                                "paddingLeft": "5dp",
-                                                                "paddingRight": "5dp",
-                                                                "items": [
-                                                                    {
-                                                                        "source": "https://cdn.mawaqit.net/images/backend/mosque_default_picture.png",
-                                                                        "scale": "best-fit",
-                                                                        "type": "Image",
-                                                                        "height": "50%",
-                                                                        "width": "100%"
-                                                                    },
-                                                                    {
-                                                                        "type": "Container",
-                                                                        "height": "50%",
-                                                                        "width": "100%",
-                                                                        "paddingTop": "16dp",
-                                                                        "paddingLeft": "16dp",
-                                                                        "paddingRight": "16dp",
-                                                                        "paddingBottom": "16dp",
-                                                                        "items": [
-                                                                            {
-                                                                                "color": "#000000",
-                                                                                "fontSize": "@fontSizeMedium",
-                                                                                "text": "${payload.data.properties.mosqueTitle}",
-                                                                                "textAlign": "center",
-                                                                                "type": "Text",
-                                                                                "width": "100%"
-                                                                            },
-                                                                            {
-                                                                                "item": [
-                                                                                    {
-                                                                                        "text": "${payload.data.properties.mosqueDescription}",
-                                                                                        "color": "#000000",
-                                                                                        "fontSize": "@fontSizeSmall",
-                                                                                        "textAlign": "center",
-                                                                                        "type": "Text",
-                                                                                        "paddingTop": "12dp",
-                                                                                        "paddingBottom": "12dp"
-                                                                                    }
-                                                                                ],
-                                                                                "type": "ScrollView",
-                                                                                "width": "100%"
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ]
-                                                            }
-                                                        ]
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                "type": "Container",
-                                "opacity": 0.9,
-                                "height": "auto",
-                                "width": "100%",
-                                "paddingTop": "@spacingSmall",
-                                "paddingLeft": "0",
-                                "paddingRight": "0",
-                                "items": [
-                                    {
-                                        "scrollDirection": "vertical",
-                                        "type": "Sequence",
-                                        "data": "${Array.slice(payload.data.properties.prayerTimes, 5,8)}",
-                                        "height": "100%",
-                                        "width": "100%",
-                                        "items": [
-                                            {
-                                                "type": "Container",
-                                                "items": [
-                                                    {
-                                                        "type": "BandButton",
-                                                        "id": "buttonCriticalApproval",
-                                                        "backgroundImageSource": "https://chriscastle.com/alexa/ars/images/marble.jpg",
-                                                        "primaryText": "${data.primaryText}",
-                                                        "secondaryText": "${data.secondaryText}",
-                                                        "ternaryText": "${data.ternaryText}"
-                                                    },
-                                                    {
-                                                        "type": "Frame",
-                                                        "height": "${viewport.width > 600 ? '10dp' : '2dp'}",
-                                                        "width": "300dp"
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
+                      "type": "Text",
+                      "style": "mosqueTitle",
+                      "text": "${props.mosqueTitle}",
+                      "textAlign": "center",
+                      "maxLines": 2,
+                      "width": "100%",
+                      "paddingTop": "8dp"
+                    },
+                    {
+                      "type": "DistanceChip",
+                      "distance": "${props.mosqueDistance}",
+                      "align": "center",
+                      "paddingTop": "6dp"
+                    },
+                    {
+                      "type": "Text",
+                      "when": "${props.mosqueDescription}",
+                      "style": "mosqueAddress",
+                      "text": "${props.mosqueDescription}",
+                      "textAlign": "center",
+                      "maxLines": 2,
+                      "width": "100%",
+                      "paddingTop": "6dp"
+                    },
+                    {
+                      "type": "Container",
+                      "width": "100%",
+                      "alignItems": "center",
+                      "paddingTop": "10dp",
+                      "paddingBottom": "6dp",
+                      "description": "The rule is wrapped rather than padded directly: padding on a Frame insets its content but still paints the background over the padded box, which turns a 1dp rule into a grey slab.",
+                      "item": {
+                        "type": "Frame",
+                        "width": "44dp",
+                        "height": "1dp",
+                        "background": "@colorDivider"
+                      }
+                    },
+                    {
+                      "type": "PrayerRow",
+                      "when": "${props.prayers.jumua}",
+                      "prayer": "${props.prayers.jumua}"
+                    },
+                    {
+                      "type": "PrayerRow",
+                      "when": "${props.prayers.jumua2}",
+                      "prayer": "${props.prayers.jumua2}"
+                    },
+                    {
+                      "type": "PrayerRow",
+                      "when": "${props.prayers.jumua3}",
+                      "prayer": "${props.prayers.jumua3}"
+                    },
+                    {
+                      "type": "NextPrayerStrip",
+                      "prayer": "${props.nextPrayer}",
+                      "label": "${props.nextLabel}",
+                      "paddingTop": "10dp"
                     }
-                ]
-            }
+                  ]
+                }
+              }
+            ]
+          }
         ]
-    },
-    "styles": {
-        "baseText": {
-            "values": [
-                {
-                    "width": "100%",
-                    "paddingBottom": "5dp",
-                    "fontSize": "${viewport.height > 480 ? 24 : 12}",
-                    "fontWeight": 600,
-                    "fontFamily": "Amazon Ember",
-                    "color": "#000000",
-                    "maxLines": 1,
-                    "textAlign": "center",
-                    "textAlignVertical": "center"
-                }
+      },
+      {
+        "type": "Container",
+        "when": "${viewport.width > viewport.height}",
+        "description": "LANDSCAPE — three zones: daily prayers, hero picture, Friday & Shuruq.",
+        "width": "100%",
+        "height": "100%",
+        "bind": [
+          {
+            "name": "props",
+            "value": "${payload.data.properties}"
+          },
+          {
+            "name": "mosquePicture",
+            "value": "${payload.data.properties.mosquePicture ? payload.data.properties.mosquePicture : @defaultMosquePicture}"
+          }
+        ],
+        "items": [
+          {
+            "type": "PageBackdrop",
+            "source": "@pageBackground",
+            "wash": "@gradientPage"
+          },
+          {
+            "type": "Container",
+            "id": "landscapeContent",
+            "width": "100%",
+            "height": "100%",
+            "paddingLeft": "@gutter",
+            "paddingRight": "@gutter",
+            "paddingTop": "@gutterV",
+            "paddingBottom": "@gutterV",
+            "layoutDirection": "${props.layoutDirection == 'RTL' ? 'RTL' : 'LTR'}",
+            "onMount": [
+              {
+                "type": "AnimateItem",
+                "componentId": "landscapeContent",
+                "duration": 600,
+                "easing": "ease-out",
+                "value": [
+                  {
+                    "property": "opacity",
+                    "from": 0,
+                    "to": 1
+                  },
+                  {
+                    "property": "transform",
+                    "from": [
+                      {
+                        "translateY": "18dp"
+                      }
+                    ],
+                    "to": [
+                      {
+                        "translateY": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "items": [
+              {
+                "type": "BrandHeader",
+                "when": "${viewport.height >= 600}",
+                "logo": "${props.skillLogoUrl}",
+                "label": "${props.skillName}",
+                "paddingBottom": "@gutterV"
+              },
+              {
+                "type": "Container",
+                "direction": "row",
+                "width": "100%",
+                "grow": 1,
+                "shrink": 1,
+                "alignItems": "stretch",
+                "items": [
+                  {
+                    "type": "DailyPanel",
+                    "prayers": "${props.prayers}",
+                    "panelHeight": "100%",
+                    "width": "@colWidth"
+                  },
+                  {
+                    "type": "Frame",
+                    "width": "@colGap"
+                  },
+                  {
+                    "type": "MosqueHero",
+                    "picture": "${mosquePicture}",
+                    "title": "${props.mosqueTitle}",
+                    "address": "${props.mosqueDescription}",
+                    "distance": "${props.mosqueDistance}",
+                    "grow": 1,
+                    "shrink": 1
+                  },
+                  {
+                    "type": "Frame",
+                    "width": "@colGap"
+                  },
+                  {
+                    "type": "FridayPanel",
+                    "prayers": "${props.prayers}",
+                    "panelHeight": "100%",
+                    "width": "@colWidth"
+                  }
+                ]
+              }
             ]
-        },
-        "baseSub": {
-            "extends": "baseText",
-            "values": [
-                {
-                    "width": "100%",
-                    "paddingTop": "5dp",
-                    "fontWeight": 400,
-                    "fontSize": "${viewport.width > 480 ? 20 : 12}",
-                    "color": "#000000",
-                    "maxLines": 2,
-                    "textAlign": "center",
-                    "textAlignVertical": "center"
+          }
+        ]
+      },
+      {
+        "type": "Container",
+        "description": "PORTRAIT — hero picture on top, then the day, then Friday & Shuruq. Scrolls on short viewports.",
+        "width": "100%",
+        "height": "100%",
+        "bind": [
+          {
+            "name": "props",
+            "value": "${payload.data.properties}"
+          },
+          {
+            "name": "mosquePicture",
+            "value": "${payload.data.properties.mosquePicture ? payload.data.properties.mosquePicture : @defaultMosquePicture}"
+          }
+        ],
+        "items": [
+          {
+            "type": "PageBackdrop",
+            "source": "@pageBackground",
+            "wash": "@gradientPage"
+          },
+          {
+            "type": "Container",
+            "id": "portraitContent",
+            "width": "100%",
+            "height": "100%",
+            "paddingLeft": "@gutter",
+            "paddingRight": "@gutter",
+            "paddingTop": "@gutterV",
+            "paddingBottom": "@gutterV",
+            "layoutDirection": "${props.layoutDirection == 'RTL' ? 'RTL' : 'LTR'}",
+            "onMount": [
+              {
+                "type": "AnimateItem",
+                "componentId": "portraitContent",
+                "duration": 600,
+                "easing": "ease-out",
+                "value": [
+                  {
+                    "property": "opacity",
+                    "from": 0,
+                    "to": 1
+                  },
+                  {
+                    "property": "transform",
+                    "from": [
+                      {
+                        "translateY": "18dp"
+                      }
+                    ],
+                    "to": [
+                      {
+                        "translateY": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "items": [
+              {
+                "type": "BrandHeader",
+                "logo": "${props.skillLogoUrl}",
+                "label": "${props.skillName}",
+                "paddingBottom": "@colGap"
+              },
+              {
+                "type": "ScrollView",
+                "width": "100%",
+                "grow": 1,
+                "shrink": 1,
+                "item": {
+                  "type": "Container",
+                  "width": "100%",
+                  "items": [
+                    {
+                      "type": "MosqueHero",
+                      "picture": "${mosquePicture}",
+                      "title": "${props.mosqueTitle}",
+                      "address": "${props.mosqueDescription}",
+                      "distance": "${props.mosqueDistance}",
+                      "width": "100%",
+                      "height": "34vh"
+                    },
+                    {
+                      "type": "Frame",
+                      "height": "@colGap"
+                    },
+                    {
+                      "type": "DailyPanel",
+                      "prayers": "${props.prayers}",
+                      "width": "100%"
+                    },
+                    {
+                      "type": "Frame",
+                      "height": "@colGap"
+                    },
+                    {
+                      "type": "FridayPanel",
+                      "prayers": "${props.prayers}",
+                      "width": "100%"
+                    }
+                  ]
                 }
+              }
             ]
-        },
-        "mainContent": {
-            "extends": "baseText",
-            "values": [
-                {
-                    "fontWeight": 200,
-                    "fontSize": "${viewport.width > 480 ? 20 : 12}"
-                }
-            ]
-        },
-        "baseSmall": {
-            "extends": "baseText",
-            "values": [
-                {
-                    "width": "100%",
-                    "paddingBottom": "5dp",
-                    "fontWeight": 400,
-                    "fontSize": "${viewport.width > 480 ? 12 : 6}",
-                    "color": "#000000",
-                    "maxLines": 1,
-                    "textAlign": "center",
-                    "textAlignVertical": "center"
-                }
-            ]
-        },
-        "labelSmall": {
-            "extends": "baseText",
-            "values": [
-                {
-                    "width": "auto",
-                    "fontSize": "${viewport.width > 480 ? 12 : 6}",
-                    "color": "#FFFAFA",
-                    "maxLines": 1,
-                    "textAlign": "left",
-                    "textAlignVertical": "center"
-                }
-            ]
-        },
-        "title": {
-            "values": [
-                {
-                    "fontWeight": 700,
-                    "fontSize": "${viewport.height > 480 ? 48 : 24}"
-                }
-            ]
-        }
-    }
+          }
+        ]
+      }
+    ]
+  }
 }

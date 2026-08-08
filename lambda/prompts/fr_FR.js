@@ -46,18 +46,22 @@ module.exports = {
     iqamaNotEnabledPrompt:
       "Les délais entre l'adhan et l'iqama ne sont pas fournis par votre mosquée.",
     mosqueInfoPrompt:
-      "Votre mosquée est %s, située à %s, à environ %s kilomètres de chez vous. ",
+      "Votre mosquée est %s, située à %s, à environ %s de chez vous. ",
     mosqueInfoErrorPrompt:
       "Désolé, je n'ai pas trouvé d'information sur votre mosquée. Veuillez réessayer.",
     nextPrayerTimeWithNamePrompt: `La prière de %s est à %s, dans %s. `,
     allIqamaTimesPrompt: "Pour %s, l'iqama est à %s. ",
     deleteDataPrompt: `Vos données ont bien été supprimées. Relancez la skill pour réutiliser ${process.env.SKILL_NAME}.`,
+    deleteDataConfirmPrompt: `Êtes-vous sûr de vouloir supprimer toutes vos données ? Cette action est irréversible.`,
+    deleteDataDeniedPrompt: `D'accord, vos données n'ont pas été supprimées.`,
+    errorDeleteDataPrompt: `Désolé, une erreur est survenue lors de la suppression de vos données. Veuillez réessayer plus tard.`,
     okPrompt: "Ok. ",
     jummaTimePrompt:
       "De plus, la prière du vendredi, le <sub alias='joumoua'>jumua</sub>, est à %s.",
     noJummaTimePrompt:
       "Il n'y a pas de prière du <sub alias='joumoua'>jumua</sub> dans cette mosquée.",
     none: "None",
+    nextPrayerLabel: "Prochaine prière",
     thankYouPrompt: `Merci d'utiliser ${process.env.SKILL_NAME} pour les horaires de prière de votre mosquée. `,
     globalErrorPrompt:
       "Désolé, je n'ai pas bien compris. Pouvez-vous répéter, s'il vous plaît ?",
@@ -91,10 +95,24 @@ module.exports = {
     timezoneErrorPrompt: `Désolé, je n'ai pas pu récupérer votre fuseau horaire. Vérifiez vos paramètres de localisation dans l'application Alexa, puis réessayez.`,
     requestRoutinePrompt:
       "Souhaitez-vous configurer une notification pour cette prière ?",
-    hadithWidgetTitle: "Hadith du jour",
-    hadithWidgetDescription: "Chargement...",
-    widgetInstallationErrorPrompt:
-      "Désolé, une erreur est survenue lors de l'installation du widget. Veuillez réessayer plus tard.",
+    widgets: {
+      nextPrayerTime: {
+        title: "Prochaine prière",
+        at: "à",
+        remaining: "restant",
+        itsTime: "C'est l'heure",
+        // Rendu "2h15" / "23 min" — le widget les concatène sans séparateur
+        // au-dessus de l'heure, donc pas d'espace autour.
+        hourUnit: "h",
+        minuteUnit: "min",
+      },
+      hadithOfTheDay: {
+        title: "Hadith du jour",
+        description: "Chargement...",
+      },
+      installationErrorPrompt:
+        "Désolé, une erreur est survenue lors de l'installation du widget. Veuillez réessayer plus tard.",
+    },
     nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s.",
     linkAccountPrompt:
       "Pour activer la notification, veuillez connecter votre compte Amazon dans l'application Alexa, puis réessayez.",
@@ -118,5 +136,6 @@ module.exports = {
     allPrayers: "Toutes les prières",
     oneMosquePrompt:
       "La seule mosquée autour de vous est %s. Voulez-vous la choisir ?",
+    userIdPrompt: "Votre code d'assistance est %s. ",
   },
 };

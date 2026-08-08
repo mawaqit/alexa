@@ -28,7 +28,6 @@ const AuthHandler = {
 
       await dbHandler.UpdateAzanUserInfo(userInfo.user_id, {
         refreshToken: accessToken.refresh_token,
-        emailId: userInfo.email,
       });
     } catch (error) {
       console.error("Failed to save authorization code:", error);
@@ -70,7 +69,7 @@ async function getRefreshToken(authCode) {
 }
 
 async function getUserInfo(accessToken) {
-  console.log("Access Token: ", accessToken);
+  // console.log("Access Token: ", accessToken);
   if (!accessToken) {
     throw new Error("Access token is required");
   }

@@ -1,0 +1,19 @@
+{
+  "nextPrayerData": {
+    "labels": {
+      "title": "Next Prayer",
+      "at": "at",
+      "remaining": "remaining",
+      "itsTime": "It's time",
+      "hourUnit": "h",
+      "minuteUnit": "min"
+    },
+    "data": {
+      "nextPrayerName": "Maghrib",
+      "nextPrayerTime": "9:15 PM",
+      "mosqueName": "Al-Noor Mosque"
+    },
+    "nextUpdateTime": 0,
+    "formattedNextUpdateTime": ""
+  }
+}

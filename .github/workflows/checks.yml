@@ -1,0 +1,63 @@
+# Reusable quality gate: lint, format check, typecheck, and tests.
+# Called by ci.yml (on PRs) and by the deploy workflows before any deploy runs,
+# so nothing ever ships without passing these.
+name: Quality Checks
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, format & types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # pnpm must be set up before setup-node so its cache can resolve the store.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # One install sets up the whole workspace (root tooling + both services).
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      # `tsc --noEmit` over azan-lambda. Serverless bundles the .ts handlers
+      # with esbuild, which strips types without checking them — so this is the
+      # only place a type error is caught before it ships.
+      - name: Typecheck
+        run: pnpm typecheck
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22 # matches the nodejs22.x runtime both lambdas deploy to
+          cache: pnpm
+
+      # One workspace install pulls in jest plus each service's runtime deps that
+      # the tests require in order to resolve the modules under test.
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm test

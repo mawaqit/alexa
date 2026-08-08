@@ -1,7 +1,7 @@
 module.exports = {
   translation: {
-    skillName: process.env.SKILL_NAME, //new
-    welcomePrompt: `Salam Aleykoum! `,
+    skillName: process.env.SKILL_NAME,
+    welcomePrompt: `Assalamu Alaikum! `,
     chooseMosquePrompt: `Which mosque would you like to choose? Here are the nearest mosques: %s. To choose one, say its number`,
     chooseMosqueByTouchPrompt:
       " or you can tap the mosque of your choice on the screen.",
@@ -43,15 +43,19 @@ module.exports = {
     selectedMosquePrompt: `Perfect, %s is now your favorite mosque! `,
     nextPrayerWithoutMosquePrompt: `The next prayer is %s at %s, in %s.`,
     iqamaNotEnabledPrompt: `The times between the adhan and the iqama are not provided by your mosque.`,
-    mosqueInfoPrompt: `Your mosque is %s, located at %s, about %s kilometers from you. `,
+    mosqueInfoPrompt: `Your mosque is %s, located at %s, about %s from you. `,
     mosqueInfoErrorPrompt: `Sorry, I couldn't find any information for your mosque. Please try again.`,
     nextPrayerTimeWithNamePrompt: `The %s prayer is at %s, in %s.`,
     allIqamaTimesPrompt: `For %s, iqama is at %s.`,
     deleteDataPrompt: `Your data has been successfully deleted. Restart the skill to use ${process.env.SKILL_NAME} again.`,
+    deleteDataConfirmPrompt: `Are you sure you want to delete all your data? This action cannot be undone.`,
+    deleteDataDeniedPrompt: `Okay, your data has not been deleted.`,
+    errorDeleteDataPrompt: `Sorry, an error occurred while deleting your data. Please try again later.`,
     okPrompt: `Okay. `,
     jummaTimePrompt: `Also, the Friday prayer, <sub alias='joomua'>Jumua</sub>, is at %s.`,
     noJummaTimePrompt: `There is no <sub alias='joomua'>Jumua</sub> prayer at this mosque.`,
     none: `None`,
+    nextPrayerLabel: `Next prayer`,
     thankYouPrompt: `Thank you for using ${process.env.SKILL_NAME} for the prayer times of your mosque. `,
     globalErrorPrompt: `Sorry, I didn't quite catch that. Could you say it again, please?`,
     fallbackPrompt: `Sorry, I didn't quite catch that. Could you say it again, please?`,
@@ -84,10 +88,24 @@ module.exports = {
     timezoneErrorPrompt: `Sorry, I couldn't retrieve your timezone. Please check your location settings in the Alexa app and try again.`,
     requestRoutinePrompt:
       "Would you like to set up a notification for this prayer?",
-    hadithWidgetTitle: "Hadith of the day",
-    hadithWidgetDescription: "Loading...",
-    widgetInstallationErrorPrompt:
-      "Sorry, an error occurred while installing the widget. Please try again later.",
+    widgets: {
+      nextPrayerTime: {
+        title: "Next Prayer",
+        at: "at",
+        remaining: "remaining",
+        itsTime: "It's time",
+        // Rendered as "2h15" / "23 min" — the widget joins these without a
+        // separator above the hour, so keep them free of surrounding spaces.
+        hourUnit: "h",
+        minuteUnit: "min",
+      },
+      hadithOfTheDay: {
+        title: "Hadith of the day",
+        description: "Loading...",
+      },
+      installationErrorPrompt:
+        "Sorry, an error occurred while installing the widget. Please try again later.",
+    },
     nextPrayerWithoutMosqueAndTimePrompt: `The next prayer is %s at %s.`,
     linkAccountPrompt:
       "To enable the notification, please link your Amazon account in the Alexa app and try again.",
@@ -111,5 +129,6 @@ module.exports = {
     allPrayers: "All Prayers",
     oneMosquePrompt:
       "The only mosque around you is %s. Do you want to choose this one?",
+    userIdPrompt: "Your support code is %s. ",
   },
 };

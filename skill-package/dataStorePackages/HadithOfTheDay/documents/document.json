@@ -1,0 +1,305 @@
+{
+  "type": "APL",
+  "version": "2024.2",
+  "theme": "dark",
+  "extensions": [
+    {
+      "name": "DataStore",
+      "uri": "alexaext:datastore:10"
+    }
+  ],
+  "settings": {
+    "DataStore": {
+      "dataBindings": [
+        {
+          "namespace": "hadithOfTheDay",
+          "key": "hadith",
+          "dataBindingName": "DS_Hadith",
+          "dataType": "OBJECT"
+        }
+      ]
+    }
+  },
+  "import": [
+    {
+      "name": "alexa-layouts",
+      "version": "1.7.0"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Artwork owned by the presentation layer.",
+      "strings": {
+        "pageBackground": "https://cdn.mawaqit.net/images/background-arabic-calligraphy.png",
+        "logoUrl": "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA"
+      }
+    },
+    {
+      "description": "Palette matching mosqueInfoApl.json.",
+      "colors": {
+        "colorGlass": "#FFFFFF14",
+        "colorStroke": "#FFFFFF2B",
+        "colorTextPrimary": "#F7F5FF",
+        "colorTextMuted": "#FFFFFFA3",
+        "colorAccent": "#F2C86B",
+        "colorAccentSoft": "#F2C86B24",
+        "colorDivider": "#FFFFFF1F"
+      },
+      "gradients": {
+        "gradientPage": {
+          "type": "linear",
+          "colorRange": [
+            "#0B0A1FD9",
+            "#0B0A1FF2",
+            "#150F33E6"
+          ],
+          "inputRange": [
+            0,
+            0.55,
+            1
+          ]
+        }
+      }
+    },
+    {
+      "description": "Metrics — medium widget.",
+      "dimensions": {
+        "padH": "22dp",
+        "padV": "20dp",
+        "brandLogo": "22dp",
+        "ruleWidth": "56dp"
+      },
+      "numbers": {
+        "fsLabel": 15,
+        "fsHadith": 18,
+        "fsBrand": 13
+      }
+    },
+    {
+      "when": "${viewport.width < 340}",
+      "description": "Metrics — compact widget.",
+      "dimensions": {
+        "padH": "16dp",
+        "padV": "14dp",
+        "brandLogo": "18dp",
+        "ruleWidth": "40dp"
+      },
+      "numbers": {
+        "fsLabel": 13,
+        "fsHadith": 15,
+        "fsBrand": 11
+      }
+    }
+  ],
+  "styles": {
+    "widgetLabel": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsLabel",
+          "fontWeight": 500,
+          "letterSpacing": "1.4dp",
+          "color": "@colorTextMuted",
+          "maxLines": 1
+        }
+      ]
+    },
+    "hadithBody": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsHadith",
+          "fontWeight": 400,
+          "color": "@colorTextPrimary",
+          "lineHeight": 1.4
+        }
+      ]
+    },
+    "brandLabel": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsBrand",
+          "fontWeight": 500,
+          "letterSpacing": "1.6dp",
+          "color": "@colorTextMuted",
+          "maxLines": 1
+        }
+      ]
+    }
+  },
+  "layouts": {
+    "PageBackdrop": {
+      "items": [
+        {
+          "type": "Container",
+          "items": [
+            {
+              "type": "Image",
+              "source": "@pageBackground",
+              "scale": "best-fill",
+              "align": "center",
+              "width": "100%",
+              "height": "100%"
+            },
+            {
+              "type": "Frame",
+              "position": "absolute",
+              "top": 0,
+              "left": 0,
+              "right": 0,
+              "bottom": 0,
+              "background": "@gradientPage"
+            }
+          ]
+        }
+      ]
+    },
+    "BrandMark": {
+      "items": [
+        {
+          "type": "Container",
+          "direction": "row",
+          "alignItems": "center",
+          "width": "100%",
+          "items": [
+            {
+              "type": "Image",
+              "source": "@logoUrl",
+              "width": "@brandLogo",
+              "height": "@brandLogo",
+              "scale": "best-fill",
+              "borderRadius": "5dp"
+            },
+            {
+              "type": "Text",
+              "style": "brandLabel",
+              "text": "MAWAQIT",
+              "paddingLeft": "8dp"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "mainTemplate": {
+    "parameters": [
+      "payload"
+    ],
+    "item": {
+      "type": "TouchWrapper",
+      "width": "100vw",
+      "height": "100vh",
+      "bind": [
+        {
+          "name": "updateTime",
+          "value": "${DS_Hadith.nextUpdateTime != null ? DS_Hadith.nextUpdateTime : payload.hadith.nextUpdateTime}",
+          "type": "number"
+        }
+      ],
+      "onMount": [
+        {
+          "type": "DataStore:WatchObject",
+          "namespace": "hadithOfTheDay",
+          "key": "hadith"
+        },
+        {
+          "type": "Idle",
+          "delay": 500
+        },
+        {
+          "type": "SendEvent",
+          "arguments": [
+            "FETCH_NEW_HADITH",
+            "${updateTime}"
+          ],
+          "flags": {
+            "interactionMode": "STANDARD"
+          }
+        }
+      ],
+      "onPress": [
+        {
+          "type": "SendEvent",
+          "arguments": [
+            "READ_HADITH",
+            "${DS_Hadith.content.hadithText ? DS_Hadith.content.hadithText : payload.hadith.content.hadithText}"
+          ],
+          "flags": {
+            "interactionMode": "STANDARD"
+          }
+        }
+      ],
+      "item": {
+        "type": "Container",
+        "width": "100%",
+        "height": "100%",
+        "items": [
+          {
+            "type": "PageBackdrop"
+          },
+          {
+            "type": "Container",
+            "position": "absolute",
+            "width": "100%",
+            "height": "100%",
+            "paddingLeft": "@padH",
+            "paddingRight": "@padH",
+            "paddingTop": "@padV",
+            "paddingBottom": "@padV",
+            "items": [
+              {
+                "type": "Container",
+                "direction": "row",
+                "width": "100%",
+                "justifyContent": "spaceBetween",
+                "items": [
+                  {
+                    "type": "Text",
+                    "style": "widgetLabel",
+                    "text": "${DS_Hadith.labels.title ? DS_Hadith.labels.title : payload.hadith.labels.title}"
+                  },
+                  {
+                    "type": "Text",
+                    "style": "widgetLabel",
+                    "text": "${Time.format('HH:mm', localTime)}"
+                  }
+                ]
+              },
+              {
+                "type": "ScrollView",
+                "width": "100%",
+                "grow": 1,
+                "shrink": 1,
+                "paddingTop": "16dp",
+                "paddingBottom": "16dp",
+                "item": {
+                  "type": "Text",
+                  "style": "hadithBody",
+                  "text": "${DS_Hadith.content.hadithText ? DS_Hadith.content.hadithText : payload.hadith.content.hadithText}"
+                }
+              },
+              {
+                "type": "Container",
+                "width": "100%",
+                "alignItems": "center",
+                "items": [
+                  {
+                    "type": "Frame",
+                    "width": "@ruleWidth",
+                    "height": "1dp",
+                    "background": "@colorDivider"
+                  },
+                  {
+                    "type": "BrandMark",
+                    "paddingTop": "12dp"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

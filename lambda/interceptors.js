@@ -43,7 +43,6 @@ const ResponseTimeCalculationInterceptor = {
 
 const AddDirectiveResponseInterceptor = {
   async process(handlerInput, response) {
-    console.log("AddDirectiveResponseInterceptor");
     const sessionAttributes = handlerInput.requestEnvelope?.session
       ? handlerInput.attributesManager.getSessionAttributes()
       : {};
@@ -56,11 +55,13 @@ const AddDirectiveResponseInterceptor = {
     const aplDirective = getAplDirective(directives);
     const { ssmlText, text, hasAudio } = getSsmlInfo(response);
 
-    console.log(
-      "APL Directive: %s \n SSML Text: %s",
-      JSON.stringify(aplDirective),
-      ssmlText,
-    );
+    // Redundant with LogResponseInterceptor, which already dumps the full
+    // response (including directives and outputSpeech).
+    // console.log(
+    //   "APL Directive: %s \n SSML Text: %s",
+    //   JSON.stringify(aplDirective),
+    //   ssmlText,
+    // );
 
     if (ssmlText && !hasAudio) {
       response["outputSpeech"]["ssml"] =
@@ -132,7 +133,6 @@ async function handleAplSupport(
     !hasAudio &&
     supportsAPL["Alexa.Presentation.APL"]
   ) {
-    console.log("Adding APL Directive");
     const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
     const directive = helperFunctions.createDirectivePayload(
       prayerTimeApl,
@@ -154,9 +154,7 @@ function handleNoAplSupport(
   text,
   skipCardDirective,
 ) {
-  console.log("APL not supported");
   if (ssmlText && !hasAudio && !skipCardDirective) {
-    console.log("Adding Simple Card");
     response.card = {
       type: "Simple",
       title: process.env.skillName,
@@ -167,8 +165,8 @@ function handleNoAplSupport(
 
 const LocalizationInterceptor = {
   async process(handlerInput) {
-    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
-    console.log("Request Type: ", requestType);
+    // Request type is redundant with LogRequestInterceptor, which already
+    // dumps the full request envelope (including request.type).
     let locale = Alexa.getLocale(handlerInput.requestEnvelope);
     // Gets the locale from the request and initializes i18next.
     const localizationClient = i18n.use(sprintf).init({
@@ -205,7 +203,6 @@ const LocalizationInterceptor = {
 
 const SavePersistenceAttributesToSession = {
   async process(handlerInput) {
-    console.log("SavePersistenceAttributesToSession Interceptor");
     if (helperFunctions.isNewSession(handlerInput)) {
       await handleNewSession(handlerInput);
     }
@@ -213,7 +210,6 @@ const SavePersistenceAttributesToSession = {
 };
 
 async function handleNewSession(handlerInput) {
-  console.log("New Session");
   const persistentAttributes =
     await helperFunctions.getPersistedData(handlerInput);
 
@@ -223,12 +219,9 @@ async function handleNewSession(handlerInput) {
 }
 
 async function processPersistentAttributes(handlerInput, persistentAttributes) {
-  console.log("Persistent Attributes: ", JSON.stringify(persistentAttributes));
-
   delete persistentAttributes.requestedRoutinePrayer;
   try {
     const userInfo = await GetUserInfo.process(handlerInput);
-    console.log("User Info Retrieved Successfully");
     if (userInfo && userInfo?.user_id && !persistentAttributes?.user_id) {
       persistentAttributes.user_id = userInfo?.user_id;
       handlerInput.attributesManager.setPersistentAttributes(
@@ -237,7 +230,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
       await handlerInput.attributesManager.savePersistentAttributes();
     }
   } catch (error) {
-    console.log("Error while fetching user info: ", error);
+    console.error("Error while fetching user info: ", error);
   }
 
   const sessionAttributes =
@@ -259,7 +252,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
     sessionAttributes.persistentAttributes = persistentAttributes;
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
   } catch (error) {
-    console.log("Error while fetching mosque list: ", error);
+    console.error("Error while fetching mosque list: ", error);
     if (error?.message === "Mosque not found") {
       await handlerInput.attributesManager.deletePersistentAttributes();
     } else if (error?.message === "Unable to fetch user timezone") {
@@ -273,14 +266,12 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
 
 const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(_handlerInput) {
-    console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
     await awsSsmHandler.handler();
   },
 };
 
 const GetUserInfo = {
   async process(handlerInput) {
-    console.log("GetUserInfo Interceptor");
     const accessToken =
       handlerInput.requestEnvelope?.session?.user?.accessToken;
     if (!accessToken) {
@@ -296,8 +287,6 @@ function updateRoutinePrayerTimings(
   mosqueTimes,
   persistentAttributes,
 ) {
-  console.log("Updating Routine Prayers: ", routinePrayers);
-  console.log("Mosque Times: ", mosqueTimes);
   if (
     routinePrayers &&
     Array.isArray(routinePrayers) &&
@@ -310,11 +299,9 @@ function updateRoutinePrayerTimings(
           prayerName?.toLowerCase() === prayer?.canonicalName?.toLowerCase() ||
           prayerName?.toLowerCase() === prayer?.name?.toLowerCase(),
       );
-      console.log("Canonical Index: ", canonicalIndex);
       // 2. Logic to get the new time from your mosque data
       // Assuming 'mosqueTimes' is an object where keys match canonical names
       const newTime = mosqueTimes[canonicalIndex];
-      console.log("New Time: ", newTime);
       // 3. Return the updated object
       return {
         ...prayer,
@@ -325,7 +312,6 @@ function updateRoutinePrayerTimings(
         time: newTime || prayer.time, // fallback to old time if mosque time is missing
       };
     });
-    console.log("Updated Routine Prayers: ", updatedPrayers);
     persistentAttributes.routinePrayers = updatedPrayers;
   }
 }

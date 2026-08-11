@@ -6,8 +6,6 @@ const helperFunctions = require("../helperFunctions");
  * Scans all mosques with existing schedules, fetches fresh prayer times, and updates the schedules.
  */
 async function handleDailyUpdate() {
-  console.log("Starting Daily Schedule Update...");
-
   try {
     // 1. Get all mosques and their active prayer schedules
     const mosquePrayersMap =
@@ -28,14 +26,14 @@ async function handleDailyUpdate() {
     // 2. Iterate through each mosque and update its schedules
     for (const mosqueId of mosqueIds) {
       try {
-        console.log(`Fetching prayer times for mosque: ${mosqueId}`);
         let timezone = null;
         try {
           const mosqueInfo = await apiHandler.getMosqueInformation(mosqueId);
           timezone = mosqueInfo?.timezone;
-        } catch {
-          console.log(
+        } catch (error) {
+          console.error(
             `Error fetching mosque information for mosque: ${mosqueId}`,
+            error,
           );
         }
         const prayerTimes = await apiHandler.getPrayerTimings(
@@ -63,16 +61,13 @@ async function handleDailyUpdate() {
 
           if (prayerIndex !== -1 && prayerTimes.times[prayerIndex]) {
             const time = prayerTimes.times[prayerIndex];
-            console.log(
-              `Updating schedule for mosque: ${mosqueId}, prayer: ${prayerName}, time: ${time}`,
-            );
             await eventBridgeScheduler.updateScheduleTimeOnly(
               mosqueId,
               prayerName,
               time,
             );
           } else {
-            console.log(
+            console.warn(
               `No prayer time found for mosque: ${mosqueId}, prayer: ${prayerName}`,
             );
           }

@@ -89,7 +89,6 @@ const LaunchRequestHandler = {
     const { attributesManager } = handlerInput;
     const sessionAttributes = attributesManager.getSessionAttributes();
     const { persistentAttributes } = sessionAttributes;
-    console.log("Persisted Data: ", persistentAttributes);
     const requestAttributes = attributesManager.getRequestAttributes();
     if (
       helperFunctions.isTaskTrigger(handlerInput) &&
@@ -119,7 +118,7 @@ const LaunchRequestHandler = {
     await helperFunctions
       .callDirectiveService(handlerInput, requestAttributes.t("welcomePrompt"))
       .catch((error) => {
-        console.log("Error while calling directive service: ", error);
+        console.error("Error while calling directive service: ", error);
       });
     return await helperFunctions.checkForPersistenceData(handlerInput);
   },
@@ -205,9 +204,7 @@ const SessionEndedRequestHandler = {
     );
   },
   handle(handlerInput) {
-    console.log(
-      `~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`,
-    );
+    // Full envelope already dumped by LogRequestInterceptor.
     // Any cleanup logic goes here.
     return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
   },
@@ -248,7 +245,7 @@ const ErrorHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const speakOutput = requestAttributes.t("errorPrompt");
-    console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
+    console.error(`~~~~ Error handled: ${JSON.stringify(error)}`);
 
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -266,7 +263,7 @@ const ExceptionEncounteredHandler = {
   },
   handle(handlerInput) {
     const error = handlerInput.requestEnvelope?.request?.error;
-    console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
+    console.error(`~~~~ Error handled: ${JSON.stringify(error)}`);
 
     return handlerInput.responseBuilder.getResponse();
   },

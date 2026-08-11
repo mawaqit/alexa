@@ -83,7 +83,6 @@ const getPrayerTimings = async (
       console.log("Mosque Timings: ", JSON.stringify(response.data));
       const currentDate = new Date();
       const dateAndMonth = getDateAndMonthForTimezone(timezone);
-      console.log("Date and Month: ", JSON.stringify(dateAndMonth));
       const date = dateAndMonth?.date ?? currentDate.getDate();
       const month = dateAndMonth?.month ?? currentDate.getMonth();
       const calendar = response?.data?.calendar;
@@ -101,8 +100,6 @@ const getPrayerTimings = async (
       if (!isPrayerCalendarRequired && response?.data?.calendar) {
         delete response.data.calendar;
       }
-
-      console.log("Mosque Times after Update: ", response?.data?.times);
 
       return response.data;
     })

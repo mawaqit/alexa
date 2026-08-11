@@ -72,7 +72,7 @@ const InstallHadithWidgetRequestHandler = {
       attributes.isHadithWidgetInstalled = true;
     } catch (error) {
       attributes.isHadithWidgetInstalled = false;
-      console.log("Error while installing hadith: ", error);
+      console.error("Error while installing hadith: ", error);
     }
     attributesManager.setPersistentAttributes(attributes);
     await attributesManager.savePersistentAttributes();
@@ -121,13 +121,8 @@ const UpdateHadithWidgetRequestHandler = {
     );
   },
   async handle(handlerInput) {
-    /* for now this information is not needed by this sample skill. 
-        Optional: it will be logged for tracking purposes. */
-    console.log(
-      "From Version" + handlerInput.requestEnvelope.request.fromVersion,
-    );
-    console.log("To Version" + handlerInput.requestEnvelope.request.toVersion);
-
+    // fromVersion/toVersion already captured in the full request envelope
+    // logged by LogRequestInterceptor; not otherwise needed by this handler.
     return handlerInput.responseBuilder.getResponse();
   },
 };
@@ -143,9 +138,8 @@ const WidgetInstallationErrorHandler = {
     );
   },
   async handle(handlerInput) {
-    console.log(
-      "Error Type: " + handlerInput.requestEnvelope.request?.error?.type,
-    );
+    // request.error.type already captured in the full request envelope
+    // logged by LogRequestInterceptor.
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const speakOutput = requestAttributes.t("widgets.installationErrorPrompt");
@@ -168,7 +162,6 @@ const UpdateHadithAPLEventHandler = {
   },
   async handle(handlerInput) {
     const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
-    console.log("Next Update Time: " + nextUpdateTime);
 
     const currentTime = Date.now();
 

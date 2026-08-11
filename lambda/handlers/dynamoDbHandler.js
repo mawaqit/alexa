@@ -18,7 +18,6 @@ const dynamo = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = process.env.AZAN_DYNAMO_DB_TABLE;
 
 async function GetAzanUserInfo(id) {
-  console.log(`[GetAzanUserInfo] Fetching user with id: ${id}`);
   const params = {
     TableName: TABLE_NAME,
     Key: {
@@ -47,8 +46,6 @@ async function UpdateAzanUserInfo(
   id,
   { refreshToken, endpointId, ...otherAttributes },
 ) {
-  console.log(`[UpdateAzanUserInfo] Attempting update for id: ${id}`);
-
   // Check if user exists to determine if we need to set CreatedTimestamp
   const existingUser = await GetAzanUserInfo(id);
   const timestamp = new Date().toISOString();
@@ -100,9 +97,6 @@ async function UpdateAzanUserInfo(
 }
 
 async function GetPersistenceUsersByMosqueId(mosqueId) {
-  console.log(
-    `[GetPersistenceUsersByMosqueId] Fetching users for mosqueId: ${mosqueId}`,
-  );
   const params = {
     TableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
     IndexName: "mosqueId_index",
@@ -129,7 +123,6 @@ async function GetPersistenceUsersByMosqueId(mosqueId) {
 
 async function BatchGetAzanUserInfo(userIds) {
   if (!userIds || userIds.length === 0) return [];
-  console.log(`[BatchGetAzanUserInfo] Fetching ${userIds.length} users.`);
 
   // DynamoDB BatchGetItem limit is 100 items
   const BATCH_SIZE = 100;
@@ -182,7 +175,6 @@ async function BatchGetAzanUserInfo(userIds) {
 }
 
 async function DeleteUserInfo(id) {
-  console.log(`[DeleteUserInfo] Attempting delete for id: ${id}`);
   const params = {
     TableName: "mawaqit-alexa-user-data-dev",
     Key: {
@@ -249,7 +241,6 @@ async function UpdateMosqueAzanData(id, attributes) {
 }
 
 async function GetUserBySupportId(supportId) {
-  console.log(`[GetUserBySupportId] Fetching user for supportId: ${supportId}`);
   const params = {
     TableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
     IndexName: "supportId-index",

@@ -31,14 +31,12 @@ const CANONICAL_PRAYER_NAMES = [
 
 const getPersistedData = async (handlerInput) => {
   try {
-    const userId = Alexa.getUserId(handlerInput.requestEnvelope);
     const attributesManager = handlerInput.attributesManager;
     const attributes =
       (await attributesManager.getPersistentAttributes()) || {};
-    console.log("Persisted Attributes for %s is %s ", userId, attributes);
     return attributes;
   } catch (err) {
-    console.log("Error in getPersistedData: ", err);
+    console.error("Error in getPersistedData: ", err);
     return null;
   }
 };
@@ -91,7 +89,6 @@ const getNextPrayerTime = async (
   );
   // Get the current moment object with time zone information
   const now = moment(currentDateTime);
-  console.log("Now: ", JSON.stringify(now));
 
   // Parse times into moment objects (assuming times are in your current time zone)
   const timeMoments = times.map((time, index) =>
@@ -104,15 +101,9 @@ const getNextPrayerTime = async (
       timezone,
     ),
   );
-  console.log("Time Moments: ", timeMoments);
   // Find the first time greater than or equal to current time (considering time zone)
   const nextTime = timeMoments.find(({ time }) => time.isSameOrAfter(now));
-  console.log("Next Time: ", nextTime);
   if (nextTime) {
-    console.log(
-      "The first time greater than or equal to current time is:",
-      nextTime,
-    );
     return {
       name: nextTime.name,
       time: nextTime.time.format("HH:mm"),
@@ -120,7 +111,6 @@ const getNextPrayerTime = async (
       diffInMinutes: nextTime.diffInMinutes,
     };
   } else {
-    console.log("No time is greater than or equal to current time: ", times[0]);
     // All of today's slots have passed → the next one is tomorrow's first
     // prayer (or iqama). Their actual times can differ from today's, so fetch
     // them from the calendar when we can rather than reusing today's times.
@@ -147,7 +137,7 @@ const getNextPrayerTime = async (
           }
         }
       } catch (error) {
-        console.log("Error fetching tomorrow's times: ", error);
+        console.error("Error fetching tomorrow's times: ", error);
       }
     }
     // For iqama, resolve tomorrow's first iqama moment (absolute or offset from
@@ -181,7 +171,6 @@ const checkForPersistenceData = async (handlerInput) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
   const { persistentAttributes, mosqueTimes } = sessionAttributes;
-  console.log("Persisted Data: ", persistentAttributes);
   const requestAttributes = attributesManager.getRequestAttributes();
   if (persistentAttributes) {
     return await getPrayerTimingsForMosque(handlerInput, mosqueTimes, "");
@@ -189,7 +178,6 @@ const checkForPersistenceData = async (handlerInput) => {
   const isLaunchRequest =
     Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest";
   if (isLaunchRequest) {
-    console.log("No persistent data found, prompting user to select mosque.");
     const speakOutput =
       requestAttributes.t("thankYouPrompt") +
       requestAttributes.t("mosqueNotRegisteredPrompt") +
@@ -257,7 +245,7 @@ const getPrayerTimingsForMosque = async (
       .withShouldEndSession(false)
       .getResponse();
   } catch (error) {
-    console.log("Error in fetching prayer timings: ", error);
+    console.error("Error in fetching prayer timings: ", error);
     if (error?.message === "Mosque not found") {
       return await getListOfMosque(handlerInput, speakOutput);
     }
@@ -304,7 +292,8 @@ const getListOfMosqueBasedOnGeoLocation = async (handlerInput, speakOutput) => {
       .withAskForPermissionsConsentCard(["alexa::devices:all:geolocation:read"])
       .getResponse();
   } else {
-    console.log("Location data: ", JSON.stringify(geoObject));
+    // Already captured in the full request envelope logged by
+    // LogRequestInterceptor (requestEnvelope.context.Geolocation).
     const { coordinate } = geoObject;
     const { latitudeInDegrees, longitudeInDegrees } = coordinate;
     try {
@@ -321,7 +310,7 @@ const getListOfMosqueBasedOnGeoLocation = async (handlerInput, speakOutput) => {
         speakOutput,
       );
     } catch (error) {
-      console.log("Error in fetching mosque list: ", error);
+      console.error("Error in fetching mosque list: ", error);
       return responseBuilder
         .speak(requestAttributes.t("errorPromptforMosqueList"))
         .withShouldEndSession(true)
@@ -472,11 +461,9 @@ const createResponseDirectiveForMosqueList = async (
       },
     },
   });
-  console.log("Mosque List: ", mosqueList);
   const mosqueListPrompt = mosqueList
     .map((mosque, index) => `${index + 1}. ${mosque.primaryText}`)
     .join(", ");
-  console.log("Mosque List Prompt: ", mosqueListPrompt);
   speechPrompt += requestAttributes.t("chooseMosquePrompt", mosqueListPrompt);
   if (
     Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
@@ -487,7 +474,6 @@ const createResponseDirectiveForMosqueList = async (
       handlerInput,
       mosqueList,
     );
-    console.log("Data Source: ", JSON.stringify(dataSource));
     const aplDirective = createDirectivePayload(mosqueListApl, dataSource);
     responseBuilder.addDirective(aplDirective);
     speechPrompt += requestAttributes.t("chooseMosqueByTouchPrompt");
@@ -509,7 +495,7 @@ const getUserTimezone = async (handlerInput) => {
       return timezone;
     })
     .catch((error) => {
-      console.log("Error in fetching user timezone: ", error);
+      console.error("Error in fetching user timezone: ", error);
       throw new Error("Unable to fetch user timezone");
     });
   return userTimeZone;
@@ -638,7 +624,7 @@ const getPrayerTimeForSpecificPrayer = (
       .withShouldEndSession(false)
       .getResponse();
   } catch (error) {
-    console.log("Error in fetching prayer time for specific prayer: ", error);
+    console.error("Error in fetching prayer time for specific prayer: ", error);
     return handlerInput.responseBuilder
       .speak(
         "Sorry, I am unable to fetch the prayer time for the specific prayer.",
@@ -779,13 +765,12 @@ const translateText = async (text, toLang) => {
     const translatedText = await translate(text, toLang);
     return translatedText ? translatedText : text;
   } catch (error) {
-    console.log("Error in converting %s to %s: %s", text, toLang, error);
+    console.error("Error in converting %s to %s: %s", text, toLang, error);
     return text;
   }
 };
 
 async function callDirectiveService(handlerInput, speakOutput) {
-  console.log("Call Directive Service");
   try {
     const requestEnvelope = handlerInput.requestEnvelope;
     const directiveServiceClient =
@@ -836,8 +821,8 @@ const createDataSourceForPrayerTiming = (time) => {
  */
 function getSlotValues(filledSlots) {
   const slotValues = {};
-  console.log(`The filled slots: ${JSON.stringify(filledSlots)}`);
-
+  // filledSlots is already visible in the full request envelope logged by
+  // LogRequestInterceptor (request.intent.slots).
   Object.keys(filledSlots || {}).forEach((key) => {
     const slot = filledSlots[key];
     const name = slot?.name || key;
@@ -890,7 +875,6 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
   const locale = Alexa.getLocale(handlerInput.requestEnvelope);
-  console.log("User Timezone: ", userTimeZone);
   const prayerNames = requestAttributes.t("prayerNames");
   let allPrayerTimes = "";
   const currentDateTime = new Date(
@@ -907,7 +891,6 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
         undefined,
         userTimeZone,
       );
-      console.log("Prayer Details for %s: ", prayer, prayerDetails);
       allPrayerTimes += requestAttributes.t(
         "allPrayerTimesPrompt",
         prayer,
@@ -1031,7 +1014,6 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   const { routinePrayers } = persistentAttributes;
   const requestAttributes = attributesManager.getRequestAttributes();
   const mosqueTimes = sessionAttributes.mosqueTimes;
-  console.log("Mosque Times: ", JSON.stringify(mosqueTimes));
   const prayerNames = requestAttributes.t("prayerNames");
   const prayerNamesForApl = extractPhonemeText(prayerNames);
   const userTimeZone = await getUserTimezone(handlerInput);
@@ -1050,7 +1032,6 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
           undefined,
           userTimeZone,
         );
-        console.log("Prayer Details for %s: ", prayer, prayerDetails);
         const time = prayerDetails.time.format("HH:mm");
         const prayerName = prayerNamesForApl[index];
         return {
@@ -1096,7 +1077,6 @@ async function generatePrayerNameDetailsForRoutine(handlerInput) {
   }
   sessionAttributes.prayerNameDetails = prayerNameDetails;
   handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-  console.log("Final Prayer Name Details: ", JSON.stringify(prayerNameDetails));
   return prayerNameDetails;
 }
 
@@ -1216,10 +1196,8 @@ const logRoutineCreation = async (
     for (const prayer of prayerNameDetails) {
       const prayerNameForSchedule = prayer.canonicalName || prayer.name;
       const time = prayer.time;
-      console.log("Mosque ID: ", mosqueId);
-      console.log("Prayer Name (Schedule): ", prayerNameForSchedule);
-      console.log("Time: ", time);
-      console.log("Timezone: ", timezone);
+      // eventBridgeScheduler logs the outcome of the mutation itself
+      // (created/updated schedule name) — no need to duplicate the inputs here.
       if (
         mosqueId &&
         prayerNameForSchedule &&
@@ -1256,7 +1234,7 @@ const logRoutineCreation = async (
       .withShouldEndSession(false)
       .getResponse();
   } catch (error) {
-    console.log("Error in logRoutineCreation:", error);
+    console.error("Error in logRoutineCreation:", error);
     if (error?.message === "Unable to fetch user timezone") {
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1435,7 +1413,7 @@ const getUserDistanceUnits = async (handlerInput) => {
       .getSystemDistanceUnits(deviceId);
     return units === "IMPERIAL" ? "IMPERIAL" : "METRIC";
   } catch (error) {
-    console.log("Error in fetching distance units, using default: ", error);
+    console.error("Error in fetching distance units, using default: ", error);
     const locale = Alexa.getLocale(requestEnvelope) || "";
     return locale.toLowerCase() === "en-us" ? "IMPERIAL" : "METRIC";
   }

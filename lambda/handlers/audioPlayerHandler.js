@@ -72,7 +72,6 @@ const AudioPlayerEventHandler = {
   },
   async handle(handlerInput) {
     const audioPlayerEvent = Alexa.getRequestType(handlerInput.requestEnvelope);
-    console.log("Audio Player Event:", audioPlayerEvent);
     if (audioPlayerEvent === "AudioPlayer.PlaybackFinished") {
       return handlerInput.responseBuilder
         .addAudioPlayerStopDirective()
@@ -91,7 +90,6 @@ const PlaybackCommandHandler = {
   },
   async handle(handlerInput) {
     const playback = Alexa.getRequestType(handlerInput.requestEnvelope);
-    console.log("Playback Command: ", playback);
     if (playback === "PlaybackController.PauseCommandIssued") {
       return handlerInput.responseBuilder
         .addAudioPlayerStopDirective()

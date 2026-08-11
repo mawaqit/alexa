@@ -214,7 +214,6 @@ const getMetadata = (handlerInput, title) => {
       ],
     },
   };
-  console.log("Metadata: ", JSON.stringify(metadata));
   return metadata;
 };
 

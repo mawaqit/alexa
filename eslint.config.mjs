@@ -9,6 +9,13 @@ import tseslint from "typescript-eslint";
 export default [
   // Reuse .gitignore so build artifacts are ignored in one place and stay in sync automatically.
   includeIgnoreFile(path.resolve(import.meta.dirname, ".gitignore")),
+  // web/ (React + Vite) is deliberately its own toolchain, not folded into
+  // this one: its .tsx files need a DOM lib and JSX parsing that would
+  // conflict with the Lambda-oriented TS config below (and no block here
+  // matches *.tsx at all, so without this exclusion those files would be
+  // silently unlinted rather than cleanly out of scope). Give it its own
+  // eslint config when it grows enough to need one.
+  { ignores: ["web/**"] },
   js.configs.recommended,
   {
     // The JavaScript half of the workspace (`lambda/`). Scoped to .js so these

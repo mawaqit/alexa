@@ -1,0 +1,8 @@
+{
+  "name": "mawaqit-alexa-web-infra",
+  "private": true,
+  "scripts": {
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod"
+  }
+}

@@ -5,3 +5,7 @@
 
 # Jest coverage output (`jest --coverage`)
 coverage
+
+# Vite build output (web/)
+web/dist
+web/.env.local

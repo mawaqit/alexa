@@ -1,7 +1,10 @@
 packages:
   - "lambda"
   - "azan-lambda"
+  - "web"
+  - "web-infra"
 allowBuilds:
   '@parcel/watcher': true
   protobufjs: true
+  serverless: true
   unrs-resolver: true

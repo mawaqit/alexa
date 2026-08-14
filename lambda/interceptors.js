@@ -8,6 +8,7 @@ const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
 const { getDataSourceForPrayerTime } = require("./datasources.js");
 const awsSsmHandler = require("./handlers/awsSsmHandler.js");
 const authHandler = require("./handlers/authHandler.js");
+const webConfigHandler = require("./handlers/webConfigHandler.js");
 
 const LogRequestInterceptor = {
   process(handlerInput) {
@@ -215,6 +216,60 @@ async function handleNewSession(handlerInput) {
 
   if (persistentAttributes?.uuid) {
     await processPersistentAttributes(handlerInput, persistentAttributes);
+  } else {
+    // No mosque selected via voice yet — but the user may have configured
+    // one from the companion website before ever opening the skill (or
+    // before finishing account linking). If so, apply it now instead of
+    // falling through to the usual "please select a mosque" prompt.
+    await tryHydrateFromWebConfig(handlerInput);
+  }
+}
+
+/**
+ * Web-first hydration: applies a mosque/prayer selection staged from the
+ * companion website (see webConfigHandler.applyPendingWebConfig) on the
+ * user's first Alexa launch after account linking. Alexa-first users get
+ * this applied immediately when they save from the website instead — this
+ * is only the fallback for the other order.
+ */
+async function tryHydrateFromWebConfig(handlerInput) {
+  try {
+    const userInfo = await GetUserInfo.process(handlerInput);
+    if (!userInfo?.user_id) {
+      return; // not account-linked yet — the existing "please link your account" prompt is untouched
+    }
+
+    // Already inside a live Alexa request, so the Alexa id is known
+    // directly — same lookup CustomDynamoDbPersistenceAdapter's default
+    // partitionKeyGenerator uses. Passed through so applyPendingWebConfig
+    // can skip the userId-index GSI, which can't find a brand-new user's
+    // row yet (see the comment on that function).
+    const alexaId =
+      handlerInput.requestEnvelope?.session?.user?.userId ||
+      handlerInput.requestEnvelope?.context?.System?.user?.userId;
+    if (!alexaId) {
+      return;
+    }
+
+    const result = await webConfigHandler.applyPendingWebConfig(
+      userInfo.user_id,
+      {
+        alexaId,
+      },
+    );
+    if (!result.applied) {
+      return; // nothing staged from the website, or not enough staged yet to apply (e.g. no mosque)
+    }
+
+    // applyPendingWebConfig wrote straight to DynamoDB via its own adapter
+    // instance, bypassing this request's attributesManager cache — push its
+    // result in directly rather than re-reading through
+    // attributesManager.getPersistentAttributes(), which would hand back
+    // the stale pre-write value it already cached earlier in this request.
+    handlerInput.attributesManager.setPersistentAttributes(result.attributes);
+    await processPersistentAttributes(handlerInput, result.attributes);
+  } catch (error) {
+    console.error("Error while hydrating from web config: ", error);
   }
 }
 

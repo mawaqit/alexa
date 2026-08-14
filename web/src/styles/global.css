@@ -1,0 +1,558 @@
+/* Palette taken from the actual MAWAQIT Alexa skill icon
+   (skill-package/assets/images/large-mawaqit-icon.png) — a deep indigo-to-
+   violet gradient badge. */
+:root {
+  --color-primary: #6d28d9;
+  --color-primary-hover: #5b21b6;
+  --color-primary-light: #8b5cf6;
+  --color-primary-dark: #3b0f70;
+  --gradient-brand: linear-gradient(160deg, #3b0f70 0%, #6d28d9 100%);
+
+  --color-bg: #f7f5fc;
+  --color-surface: #ffffff;
+  --color-border: #e6e0f5;
+  --color-text: #1f1533;
+  --color-text-muted: #6b6280;
+
+  --color-error-bg: #fdecea;
+  --color-error-text: #b3261e;
+  --color-pending-bg: #f3ecfc;
+  --color-pending-text: #5b21b6;
+  --color-ok-bg: #e8f6ee;
+  --color-ok-text: #1f7a4d;
+
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(59, 15, 112, 0.1);
+  --shadow-lg: 0 12px 32px rgba(59, 15, 112, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+h1,
+h2 {
+  margin: 0 0 0.5rem;
+  color: var(--color-primary-dark);
+}
+
+.page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: var(--color-text-muted);
+}
+
+.muted-text {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+/* Landing */
+.landing {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--gradient-brand);
+}
+
+.landing-card {
+  max-width: 26rem;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.landing-logo {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  margin-bottom: 0.75rem;
+}
+
+.landing-card p {
+  color: var(--color-text-muted);
+  margin: 0.75rem 0 1.5rem;
+}
+
+/* Dashboard */
+.dashboard {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dashboard-header h1 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.header-logo {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+}
+
+.dashboard-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-section h2 {
+  font-size: 1.1rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+.status-banner {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+}
+
+.status-ok {
+  background: var(--color-ok-bg);
+  color: var(--color-ok-text);
+}
+
+.status-pending {
+  background: var(--color-pending-bg);
+  color: var(--color-pending-text);
+}
+
+.error-banner {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  border: 1px dashed var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* Buttons */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.button-secondary {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+  border-color: var(--color-border);
+}
+
+.button-secondary:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.button-text {
+  background: transparent;
+  color: var(--color-primary);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.button-text:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+/* Mosque card / search */
+.mosque-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.mosque-card p,
+.mosque-result-info p {
+  margin: 0.15rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.mosque-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.mosque-search-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.mosque-search-form {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 14rem;
+}
+
+.mosque-search-form input {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+.mosque-search-form input:focus {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 1px;
+}
+
+.mosque-results {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mosque-result {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+}
+
+.mosque-result-info {
+  flex: 1;
+}
+
+/* Toggle switch */
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.switch-row-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Visually hidden but still focusable/keyboard-operable — the real
+   interactive element for screen readers and Tab/Space. */
+.switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.switch-track {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--color-border);
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  /* A little overshoot rather than a linear slide — the same "snap" feel as
+     the button taps elsewhere on the page. */
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.switch-input:checked + .switch-track {
+  background: var(--color-primary);
+}
+
+.switch-input:checked + .switch-track .switch-thumb {
+  transform: translateX(1rem);
+}
+
+.switch-input:focus-visible + .switch-track {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+.switch-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Radio button (favorite reciter) */
+.radio-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.radio-row-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.radio-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.radio-dot {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.radio-dot::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  transform: scale(0);
+  /* Same overshoot feel as the switch thumb — one consistent "snap" motion
+     language across every selection control on the page. */
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.radio-input:checked + .radio-dot {
+  border-color: var(--color-primary);
+}
+
+.radio-input:checked + .radio-dot::after {
+  transform: scale(1);
+}
+
+.radio-input:focus-visible + .radio-dot {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+.radio-label {
+  flex: 1;
+  font-weight: 600;
+}
+
+/* Reciter selector */
+.reciter-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.reciter-selector-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Prayer selector */
+.prayer-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prayer-name {
+  font-weight: 600;
+}
+
+.prayer-time {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Setup wizard */
+.wizard {
+  overflow: hidden;
+}
+
+.step-indicator {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.step-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+
+.step-dot-active {
+  background: var(--color-primary);
+}
+
+.wizard-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.wizard-welcome,
+.wizard-done {
+  align-items: center;
+  text-align: center;
+  padding: 1rem 0.5rem;
+}
+
+.wizard-welcome h2,
+.wizard-done h2 {
+  margin-top: 0.5rem;
+}
+
+.wizard-welcome p,
+.wizard-done p {
+  max-width: 26rem;
+}
+
+.wizard-logo {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  box-shadow: var(--shadow-lg);
+}
+
+.wizard-checkmark {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--color-ok-bg);
+  color: var(--color-ok-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wizard-checkmark svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}

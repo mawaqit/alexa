@@ -6,6 +6,7 @@ const {
   DeleteCommand,
   QueryCommand,
   BatchGetCommand,
+  UpdateCommand,
 } = require("@aws-sdk/lib-dynamodb");
 
 // CRITICAL: Initialize Client pointing to PARIS (eu-west-3)
@@ -54,6 +55,12 @@ async function UpdateAzanUserInfo(
   // So existingUser?.refresh_token works even if existingUser is missing.
 
   const item = {
+    // Preserve every field this call doesn't know about (e.g.
+    // pendingMosqueSelection/pendingRoutinePrayers staged by the website —
+    // see webConfigHandler.js) — this was previously a plain PutCommand
+    // built from scratch, which silently wiped any such field the moment
+    // account linking ran, before it ever had a chance to be applied.
+    ...existingUser,
     id: id,
     refresh_token: refreshToken ?? existingUser?.refresh_token,
     endpointId: endpointId ?? existingUser?.endpointId,
@@ -90,6 +97,62 @@ async function UpdateAzanUserInfo(
   } catch (error) {
     console.error(
       `[UpdateAzanUserInfo] Error updating user info for id ${id}:`,
+      error,
+    );
+    throw error;
+  }
+}
+
+/**
+ * Atomically updates arbitrary attributes on the azan-users-data table via a
+ * single UpdateExpression — never a read-modify-write like UpdateAzanUserInfo
+ * above. This table is now written concurrently by three call sites (this
+ * Lambda's own AuthHandler, azan-lambda's discovery/authorization handlers,
+ * and the website's webConfigHandler), so a PutCommand built from a stale
+ * read would silently drop whichever writer lost the race. Mirrors
+ * azan-lambda/src/services/azanUsers.ts's updateAzanUserInfo.
+ *
+ * Pass `null` (not `undefined`) to clear a field — DynamoDB has no
+ * "undefined" attribute value, so an `undefined` here is simply skipped
+ * rather than written.
+ */
+async function UpdateAzanUserAttributesAtomic(id, attributes) {
+  const timestamp = new Date().toISOString();
+
+  let updateExpression =
+    "SET #updatedTimestamp = :updatedTimestamp, #createdTimestamp = if_not_exists(#createdTimestamp, :createdTimestamp)";
+  const expressionAttributeNames = {
+    "#updatedTimestamp": "updatedTimestamp",
+    "#createdTimestamp": "createdTimestamp",
+  };
+  const expressionAttributeValues = {
+    ":updatedTimestamp": timestamp,
+    ":createdTimestamp": timestamp,
+  };
+
+  for (const [key, value] of Object.entries(attributes)) {
+    if (value === undefined) continue;
+    updateExpression += `, #attr_${key} = :val_${key}`;
+    expressionAttributeNames[`#attr_${key}`] = key;
+    expressionAttributeValues[`:val_${key}`] = value;
+  }
+
+  const params = {
+    TableName: TABLE_NAME,
+    Key: { id },
+    UpdateExpression: updateExpression,
+    ExpressionAttributeNames: expressionAttributeNames,
+    ExpressionAttributeValues: expressionAttributeValues,
+    ReturnValues: "ALL_NEW",
+  };
+
+  try {
+    const data = await dynamo.send(new UpdateCommand(params));
+    console.log(`[UpdateAzanUserAttributesAtomic] Updated user ${id}`);
+    return data.Attributes;
+  } catch (error) {
+    console.error(
+      `[UpdateAzanUserAttributesAtomic] Error updating user ${id}:`,
       error,
     );
     throw error;
@@ -263,13 +326,79 @@ async function GetUserBySupportId(supportId) {
   }
 }
 
+// Bridges an LWA account id (what the website has, from Login With Amazon)
+// to the Alexa-linked persistence row (keyed by the Alexa skill's own user
+// id) — the "userId-index" GSI this depends on is a manual DynamoDB step
+// (see the plan), not something this repo's IaC provisions.
+async function GetPersistenceUserByUserId(userId) {
+  const params = {
+    TableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
+    IndexName: "userId-index",
+    KeyConditionExpression: "userId = :userId",
+    ExpressionAttributeValues: {
+      ":userId": userId,
+    },
+  };
+
+  try {
+    const data = await dynamo.send(new QueryCommand(params));
+    console.log(
+      `[GetPersistenceUserByUserId] Found ${data.Items?.length || 0} users.`,
+    );
+    return data.Items?.[0] || null;
+  } catch (error) {
+    console.error(
+      `[GetPersistenceUserByUserId] Error fetching user for userId ${userId}:`,
+      error,
+    );
+    throw error;
+  }
+}
+
+// Direct lookup by the Alexa skill's own id — used when the caller is
+// already inside a live Alexa request and so already knows this id
+// directly (interceptors.js), instead of discovering it via the
+// userId-index GSI. That GSI can only find a row whose attributes.user_id
+// has already been promoted to the top-level userId column, which for a
+// brand-new user hasn't happened yet — see webConfigHandler.applyPendingWebConfig.
+async function GetPersistenceUserById(id) {
+  const params = {
+    TableName: process.env.PERSISTENCE_ADAPTER_TABLE_NAME,
+    Key: { id },
+    // webConfigHandler.applyPendingWebConfig relies on this being the
+    // freshest possible copy of `attributes` — it does a read-then-full-replace
+    // and is called for independent saves in quick succession (mosque,
+    // reciter, prayers), so a default eventually-consistent read here could
+    // hand back a snapshot that predates the *previous* save's write and
+    // silently wipe it.
+    ConsistentRead: true,
+  };
+
+  try {
+    const data = await dynamo.send(new GetCommand(params));
+    return data.Item || null;
+  } catch (error) {
+    console.error(
+      `[GetPersistenceUserById] Error fetching user for id ${id}:`,
+      error,
+    );
+    throw error;
+  }
+}
+
 module.exports = {
   GetAzanUserInfo,
   UpdateAzanUserInfo,
+  UpdateAzanUserAttributesAtomic,
   DeleteUserInfo,
   GetPersistenceUsersByMosqueId,
   BatchGetAzanUserInfo,
   GetMosqueAzanData,
   UpdateMosqueAzanData,
   GetUserBySupportId,
+  GetPersistenceUserByUserId,
+  GetPersistenceUserById,
+  // Exposed so webConfigHandler.js can build a CustomDynamoDbPersistenceAdapter
+  // against the same client instead of opening a second connection pool.
+  rawDynamoDbClient: client,
 };

@@ -2,14 +2,16 @@
 
 Backend for the MAWAQIT Alexa skill: prayer time lookups, routines, widgets, and the Smart Azan (adhan) notification system.
 
-The project is split into two independently deployed Serverless Framework services, plus the Alexa skill configuration itself:
+The project is split into independently deployed Serverless Framework services, a static companion website, and the Alexa skill configuration itself:
 
-| Path                 | Service name         | Language   | What it does                                                         |
-| -------------------- | -------------------- | ---------- | -------------------------------------------------------------------- |
-| `lambda/`            | `alexa`              | JavaScript | Main skill backend: intent handling, prayer times, routines, widgets |
-| `azan-lambda/`       | `mawaqit-alexa-azan` | TypeScript | Smart Azan: scheduled adhan playback dispatch                        |
-| `skill-package/`     | -                    | -          | Alexa skill package: manifest (`skill.json`), interaction models, tasks, routine triggers — deployed via `ask deploy` |
-| `utils/`             | -                    | -          | One-off Python script for generating locale files                    |
+| Path                 | Service name              | Language   | What it does                                                         |
+| -------------------- | -------------------------- | ---------- | -------------------------------------------------------------------- |
+| `lambda/`            | `alexa`                    | JavaScript | Main skill backend: intent handling, prayer times, routines, widgets, and the companion website's HTTP API (`webApiHandler`) |
+| `azan-lambda/`       | `mawaqit-alexa-azan`       | TypeScript | Smart Azan: scheduled adhan playback dispatch                        |
+| `web/`               | -                          | TypeScript | Companion website (React + Vite SPA) — LWA login, mosque selection, Azan prayer picker |
+| `web-infra/`         | `mawaqit-alexa-web-infra`  | -          | S3 + CloudFront hosting for `web/` — resources only, no Lambda functions |
+| `skill-package/`     | -                          | -          | Alexa skill package: manifest (`skill.json`), interaction models, tasks, routine triggers — deployed via `ask deploy` |
+| `utils/`             | -                          | -          | One-off Python script for generating locale files                    |
 
 The codebase is migrating to TypeScript one service at a time — see
 [TypeScript](#typescript).
@@ -37,13 +39,23 @@ alexa/
 │   ├── tests/                 # Jest tests for this service
 │   ├── env.json
 │   └── serverless.yml
+├── web/                        # Companion website (React + Vite, own toolchain — not in the root tsconfig/eslint)
+│   ├── src/pages/                # Landing (LWA login), Dashboard (status + wizard)
+│   ├── src/components/           # SetupWizard, MosqueSearch, PrayerSelector, Switch, LinkStatusBanner
+│   ├── src/api/client.ts         # Typed fetch wrapper over lambda/'s webApiHandler routes
+│   ├── .env / .env.dev / .env.prod  # VITE_API_BASE_URL per environment
+│   └── vite.config.ts
+├── web-infra/                  # S3 + CloudFront for web/ (service: mawaqit-alexa-web-infra)
+│   └── serverless.yml            # Resources only — no functions
+├── scripts/
+│   └── deploy-web.js           # Builds web/, syncs to S3, invalidates CloudFront
 ├── skill-package/             # Alexa skill package, deployed via `ask deploy`
 │   ├── skill.json             # Skill manifest (endpoints, publishing info)
 │   ├── interactionModels/     # custom/<locale>.json — one voice model per locale
 │   ├── tasks/                 # Custom task definitions (PlayAdhaan)
 │   └── routines/              # Ready-made routine triggers
 ├── ask-resources.json         # ASK CLI deploy config (points at skill-package/)
-├── tsconfig.json              # TypeScript config for the whole workspace
+├── tsconfig.json              # TypeScript config for the whole workspace (azan-lambda only — see TypeScript)
 └── utils/                     # create_locale_files.py (locale scaffolding script)
 ```
 

@@ -1,0 +1,135 @@
+# Static hosting for the MAWAQIT companion website (web/) — S3 + CloudFront.
+#
+# Deliberately its own service, not folded into lambda/serverless.yml:
+# a CloudFront distribution update in CloudFormation can take 15–45 minutes
+# to propagate, which would slow down every unrelated lambda/ deploy if the
+# two stacks were combined. This bucket/distribution also change far less
+# often than Lambda code does, so a slower, separate deploy cadence is fine.
+#
+# No Lambda functions here — resources only.
+org: mawaqit
+app: alexa
+service: mawaqit-alexa-web-infra
+
+frameworkVersion: ^4.0.0
+
+# lambda/ (service "alexa") already has a per-stage deployment bucket from
+# an older Serverless Framework bootstrap mechanism — not the newer
+# SSM-tracked shared-bucket one (that path turned out not to exist in this
+# region at all; azan-lambda's equivalent lives under a different region,
+# eu-west-1, since its compute runs there). Reusing lambda/'s bucket here
+# needs no new permission: this deploy role already writes to it
+# successfully on every lambda/ deploy.
+custom:
+  deploymentBuckets:
+    dev: alexa-dev-serverlessdeploymentbucket-buhv6psgopml
+    prod: alexa-prod-serverlessdeploymentbucket-o5x5kgpjercr
+
+provider:
+  name: aws
+  region: ${opt:region, 'eu-west-3'}
+  stage: ${opt:stage, 'dev'}
+  deploymentBucket:
+    name: ${self:custom.deploymentBuckets.${self:provider.stage}}
+
+functions: {}
+
+resources:
+  Resources:
+    WebBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        # S3 bucket names are globally unique across every AWS account, not
+        # just this one — the account id suffix avoids a collision with
+        # someone else's bucket.
+        BucketName: mawaqit-alexa-web-${self:provider.stage}-${aws:accountId}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+
+    # CloudFront reaches the (fully private) bucket via Origin Access
+    # Control — the current AWS-recommended pattern, not the older public
+    # "S3 static website hosting" endpoint or origin access identity (OAI).
+    WebOriginAccessControl:
+      Type: AWS::CloudFront::OriginAccessControl
+      Properties:
+        OriginAccessControlConfig:
+          Name: mawaqit-alexa-web-${self:provider.stage}-oac
+          OriginAccessControlOriginType: s3
+          SigningBehavior: always
+          SigningProtocol: sigv4
+
+    WebDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Enabled: true
+          DefaultRootObject: index.html
+          # North America + Europe edge locations only — cheapest tier,
+          # plenty for this app's audience. Widen later if needed; it's a
+          # one-line config change, not a redesign.
+          PriceClass: PriceClass_100
+          HttpVersion: http2
+          Origins:
+            - Id: WebBucketOrigin
+              DomainName: !GetAtt WebBucket.RegionalDomainName
+              OriginAccessControlId: !Ref WebOriginAccessControl
+              S3OriginConfig:
+                OriginAccessIdentity: ""
+          DefaultCacheBehavior:
+            TargetOriginId: WebBucketOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            # AWS managed "CachingOptimized" policy — long TTL, automatic
+            # gzip/brotli variants. Standard choice for static assets, no
+            # custom cache policy needed.
+            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          # The SPA has no client-side router yet (App.tsx switches views by
+          # auth state, not by URL) — these are here anyway so adding one
+          # later is a code change, not also an infra change: any path
+          # S3/OAC would 403/404 on falls back to index.html so client-side
+          # routing can take over.
+          CustomErrorResponses:
+            - ErrorCode: 403
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+            - ErrorCode: 404
+              ResponseCode: 200
+              ResponsePagePath: /index.html
+          # No custom domain yet — CloudFront's own *.cloudfront.net domain
+          # and default certificate. Adding a domain later: set `Aliases`
+          # and `ViewerCertificate.AcmCertificateArn` here (the cert MUST be
+          # in us-east-1 — CloudFront's one hard requirement, regardless of
+          # the rest of this stack running in eu-west-3).
+
+    # Grants CloudFront (and only this specific distribution) read access to
+    # the bucket. Deploy order isn't a problem: WebDistribution only depends
+    # on WebBucket, not on this policy, so CloudFormation creates the
+    # bucket, then the distribution, then this policy — no cycle.
+    WebBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref WebBucket
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: cloudfront.amazonaws.com
+              Action: s3:GetObject
+              Resource: !Sub "${WebBucket.Arn}/*"
+              Condition:
+                StringEquals:
+                  AWS:SourceArn: !Sub "arn:aws:cloudfront::${aws:accountId}:distribution/${WebDistribution}"
+
+  Outputs:
+    BucketName:
+      Value: !Ref WebBucket
+    DistributionId:
+      Value: !Ref WebDistribution
+    DistributionDomainName:
+      Value: !GetAtt WebDistribution.DomainName

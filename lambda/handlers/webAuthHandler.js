@@ -75,13 +75,19 @@ async function handleAuthCallback(event) {
       sub: userInfo.user_id,
     });
 
+    // The session travels as a bearer token, not a cookie — see the comment
+    // at the top of webSessionHandler.js. A URL *fragment* (`#session=`),
+    // not a query param: fragments are never sent to any server (this one
+    // included, on the very next request) or written to server access
+    // logs, and the SPA strips it from the address bar immediately after
+    // reading it (see App.tsx).
+    const destination = new URL(process.env.WEB_ORIGIN);
+    destination.hash = `session=${sessionToken}`;
+
     return {
       statusCode: 302,
-      headers: { Location: process.env.WEB_ORIGIN },
-      cookies: [
-        webSessionHandler.buildSessionCookie(sessionToken, { secure }),
-        webSessionHandler.buildClearStateCookie({ secure }),
-      ],
+      headers: { Location: destination.toString() },
+      cookies: [webSessionHandler.buildClearStateCookie({ secure })],
     };
   } catch (error) {
     console.error(
@@ -97,12 +103,13 @@ async function handleAuthCallback(event) {
   }
 }
 
+// Nothing to do server-side — the session is a stateless bearer token the
+// SPA holds itself (sessionStorage, see api/client.ts), not a server-tracked
+// cookie. This endpoint exists so the frontend has one consistent place to
+// call on logout, in case that ever needs to change (e.g. a token
+// blocklist) without the SPA needing to know.
 async function handleAuthLogout() {
-  const secure = isDeployedOverHttps();
-  return {
-    statusCode: 204,
-    cookies: [webSessionHandler.buildClearSessionCookie({ secure })],
-  };
+  return { statusCode: 204 };
 }
 
 async function handleAuthSession(event) {
@@ -117,16 +124,19 @@ async function handleAuthSession(event) {
   return {
     statusCode: 200,
     headers: jsonHeaders(),
-    body: JSON.stringify({ authenticated: true, userId: session.sub }),
+    body: JSON.stringify({
+      authenticated: true,
+      userId: session.sub,
+    }),
   };
 }
 
-// Shared with the other /me/* route handlers (added in a later phase) so
-// they can all resolve "who is calling" the same way.
+// Shared with every other /me/* and /oauth/* route handler so they all
+// resolve "who is calling" the same way.
 function getSessionFromEvent(event) {
-  const cookies = webSessionHandler.parseCookies(event);
-  const token = cookies[webSessionHandler.SESSION_COOKIE_NAME];
-  return webSessionHandler.verifySessionToken(token);
+  return webSessionHandler.verifySessionToken(
+    webSessionHandler.getBearerToken(event),
+  );
 }
 
 // Secure cookies are dropped by browsers over plain http:// — local dev

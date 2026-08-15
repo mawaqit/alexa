@@ -2,6 +2,7 @@ const awsSsmHandler = require("./handlers/awsSsmHandler.js");
 const webAuthHandler = require("./handlers/webAuthHandler.js");
 const webConfigHandler = require("./handlers/webConfigHandler.js");
 const webMosqueHandler = require("./handlers/webMosqueHandler.js");
+const webAlexaLinkHandler = require("./handlers/webAlexaLinkHandler.js");
 
 /**
  * Entry point for the MAWAQIT companion website's HTTP API — a Lambda
@@ -40,6 +41,19 @@ async function route(event) {
   }
   if (method === "GET" && path === "/auth/session") {
     return webAuthHandler.handleAuthSession(event);
+  }
+
+  // Account linking passthrough (see the plan: "passthrough, not a custom
+  // OAuth provider") — the skill's Account Linking "Web Authorization URI"
+  // points at /oauth/authorize; Access Token URI stays Amazon's own.
+  if (method === "GET" && path === "/oauth/authorize") {
+    return webAlexaLinkHandler.handleOAuthAuthorize(event);
+  }
+  if (method === "GET" && path === "/oauth/lwa-callback") {
+    return webAlexaLinkHandler.handleOAuthLwaCallback(event);
+  }
+  if (method === "GET" && path === "/oauth/complete-linking") {
+    return webAlexaLinkHandler.handleOAuthCompleteLinking(event);
   }
 
   // Config (phase 2). Later phases add PUT /me/mosque, PUT /me/prayers.

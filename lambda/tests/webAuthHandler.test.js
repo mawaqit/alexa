@@ -4,7 +4,7 @@
  * explicit redirect_uri and a CSRF-safe state check (there's no Alexa app
  * managing the redirect for it). These tests cover the parts most likely to
  * silently break: the state check that prevents a forged callback, the
- * client secret never leaking into a redirect URL, and the session cookie
+ * client secret never leaking into a redirect URL, and the session token
  * only ever carrying user_id.
  */
 jest.mock("axios");
@@ -83,7 +83,7 @@ describe("handleAuthCallback", () => {
     expect(response.statusCode).toBe(400);
   });
 
-  it("exchanges the code with the redirect_uri included, fetches the profile, and issues a session cookie carrying only user_id", async () => {
+  it("exchanges the code with the redirect_uri included, fetches the profile, and redirects with a session token carrying only user_id in the URL fragment", async () => {
     axios.request
       .mockResolvedValueOnce({ data: { access_token: "lwa-access-token" } })
       .mockResolvedValueOnce({
@@ -105,13 +105,15 @@ describe("handleAuthCallback", () => {
     expect(tokenCall.data.get("client_secret")).toBe("test-web-client-secret");
 
     expect(response.statusCode).toBe(302);
-    expect(response.headers.Location).toBe("http://localhost:5173");
+    // A fragment, not a cookie: no combination of SameSite/Secure/
+    // Partitioned reliably gets a cookie sent on the SPA's own cross-site
+    // fetch() calls once frontend and backend are different domains —
+    // confirmed by hand. See webSessionHandler.js's top comment.
+    const location = new URL(response.headers.Location);
+    expect(location.origin + location.pathname).toBe("http://localhost:5173/");
+    expect(location.hash.startsWith("#session=")).toBe(true);
 
-    const sessionCookie = response.cookies.find((cookie) =>
-      cookie.startsWith(webSessionHandler.SESSION_COOKIE_NAME),
-    );
-    expect(sessionCookie).toBeDefined();
-    const token = sessionCookie.split(";")[0].split("=")[1];
+    const token = location.hash.slice("#session=".length);
     const payload = webSessionHandler.verifySessionToken(token, {
       secret: "test-session-secret",
     });
@@ -122,45 +124,38 @@ describe("handleAuthCallback", () => {
     expect(payload.email).toBeUndefined();
   });
 
-  it("returns 502 without setting a session cookie when the LWA token exchange fails", async () => {
+  it("returns 502 without redirecting anywhere when the LWA token exchange fails", async () => {
     axios.request.mockRejectedValue(new Error("Amazon said no"));
 
     const response = await webAuthHandler.handleAuthCallback(eventWithState());
 
     expect(response.statusCode).toBe(502);
-    expect(
-      response.cookies.some((c) =>
-        c.startsWith(webSessionHandler.SESSION_COOKIE_NAME),
-      ),
-    ).toBe(false);
+    expect(response.headers.Location).toBeUndefined();
   });
 });
 
 describe("handleAuthLogout", () => {
-  it("clears the session cookie", async () => {
+  it("returns 204 — the session is a client-held bearer token, nothing to clear server-side", async () => {
     const response = await webAuthHandler.handleAuthLogout();
 
     expect(response.statusCode).toBe(204);
-    expect(response.cookies[0]).toContain("Max-Age=0");
   });
 });
 
 describe("handleAuthSession", () => {
-  it("returns 401 when there is no session cookie", async () => {
+  it("returns 401 when there is no Authorization header", async () => {
     const response = await webAuthHandler.handleAuthSession({});
 
     expect(response.statusCode).toBe(401);
     expect(JSON.parse(response.body)).toEqual({ authenticated: false });
   });
 
-  it("returns the LWA user id from a valid session cookie", async () => {
+  it("returns the LWA user id from a valid bearer token", async () => {
     const token = webSessionHandler.signSessionToken(
       { sub: "amzn1.account.EXAMPLE" },
       { secret: "test-session-secret" },
     );
-    const event = {
-      cookies: [`${webSessionHandler.SESSION_COOKIE_NAME}=${token}`],
-    };
+    const event = { headers: { authorization: `Bearer ${token}` } };
 
     const response = await webAuthHandler.handleAuthSession(event);
 

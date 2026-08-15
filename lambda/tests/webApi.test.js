@@ -9,11 +9,13 @@ jest.mock("../handlers/awsSsmHandler.js");
 jest.mock("../handlers/webAuthHandler.js");
 jest.mock("../handlers/webConfigHandler.js");
 jest.mock("../handlers/webMosqueHandler.js");
+jest.mock("../handlers/webAlexaLinkHandler.js");
 
 const awsSsmHandler = require("../handlers/awsSsmHandler.js");
 const webAuthHandler = require("../handlers/webAuthHandler.js");
 const webConfigHandler = require("../handlers/webConfigHandler.js");
 const webMosqueHandler = require("../handlers/webMosqueHandler.js");
+const webAlexaLinkHandler = require("../handlers/webAlexaLinkHandler.js");
 const webApi = require("../webApi.js");
 
 const httpEvent = (method, path, extra = {}) => ({
@@ -63,6 +65,22 @@ it.each([
   expect(webConfigHandler[handlerName]).toHaveBeenCalled();
   expect(response.statusCode).toBe(200);
 });
+
+it.each([
+  ["GET", "/oauth/authorize", "handleOAuthAuthorize"],
+  ["GET", "/oauth/lwa-callback", "handleOAuthLwaCallback"],
+  ["GET", "/oauth/complete-linking", "handleOAuthCompleteLinking"],
+])(
+  "routes %s %s to webAlexaLinkHandler.%s",
+  async (method, path, handlerName) => {
+    webAlexaLinkHandler[handlerName].mockResolvedValue({ statusCode: 200 });
+
+    const response = await webApi.handler(httpEvent(method, path));
+
+    expect(webAlexaLinkHandler[handlerName]).toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  },
+);
 
 it("routes GET /mosques/search to webMosqueHandler.handleSearchMosques", async () => {
   webMosqueHandler.handleSearchMosques.mockResolvedValue({ statusCode: 200 });

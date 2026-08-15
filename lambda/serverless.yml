@@ -126,7 +126,12 @@ functions:
       cors:
         allowedOrigins:
           - ${file(env.json):${self:provider.stage}.webOrigin, 'http://localhost:5173'}
-        allowedHeaders: [Content-Type]
+        # Authorization is required now that the session travels as a bearer
+        # token, not a cookie (see webSessionHandler.js's top comment) — any
+        # custom header on a cross-site fetch() forces a CORS preflight, and
+        # the browser blocks the real request unless the preflight response
+        # explicitly allows that header.
+        allowedHeaders: [Content-Type, Authorization]
         # OPTIONS isn't a valid value here — Function URLs handle the CORS
         # preflight (OPTIONS) automatically once Cors is configured at all;
         # this list is only the actual invocation methods.

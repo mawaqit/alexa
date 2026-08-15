@@ -88,33 +88,68 @@ describe("signSessionToken / verifySessionToken", () => {
   });
 });
 
+// Neither the session nor the Alexa-linking handoff data travel as cookies
+// anymore (see the comment at the top of webSessionHandler.js) — oauth_state
+// is the one exception still worth a cookie. buildStateCookie exercises the
+// shared buildCookie() every cookie in this file goes through.
 describe("cookie builders", () => {
-  it("marks the session cookie HttpOnly and SameSite=Lax so it can't be read or leaked by third-party requests", () => {
-    const cookie = webSessionHandler.buildSessionCookie("token-value", {
+  it("marks the cookie HttpOnly, Secure, Partitioned and SameSite=None when deployed — the frontend and backend live on different domains there, and Lax cookies are excluded from the SPA's own cross-site fetch() calls", () => {
+    const cookie = webSessionHandler.buildStateCookie("nonce-value", {
       secure: true,
     });
 
     expect(cookie).toContain("HttpOnly");
-    expect(cookie).toContain("SameSite=Lax");
+    expect(cookie).toContain("SameSite=None");
     expect(cookie).toContain("Secure");
+    // CHIPS — without this, browsers that block unpartitioned third-party
+    // cookies store the cookie (visible in DevTools) but silently never
+    // send it, which looks identical to a missing cookie.
+    expect(cookie).toContain("Partitioned");
     expect(cookie).toContain(
-      `${webSessionHandler.SESSION_COOKIE_NAME}=token-value`,
+      `${webSessionHandler.STATE_COOKIE_NAME}=nonce-value`,
     );
   });
 
-  it("omits Secure for local http:// dev, where a Secure cookie would be silently dropped by the browser", () => {
-    const cookie = webSessionHandler.buildSessionCookie("token-value", {
+  it("uses SameSite=Lax and omits Secure/Partitioned for local http:// dev — frontend and backend are same-site there (SameSite ignores port), Secure would be silently dropped over plain http, and Partitioned requires Secure", () => {
+    const cookie = webSessionHandler.buildStateCookie("nonce-value", {
       secure: false,
     });
 
+    expect(cookie).toContain("SameSite=Lax");
     expect(cookie).not.toContain("Secure");
+    expect(cookie).not.toContain("Partitioned");
   });
 
-  it("clears the session cookie with Max-Age=0", () => {
-    const cookie = webSessionHandler.buildClearSessionCookie({ secure: true });
+  it("clears the state cookie with Max-Age=0", () => {
+    const cookie = webSessionHandler.buildClearStateCookie({ secure: true });
 
     expect(cookie).toContain("Max-Age=0");
-    expect(cookie).toContain(`${webSessionHandler.SESSION_COOKIE_NAME}=`);
+    expect(cookie).toContain(`${webSessionHandler.STATE_COOKIE_NAME}=`);
+  });
+});
+
+describe("getBearerToken", () => {
+  it("extracts the token from a lowercase Authorization header — how a real Lambda Function URL event delivers it", () => {
+    const event = { headers: { authorization: "Bearer abc.def.ghi" } };
+
+    expect(webSessionHandler.getBearerToken(event)).toBe("abc.def.ghi");
+  });
+
+  it("also accepts a capitalized header — for events built by hand (tests, local tooling)", () => {
+    const event = { headers: { Authorization: "Bearer abc.def.ghi" } };
+
+    expect(webSessionHandler.getBearerToken(event)).toBe("abc.def.ghi");
+  });
+
+  it("returns null when there is no Authorization header at all", () => {
+    expect(webSessionHandler.getBearerToken({ headers: {} })).toBeNull();
+    expect(webSessionHandler.getBearerToken({})).toBeNull();
+  });
+
+  it("returns null for a header that isn't a Bearer token, instead of returning garbage", () => {
+    const event = { headers: { authorization: "Basic dXNlcjpwYXNz" } };
+
+    expect(webSessionHandler.getBearerToken(event)).toBeNull();
   });
 });
 

@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { api, type SessionResponse } from "./api/client";
+import {
+  api,
+  bootstrapSessionFromUrl,
+  hasPendingAlexaLink,
+  type SessionResponse,
+} from "./api/client";
 import { Landing } from "./pages/Landing";
 import { Dashboard } from "./pages/Dashboard";
 
@@ -9,6 +14,10 @@ export function App() {
   const [session, setSession] = useState<SessionResponse | null>(null);
 
   useEffect(() => {
+    // Must run before getSession(): a freshly-completed login arrives with
+    // the token in the URL fragment, not yet in sessionStorage — see
+    // client.ts's bootstrapSessionFromUrl.
+    bootstrapSessionFromUrl();
     api
       .getSession()
       .then(setSession)
@@ -24,7 +33,10 @@ export function App() {
   }
 
   return session.authenticated ? (
-    <Dashboard onLoggedOut={() => setSession({ authenticated: false })} />
+    <Dashboard
+      linking={hasPendingAlexaLink()}
+      onLoggedOut={() => setSession({ authenticated: false })}
+    />
   ) : (
     <Landing />
   );

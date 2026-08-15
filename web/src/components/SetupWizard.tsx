@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import type { Mosque } from "../api/client";
+import { getCompleteLinkingUrl, type Mosque } from "../api/client";
 import { MosqueSearch } from "./MosqueSearch";
 import { ReciterSelector } from "./ReciterSelector";
 import { PrayerSelector } from "./PrayerSelector";
@@ -16,6 +16,9 @@ interface SetupWizardProps {
   initialReciter: string | null;
   initialPrayers: string[];
   timezone: string;
+  // True when this browser arrived via the Alexa app's "Link Account" flow
+  // — DoneStep prioritizes "Continue to Alexa" over "Go to dashboard" when set.
+  linking: boolean;
   onSaveMosque: (mosque: Mosque) => Promise<void>;
   onSaveReciter: (primaryText: string) => Promise<void>;
   onSavePrayers: (prayers: string[]) => Promise<void>;
@@ -37,6 +40,7 @@ export function SetupWizard({
   initialReciter,
   initialPrayers,
   timezone,
+  linking,
   onSaveMosque,
   onSaveReciter,
   onSavePrayers,
@@ -132,7 +136,7 @@ export function SetupWizard({
             </div>
           )}
 
-          {step === "done" && <DoneStep onFinish={onFinish} />}
+          {step === "done" && <DoneStep linking={linking} onFinish={onFinish} />}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -181,7 +185,15 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
   );
 }
 
-function DoneStep({ onFinish }: { onFinish: () => void }) {
+function DoneStep({
+  linking,
+  onFinish,
+}: {
+  linking: boolean;
+  onFinish: () => void;
+}) {
+  const linkUrl = linking ? getCompleteLinkingUrl() : null;
+
   return (
     <div className="wizard-step-body wizard-done">
       <motion.div
@@ -216,16 +228,30 @@ function DoneStep({ onFinish }: { onFinish: () => void }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: EASE_OUT, delay: 0.35 }}
       >
-        Your mosque and Azan prayers are saved. If your Alexa skill isn't linked yet,
-        open the MAWAQIT skill on Alexa and link your account to finish applying it.
+        {linking
+          ? "Your mosque and Azan prayers are saved. Continue to finish linking your Alexa skill."
+          : "Your mosque and Azan prayers are saved. If your Alexa skill isn't linked yet, " +
+            "open the MAWAQIT skill on Alexa and link your account to finish applying it."}
       </motion.p>
+      {linkUrl && (
+        <motion.a
+          href={linkUrl}
+          className="button button-primary"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: EASE_OUT, delay: 0.42 }}
+          whileTap={{ scale: 0.96 }}
+        >
+          Continue to Alexa
+        </motion.a>
+      )}
       <motion.button
         type="button"
-        className="button button-primary"
+        className={linking ? "button button-secondary" : "button button-primary"}
         onClick={onFinish}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: EASE_OUT, delay: 0.42 }}
+        transition={{ duration: 0.3, ease: EASE_OUT, delay: linking ? 0.48 : 0.42 }}
         whileTap={{ scale: 0.96 }}
       >
         Go to dashboard

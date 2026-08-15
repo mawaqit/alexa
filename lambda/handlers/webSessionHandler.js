@@ -4,7 +4,21 @@ const crypto = require("crypto");
 // id), so a full JWT library is more surface area than the problem needs —
 // this is a minimal, dependency-free HS256 JWT (header.payload.signature,
 // base64url, HMAC-SHA256) using only Node's built-in crypto module.
-const SESSION_COOKIE_NAME = "mawaqit_web_session";
+//
+// Neither the session nor the Alexa-linking handoff data (webAlexaLinkHandler.js)
+// travel as cookies — both are bearer tokens carried via URL fragment/query
+// param instead. Two different cookie-reliability problems forced this:
+// (1) no combination of SameSite/Secure/Partitioned gets a cookie reliably
+// sent on the SPA's own cross-site fetch() calls once frontend and backend
+// are genuinely different domains (confirmed by hand); (2) even a same-origin
+// cookie (set and read entirely by this backend during its own redirect
+// chain, e.g. our domain → Amazon → our domain) isn't reliable when driven
+// by Alexa's own in-app browser during account linking, even though the
+// identical mechanics work fine for this file's plain /auth/start+
+// /auth/callback login in a normal desktop browser (confirmed by hand).
+// oauth_state below is the one exception still worth a cookie: it's only
+// ever exercised through a normal desktop browser (a direct site visit),
+// never through Alexa's embedded one.
 const STATE_COOKIE_NAME = "oauth_state";
 const SESSION_TTL_SECONDS = 14 * 24 * 60 * 60; // 14 days
 const STATE_TTL_SECONDS = 5 * 60; // long enough to complete the Amazon login redirect
@@ -73,15 +87,14 @@ function generateStateNonce() {
   return crypto.randomBytes(16).toString("hex");
 }
 
-function buildSessionCookie(token, { secure = true } = {}) {
-  return buildCookie(SESSION_COOKIE_NAME, token, {
-    maxAge: SESSION_TTL_SECONDS,
-    secure,
-  });
-}
-
-function buildClearSessionCookie({ secure = true } = {}) {
-  return buildCookie(SESSION_COOKIE_NAME, "", { maxAge: 0, secure });
+// Reads the session token from `Authorization: Bearer <token>`. Lambda
+// Function URL header keys arrive lowercased, but this also accepts the
+// capitalized form for anything constructing an event by hand (tests, local
+// tooling).
+function getBearerToken(event) {
+  const header = event?.headers?.authorization || event?.headers?.Authorization;
+  if (!header?.startsWith("Bearer ")) return null;
+  return header.slice("Bearer ".length);
 }
 
 function buildStateCookie(nonce, { secure = true } = {}) {
@@ -118,10 +131,33 @@ function buildCookie(name, value, { maxAge, secure }) {
     `${name}=${value}`,
     "HttpOnly",
     "Path=/",
-    "SameSite=Lax",
+    // Lax works for local dev, where the frontend (localhost:5173) and
+    // backend (localhost:3000) are genuinely same-site (SameSite only cares
+    // about scheme + registrable domain, not port). Deployed, the frontend
+    // (its own domain — a dev tunnel today, eventually CloudFront) and
+    // backend (the Function URL's own domain) are cross-site, and Lax
+    // cookies are excluded from cross-site fetch()/XHR — only sent on
+    // top-level navigation — so the SPA's own /auth/session check would
+    // never see the cookie it just got redirected here with, and the login
+    // flow would loop forever. None requires Secure, which `secure` already
+    // implies here (only true when deployed over https).
+    `SameSite=${secure ? "None" : "Lax"}`,
     `Max-Age=${maxAge}`,
   ];
-  if (secure) attrs.push("Secure");
+  if (secure) {
+    attrs.push("Secure");
+    // CHIPS: browsers are increasingly blocking "unpartitioned" third-party
+    // cookies outright — this cookie IS third-party from the browser's
+    // perspective whenever deployed (frontend and backend are cross-site).
+    // Partitioned is the standards-track exemption for exactly this shape
+    // (cross-site frontend/API pair, no cross-site tracking involved) —
+    // without it, SameSite=None; Secure alone isn't enough on a browser
+    // that's blocking third-party cookies: the cookie visibly gets stored
+    // (shows up in DevTools) but is silently excluded from being *sent* on
+    // the SPA's own fetch() calls back to this domain, which looks
+    // identical to the SameSite=Lax bug this file already works around.
+    attrs.push("Partitioned");
+  }
   return attrs.join("; ");
 }
 
@@ -142,13 +178,11 @@ function constantTimeEquals(a, b) {
 }
 
 module.exports = {
-  SESSION_COOKIE_NAME,
   STATE_COOKIE_NAME,
   signSessionToken,
   verifySessionToken,
   generateStateNonce,
-  buildSessionCookie,
-  buildClearSessionCookie,
+  getBearerToken,
   buildStateCookie,
   buildClearStateCookie,
   parseCookies,

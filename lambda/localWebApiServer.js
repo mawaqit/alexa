@@ -173,7 +173,10 @@ function applyCorsHeaders(res) {
   res.setHeader("Access-Control-Allow-Origin", process.env.WEB_ORIGIN);
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  // Authorization: the session now travels as a bearer token, not a cookie
+  // (see webSessionHandler.js) — the browser won't send that header on a
+  // cross-origin fetch() unless the preflight response explicitly allows it.
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 }
 
 function sendResponse(res, result) {

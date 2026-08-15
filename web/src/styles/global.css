@@ -166,6 +166,34 @@ h2 {
   color: var(--color-pending-text);
 }
 
+.alexa-link-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius);
+  background: var(--gradient-brand);
+  color: #fff;
+}
+
+.alexa-link-banner p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.alexa-link-banner .button-primary {
+  background: #fff;
+  color: var(--color-primary-dark);
+  flex-shrink: 0;
+}
+
+.alexa-link-banner .button-primary:hover {
+  background: var(--color-bg);
+}
+
 .error-banner {
   margin: 0;
   padding: 0.75rem 1rem;

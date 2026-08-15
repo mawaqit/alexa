@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, type Mosque, type MeConfigResponse } from "../api/client";
+import { AlexaLinkBanner } from "../components/AlexaLinkBanner";
 import { LinkStatusBanner } from "../components/LinkStatusBanner";
 import { MosqueSearch } from "../components/MosqueSearch";
 import { ReciterSelector } from "../components/ReciterSelector";
@@ -14,10 +15,13 @@ import { EASE_OUT, fadeUpVariants } from "../animation";
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 interface DashboardProps {
+  // True when this browser arrived via the Alexa app's "Link Account" flow
+  // and hasn't handed back to Alexa yet — see App.tsx/webAlexaLinkHandler.js.
+  linking: boolean;
   onLoggedOut: () => void;
 }
 
-export function Dashboard({ onLoggedOut }: DashboardProps) {
+export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
   const [config, setConfig] = useState<MeConfigResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [changingMosque, setChangingMosque] = useState(false);
@@ -93,6 +97,8 @@ export function Dashboard({ onLoggedOut }: DashboardProps) {
           Log out
         </button>
       </header>
+
+      {linking && <AlexaLinkBanner />}
 
       <LinkStatusBanner linked={config.linked} deviceLinked={config.deviceLinked} />
 
@@ -214,6 +220,7 @@ export function Dashboard({ onLoggedOut }: DashboardProps) {
               initialReciter={config.favouriteAdhaan}
               initialPrayers={routinePrayers}
               timezone={timezone}
+              linking={linking}
               onSaveMosque={saveMosque}
               onSaveReciter={saveReciter}
               onSavePrayers={savePrayers}

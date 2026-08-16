@@ -27,6 +27,7 @@ export function App() {
   if (session === null) {
     return (
       <div className="page-loading" role="status">
+        <span className="spinner" aria-hidden="true" />
         Loading…
       </div>
     );

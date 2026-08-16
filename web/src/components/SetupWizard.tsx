@@ -1,15 +1,20 @@
 import { useState } from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, AnimatePresence, type Variants, type PanInfo } from "framer-motion";
 import { getCompleteLinkingUrl, type Mosque } from "../api/client";
 import { MosqueSearch } from "./MosqueSearch";
 import { ReciterSelector } from "./ReciterSelector";
 import { PrayerSelector } from "./PrayerSelector";
-import { EASE_OUT, SPRING } from "../animation";
+import { EASE_OUT, SPRING, project } from "../animation";
 
 type StepId = "welcome" | "mosque" | "reciter" | "prayers" | "done";
 
 const STEP_ORDER: StepId[] = ["welcome", "mosque", "reciter", "prayers", "done"];
 const INDICATOR_STEPS: StepId[] = ["mosque", "reciter", "prayers", "done"];
+
+// How far a swipe-back drag, plus its projected momentum, has to travel
+// before it commits to the previous step rather than springing back to
+// where it started — see the drag props on the step panel below.
+const SWIPE_BACK_THRESHOLD = 90;
 
 interface SetupWizardProps {
   initialMosque: Mosque | null;
@@ -61,6 +66,16 @@ export function SetupWizard({
     setStep(next);
   };
 
+  const stepIndex = STEP_ORDER.indexOf(step);
+  // Nothing to go back to from the welcome screen, and "done" is a finished,
+  // already-saved state — backing out of it would re-open a wizard whose
+  // work is over rather than undo anything.
+  const previousStep = stepIndex > 0 ? STEP_ORDER[stepIndex - 1] : null;
+  const canGoBack = previousStep !== null && step !== "done";
+  const goBack = () => {
+    if (previousStep) goTo(previousStep);
+  };
+
   const handleMosqueSelect = (mosque: Mosque) => {
     setSavingMosque(true);
     setError(null);
@@ -81,7 +96,14 @@ export function SetupWizard({
 
   return (
     <div className="wizard">
-      <StepIndicator current={step} />
+      <div className="wizard-header">
+        {canGoBack && (
+          <button type="button" className="wizard-back" onClick={goBack}>
+            <span aria-hidden="true">←</span> Back
+          </button>
+        )}
+        <StepIndicator current={step} />
+      </div>
 
       <AnimatePresence mode="wait" custom={direction}>
         <motion.div
@@ -91,7 +113,24 @@ export function SetupWizard({
           initial="enter"
           animate="center"
           exit="exit"
-          className="wizard-step"
+          className={`wizard-step${canGoBack ? " wizard-step-draggable" : ""}`}
+          // Direct-manipulation swipe-back: the panel tracks the finger 1:1
+          // within [0, 160], resists further past that (dragElastic — a
+          // rubber-banded boundary rather than a hard stop), and always
+          // springs back to 0 on release (dragSnapToOrigin) unless the
+          // gesture's own momentum projects past SWIPE_BACK_THRESHOLD, in
+          // which case we commit to the previous step ourselves below. A
+          // "Back" button (above) gives the same result without a pointer.
+          drag={canGoBack ? "x" : false}
+          dragConstraints={{ left: 0, right: 160 }}
+          dragElastic={{ left: 0, right: 0.6 }}
+          dragSnapToOrigin
+          onDragEnd={(_event: PointerEvent, info: PanInfo) => {
+            if (!canGoBack) return;
+            const projectedOffset = info.offset.x + project(info.velocity.x);
+            if (projectedOffset > SWIPE_BACK_THRESHOLD) goBack();
+          }}
+          style={canGoBack ? { touchAction: "pan-y" } : undefined}
         >
           {step === "welcome" && <WelcomeStep onNext={() => goTo("mosque")} />}
 

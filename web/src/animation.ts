@@ -23,3 +23,13 @@ export const listItemVariants: Variants = {
   hidden: { opacity: 0, y: 8 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE_OUT } },
 };
+
+// Apple's momentum-projection formula (WWDC 2018 "Designing Fluid
+// Interfaces") — projects where a released gesture would coast to a stop,
+// so a quick flick can commit to an outcome its velocity implies even if
+// the pointer let go before crossing the pixel threshold on its own.
+// decelerationRate mirrors iOS scroll deceleration (~0.998 for a normal-
+// paced flick); used by SetupWizard's swipe-back gesture.
+export function project(velocityPxPerSecond: number, decelerationRate = 0.998): number {
+  return ((velocityPxPerSecond / 1000) * decelerationRate) / (1 - decelerationRate);
+}

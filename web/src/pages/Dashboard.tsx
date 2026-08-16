@@ -80,6 +80,7 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
   if (!config) {
     return (
       <div className="page-loading" role="status">
+        <span className="spinner" aria-hidden="true" />
         Loading…
       </div>
     );

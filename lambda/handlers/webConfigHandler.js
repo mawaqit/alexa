@@ -5,11 +5,15 @@ const eventBridgeScheduler = require("./eventBridgeScheduler.js");
 const {
   CustomDynamoDbPersistenceAdapter,
 } = require("../util/CustomDynamoDbPersistenceAdapter.js");
-const { buildEligiblePrayerTimes } = require("./routineEligiblePrayers.js");
+const {
+  ROUTINE_ELIGIBLE_PRAYER_NAMES,
+  buildEligiblePrayerTimes,
+} = require("./routineEligiblePrayers.js");
 // Same static reciter list the voice flow's FavoriteAdhaanReciterIntent
 // offers (datasources.js) — reused as-is so the website can never drift out
 // of sync with what PlayAdhanIntentHandler actually knows how to play.
 const { adhaanRecitation } = require("../datasources.js");
+const validate = require("./webValidation.js");
 
 /**
  * GET /me/config — resolves "what does this logged-in website user currently
@@ -98,7 +102,7 @@ async function handleSaveReciter(event) {
   }
 
   const { primaryText } = body || {};
-  if (!primaryText) {
+  if (!validate.isNonEmptyString(primaryText)) {
     return badRequest("primaryText is required");
   }
 
@@ -145,8 +149,28 @@ async function handleSaveMosque(event) {
     image,
     timezone,
   } = body || {};
-  if (!uuid || !primaryText || !timezone) {
-    return badRequest("uuid, primaryText and timezone are required");
+  if (!validate.isNonEmptyString(uuid)) {
+    return badRequest("uuid is required");
+  }
+  if (!validate.isNonEmptyString(primaryText)) {
+    return badRequest("primaryText is required");
+  }
+  if (!validate.isValidTimezone(timezone)) {
+    return badRequest("timezone must be a valid IANA time zone identifier");
+  }
+  if (!validate.isOptionalFiniteNumber(proximity)) {
+    return badRequest("proximity must be a number");
+  }
+  if (
+    !validate.isOptionalString(localisation) ||
+    !validate.isOptionalString(jumua) ||
+    !validate.isOptionalString(jumua2) ||
+    !validate.isOptionalString(jumua3)
+  ) {
+    return badRequest("localisation/jumua fields must be strings");
+  }
+  if (!validate.isOptionalHttpUrl(image)) {
+    return badRequest("image must be an http(s) URL");
   }
 
   const pendingMosqueSelection = stripUndefined({
@@ -186,8 +210,28 @@ async function handleSavePrayers(event) {
   }
 
   const { prayers, timezone } = body || {};
-  if (!Array.isArray(prayers) || !timezone) {
-    return badRequest("prayers (array) and timezone are required");
+  if (
+    !validate.isStringArray(prayers, {
+      maxLength: ROUTINE_ELIGIBLE_PRAYER_NAMES.length,
+    })
+  ) {
+    return badRequest(
+      `prayers must be an array of up to ${ROUTINE_ELIGIBLE_PRAYER_NAMES.length} prayer names`,
+    );
+  }
+  const hasUnknownPrayer = prayers.some(
+    (name) =>
+      !ROUTINE_ELIGIBLE_PRAYER_NAMES.some(
+        (canonical) => canonical.toLowerCase() === name.toLowerCase(),
+      ),
+  );
+  if (hasUnknownPrayer) {
+    return badRequest(
+      `prayers must only contain: ${ROUTINE_ELIGIBLE_PRAYER_NAMES.join(", ")}`,
+    );
+  }
+  if (!validate.isValidTimezone(timezone)) {
+    return badRequest("timezone must be a valid IANA time zone identifier");
   }
 
   await dbHandler.UpdateAzanUserAttributesAtomic(session.sub, {

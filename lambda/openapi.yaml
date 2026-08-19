@@ -1,0 +1,482 @@
+openapi: 3.0.3
+info:
+  title: MAWAQIT Companion API
+  description: |
+    HTTP API behind the MAWAQIT companion website and (future) mobile apps. Served from lambda/webApi.js as a Lambda Function URL (payload format 2.0, the same request/response shape as an API Gateway HTTP API).
+    Authentication is a self-issued session token (see `bearerAuth` below), obtained by completing the Login with Amazon flow under `/auth/*`. It is NOT an Amazon LWA access token — it is minted by this backend after verifying the LWA login, and only this backend's secret can produce or verify one.
+  version: 1.0.0
+servers:
+  - url: https://{functionUrlId}.lambda-url.{region}.on.aws
+    variables:
+      functionUrlId:
+        default: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      region:
+        default: eu-west-1
+
+security: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Send as `Authorization: Bearer <token>`. The token is a minimal self-signed JWT (HS256) minted by POST-login at `/auth/callback`; its only claim is `sub` (the Login with Amazon user id). It expires 14 days after issue. There is no refresh endpoint yet — a caller gets a new token by repeating the `/auth/start` login flow.
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Not authenticated
+
+    SessionResponse:
+      type: object
+      required:
+        - authenticated
+      properties:
+        authenticated:
+          type: boolean
+        userId:
+          type: string
+          description: Present only when authenticated=true. The LWA user id.
+
+    Mosque:
+      type: object
+      required:
+        - uuid
+        - primaryText
+      properties:
+        uuid:
+          type: string
+        primaryText:
+          type: string
+        proximity:
+          type: number
+          nullable: true
+        localisation:
+          type: string
+          nullable: true
+        jumua:
+          type: string
+          nullable: true
+        jumua2:
+          type: string
+          nullable: true
+        jumua3:
+          type: string
+          nullable: true
+        image:
+          type: string
+          nullable: true
+
+    MosqueSelection:
+      allOf:
+        - $ref: '#/components/schemas/Mosque'
+        - type: object
+          required:
+            - timezone
+          properties:
+            timezone:
+              type: string
+              example: Europe/Paris
+
+    PrayerTime:
+      type: object
+      required:
+        - canonicalName
+        - time
+      properties:
+        canonicalName:
+          type: string
+          example: Fajr
+        time:
+          type: string
+          example: '05:12'
+
+    RoutinePrayer:
+      type: object
+      required:
+        - name
+        - canonicalName
+        - time
+      properties:
+        name:
+          type: string
+        canonicalName:
+          type: string
+        time:
+          type: string
+        namePhoneme:
+          type: string
+
+    Reciter:
+      type: object
+      required:
+        - primaryText
+      properties:
+        primaryText:
+          type: string
+
+    MeConfigResponse:
+      type: object
+      required:
+        - linked
+        - mosque
+        - routinePrayers
+        - favouriteAdhaan
+      properties:
+        linked:
+          type: string
+          enum:
+            - alexa
+            - web-only
+            - none
+        mosque:
+          $ref: '#/components/schemas/Mosque'
+          nullable: true
+        routinePrayers:
+          type: array
+          description: |
+            Full RoutinePrayer objects once "alexa"-linked; a "web-only" pending config carries just canonical name strings until it's applied to a linked Alexa account.
+          items: {}
+        favouriteAdhaan:
+          type: string
+          nullable: true
+        pending:
+          type: boolean
+        deviceLinked:
+          type: boolean
+
+    SaveResult:
+      type: object
+      required:
+        - saved
+        - applied
+      properties:
+        saved:
+          type: boolean
+        applied:
+          type: boolean
+        reason:
+          type: string
+          example: no-mosque-selected
+
+  responses:
+    Unauthorized:
+      description: No/invalid/expired session token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Missing or invalid request body/params.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+paths:
+  /auth/start:
+    get:
+      summary: Begin website login
+      description: |
+        Redirects the browser to Login with Amazon. Not usable directly by a non-browser client (mobile app) as-is — it depends on a redirect chain and a short-lived CSRF cookie. A native app should drive LWA via an in-app browser/ASWebAuthenticationSession-style flow and land on the same `/auth/callback`.
+      security: []
+      responses:
+        '302':
+          description: Redirect to Amazon's LWA authorize endpoint.
+        '503':
+          description: Website login not yet configured server-side.
+
+  /auth/callback:
+    get:
+      summary: LWA login callback
+      description: |
+        Amazon redirects here with `code`/`state`. On success, redirects to the web app with the freshly-minted session token in the URL fragment (`#session=...`) — never in a query param, so it never reaches server access logs.
+      security: []
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to WEB_ORIGIN with `#session=<token>`.
+        '400':
+          description: Missing/invalid state (CSRF check failed).
+        '502':
+          description: LWA token exchange or profile fetch failed.
+
+  /auth/logout:
+    post:
+      summary: Logout
+      description: |
+        Stateless no-op today (the session is a client-held bearer token, not server-tracked) — exists so clients have one stable place to call regardless of how logout is implemented later.
+      security: []
+      responses:
+        '204':
+          description: Logged out (client should discard its stored token).
+
+  /auth/session:
+    get:
+      summary: Check current session
+      description: |
+        Always returns 200/401 with a JSON body — never throws for "not logged in." Send the bearer token if you have one; omitting it is treated the same as an invalid one.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Session is valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '401':
+          description: No/invalid/expired token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+
+  /oauth/authorize:
+    get:
+      summary: Alexa account-linking passthrough (entry point)
+      description: |
+        Not a general-purpose endpoint — this is the URL Alexa's own account linking flow opens in its in-app browser. Not relevant to a standalone mobile app integration.
+      security: []
+      responses:
+        '302':
+          description: Redirect into the LWA login step.
+        '400':
+          description: Invalid/unrecognized client_id or redirect_uri.
+
+  /oauth/lwa-callback:
+    get:
+      summary: Alexa account-linking passthrough (LWA callback)
+      security: []
+      responses:
+        '302':
+          description: Redirect back into the web app with session+link tokens.
+        '400':
+          description: Invalid or missing OAuth state.
+        '502':
+          description: LWA login failed.
+
+  /oauth/complete-linking:
+    get:
+      summary: Alexa account-linking passthrough (completion)
+      description: |
+        Reached via a plain `<a href>` navigation, not fetch — so both the session and link tokens travel as query params here (the one deliberate exception to the bearer-header rule; both are short-lived).
+      security: []
+      parameters:
+        - name: session
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: link
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to Amazon's authorize endpoint to finish linking.
+        '400':
+          description: Not logged in, or no pending linking request.
+
+  /me/config:
+    get:
+      summary: Get the current user's saved configuration
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeConfigResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /me/mosque:
+    put:
+      summary: Save the current user's mosque selection
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MosqueSelection'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /me/prayers:
+    put:
+      summary: Save the current user's routine prayer selection
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prayers
+                - timezone
+              properties:
+                prayers:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - Fajr
+                    - Isha
+                timezone:
+                  type: string
+                  example: Europe/Paris
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /me/reciters:
+    get:
+      summary: List available Azan reciters
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reciter'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /me/reciter:
+    put:
+      summary: Save the current user's favorite reciter
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - primaryText
+              properties:
+                primaryText:
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SaveResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /mosques/search:
+    get:
+      summary: Search mosques by name or coordinates
+      description: |
+        Authenticated (not open to the public) because every call spends this backend's own mawaqit.net API key — an unauthenticated proxy would let anyone spend it.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: word
+          in: query
+          schema:
+            type: string
+        - name: lat
+          in: query
+          schema:
+            type: string
+        - name: lon
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Mosque'
+        '400':
+          description: Neither `word` nor `lat`+`lon` were provided.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '502':
+          description: Upstream mosque search is unavailable.
+
+  /mosques/{uuid}/times:
+    get:
+      summary: Get today's prayer times for a mosque
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: timezone
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prayerTimes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PrayerTime'
+        '400':
+          description: Missing `timezone`.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Mosque not found.
+        '502':
+          description: Unable to fetch mosque prayer times.

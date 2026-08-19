@@ -1,6 +1,7 @@
 const apiHandler = require("./apiHandler.js");
 const webAuthHandler = require("./webAuthHandler.js");
 const { buildEligiblePrayerTimes } = require("./routineEligiblePrayers.js");
+const validate = require("./webValidation.js");
 
 // The voice UI caps at 5 results (all Alexa can usefully speak); the website
 // can render a real list and paginate through it client-side, so it asks for
@@ -22,6 +23,15 @@ async function handleSearchMosques(event) {
   const { lat, lon, word } = event?.queryStringParameters || {};
   if (!word && !(lat && lon)) {
     return badRequest("Provide either `word`, or both `lat` and `lon`");
+  }
+  if (word && !validate.isNonEmptyString(word, 200)) {
+    return badRequest("word must be a string up to 200 characters");
+  }
+  if (lat && !validate.isValidLatitude(lat)) {
+    return badRequest("lat must be a number between -90 and 90");
+  }
+  if (lon && !validate.isValidLongitude(lon)) {
+    return badRequest("lon must be a number between -180 and 180");
   }
 
   try {
@@ -61,9 +71,13 @@ async function handleGetMosqueTimes(event, mosqueUuid) {
     return unauthorized();
   }
 
+  if (!validate.isNonEmptyString(mosqueUuid, 200)) {
+    return badRequest("Invalid mosque id");
+  }
+
   const { timezone } = event?.queryStringParameters || {};
-  if (!timezone) {
-    return badRequest("timezone is required");
+  if (!validate.isValidTimezone(timezone)) {
+    return badRequest("timezone must be a valid IANA time zone identifier");
   }
 
   try {

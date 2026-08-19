@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { MapPin, MusicNotes, Bell, SignOut, WarningCircle } from "@phosphor-icons/react";
 import { api, type Mosque, type MeConfigResponse } from "../api/client";
 import { AlexaLinkBanner } from "../components/AlexaLinkBanner";
 import { LinkStatusBanner } from "../components/LinkStatusBanner";
@@ -35,7 +36,7 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
         setConfig(data);
         setError(null);
       })
-      .catch(() => setError("Couldn't load your configuration — please refresh."));
+      .catch(() => setError("Couldn't load your configuration. Please refresh."));
   }, []);
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
       .saveReciter(primaryText)
       .then(() => loadConfig())
       .catch(() => {
-        setError("Couldn't save your reciter selection — please try again.");
+        setError("Couldn't save your reciter selection. Please try again.");
         throw new Error("save-reciter-failed");
       });
 
@@ -62,14 +63,14 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
       .savePrayers(prayers, timezone)
       .then(() => loadConfig())
       .catch(() => {
-        setError("Couldn't save your prayer selection — please try again.");
+        setError("Couldn't save your prayer selection. Please try again.");
         throw new Error("save-prayers-failed");
       });
 
   const handleChangeMosque = (mosque: Mosque) => {
     setSavingMosque(true);
     saveMosque(mosque)
-      .catch(() => setError("Couldn't save that mosque — please try again."))
+      .catch(() => setError("Couldn't save that mosque. Please try again."))
       .finally(() => setSavingMosque(false));
   };
 
@@ -95,6 +96,7 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
         <img src="/mawaqit-icon.png" alt="" className="header-logo" />
         <h1>MAWAQIT for Alexa</h1>
         <button type="button" className="button button-secondary" onClick={handleLogout}>
+          <SignOut size={16} weight="bold" aria-hidden="true" />
           Log out
         </button>
       </header>
@@ -103,7 +105,12 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
 
       <LinkStatusBanner linked={config.linked} deviceLinked={config.deviceLinked} />
 
-      {error && <p className="error-banner">{error}</p>}
+      {error && (
+        <p className="error-banner">
+          <WarningCircle size={18} weight="fill" aria-hidden="true" />
+          {error}
+        </p>
+      )}
 
       <AnimatePresence mode="wait">
         {setupComplete ? (
@@ -116,7 +123,12 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
           >
             <section className="card dashboard-section">
               <div className="section-header">
-                <h2>Your mosque</h2>
+                <div className="section-header-title">
+                  <span className="icon-chip">
+                    <MapPin size={16} weight="bold" aria-hidden="true" />
+                  </span>
+                  <h2>Your mosque</h2>
+                </div>
                 <button
                   type="button"
                   className="button button-text"
@@ -128,8 +140,12 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
 
               {config.mosque && !changingMosque && (
                 <div className="mosque-card">
-                  {config.mosque.image && (
+                  {config.mosque.image ? (
                     <img src={config.mosque.image} alt="" className="mosque-thumb" />
+                  ) : (
+                    <span className="mosque-thumb mosque-thumb-fallback" aria-hidden="true">
+                      <MapPin size={20} weight="bold" />
+                    </span>
                   )}
                   <div>
                     <strong>{config.mosque.primaryText}</strong>
@@ -155,7 +171,12 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
 
             <section className="card dashboard-section">
               <div className="section-header">
-                <h2>Favorite reciter</h2>
+                <div className="section-header-title">
+                  <span className="icon-chip">
+                    <MusicNotes size={16} weight="bold" aria-hidden="true" />
+                  </span>
+                  <h2>Favorite reciter</h2>
+                </div>
                 <button
                   type="button"
                   className="button button-text"
@@ -172,7 +193,7 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
               {!changingReciter && (
                 <p className={config.favouriteAdhaan ? undefined : "muted-text"}>
                   {config.favouriteAdhaan ??
-                    "Using the default Azan voice — choose your favorite to personalize it."}
+                    "Using the default Azan voice. Choose your favorite to personalize it."}
                 </p>
               )}
 
@@ -198,7 +219,12 @@ export function Dashboard({ linking, onLoggedOut }: DashboardProps) {
 
             {config.mosque && (
               <section className="card dashboard-section">
-                <h2>Azan prayers</h2>
+                <div className="section-header-title">
+                  <span className="icon-chip">
+                    <Bell size={16} weight="bold" aria-hidden="true" />
+                  </span>
+                  <h2>Azan prayers</h2>
+                </div>
                 <PrayerSelector
                   mosqueUuid={config.mosque.uuid}
                   timezone={timezone}

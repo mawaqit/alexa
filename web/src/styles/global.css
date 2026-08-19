@@ -33,9 +33,25 @@
   --color-ok-bg: #e8f6ee;
   --color-ok-text: #1f7a4d;
 
-  --radius: 12px;
+  /* Two-tier shape scale, applied consistently: --radius is for containers
+     (cards, banners), --radius-sm for controls (buttons, inputs). Toggles
+     and dots use a hardcoded 999px/50% instead of a third token since
+     "fully round" isn't a size, it's a shape. */
+  --radius: 18px;
+  --radius-sm: 10px;
   --shadow: 0 1px 3px rgba(59, 15, 112, 0.1);
   --shadow-lg: 0 12px 32px rgba(59, 15, 112, 0.16);
+  /* Tinted to the brand hue (not a neutral black) per the shadow-tinting
+     rule — used only on the primary button and other on-brand emphasis,
+     never as a generic drop shadow. */
+  --shadow-brand: 0 8px 20px rgba(109, 40, 217, 0.28);
+
+  --font-sans:
+    "Outfit Variable", "Segoe UI", system-ui, -apple-system, Roboto, Helvetica,
+    Arial, sans-serif;
+  /* Reserved for tabular data (prayer times) — never for decoration or body
+     copy, so the "structured/precise" register stays meaningful. */
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   /* Lets native form controls (the text input's caret/selection, any
      browser chrome inside the page) pick a light or dark rendering to
@@ -69,6 +85,7 @@
 
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
     --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+    --shadow-brand: 0 8px 24px rgba(167, 139, 250, 0.25);
   }
 }
 
@@ -113,14 +130,7 @@
 
 body {
   margin: 0;
-  font-family:
-    "Segoe UI",
-    system-ui,
-    -apple-system,
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
+  font-family: var(--font-sans);
   font-optical-sizing: auto;
   background: var(--color-bg);
   color: var(--color-text);
@@ -137,6 +147,7 @@ h1,
 h2 {
   margin: 0 0 0.5rem;
   color: var(--color-primary-dark);
+  font-weight: 600;
   font-optical-sizing: auto;
 }
 
@@ -206,30 +217,71 @@ h2 {
 
 /* Landing */
 .landing {
-  min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
   background: var(--gradient-brand);
+  overflow: hidden;
+}
+
+/* The geometric pattern (BrandPattern.tsx) sits behind everything on this
+   screen, faded at the edges so it reads as texture on the gradient rather
+   than a busy tiled backdrop competing with the card. */
+.landing-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: #fff;
+  opacity: 0.14;
+  mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
 }
 
 .landing-card {
+  position: relative;
   max-width: 26rem;
+  width: 100%;
   text-align: center;
+  padding: 2.25rem 2rem;
   box-shadow: var(--shadow-lg);
 }
 
-.landing-logo {
-  width: 4rem;
-  height: 4rem;
+.landing-logo-ring {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  margin-bottom: 0.75rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-brand);
+}
+
+.landing-logo {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+}
+
+.landing-card h1 {
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 1.85rem);
 }
 
 .landing-card p {
   color: var(--color-text-muted);
-  margin: 0.75rem 0 1.5rem;
+  margin: 0.75rem 0 1.75rem;
+  max-width: 32ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landing-card .button {
+  width: 100%;
 }
 
 /* Dashboard */
@@ -276,13 +328,14 @@ h2 {
 .dashboard-header h1 {
   flex: 1;
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
 }
 
 .header-logo {
-  width: 2rem;
-  height: 2rem;
+  width: 2.1rem;
+  height: 2.1rem;
   border-radius: 50%;
+  box-shadow: var(--shadow);
 }
 
 .dashboard-body {
@@ -300,17 +353,56 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .section-header h2 {
   margin: 0;
 }
 
+.section-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.section-header-title h2 {
+  margin: 0;
+}
+
+/* Standalone use (the Azan-prayers section has no trailing action button,
+   so it renders this title alone instead of nested in .section-header). */
+.dashboard-section > .section-header-title {
+  margin-bottom: 0.75rem;
+}
+
+/* A small tinted circle behind a Phosphor icon — used next to section
+   headings and inside status banners so the icon reads as a deliberate
+   accent, not a loose glyph floating in text. */
+.icon-chip {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-pending-bg);
+  color: var(--color-primary);
+}
+
 .status-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   margin: 0;
   padding: 0.75rem 1rem;
   border-radius: var(--radius);
   font-size: 0.95rem;
+}
+
+.status-banner svg {
+  flex-shrink: 0;
 }
 
 .status-ok {
@@ -337,8 +429,15 @@ h2 {
 }
 
 .alexa-link-banner p {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin: 0;
   font-size: 0.95rem;
+}
+
+.alexa-link-banner p svg {
+  flex-shrink: 0;
 }
 
 .alexa-link-banner .button-primary {
@@ -355,12 +454,19 @@ h2 {
 }
 
 .error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   margin: 0;
   padding: 0.75rem 1rem;
   border-radius: var(--radius);
   background: var(--color-error-bg);
   color: var(--color-error-text);
   font-size: 0.9rem;
+}
+
+.error-banner svg {
+  flex-shrink: 0;
 }
 
 .empty-state {
@@ -378,10 +484,10 @@ h2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.2rem;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -390,12 +496,18 @@ h2 {
     background-color 0.15s ease,
     opacity 0.15s ease,
     border-color 0.15s ease,
+    box-shadow 0.15s ease,
     transform 0.1s ease-out;
 }
 
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
 }
 
 /* Feedback on press, not on release — every button gets this, including
@@ -410,10 +522,15 @@ h2 {
 .button-primary {
   background: var(--color-primary);
   color: #fff;
+  box-shadow: var(--shadow-brand);
 }
 
 .button-primary:hover:not(:disabled) {
   background: var(--color-primary-hover);
+}
+
+.button-primary:disabled {
+  box-shadow: none;
 }
 
 .button-secondary {
@@ -455,9 +572,17 @@ h2 {
 .mosque-thumb {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
   flex-shrink: 0;
+}
+
+.mosque-thumb-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-pending-bg);
+  color: var(--color-primary);
 }
 
 .mosque-search-actions {
@@ -477,7 +602,7 @@ h2 {
 .mosque-search-form input {
   flex: 1;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 0.5rem 0.75rem;
   font-size: 0.95rem;
   /* Explicit, themed colors — left to the UA default this renders a white
@@ -510,8 +635,16 @@ h2 {
   align-items: center;
   gap: 0.75rem;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 0.6rem 0.8rem;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.mosque-result:hover {
+  border-color: var(--color-primary-light);
+  background: var(--color-pending-bg);
 }
 
 .mosque-result-info {
@@ -525,10 +658,16 @@ h2 {
   gap: 0.7rem;
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   width: 100%;
-  transition: transform 0.1s ease-out;
+  transition:
+    transform 0.1s ease-out,
+    border-color 0.15s ease;
+}
+
+.switch-row:hover {
+  border-color: var(--color-primary-light);
 }
 
 .switch-row:active {
@@ -606,10 +745,16 @@ h2 {
   gap: 0.7rem;
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   width: 100%;
-  transition: transform 0.1s ease-out;
+  transition:
+    transform 0.1s ease-out,
+    border-color 0.15s ease;
+}
+
+.radio-row:hover {
+  border-color: var(--color-primary-light);
 }
 
 .radio-row:active {
@@ -705,7 +850,9 @@ h2 {
 
 .prayer-time {
   color: var(--color-text-muted);
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
 }
 
 /* Setup wizard */
@@ -733,13 +880,15 @@ h2 {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 0.3rem 0.4rem;
-  border-radius: 6px;
-  transition: transform 0.1s ease-out;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition:
+    transform 0.1s ease-out,
+    background-color 0.15s ease;
 }
 
 .wizard-back:hover {
-  text-decoration: underline;
+  background: var(--color-pending-bg);
 }
 
 .wizard-back:active {

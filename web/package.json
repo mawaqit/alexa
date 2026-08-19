@@ -10,6 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource-variable/jetbrains-mono": "^5.1.1",
+    "@fontsource-variable/outfit": "^5.2.5",
+    "@phosphor-icons/react": "^2.1.7",
     "framer-motion": "^11.15.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

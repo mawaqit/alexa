@@ -1,3 +1,4 @@
+import { LinkSimple } from "@phosphor-icons/react";
 import { getCompleteLinkingUrl } from "../api/client";
 
 // Shown whenever this browser arrived via the Alexa app's "Link Account"
@@ -11,7 +12,10 @@ export function AlexaLinkBanner() {
 
   return (
     <div className="alexa-link-banner">
-      <p>Almost done — finish linking your Alexa skill to apply this setup.</p>
+      <p>
+        <LinkSimple size={18} weight="bold" aria-hidden="true" />
+        Almost done. Finish linking your Alexa skill to apply this setup.
+      </p>
       {linkUrl ? (
         <a href={linkUrl} className="button button-primary">
           Continue to Alexa

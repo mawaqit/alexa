@@ -1,6 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { MotionConfig } from "framer-motion";
+import "@fontsource-variable/outfit";
+import "@fontsource-variable/jetbrains-mono";
 import { App } from "./App";
 import "./styles/global.css";
 

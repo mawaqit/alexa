@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence, type Variants, type PanInfo } from "framer-motion";
+import { ArrowLeft, WarningCircle } from "@phosphor-icons/react";
 import { getCompleteLinkingUrl, type Mosque } from "../api/client";
 import { MosqueSearch } from "./MosqueSearch";
 import { ReciterSelector } from "./ReciterSelector";
@@ -84,7 +85,7 @@ export function SetupWizard({
         setSelectedMosque(mosque);
         goTo("reciter");
       })
-      .catch(() => setError("Couldn't save that mosque — please try again."))
+      .catch(() => setError("Couldn't save that mosque. Please try again."))
       .finally(() => setSavingMosque(false));
   };
 
@@ -99,7 +100,7 @@ export function SetupWizard({
       <div className="wizard-header">
         {canGoBack && (
           <button type="button" className="wizard-back" onClick={goBack}>
-            <span aria-hidden="true">←</span> Back
+            <ArrowLeft size={16} weight="bold" aria-hidden="true" /> Back
           </button>
         )}
         <StepIndicator current={step} />
@@ -140,7 +141,12 @@ export function SetupWizard({
               <p className="muted-text">
                 Search by name, or let us find mosques near you.
               </p>
-              {error && <p className="error-banner">{error}</p>}
+              {error && (
+                <p className="error-banner">
+                  <WarningCircle size={18} weight="fill" aria-hidden="true" />
+                  {error}
+                </p>
+              )}
               <MosqueSearch onSelect={handleMosqueSelect} disabled={savingMosque} />
             </div>
           )}
@@ -149,7 +155,7 @@ export function SetupWizard({
             <div className="wizard-step-body">
               <h2>Choose your favorite reciter</h2>
               <p className="muted-text">
-                Pick the voice you'd like to hear for the Azan — or skip to use the
+                Pick the voice you'd like to hear for the Azan, or skip to use the
                 default.
               </p>
               <ReciterSelector

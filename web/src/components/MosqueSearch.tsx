@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Compass, MagnifyingGlass, WarningCircle } from "@phosphor-icons/react";
 import { api, type Mosque } from "../api/client";
 import { EASE_OUT, listVariants, listItemVariants } from "../animation";
 
@@ -74,6 +75,7 @@ export function MosqueSearch({ onSelect, disabled }: MosqueSearchProps) {
           whileTap={{ scale: 0.96 }}
           transition={{ duration: 0.15, ease: EASE_OUT }}
         >
+          <Compass size={16} weight="bold" aria-hidden="true" />
           Use my location
         </motion.button>
         <form onSubmit={searchByWord} className="mosque-search-form">
@@ -91,6 +93,7 @@ export function MosqueSearch({ onSelect, disabled }: MosqueSearchProps) {
             whileTap={{ scale: 0.96 }}
             transition={{ duration: 0.15, ease: EASE_OUT }}
           >
+            <MagnifyingGlass size={16} weight="bold" aria-hidden="true" />
             Search
           </motion.button>
         </form>
@@ -98,7 +101,10 @@ export function MosqueSearch({ onSelect, disabled }: MosqueSearchProps) {
 
       {status === "loading" && <p className="muted-text">Searching…</p>}
       {status === "error" && (
-        <p className="error-banner">Couldn't search right now — please try again.</p>
+        <p className="error-banner">
+          <WarningCircle size={18} weight="fill" aria-hidden="true" />
+          Couldn't search right now. Please try again.
+        </p>
       )}
       {showNoResults && (
         <p className="empty-state">

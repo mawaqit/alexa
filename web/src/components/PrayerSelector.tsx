@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { WarningCircle } from "@phosphor-icons/react";
 import { api, type PrayerTime } from "../api/client";
 import { Switch } from "./Switch";
 import { EASE_OUT, listVariants, listItemVariants } from "../animation";
@@ -69,7 +70,8 @@ export function PrayerSelector({ mosqueUuid, timezone, selected, onSave }: Praye
   if (prayerTimes.length === 0) {
     return (
       <p className="error-banner">
-        Couldn't load this mosque's prayer times — please try again shortly.
+        <WarningCircle size={18} weight="fill" aria-hidden="true" />
+        Couldn't load this mosque's prayer times. Please try again shortly.
       </p>
     );
   }
@@ -107,7 +109,12 @@ export function PrayerSelector({ mosqueUuid, timezone, selected, onSave }: Praye
       >
         {status === "saving" ? "Saving…" : "Save prayer selection"}
       </motion.button>
-      {status === "error" && <p className="error-banner">Couldn't save — please try again.</p>}
+      {status === "error" && (
+        <p className="error-banner">
+          <WarningCircle size={18} weight="fill" aria-hidden="true" />
+          Couldn't save. Please try again.
+        </p>
+      )}
     </div>
   );
 }

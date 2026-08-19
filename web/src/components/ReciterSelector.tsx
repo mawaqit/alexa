@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { WarningCircle } from "@phosphor-icons/react";
 import { api, type Reciter } from "../api/client";
 import { Radio } from "./Radio";
 import { EASE_OUT, listVariants, listItemVariants } from "../animation";
@@ -59,7 +60,8 @@ export function ReciterSelector({ selected, onSave, onSkip }: ReciterSelectorPro
   if (reciters.length === 0) {
     return (
       <p className="error-banner">
-        Couldn't load the reciter list — please try again shortly.
+        <WarningCircle size={18} weight="fill" aria-hidden="true" />
+        Couldn't load the reciter list. Please try again shortly.
       </p>
     );
   }
@@ -100,7 +102,12 @@ export function ReciterSelector({ selected, onSave, onSkip }: ReciterSelectorPro
           </button>
         )}
       </div>
-      {status === "error" && <p className="error-banner">Couldn't save — please try again.</p>}
+      {status === "error" && (
+        <p className="error-banner">
+          <WarningCircle size={18} weight="fill" aria-hidden="true" />
+          Couldn't save. Please try again.
+        </p>
+      )}
     </div>
   );
 }

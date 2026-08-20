@@ -322,6 +322,9 @@
               },
               {
                 "id": "HadithOfTheDay"
+              },
+              {
+                "id": "AllPrayerTime"
               }
             ],
             "type": "ALEXA_DATASTORE_PACKAGEMANAGER"

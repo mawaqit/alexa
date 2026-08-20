@@ -8,8 +8,8 @@
         {
           "targetViewport": "WIDGET_M",
           "metadata": {
-            "name": "Next prayer",
-            "description": "Displays the next prayer time for your mosque.",
+            "name": "All prayer times",
+            "description": "Displays all five daily prayer times for your mosque, highlighting the next one.",
             "keywords": [
               "prayer",
               "mosque",
@@ -18,7 +18,7 @@
             ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
             "previews": [
-              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/nextPrayerWidget-en.png"
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/allPrayerWidget-en.png"
             ]
           }
         }
@@ -27,8 +27,8 @@
         {
           "targetViewport": "WIDGET_M",
           "metadata": {
-            "name": "Prochaine prière",
-            "description": "Affiche l'heure de la prochaine prière de votre mosquée.",
+            "name": "Toutes les prières",
+            "description": "Affiche les cinq heures de prière quotidiennes de votre mosquée, avec la prochaine mise en avant.",
             "keywords": [
               "prière",
               "mosquée",
@@ -37,7 +37,7 @@
             ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
             "previews": [
-              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/nextPrayerWidget-fr.png"
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/allPrayerWidget-fr.png"
             ]
           }
         }
@@ -46,8 +46,8 @@
         {
           "targetViewport": "WIDGET_M",
           "metadata": {
-            "name": "Next prayer",
-            "description": "Displays the next prayer time for your mosque.",
+            "name": "All prayer times",
+            "description": "Displays all five daily prayer times for your mosque, highlighting the next one.",
             "keywords": [
               "prayer",
               "mosque",
@@ -56,7 +56,7 @@
             ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
             "previews": [
-              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/nextPrayerWidget-en.png"
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/allPrayerWidget-en.png"
             ]
           }
         }
@@ -65,8 +65,8 @@
         {
           "targetViewport": "WIDGET_M",
           "metadata": {
-            "name": "Next prayer",
-            "description": "Displays the next prayer time for your mosque.",
+            "name": "All prayer times",
+            "description": "Displays all five daily prayer times for your mosque, highlighting the next one.",
             "keywords": [
               "prayer",
               "mosque",
@@ -75,7 +75,7 @@
             ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
             "previews": [
-              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/nextPrayerWidget-en.png"
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/allPrayerWidget-en.png"
             ]
           }
         }
@@ -84,8 +84,8 @@
         {
           "targetViewport": "WIDGET_M",
           "metadata": {
-            "name": "Next prayer",
-            "description": "Displays the next prayer time for your mosque.",
+            "name": "All prayer times",
+            "description": "Displays all five daily prayer times for your mosque, highlighting the next one.",
             "keywords": [
               "prayer",
               "mosque",
@@ -94,7 +94,7 @@
             ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
             "previews": [
-              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/nextPrayerWidget-en.png"
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/allPrayerWidget-en.png"
             ]
           }
         }
@@ -103,8 +103,8 @@
         {
           "targetViewport": "WIDGET_M",
           "metadata": {
-            "name": "Next prayer",
-            "description": "Displays the next prayer time for your mosque.",
+            "name": "All prayer times",
+            "description": "Displays all five daily prayer times for your mosque, highlighting the next one.",
             "keywords": [
               "prayer",
               "mosque",
@@ -113,7 +113,7 @@
             ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
             "previews": [
-              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/nextPrayerWidget-en.png"
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/allPrayerWidget-en.png"
             ]
           }
         }
@@ -122,8 +122,8 @@
         {
           "targetViewport": "WIDGET_M",
           "metadata": {
-            "name": "Prochaine prière",
-            "description": "Affiche l'heure de la prochaine prière de votre mosquée.",
+            "name": "Toutes les prières",
+            "description": "Affiche les cinq heures de prière quotidiennes de votre mosquée, avec la prochaine mise en avant.",
             "keywords": [
               "prière",
               "mosquée",
@@ -132,7 +132,7 @@
             ],
             "iconUri": "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/large-mawaqit-icon.png",
             "previews": [
-              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/nextPrayerWidget-fr.png"
+              "https://raw.githubusercontent.com/mawaqit/alexa/develop/skill-package/assets/images/preview/allPrayerWidget-fr.png"
             ]
           }
         }
@@ -140,7 +140,7 @@
     }
   },
   "manifest": {
-    "id": "NextPrayerTime",
+    "id": "AllPrayerTime",
     "version": "1.0.0",
     "presentationDefinitions": [
       {

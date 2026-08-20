@@ -76,6 +76,13 @@ const {
   UpdatePrayerTimeAPLEventHandler,
   ReadPrayerTimeAPLEventHandler,
 } = require("./handlers/prayerTimeWidgetHandler.js");
+const {
+  InstallAllPrayerTimeWidgetRequestHandler,
+  RemoveAllPrayerTimeWidgetRequestHandler,
+  UpdateAllPrayerTimeWidgetRequestHandler,
+  UpdateAllPrayerTimeAPLEventHandler,
+  ReadAllPrayerTimeAPLEventHandler,
+} = require("./handlers/allPrayerTimeWidgetHandler.js");
 const { AuthHandler } = require("./handlers/authHandler.js");
 const moment = require("moment-timezone");
 
@@ -303,6 +310,11 @@ exports.handler = Alexa.SkillBuilders.custom()
     UpdatePrayerTimeWidgetRequestHandler,
     UpdatePrayerTimeAPLEventHandler,
     ReadPrayerTimeAPLEventHandler,
+    InstallAllPrayerTimeWidgetRequestHandler,
+    RemoveAllPrayerTimeWidgetRequestHandler,
+    UpdateAllPrayerTimeWidgetRequestHandler,
+    UpdateAllPrayerTimeAPLEventHandler,
+    ReadAllPrayerTimeAPLEventHandler,
     LaunchRequestHandler,
     ExceptionEncounteredHandler,
     HelpIntentHandler,

@@ -19,16 +19,10 @@ const CFIRWithoutSlotsHandler = {
     );
   },
   async handle(handlerInput) {
-    console.log("in CFIRWithoutSlotsHandler");
     const { attributesManager } = handlerInput;
     const sessionAttributes = attributesManager.getSessionAttributes();
     const { persistentAttributes } = sessionAttributes;
-    console.log(
-      "Persisted data present:",
-      !!(persistentAttributes && persistentAttributes.uuid),
-    );
     if (!persistentAttributes || !persistentAttributes.uuid) {
-      console.log("No persistent data found, returning MAYBE");
       return handlerInput.responseBuilder
         .withCanFulfillIntent({
           canFulfill: "MAYBE",
@@ -36,7 +30,6 @@ const CFIRWithoutSlotsHandler = {
         })
         .getResponse();
     }
-    console.log("Persistent Data Found, returning YES");
     return handlerInput.responseBuilder
       .withCanFulfillIntent({
         canFulfill: "YES",
@@ -80,22 +73,13 @@ const CFIRNextPrayerTimeAndPlayAdhaanIntentHandler = {
     const filledSlots = handlerInput.requestEnvelope.request.intent.slots;
     const slotValues = helperFunctions.getSlotValues(filledSlots);
     const intentName = helperFunctions.getIntentName(handlerInput);
-    console.log(
-      "in CFIRNextPrayerTimeAndPlayAdhaanIntentHandler " +
-        JSON.stringify(slotValues),
-    );
     const { attributesManager } = handlerInput;
     const sessionAttributes = attributesManager.getSessionAttributes();
     const { persistentAttributes } = sessionAttributes;
-    console.log(
-      "Persisted data present:",
-      !!(persistentAttributes && persistentAttributes.uuid),
-    );
     if (
       (!persistentAttributes || !persistentAttributes.uuid) &&
       intentName !== "PlayAdhanIntent"
     ) {
-      console.log("No persistent data found, returning MAYBE");
       return handlerInput.responseBuilder
         .withCanFulfillIntent({
           canFulfill: "MAYBE",

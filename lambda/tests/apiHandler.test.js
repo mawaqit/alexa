@@ -149,6 +149,20 @@ describe("getMosqueList", () => {
     );
   });
 
+  it("respects a caller-supplied limit (the website asks for more than the voice UI's default 5)", async () => {
+    axios.request.mockResolvedValue({
+      data: Array.from({ length: 12 }, (_, i) => ({
+        name: `Mosque ${i}`,
+        uuid: `uuid-${i}`,
+        proximity: i * 100,
+      })),
+    });
+
+    const list = await getMosqueList(false, 48.85, 2.35, 10);
+
+    expect(list).toHaveLength(10);
+  });
+
   it("searches by coordinates when no search word is given", async () => {
     axios.request.mockResolvedValue({ data: [{ name: "M", uuid: "u" }] });
 

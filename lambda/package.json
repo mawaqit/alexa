@@ -3,9 +3,15 @@
   "main": "index.js",
   "scripts": {
     "deploy:dev": "serverless deploy --stage dev",
-    "deploy:prod": "serverless deploy --stage prod"
+    "deploy:prod": "serverless deploy --stage prod",
+    "serve": "node localWebApiServer.js"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.971.0",
+    "@aws-sdk/client-scheduler": "^3.971.0",
+    "@aws-sdk/client-sqs": "^3.971.0",
+    "@aws-sdk/client-ssm": "^3.971.0",
+    "@aws-sdk/lib-dynamodb": "^3.971.0",
     "@google-cloud/translate": "^9.4.2",
     "ask-sdk-core": "^2.7.0",
     "ask-sdk-model": "^1.19.0",
@@ -14,13 +20,8 @@
     "i18next-sprintf-postprocessor": "^0.2.2",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.4",
-    "util": "^0.12.5",
-    "@aws-sdk/client-dynamodb": "^3.971.0",
-    "@aws-sdk/lib-dynamodb": "^3.971.0",
-    "@aws-sdk/client-scheduler": "^3.971.0",
-    "@aws-sdk/client-sqs": "^3.971.0",
-    "@aws-sdk/client-ssm": "^3.971.0",
-    "qs": "^6.12.3"
+    "qs": "^6.12.3",
+    "util": "^0.12.5"
   },
   "devDependencies": {
     "serverless-aws-alias": "^1.8.0"

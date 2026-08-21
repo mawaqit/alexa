@@ -29,7 +29,14 @@ const buildHandlerInput = ({
   const savePersistentAttributes = jest.fn(async () => {});
 
   const requestEnvelope = {
-    session: { new: true, attributes: {} },
+    // Real Alexa requests carry the account-linking token at
+    // session.user.accessToken — interceptors.js's GetUserInfo reads it from
+    // here.
+    session: {
+      new: true,
+      attributes: {},
+      user: { userId: "user-1", ...(accessToken ? { accessToken } : {}) },
+    },
     context: {
       System: {
         apiEndpoint: "https://api.eu.amazonalexa.com",

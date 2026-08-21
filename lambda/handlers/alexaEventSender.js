@@ -47,7 +47,6 @@ async function sendDoorbellEvent(accessToken, endpointId, timestamp) {
 
   for (const url of regions) {
     try {
-      console.log(`Attempting to send event to ${url}`);
       const config = {
         method: "post",
         maxBodyLength: Infinity,
@@ -66,7 +65,7 @@ async function sendDoorbellEvent(accessToken, endpointId, timestamp) {
       );
       return response.data; // Success, return immediately
     } catch (error) {
-      console.log(
+      console.error(
         `Failed to send event to ${url}:`,
         error?.response?.data || error.message,
       );

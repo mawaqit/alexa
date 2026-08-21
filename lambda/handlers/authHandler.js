@@ -37,7 +37,6 @@ const AuthHandler = {
 };
 
 async function getRefreshToken(authCode) {
-  console.log("Exchanging auth code for tokens");
   if (!authCode) {
     throw new Error("Auth code is required");
   }
@@ -63,7 +62,7 @@ async function getRefreshToken(authCode) {
     console.log("GetRefreshToken: token exchange successful");
     return response.data;
   } catch (error) {
-    console.log("Error in GetRefreshToken: ", error?.response?.data);
+    console.error("Error in GetRefreshToken: ", error?.response?.data);
     throw error;
   }
 }
@@ -93,7 +92,6 @@ async function getUserInfo(accessToken) {
 }
 
 async function getAccessTokenFromRefreshToken(refreshToken) {
-  console.log("Getting access token from refresh token");
   if (!refreshToken) {
     throw new Error("Refresh token is required");
   }

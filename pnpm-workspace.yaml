@@ -1,6 +1,10 @@
 packages:
   - "lambda"
   - "azan-lambda"
+  - "web"
+  - "web-infra"
 allowBuilds:
+  esbuild: true
   protobufjs: true
+  serverless: true
   unrs-resolver: true

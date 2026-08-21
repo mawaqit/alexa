@@ -8,6 +8,7 @@ const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
 const { getDataSourceForPrayerTime } = require("./datasources.js");
 const awsSsmHandler = require("./handlers/awsSsmHandler.js");
 const authHandler = require("./handlers/authHandler.js");
+const webConfigHandler = require("./handlers/webConfigHandler.js");
 
 const LogRequestInterceptor = {
   process(handlerInput) {
@@ -43,7 +44,6 @@ const ResponseTimeCalculationInterceptor = {
 
 const AddDirectiveResponseInterceptor = {
   async process(handlerInput, response) {
-    console.log("AddDirectiveResponseInterceptor");
     const sessionAttributes = handlerInput.requestEnvelope?.session
       ? handlerInput.attributesManager.getSessionAttributes()
       : {};
@@ -56,11 +56,13 @@ const AddDirectiveResponseInterceptor = {
     const aplDirective = getAplDirective(directives);
     const { ssmlText, text, hasAudio } = getSsmlInfo(response);
 
-    console.log(
-      "APL Directive: %s \n SSML Text: %s",
-      JSON.stringify(aplDirective),
-      ssmlText,
-    );
+    // Redundant with LogResponseInterceptor, which already dumps the full
+    // response (including directives and outputSpeech).
+    // console.log(
+    //   "APL Directive: %s \n SSML Text: %s",
+    //   JSON.stringify(aplDirective),
+    //   ssmlText,
+    // );
 
     if (ssmlText && !hasAudio) {
       response["outputSpeech"]["ssml"] =
@@ -132,7 +134,6 @@ async function handleAplSupport(
     !hasAudio &&
     supportsAPL["Alexa.Presentation.APL"]
   ) {
-    console.log("Adding APL Directive");
     const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
     const directive = helperFunctions.createDirectivePayload(
       prayerTimeApl,
@@ -154,9 +155,7 @@ function handleNoAplSupport(
   text,
   skipCardDirective,
 ) {
-  console.log("APL not supported");
   if (ssmlText && !hasAudio && !skipCardDirective) {
-    console.log("Adding Simple Card");
     response.card = {
       type: "Simple",
       title: process.env.skillName,
@@ -167,8 +166,8 @@ function handleNoAplSupport(
 
 const LocalizationInterceptor = {
   async process(handlerInput) {
-    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
-    console.log("Request Type: ", requestType);
+    // Request type is redundant with LogRequestInterceptor, which already
+    // dumps the full request envelope (including request.type).
     let locale = Alexa.getLocale(handlerInput.requestEnvelope);
     // Gets the locale from the request and initializes i18next.
     const localizationClient = i18n.use(sprintf).init({
@@ -205,7 +204,6 @@ const LocalizationInterceptor = {
 
 const SavePersistenceAttributesToSession = {
   async process(handlerInput) {
-    console.log("SavePersistenceAttributesToSession Interceptor");
     if (helperFunctions.isNewSession(handlerInput)) {
       await handleNewSession(handlerInput);
     }
@@ -213,22 +211,72 @@ const SavePersistenceAttributesToSession = {
 };
 
 async function handleNewSession(handlerInput) {
-  console.log("New Session");
   const persistentAttributes =
     await helperFunctions.getPersistedData(handlerInput);
 
   if (persistentAttributes?.uuid) {
     await processPersistentAttributes(handlerInput, persistentAttributes);
+  } else {
+    // No mosque selected via voice yet — but the user may have configured
+    // one from the companion website before ever opening the skill (or
+    // before finishing account linking). If so, apply it now instead of
+    // falling through to the usual "please select a mosque" prompt.
+    await tryHydrateFromWebConfig(handlerInput);
+  }
+}
+
+/**
+ * Web-first hydration: applies a mosque/prayer selection staged from the
+ * companion website (see webConfigHandler.applyPendingWebConfig) on the
+ * user's first Alexa launch after account linking. Alexa-first users get
+ * this applied immediately when they save from the website instead — this
+ * is only the fallback for the other order.
+ */
+async function tryHydrateFromWebConfig(handlerInput) {
+  try {
+    const userInfo = await GetUserInfo.process(handlerInput);
+    if (!userInfo?.user_id) {
+      return; // not account-linked yet — the existing "please link your account" prompt is untouched
+    }
+
+    // Already inside a live Alexa request, so the Alexa id is known
+    // directly — same lookup CustomDynamoDbPersistenceAdapter's default
+    // partitionKeyGenerator uses. Passed through so applyPendingWebConfig
+    // can skip the userId-index GSI, which can't find a brand-new user's
+    // row yet (see the comment on that function).
+    const alexaId =
+      handlerInput.requestEnvelope?.session?.user?.userId ||
+      handlerInput.requestEnvelope?.context?.System?.user?.userId;
+    if (!alexaId) {
+      return;
+    }
+
+    const result = await webConfigHandler.applyPendingWebConfig(
+      userInfo.user_id,
+      {
+        alexaId,
+      },
+    );
+    if (!result.applied) {
+      return; // nothing staged from the website, or not enough staged yet to apply (e.g. no mosque)
+    }
+
+    // applyPendingWebConfig wrote straight to DynamoDB via its own adapter
+    // instance, bypassing this request's attributesManager cache — push its
+    // result in directly rather than re-reading through
+    // attributesManager.getPersistentAttributes(), which would hand back
+    // the stale pre-write value it already cached earlier in this request.
+    handlerInput.attributesManager.setPersistentAttributes(result.attributes);
+    await processPersistentAttributes(handlerInput, result.attributes);
+  } catch (error) {
+    console.error("Error while hydrating from web config: ", error);
   }
 }
 
 async function processPersistentAttributes(handlerInput, persistentAttributes) {
-  console.log("Persistent Attributes: ", JSON.stringify(persistentAttributes));
-
   delete persistentAttributes.requestedRoutinePrayer;
   try {
     const userInfo = await GetUserInfo.process(handlerInput);
-    console.log("User Info Retrieved Successfully");
     if (userInfo && userInfo?.user_id && !persistentAttributes?.user_id) {
       persistentAttributes.user_id = userInfo?.user_id;
       handlerInput.attributesManager.setPersistentAttributes(
@@ -237,7 +285,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
       await handlerInput.attributesManager.savePersistentAttributes();
     }
   } catch (error) {
-    console.log("Error while fetching user info: ", error);
+    console.error("Error while fetching user info: ", error);
   }
 
   const sessionAttributes =
@@ -259,7 +307,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
     sessionAttributes.persistentAttributes = persistentAttributes;
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
   } catch (error) {
-    console.log("Error while fetching mosque list: ", error);
+    console.error("Error while fetching mosque list: ", error);
     if (error?.message === "Mosque not found") {
       await handlerInput.attributesManager.deletePersistentAttributes();
     } else if (error?.message === "Unable to fetch user timezone") {
@@ -273,14 +321,12 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
 
 const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(_handlerInput) {
-    console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
     await awsSsmHandler.handler();
   },
 };
 
 const GetUserInfo = {
   async process(handlerInput) {
-    console.log("GetUserInfo Interceptor");
     const accessToken =
       handlerInput.requestEnvelope?.session?.user?.accessToken;
     if (!accessToken) {
@@ -296,8 +342,6 @@ function updateRoutinePrayerTimings(
   mosqueTimes,
   persistentAttributes,
 ) {
-  console.log("Updating Routine Prayers: ", routinePrayers);
-  console.log("Mosque Times: ", mosqueTimes);
   if (
     routinePrayers &&
     Array.isArray(routinePrayers) &&
@@ -310,11 +354,9 @@ function updateRoutinePrayerTimings(
           prayerName?.toLowerCase() === prayer?.canonicalName?.toLowerCase() ||
           prayerName?.toLowerCase() === prayer?.name?.toLowerCase(),
       );
-      console.log("Canonical Index: ", canonicalIndex);
       // 2. Logic to get the new time from your mosque data
       // Assuming 'mosqueTimes' is an object where keys match canonical names
       const newTime = mosqueTimes[canonicalIndex];
-      console.log("New Time: ", newTime);
       // 3. Return the updated object
       return {
         ...prayer,
@@ -325,7 +367,6 @@ function updateRoutinePrayerTimings(
         time: newTime || prayer.time, // fallback to old time if mosque time is missing
       };
     });
-    console.log("Updated Routine Prayers: ", updatedPrayers);
     persistentAttributes.routinePrayers = updatedPrayers;
   }
 }

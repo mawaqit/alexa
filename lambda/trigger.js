@@ -20,7 +20,6 @@ exports.handler = async (event) => {
     }
 
     try {
-      console.log(`Starting DAILY_UPDATE for mosque: ${mosqueId}`);
       const schedules =
         await eventBridgeScheduler.listSchedulesForMosque(mosqueId);
 
@@ -53,9 +52,6 @@ exports.handler = async (event) => {
         const prayerIndex = allPrayers.indexOf(prayerName);
         if (prayerIndex !== -1 && prayerTimes.times[prayerIndex]) {
           const time = prayerTimes.times[prayerIndex];
-          console.log(
-            `Updating schedule for mosque: ${mosqueId}, prayer: ${prayerName}, time: ${time}`,
-          );
           await eventBridgeScheduler.updateScheduleTimeOnly(
             mosqueId,
             prayerName,
@@ -91,9 +87,6 @@ exports.handler = async (event) => {
     // NEW LOGIC: Fetch users from Persistence Table by mosqueId
     const persistenceUsers =
       await dbHandler.GetPersistenceUsersByMosqueId(mosqueId);
-    console.log(
-      `Found ${persistenceUsers.length} users for mosque ${mosqueId} in persistence table`,
-    );
 
     // 1. Filter users based on routinePrayers and collect userIds
     const userIdsToFetch = persistenceUsers
@@ -112,10 +105,6 @@ exports.handler = async (event) => {
       .map((pUser) => pUser.userId) // Extract userId (assuming it's mapped to userId in local object, or id from DB)
       .filter((id) => id); // Remove undefined/null ids
 
-    console.log(
-      `Filtered down to ${userIdsToFetch.length} users with ${prayerName} enabled.`,
-    );
-
     if (userIdsToFetch.length === 0) {
       console.log(
         `No users found for ${mosqueId} - ${prayerName}. Deleting schedule.`,
@@ -125,16 +114,13 @@ exports.handler = async (event) => {
     }
 
     const azanUsers = await dbHandler.BatchGetAzanUserInfo(userIdsToFetch);
-    console.log(
-      `Fetched details for ${azanUsers.length} users from Azan table.`,
-    );
 
     // 3. Map to valid user objects for SQS
     validUsers = azanUsers
       .map((user) => {
         const { refresh_token, endpointId } = user;
         if (!refresh_token || !endpointId) {
-          console.log(
+          console.warn(
             `Missing refresh_token or endpointId for userId: ${user.id}`,
           );
           return null;
@@ -147,10 +133,6 @@ exports.handler = async (event) => {
         };
       })
       .filter((u) => u !== null);
-
-    console.log(
-      `Processing ${validUsers.length} valid users for ${prayerName}`,
-    );
 
     const promises = [];
     for (let i = 0; i < validUsers.length; i += batchSize) {

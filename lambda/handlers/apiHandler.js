@@ -7,6 +7,10 @@ const getMosqueList = async (
   searchWord,
   latitudeInDegrees,
   longitudeInDegrees,
+  // Voice UI can only usefully speak ~5 options, so every existing caller
+  // relies on this default and stays byte-for-byte unaffected; the website
+  // (which can show a real list with pagination) passes a higher value.
+  limit = 5,
 ) => {
   let url = `/mosque/search?`;
   if (searchWord) {
@@ -55,7 +59,7 @@ const getMosqueList = async (
             image,
           }),
         )
-        .slice(0, 5);
+        .slice(0, limit);
     })
     .catch((error) => {
       console.error("Error while fetching mosque list: ", error);
@@ -83,7 +87,6 @@ const getPrayerTimings = async (
       console.log("Mosque Timings: ", JSON.stringify(response.data));
       const currentDate = new Date();
       const dateAndMonth = getDateAndMonthForTimezone(timezone);
-      console.log("Date and Month: ", JSON.stringify(dateAndMonth));
       const date = dateAndMonth?.date ?? currentDate.getDate();
       const month = dateAndMonth?.month ?? currentDate.getMonth();
       const calendar = response?.data?.calendar;
@@ -101,8 +104,6 @@ const getPrayerTimings = async (
       if (!isPrayerCalendarRequired && response?.data?.calendar) {
         delete response.data.calendar;
       }
-
-      console.log("Mosque Times after Update: ", response?.data?.times);
 
       return response.data;
     })

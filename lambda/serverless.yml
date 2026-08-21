@@ -45,6 +45,15 @@ provider:
     SQS_QUEUE_BATCH_SIZE: ${file(env.json):${self:provider.stage}.sqsQueueBatchSize, '10'}
     SQS_QUEUE_URL: { Ref: AlexaAzanQueue }
     MOSQUE_AZAN_DATA_TABLE: mawaqit-alexa-mosque-azan-data-${self:provider.stage}
+    WEB_ORIGIN: ${file(env.json):${self:provider.stage}.webOrigin, 'http://localhost:5173'}
+    WEB_REDIRECT_URI: ${file(env.json):${self:provider.stage}.webRedirectUri, 'http://localhost:3000/auth/callback'}
+    # Stand-in until /alexa/webClientId etc. exist in SSM (pending platform
+    # team access) — same variable names awsSsmHandler.js writes, so once
+    # those SSM params exist it silently overwrites these and env.json's
+    # copies become dead weight to delete, no code change needed either way.
+    webClientId: ${file(env.json):${self:provider.stage}.webClientId, ''}
+    webClientSecret: ${file(env.json):${self:provider.stage}.webClientSecret, ''}
+    webSessionSecret: ${file(env.json):${self:provider.stage}.webSessionSecret, ''}
   lambdaHashingVersion: 20201221
 
   iamRoleStatements:
@@ -99,6 +108,35 @@ functions:
     timeout: 900
     memorySize: 128
     description: Worker Lambda to process Alexa events from SQS
+    versionFunction: false
+
+  webApiHandler:
+    handler: webApi.handler
+    timeout: 10
+    memorySize: 128
+    description: HTTP API for the MAWAQIT companion website (LWA login, mosque/prayer config)
+    # Lambda Function URL, not API Gateway: webApi.js already does its own
+    # internal routing (one function, no fan-out to other functions), so
+    # API Gateway's main value-add wasn't being used — this is simpler
+    # infrastructure for the same event/response shape (Function URL events
+    # are the same v2.0 payload format: rawPath, requestContext.http.method,
+    # a cookies array, etc.), and only needs lambda:* permissions to deploy,
+    # not a separate apigateway:* grant.
+    url:
+      cors:
+        allowedOrigins:
+          - ${file(env.json):${self:provider.stage}.webOrigin, 'http://localhost:5173'}
+        # Authorization is required now that the session travels as a bearer
+        # token, not a cookie (see webSessionHandler.js's top comment) — any
+        # custom header on a cross-site fetch() forces a CORS preflight, and
+        # the browser blocks the real request unless the preflight response
+        # explicitly allows that header.
+        allowedHeaders: [Content-Type, Authorization]
+        # OPTIONS isn't a valid value here — Function URLs handle the CORS
+        # preflight (OPTIONS) automatically once Cors is configured at all;
+        # this list is only the actual invocation methods.
+        allowedMethods: [GET, POST, PUT]
+        allowCredentials: true
     versionFunction: false
 
 resources:

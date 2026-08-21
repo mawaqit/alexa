@@ -1,0 +1,984 @@
+/* Palette taken from the actual MAWAQIT Alexa skill icon
+   (skill-package/assets/images/large-mawaqit-icon.png) — a deep indigo-to-
+   violet gradient badge. Every color below is a token, not a literal, so
+   dark mode (further down) only has to redefine the tokens, not the rules
+   that use them. */
+:root {
+  --color-primary: #6d28d9;
+  --color-primary-hover: #5b21b6;
+  --color-primary-light: #8b5cf6;
+  /* Semantic "heading/emphasis ink" — flips to a light tone in dark mode
+     below, despite the name. --brand-ink (below) is its non-flipping twin,
+     for the few spots (the Alexa-link banner's pill button) that sit
+     directly on --gradient-brand and need to stay dark-on-white in both
+     themes. */
+  --color-primary-dark: #3b0f70;
+  --brand-ink: #3b0f70;
+  --gradient-brand: linear-gradient(160deg, #3b0f70 0%, #6d28d9 100%);
+
+  --color-bg: #f7f5fc;
+  --color-surface: #ffffff;
+  /* The dashboard header's floating material — see .dashboard-header.
+     Redefined to an opaque copy of --color-surface under
+     prefers-reduced-transparency. */
+  --color-surface-translucent: rgba(255, 255, 255, 0.72);
+  --color-border: #e6e0f5;
+  --color-text: #1f1533;
+  --color-text-muted: #6b6280;
+
+  --color-error-bg: #fdecea;
+  --color-error-text: #b3261e;
+  --color-pending-bg: #f3ecfc;
+  --color-pending-text: #5b21b6;
+  --color-ok-bg: #e8f6ee;
+  --color-ok-text: #1f7a4d;
+
+  /* Two-tier shape scale, applied consistently: --radius is for containers
+     (cards, banners), --radius-sm for controls (buttons, inputs). Toggles
+     and dots use a hardcoded 999px/50% instead of a third token since
+     "fully round" isn't a size, it's a shape. */
+  --radius: 18px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 3px rgba(59, 15, 112, 0.1);
+  --shadow-lg: 0 12px 32px rgba(59, 15, 112, 0.16);
+  /* Tinted to the brand hue (not a neutral black) per the shadow-tinting
+     rule — used only on the primary button and other on-brand emphasis,
+     never as a generic drop shadow. */
+  --shadow-brand: 0 8px 20px rgba(109, 40, 217, 0.28);
+
+  --font-sans:
+    "Outfit Variable", "Segoe UI", system-ui, -apple-system, Roboto, Helvetica,
+    Arial, sans-serif;
+  /* Reserved for tabular data (prayer times) — never for decoration or body
+     copy, so the "structured/precise" register stays meaningful. */
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Lets native form controls (the text input's caret/selection, any
+     browser chrome inside the page) pick a light or dark rendering to
+     match, instead of defaulting to light and looking pasted-on. */
+  color-scheme: light dark;
+}
+
+/* System dark mode. Every rule elsewhere reads a token, so this block is
+   the entire dark theme — nothing below this needs a `.dark` class or a
+   second copy of any rule. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #a78bfa;
+    --color-primary-hover: #c4b5fd;
+    --color-primary-light: #8b5cf6;
+    --color-primary-dark: #ede9fe;
+
+    --color-bg: #150c26;
+    --color-surface: #1f1436;
+    --color-surface-translucent: rgba(31, 20, 54, 0.72);
+    --color-border: #372a54;
+    --color-text: #f3effa;
+    --color-text-muted: #b3a6cc;
+
+    --color-error-bg: #3a1a18;
+    --color-error-text: #ff9d92;
+    --color-pending-bg: #2a1f47;
+    --color-pending-text: #cbb8f7;
+    --color-ok-bg: #123322;
+    --color-ok-text: #83e2ac;
+
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+    --shadow-brand: 0 8px 24px rgba(167, 139, 250, 0.25);
+  }
+}
+
+/* A near-solid, clearly-bordered look for users who asked for more
+   contrast — translucent chrome and soft pastel banners are the first
+   things that stop being legible at low vision, so trade them for flat
+   fills and a defined edge. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: currentColor;
+    --color-surface-translucent: var(--color-surface);
+  }
+
+  .card,
+  .status-banner,
+  .error-banner,
+  .empty-state,
+  .switch-row,
+  .radio-row,
+  .mosque-result,
+  .button-secondary {
+    border-width: 2px;
+  }
+}
+
+/* Frostier/solid instead of blurred — the header material is the only
+   thing on the page using backdrop-filter. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --color-surface-translucent: var(--color-surface);
+  }
+
+  .dashboard-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  /* Only color properties — never transform/layout — so a system theme
+     switch fades instead of snapping, without implying any layout motion
+     that reduced-motion would need to suppress. */
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+h1,
+h2 {
+  margin: 0 0 0.5rem;
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  font-optical-sizing: auto;
+}
+
+/* Tracking is size-specific, never one value for every heading: large
+   display text (h1) wants letters pulled slightly closer, dense small text
+   (the body default, near 0) wants them left alone. Leading runs the other
+   way — tighter on big headings, roomier on small ones. */
+h1 {
+  font-size: clamp(1.5rem, 1rem + 2vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: clamp(1.1rem, 0.95rem + 0.6vw, 1.35rem);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 100vh;
+  color: var(--color-text-muted);
+}
+
+/* A small rotating ring — replaces a bare "Loading…" with something that
+   reads as active work in progress, not a stalled page. */
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2.5px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* A looping animation is exactly what Reduce Motion asks pages to drop —
+     a static ring still reads as "loading" beside the text. */
+  .spinner {
+    animation: none;
+  }
+}
+
+.muted-text {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+}
+
+/* Landing */
+.landing {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--gradient-brand);
+  overflow: hidden;
+}
+
+/* The geometric pattern (BrandPattern.tsx) sits behind everything on this
+   screen, faded at the edges so it reads as texture on the gradient rather
+   than a busy tiled backdrop competing with the card. */
+.landing-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: #fff;
+  opacity: 0.14;
+  mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 72%);
+}
+
+.landing-card {
+  position: relative;
+  max-width: 26rem;
+  width: 100%;
+  text-align: center;
+  padding: 2.25rem 2rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.landing-logo-ring {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-brand);
+}
+
+.landing-logo {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+}
+
+.landing-card h1 {
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 1.85rem);
+}
+
+.landing-card p {
+  color: var(--color-text-muted);
+  margin: 0.75rem 0 1.75rem;
+  max-width: 32ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landing-card .button {
+  width: 100%;
+}
+
+/* Dashboard */
+.dashboard {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  /* A floating material, not a fixed opaque strip: it stays reachable
+     while content scrolls underneath it, and the blur signals it's chrome
+     layered above the page rather than the first card in the list. */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: 0 -1rem;
+  padding: 0.85rem 1rem;
+  background: var(--color-surface-translucent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+/* A soft fade under the sticky header instead of a hard 1px divider — only
+   noticeable where the floating chrome actually overlaps scrolled content. */
+.dashboard-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 10px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.06), transparent);
+  pointer-events: none;
+}
+
+.dashboard-header h1 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.header-logo {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  box-shadow: var(--shadow);
+}
+
+.dashboard-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dashboard-section h2 {
+  font-size: 1.1rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+.section-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.section-header-title h2 {
+  margin: 0;
+}
+
+/* Standalone use (the Azan-prayers section has no trailing action button,
+   so it renders this title alone instead of nested in .section-header). */
+.dashboard-section > .section-header-title {
+  margin-bottom: 0.75rem;
+}
+
+/* A small tinted circle behind a Phosphor icon — used next to section
+   headings and inside status banners so the icon reads as a deliberate
+   accent, not a loose glyph floating in text. */
+.icon-chip {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-pending-bg);
+  color: var(--color-primary);
+}
+
+.status-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+}
+
+.status-banner svg {
+  flex-shrink: 0;
+}
+
+.status-ok {
+  background: var(--color-ok-bg);
+  color: var(--color-ok-text);
+}
+
+.status-pending {
+  background: var(--color-pending-bg);
+  color: var(--color-pending-text);
+}
+
+.alexa-link-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius);
+  background: var(--gradient-brand);
+  color: #fff;
+}
+
+.alexa-link-banner p {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.alexa-link-banner p svg {
+  flex-shrink: 0;
+}
+
+.alexa-link-banner .button-primary {
+  /* Always on the fixed dark gradient regardless of page theme, so this
+     stays a solid white pill with dark ink — --brand-ink never flips with
+     dark mode the way --color-primary-dark does. */
+  background: #fff;
+  color: var(--brand-ink);
+  flex-shrink: 0;
+}
+
+.alexa-link-banner .button-primary:hover {
+  background: var(--color-bg);
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+  font-size: 0.9rem;
+}
+
+.error-banner svg {
+  flex-shrink: 0;
+}
+
+.empty-state {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  border: 1px dashed var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* Buttons */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease-out;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+/* Feedback on press, not on release — every button gets this, including
+   the plain (non-framer-motion) ones like Skip/Cancel that have no
+   whileTap. framer-motion's whileTap sets its own inline transform on the
+   buttons that have it, which takes precedence over this, so there's no
+   fight between the two. */
+.button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.button-primary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: var(--shadow-brand);
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.button-primary:disabled {
+  box-shadow: none;
+}
+
+.button-secondary {
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+  border-color: var(--color-border);
+}
+
+.button-secondary:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.button-text {
+  background: transparent;
+  color: var(--color-primary);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.button-text:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+/* Mosque card / search */
+.mosque-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.mosque-card p,
+.mosque-result-info p {
+  margin: 0.15rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.mosque-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.mosque-thumb-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-pending-bg);
+  color: var(--color-primary);
+}
+
+.mosque-search-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.mosque-search-form {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 14rem;
+}
+
+.mosque-search-form input {
+  flex: 1;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  /* Explicit, themed colors — left to the UA default this renders a white
+     field with dark text no matter the page theme, which turns invisible
+     against a light caret/selection in dark mode. */
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.mosque-search-form input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.mosque-search-form input:focus {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 1px;
+}
+
+.mosque-results {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mosque-result {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.8rem;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.mosque-result:hover {
+  border-color: var(--color-primary-light);
+  background: var(--color-pending-bg);
+}
+
+.mosque-result-info {
+  flex: 1;
+}
+
+/* Toggle switch */
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  width: 100%;
+  transition:
+    transform 0.1s ease-out,
+    border-color 0.15s ease;
+}
+
+.switch-row:hover {
+  border-color: var(--color-primary-light);
+}
+
+.switch-row:active {
+  transform: scale(0.98);
+}
+
+.switch-row-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Visually hidden but still focusable/keyboard-operable — the real
+   interactive element for screen readers and Tab/Space. */
+.switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.switch-track {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--color-border);
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  /* A little overshoot rather than a linear slide — the same "snap" feel as
+     the button taps elsewhere on the page. */
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.switch-input:checked + .switch-track {
+  background: var(--color-primary);
+}
+
+.switch-input:checked + .switch-track .switch-thumb {
+  transform: translateX(1rem);
+}
+
+.switch-input:focus-visible + .switch-track {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+.switch-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* Radio button (favorite reciter) */
+.radio-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  width: 100%;
+  transition:
+    transform 0.1s ease-out,
+    border-color 0.15s ease;
+}
+
+.radio-row:hover {
+  border-color: var(--color-primary-light);
+}
+
+.radio-row:active {
+  transform: scale(0.98);
+}
+
+.radio-row-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.radio-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.radio-dot {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.radio-dot::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  transform: scale(0);
+  /* Same overshoot feel as the switch thumb — one consistent "snap" motion
+     language across every selection control on the page. */
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.radio-input:checked + .radio-dot {
+  border-color: var(--color-primary);
+}
+
+.radio-input:checked + .radio-dot::after {
+  transform: scale(1);
+}
+
+.radio-input:focus-visible + .radio-dot {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+.radio-label {
+  flex: 1;
+  font-weight: 600;
+}
+
+/* Reciter selector */
+.reciter-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.reciter-selector-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Prayer selector */
+.prayer-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prayer-name {
+  font-weight: 600;
+}
+
+.prayer-time {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+}
+
+/* Setup wizard */
+.wizard {
+  overflow: hidden;
+}
+
+.wizard-header {
+  /* Anchors .wizard-back to this box's corner (below) while the step dots
+     stay centered on the header regardless of whether Back is showing. */
+  position: relative;
+}
+
+.wizard-back {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: transparent;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition:
+    transform 0.1s ease-out,
+    background-color 0.15s ease;
+}
+
+.wizard-back:hover {
+  background: var(--color-pending-bg);
+}
+
+.wizard-back:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.step-indicator {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.step-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+
+.step-dot-active {
+  background: var(--color-primary);
+}
+
+.wizard-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* The step panel is draggable (see SetupWizard.tsx) whenever there's a
+   previous step to swipe back to — cursor affordance for a pointer, same
+   as any other grabbable surface. */
+.wizard-step-draggable {
+  cursor: grab;
+}
+
+.wizard-step-draggable:active {
+  cursor: grabbing;
+}
+
+.wizard-welcome,
+.wizard-done {
+  align-items: center;
+  text-align: center;
+  padding: 1rem 0.5rem;
+}
+
+.wizard-welcome h2,
+.wizard-done h2 {
+  margin-top: 0.5rem;
+}
+
+.wizard-welcome p,
+.wizard-done p {
+  max-width: 26rem;
+}
+
+.wizard-logo {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  box-shadow: var(--shadow-lg);
+}
+
+.wizard-checkmark {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--color-ok-bg);
+  color: var(--color-ok-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wizard-checkmark svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+/* Reduce Motion: keep every state change (this is a settings form — the
+   change itself is information, not decoration) but drop the parts that
+   are pure physical flourish: overshoot springs collapse to a plain,
+   short ease, and framer-motion's own transform animations are already
+   handled globally by <MotionConfig reducedMotion="user"> in main.tsx. */
+@media (prefers-reduced-motion: reduce) {
+  .switch-thumb,
+  .radio-dot::after {
+    transition-duration: 0.15s;
+    transition-timing-function: ease;
+  }
+}

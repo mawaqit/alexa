@@ -48,6 +48,34 @@ const AudioIntentHandler = {
   },
   async handle(handlerInput) {
     const intent = Alexa.getIntentName(handlerInput.requestEnvelope);
+    const sessionAttributes =
+      handlerInput.attributesManager.getSessionAttributes();
+    if (sessionAttributes.adhanPlaybackMode === "apl-video") {
+      // Adhan is playing through the custom player's Video component, not
+      // the AudioPlayer interface — addAudioPlayerStopDirective() would be a
+      // no-op here. Drive the Video directly, and keep its bound isPlaying
+      // in sync so the on-screen icon matches what voice just did.
+      const isPlaying = intent === "AMAZON.ResumeIntent";
+      return handlerInput.responseBuilder
+        .addDirective({
+          type: "Alexa.Presentation.APL.ExecuteCommands",
+          token: sessionAttributes.adhanPlayerToken,
+          commands: [
+            {
+              type: "SetValue",
+              componentId: "adhanPlayerRoot",
+              property: "isPlaying",
+              value: isPlaying,
+            },
+            {
+              type: "ControlMedia",
+              componentId: "adhanVideo",
+              command: isPlaying ? "play" : "pause",
+            },
+          ],
+        })
+        .getResponse();
+    }
     switch (intent) {
       case "AMAZON.ResumeIntent":
         return await intentHandler.PlayAdhanIntentHandler.handle(handlerInput);

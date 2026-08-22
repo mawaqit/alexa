@@ -6,11 +6,13 @@ const {
   getDataSourceforMosqueInfo,
   adhaanRecitation,
   getDataSourceForAdhaanReciter,
+  getDataSourceForAdhanPlayer,
   getMetadata,
   getDataSourceForRoutine,
   getDataSourceForDeleteRoutineList,
 } = require("../datasources.js");
 const listApl = require("../aplDocuments/mosqueListApl.json");
+const adhanPlayerApl = require("../aplDocuments/adhanPlayerApl.json");
 const crypto = require("crypto");
 const { randomUUID: uuidv4 } = crypto;
 const adhaanTasks = [
@@ -849,11 +851,43 @@ const PlayAdhanIntentHandler = {
           ? persistentAttributes.favouriteAdhaan.fajrUrl
           : persistentAttributes.favouriteAdhaan.otherUrl;
     }
-    const playBehavior = "REPLACE_ALL";
-    const metadataInfo = getMetadata(handlerInput, audioName);
     const supportedInterfaces = Alexa.getSupportedInterfaces(
       handlerInput.requestEnvelope,
     );
+    if (
+      supportedInterfaces["Alexa.Presentation.APL"] &&
+      helperFunctions.deviceSupportsVideo(handlerInput)
+    ) {
+      // Play through APL's own Video component so this custom screen — not
+      // Alexa's system AudioPlayer card — stays on top for the whole call to
+      // prayer. AudioIntentHandler reads adhanPlaybackMode to know which
+      // mechanism voice Pause/Resume should control. Devices that support
+      // APL but not video fall through to the AudioPlayer branch below —
+      // a Video component with no video support silently plays nothing.
+      const dataSource = getDataSourceForAdhanPlayer(
+        handlerInput,
+        audioName,
+        audioUrl,
+      );
+      const aplDirective = helperFunctions.createDirectivePayload(
+        adhanPlayerApl,
+        dataSource,
+      );
+      sessionAttributes.adhanPlaybackMode = "apl-video";
+      // AudioIntentHandler needs this exact token to target the on-screen
+      // document with an ExecuteCommands directive later.
+      sessionAttributes.adhanPlayerToken = aplDirective.token;
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+      // shouldEndSession is deliberately omitted (not set to true or false):
+      // false reopens the mic for a spoken follow-up, which is not wanted
+      // here; true drops sessionAttributes before the next request, so a
+      // later "Alexa, pause/resume" arrives with no adhanPlaybackMode/token
+      // and AudioIntentHandler can't target the on-screen player. Omitting
+      // it keeps the session (and this state) alive without listening.
+      return handlerInput.responseBuilder
+        .addDirective(aplDirective)
+        .getResponse();
+    }
     if (!supportedInterfaces["AudioPlayer"]) {
       console.warn("Audio Player is not supported on this device");
       return handlerInput.responseBuilder
@@ -861,6 +895,10 @@ const PlayAdhanIntentHandler = {
         .withShouldEndSession(false)
         .getResponse();
     }
+    sessionAttributes.adhanPlaybackMode = "audio-player";
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    const playBehavior = "REPLACE_ALL";
+    const metadataInfo = getMetadata(handlerInput, audioName);
     return handlerInput.responseBuilder
       .withShouldEndSession(true)
       .addAudioPlayerPlayDirective(
@@ -1396,11 +1434,30 @@ const PlayAdhanTaskHandler = {
           ? persistentAttributes.favouriteAdhaan.fajrUrl
           : persistentAttributes.favouriteAdhaan.otherUrl;
       }
-      const playBehavior = "REPLACE_ALL";
-      const metadataInfo = getMetadata(handlerInput, audioName);
       const supportedInterfaces = Alexa.getSupportedInterfaces(
         handlerInput.requestEnvelope,
       );
+      if (
+        supportedInterfaces["Alexa.Presentation.APL"] &&
+        helperFunctions.deviceSupportsVideo(handlerInput)
+      ) {
+        const dataSource = getDataSourceForAdhanPlayer(
+          handlerInput,
+          audioName,
+          audioUrl,
+        );
+        const aplDirective = helperFunctions.createDirectivePayload(
+          adhanPlayerApl,
+          dataSource,
+        );
+        sessionAttributes.adhanPlaybackMode = "apl-video";
+        sessionAttributes.adhanPlayerToken = aplDirective.token;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        // shouldEndSession is deliberately omitted — see PlayAdhanIntentHandler.
+        return handlerInput.responseBuilder
+          .addDirective(aplDirective)
+          .getResponse();
+      }
       if (!supportedInterfaces["AudioPlayer"]) {
         console.warn("Audio Player is not supported on this device");
         return handlerInput.responseBuilder
@@ -1408,6 +1465,10 @@ const PlayAdhanTaskHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
+      sessionAttributes.adhanPlaybackMode = "audio-player";
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+      const playBehavior = "REPLACE_ALL";
+      const metadataInfo = getMetadata(handlerInput, audioName);
       return handlerInput.responseBuilder
         .withShouldEndSession(true)
         .addAudioPlayerPlayDirective(

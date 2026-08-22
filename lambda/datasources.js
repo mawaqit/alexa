@@ -163,6 +163,33 @@ const getDataSourceForDeleteRoutineList = async (
   );
 };
 
+/**
+ * Data source for adhanPlayerApl.json.
+ *
+ * Deliberately separate from getMetadata: that function feeds the AudioPlayer
+ * interface's metadata card (used only on audio-only devices as a fallback),
+ * while this feeds the custom APL screen that plays the mp3 itself via a
+ * Video component. Same underlying artwork/labels, different consumer.
+ */
+const getDataSourceForAdhanPlayer = (handlerInput, audioName, audioUrl) => {
+  const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
+  const logoUrl = requestAttributes.t("logoUrl");
+  return {
+    data: {
+      properties: {
+        audioUrl: audioUrl,
+        reciterName: audioName,
+        subtitle: requestAttributes.t("skillName"),
+        albumArt: logoUrl,
+        skillLogoUrl: logoUrl,
+        skillName: process.env.SKILL_NAME,
+        layoutDirection: requestAttributes.t("layoutDirection"),
+      },
+    },
+  };
+};
+
 const getMetadata = (handlerInput, title) => {
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
@@ -194,6 +221,7 @@ module.exports = {
   getDataSourceforMosqueInfo,
   adhaanRecitation,
   getDataSourceForAdhaanReciter,
+  getDataSourceForAdhanPlayer,
   getMetadata,
   getDataSourceForRoutine,
   getDataSourceForDeleteRoutineList,

@@ -202,9 +202,31 @@ const DeleteRoutineTouchEventHandler = {
   },
 };
 
+const AdhanPlaybackFinishedTouchEventHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) ===
+        "Alexa.Presentation.APL.UserEvent" &&
+      helperFunctions.getAplArgument(handlerInput, 0) ===
+        "ADHAN_PLAYBACK_FINISHED"
+    );
+  },
+  async handle(handlerInput) {
+    const sessionAttributes =
+      handlerInput.attributesManager.getSessionAttributes();
+    delete sessionAttributes.adhanPlaybackMode;
+    delete sessionAttributes.adhanPlayerToken;
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    return handlerInput.responseBuilder
+      .withShouldEndSession(true)
+      .getResponse();
+  },
+};
+
 module.exports = {
   MosqueListTouchEventHandler,
   AdhaanRecitationTouchEventHandler,
   RoutineListTouchEventHandler,
   DeleteRoutineTouchEventHandler,
+  AdhanPlaybackFinishedTouchEventHandler,
 };

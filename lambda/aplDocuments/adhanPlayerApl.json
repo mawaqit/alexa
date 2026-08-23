@@ -2,7 +2,7 @@
   "type": "APL",
   "version": "2023.3",
   "theme": "dark",
-  "description": "Custom Adhan player. Plays the recitation through an off-screen Video component (audio-only) instead of the AudioPlayer interface, so this screen — not Alexa's system Now-Playing card — stays on top for the whole call to prayer.",
+  "description": "Custom Adhan player. Plays the recitation through an off-screen Video component (audio-only) instead of the AudioPlayer interface, so this screen — not Alexa's system Now-Playing card — stays on top for the whole call to prayer. Contract with the backend (handlers/audioPlayerHandler.js): the component ids 'adhanPlayerRoot'/'adhanVideo' are targeted by ExecuteCommands directives built from session state, and the SendEvent argument names 'ADHAN_PLAYBACK_FINISHED'/'ADHAN_PLAYBACK_FAILED' are matched by name there — renaming any of these here silently breaks that wiring, since there's no compile-time link between this document and the backend.",
   "import": [
     {
       "name": "alexa-layouts",
@@ -345,7 +345,7 @@
             "type": "Video",
             "id": "adhanVideo",
             "description": "Audio-only source — no picture to show, so it's sized to nothing and left out of the visible layout. This is the whole point of the custom player: this Video plays the mp3 directly, so the AudioPlayer interface (and its system Now-Playing card) is never invoked. It's given a real, full-screen footprint rather than being shrunk to near-zero or made transparent — some renderers never allocate a media pipeline for an effectively invisible video component, which silently kills playback. PageBackdrop is drawn immediately after it and fully covers it, so nothing is actually seen.",
-            "when": "${!disallowVideo}",
+            "when": "${!environment.disallowVideo}",
             "source": "${props.audioUrl}",
             "audioTrack": "foreground",
             "autoPlay": true,
@@ -400,6 +400,24 @@
                 "componentId": "adhanPlayerRoot",
                 "property": "videoTotalValue",
                 "value": 0
+              },
+              {
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "isPlaying",
+                "value": false
+              },
+              {
+                "description": "Same treatment as onEnd — a broken/expired mp3 URL shouldn't leave a silent, stuck player on screen.",
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "hasEnded",
+                "value": true
+              },
+              {
+                "description": "Lets the backend know playback never actually happened, so it can clear adhanPlaybackMode/adhanPlayerToken and speak an error prompt — mirrors the onEnd SendEvent below.",
+                "type": "SendEvent",
+                "arguments": ["ADHAN_PLAYBACK_FAILED"]
               }
             ],
             "onEnd": [
@@ -468,6 +486,7 @@
             "items": [
               {
                 "type": "BrandHeader",
+                "logo": "${props.skillLogoUrl}",
                 "label": "${props.skillName}",
                 "position": "absolute",
                 "top": "@gutterV",

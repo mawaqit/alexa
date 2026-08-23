@@ -5,6 +5,7 @@ const Alexa = require("ask-sdk-core");
 const helperFunctions = require("./helperFunctions.js");
 const apiHandler = require("./handlers/apiHandler.js");
 const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
+const adhanPlayerApl = require("./aplDocuments/adhanPlayerApl.json");
 const { getDataSourceForPrayerTime } = require("./datasources.js");
 const awsSsmHandler = require("./handlers/awsSsmHandler.js");
 const authHandler = require("./handlers/authHandler.js");
@@ -55,6 +56,10 @@ const AddDirectiveResponseInterceptor = {
     const { directives } = response;
     const aplDirective = getAplDirective(directives);
     const { ssmlText, text, hasAudio } = getSsmlInfo(response);
+    const clearedAdhanState = clearStaleAdhanPlayerState(
+      sessionAttributes,
+      aplDirective,
+    );
 
     // Redundant with LogResponseInterceptor, which already dumps the full
     // response (including directives and outputSpeech).
@@ -93,7 +98,8 @@ const AddDirectiveResponseInterceptor = {
     if (
       handlerInput.requestEnvelope?.session &&
       (sessionAttributes?.skipAplDirective ||
-        sessionAttributes?.skipCardDirective)
+        sessionAttributes?.skipCardDirective ||
+        clearedAdhanState)
     ) {
       delete sessionAttributes.skipAplDirective;
       delete sessionAttributes.skipCardDirective;
@@ -101,6 +107,30 @@ const AddDirectiveResponseInterceptor = {
     }
   },
 };
+
+/**
+ * If this response renders a different APL document than the adhan player,
+ * any adhanPlaybackMode/adhanPlayerToken left over from an earlier turn are
+ * now stale — the Video they'd target is no longer on screen, so a later
+ * voice pause/resume/stop would silently target a document that's gone.
+ * This interceptor is the one place every outgoing directive already
+ * passes through, so it's the natural spot to catch that handoff. Doesn't
+ * touch ExecuteCommands directives (e.g. AudioIntentHandler's own
+ * pause/resume) — those don't carry a `document` and are exactly the
+ * legitimate use of this state, not a replacement of it.
+ */
+function clearStaleAdhanPlayerState(sessionAttributes, aplDirective) {
+  if (
+    !sessionAttributes.adhanPlaybackMode ||
+    aplDirective?.type !== "Alexa.Presentation.APL.RenderDocument" ||
+    aplDirective.document === adhanPlayerApl
+  ) {
+    return false;
+  }
+  delete sessionAttributes.adhanPlaybackMode;
+  delete sessionAttributes.adhanPlayerToken;
+  return true;
+}
 
 function getAplDirective(directives) {
   return directives

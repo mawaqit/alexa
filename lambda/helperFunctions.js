@@ -58,7 +58,9 @@ const checkForConsentTokenToAccessDeviceLocation = (handlerInput) => {
  * instead of a screen that looks fine but never makes a sound.
  */
 const deviceSupportsVideo = (handlerInput) => {
-  return Boolean(handlerInput.requestEnvelope.context?.Viewport?.video);
+  return Boolean(
+    handlerInput.requestEnvelope.context?.Viewport?.video?.codecs?.length,
+  );
 };
 
 const createDirectivePayload = (

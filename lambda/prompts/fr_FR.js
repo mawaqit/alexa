@@ -77,6 +77,7 @@ module.exports = {
       "ou touchez la récitation de votre choix sur l'écran.",
     hadithErrorPrompt: `Désolé, je n'ai trouvé aucun hadith. Veuillez réessayer.`,
     adhaanErrorPrompt: `Désolé, la lecture de l'adhan n'est pas disponible pour le moment. Veuillez réessayer plus tard.`,
+    adhanPlayerSubtitle: `Adhan`,
     selectMosquePrompt: `Pour enregistrer une mosquée, dites « choisis ma mosquée ». `,
     unableToResolvePrayerNamePrompt: `Désolé, je n'ai pas pu reconnaître le nom de la prière. Veuillez réessayer.`,
     prayerNamePrompt:

@@ -47,12 +47,14 @@ const {
   AdhaanRecitationTouchEventHandler,
   RoutineListTouchEventHandler,
   DeleteRoutineTouchEventHandler,
-  AdhanPlaybackFinishedTouchEventHandler,
 } = require("./handlers/touchHandler.js");
 const {
   AudioPlayerEventHandler,
   PlaybackCommandHandler,
   AudioIntentHandler,
+  AdhanPlaybackFinishedEventHandler,
+  AdhanPlaybackFailedEventHandler,
+  getAdhanStopResponse,
 } = require("./handlers/audioPlayerHandler.js");
 const {
   CFIRWithoutSlotsHandler,
@@ -166,54 +168,14 @@ const CancelAndStopIntentHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const speakOutput = requestAttributes.t("stopPrompt");
-    const sessionAttributes =
-      handlerInput.attributesManager.getSessionAttributes();
 
-    if (sessionAttributes.adhanPlaybackMode === "apl-video") {
-      // Without this, "Alexa, stop" just spoke a prompt while the Adhan
-      // kept playing through the Video component underneath — this handler
-      // never knew there was a custom player to stop.
-      const stopDirective = {
-        type: "Alexa.Presentation.APL.ExecuteCommands",
-        token: sessionAttributes.adhanPlayerToken,
-        commands: [
-          {
-            type: "SetValue",
-            componentId: "adhanPlayerRoot",
-            property: "isPlaying",
-            value: false,
-          },
-          {
-            type: "ControlMedia",
-            componentId: "adhanVideo",
-            command: "pause",
-          },
-          {
-            type: "SetValue",
-            componentId: "adhanPlayerRoot",
-            property: "hasEnded",
-            value: true,
-          },
-        ],
-      };
-      delete sessionAttributes.adhanPlaybackMode;
-      delete sessionAttributes.adhanPlayerToken;
-      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-      return handlerInput.responseBuilder
-        .speak(speakOutput)
-        .addDirective(stopDirective)
-        .withShouldEndSession(true)
-        .getResponse();
-    }
-
-    if (sessionAttributes.adhanPlaybackMode === "audio-player") {
-      delete sessionAttributes.adhanPlaybackMode;
-      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-      return handlerInput.responseBuilder
-        .speak(speakOutput)
-        .addAudioPlayerStopDirective()
-        .withShouldEndSession(true)
-        .getResponse();
+    // Adhan-specific handling lives in audioPlayerHandler.js (importable
+    // there, unlike this file, which exports nothing but `handler`) — falls
+    // through to the plain speak-only response below when the adhan isn't
+    // actually playing.
+    const adhanStopResponse = getAdhanStopResponse(handlerInput, speakOutput);
+    if (adhanStopResponse) {
+      return adhanStopResponse;
     }
 
     return handlerInput.responseBuilder
@@ -359,6 +321,8 @@ exports.handler = Alexa.SkillBuilders.custom()
     AudioPlayerEventHandler,
     PlaybackCommandHandler,
     AudioIntentHandler,
+    AdhanPlaybackFinishedEventHandler,
+    AdhanPlaybackFailedEventHandler,
     MosqueInfoIntentHandler,
     AllIqamaTimeIntentHandler,
     NextPrayerTimeIntentWithoutNameHandler,
@@ -383,7 +347,6 @@ exports.handler = Alexa.SkillBuilders.custom()
     DeleteDataIntentHandler,
     MosqueListTouchEventHandler,
     AdhaanRecitationTouchEventHandler,
-    AdhanPlaybackFinishedTouchEventHandler,
     RoutineListTouchEventHandler,
     DeleteRoutineStartedHandler,
     DeleteRoutinePrayerIndexHandler,

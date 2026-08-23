@@ -180,7 +180,9 @@ const getDataSourceForAdhanPlayer = (handlerInput, audioName, audioUrl) => {
       properties: {
         audioUrl: audioUrl,
         reciterName: audioName,
-        subtitle: requestAttributes.t("skillName"),
+        // Not the skill name — that's already in the BrandHeader above the
+        // reciter name; showing it twice would be redundant.
+        subtitle: requestAttributes.t("adhanPlayerSubtitle"),
         albumArt: logoUrl,
         skillLogoUrl: logoUrl,
         skillName: process.env.SKILL_NAME,

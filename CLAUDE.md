@@ -144,3 +144,32 @@ Two things bite in the TypeScript tests specifically:
   time, never at import time.
 - **`AcceptGrant.Response` and `Discover.Response` must not carry an
   `endpoint`** — Amazon rejects the message. `AlexaResponse` strips it.
+- **The Adhan player's session-attribute contract (`lambda/`).**
+  `sessionAttributes.adhanPlaybackMode` (`"apl-video"` or `"audio-player"`)
+  and `adhanPlayerToken` tell `AudioIntentHandler` and `getAdhanStopResponse`
+  (`handlers/audioPlayerHandler.js`) which mechanism voice
+  pause/resume/stop should drive. Both are set by `renderAdhanPlayer`
+  (`handlers/intentHandler.js`) only for the `apl-video` path — the
+  `audio-player` path deliberately sets neither, since
+  `context.AudioPlayer.playerActivity` (present on every customer-initiated
+  request regardless of session state) is the reliable signal there, unlike
+  a session attribute written on a response that ends the session in the
+  same call. `apl-video`'s two attributes are cleared in three places:
+  `AdhanPlaybackFinishedEventHandler`/`AdhanPlaybackFailedEventHandler`
+  (the Video's `onEnd`/`onTrackFail` `SendEvent`, token-checked against
+  `adhanPlayerToken` so a stale event from a superseded document can't wipe
+  a still-running player), and `AddDirectiveResponseInterceptor`
+  (`interceptors.js`), which clears them whenever a *different* APL
+  document gets rendered mid-adhan. `shouldEndSession` is deliberately
+  omitted (not set to `true` or `false`) on the `apl-video` render: `false`
+  would reopen the mic for an unwanted spoken follow-up, `true` would drop
+  session attributes before the next request, breaking voice control.
+  Known limitation: this state only survives as long as the session does —
+  a sufficiently long-idle session could in principle expire before a very
+  long adhan finishes, which would silently fall back to no voice control
+  (the on-screen Play/Pause button is unaffected either way, since it never
+  goes through the backend). The APL document
+  (`aplDocuments/adhanPlayerApl.json`) and this backend agree on two
+  component ids (`adhanPlayerRoot`, `adhanVideo`) and two event names
+  (`ADHAN_PLAYBACK_FINISHED`, `ADHAN_PLAYBACK_FAILED`) — renaming any of
+  them on one side without the other silently breaks the wiring.

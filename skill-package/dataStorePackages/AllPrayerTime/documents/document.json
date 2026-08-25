@@ -1,0 +1,605 @@
+{
+    "type": "APL",
+    "version": "2024.2",
+    "theme": "dark",
+    "description": "All prayer times widget. Displays the five daily prayer times and highlights whichever one is next, recomputed live from the device clock. The isNext* bindings compare data.prayers[].time lexicographically, which is only correct because the times are zero-padded 24h \"HH:mm\" and given in ascending order; the upper bound on each range is inclusive (<=), so a prayer stays \"next\" through its own exact minute.",
+    "extensions": [
+        {
+            "name": "DataStore",
+            "uri": "alexaext:datastore:10"
+        }
+    ],
+    "settings": {
+        "DataStore": {
+            "dataBindings": [
+                {
+                    "namespace": "allPrayerTimeWidget",
+                    "key": "allPrayerTimeData",
+                    "dataBindingName": "DS_AllPrayerTime",
+                    "dataType": "OBJECT"
+                }
+            ]
+        }
+    },
+    "import": [
+        {
+            "name": "alexa-layouts",
+            "version": "1.7.0"
+        }
+    ],
+    "resources": [
+        {
+            "description": "Artwork owned by the presentation layer.",
+            "strings": {
+                "pageBackground": "https://cdn.mawaqit.net/images/background-arabic-calligraphy.png",
+                "logoUrl": "https://play-lh.googleusercontent.com/79-OHFiVzGLTSLg_tXcsS3VwxWd9ZAxL4eAt35IgIljERyMkYvAq92m-fgpDsZ-lNA"
+            }
+        },
+        {
+            "description": "Palette matching nextPrayerTimeWidget/mosqueInfoApl.json.",
+            "colors": {
+                "colorGlass": "#FFFFFF14",
+                "colorStroke": "#FFFFFF2B",
+                "colorTextPrimary": "#F7F5FF",
+                "colorTextMuted": "#FFFFFFA3",
+                "colorAccent": "#F2C86B",
+                "colorAccentSoft": "#F2C86B24",
+                "colorDivider": "#FFFFFF1F",
+                "colorRowBackground": "transparent"
+            },
+            "gradients": {
+                "gradientPage": {
+                    "type": "linear",
+                    "colorRange": [
+                        "#0B0A1FD9",
+                        "#0B0A1FF2",
+                        "#150F33E6"
+                    ],
+                    "inputRange": [
+                        0,
+                        0.55,
+                        1
+                    ]
+                }
+            }
+        },
+        {
+            "description": "Metrics — medium widget.",
+            "dimensions": {
+                "padH": "22dp",
+                "padV": "18dp",
+                "brandLogo": "20dp",
+                "ruleWidth": "56dp",
+                "rowPadH": "18dp",
+                "rowPadV": "16dp",
+                "rowRadius": "16dp"
+            },
+            "numbers": {
+                "fsLabel": 15,
+                "fsMosque": 14,
+                "fsBrand": 12,
+                "fsRowLabel": 19,
+                "fsRowTime": 22,
+                "fsRowTimeActive": 31,
+                "fsCountdownLabel": 14,
+                "fsCountdownValue": 21
+            }
+        },
+        {
+            "when": "${viewport.width < 340}",
+            "description": "Metrics — compact widget.",
+            "dimensions": {
+                "padH": "16dp",
+                "padV": "12dp",
+                "brandLogo": "16dp",
+                "ruleWidth": "40dp",
+                "rowPadH": "13dp",
+                "rowPadV": "11dp",
+                "rowRadius": "12dp"
+            },
+            "numbers": {
+                "fsLabel": 12,
+                "fsMosque": 11,
+                "fsBrand": 10,
+                "fsRowLabel": 15,
+                "fsRowTime": 17,
+                "fsRowTimeActive": 24,
+                "fsCountdownLabel": 11,
+                "fsCountdownValue": 17
+            }
+        }
+    ],
+    "styles": {
+        "widgetLabel": {
+            "values": [
+                {
+                    "fontFamily": "Amazon Ember",
+                    "fontSize": "@fsLabel",
+                    "fontWeight": 500,
+                    "letterSpacing": "1.4dp",
+                    "color": "@colorTextMuted",
+                    "maxLines": 1
+                }
+            ]
+        },
+        "mosqueName": {
+            "values": [
+                {
+                    "fontFamily": "Amazon Ember",
+                    "fontSize": "@fsMosque",
+                    "fontWeight": 400,
+                    "color": "@colorTextMuted",
+                    "maxLines": 1
+                }
+            ]
+        },
+        "brandLabel": {
+            "values": [
+                {
+                    "fontFamily": "Amazon Ember",
+                    "fontSize": "@fsBrand",
+                    "fontWeight": 500,
+                    "letterSpacing": "1.6dp",
+                    "color": "@colorTextMuted",
+                    "maxLines": 1
+                }
+            ]
+        }
+    },
+    "layouts": {
+        "PageBackdrop": {
+            "items": [
+                {
+                    "type": "Container",
+                    "items": [
+                        {
+                            "type": "Image",
+                            "source": "@pageBackground",
+                            "scale": "best-fill",
+                            "align": "center",
+                            "width": "100%",
+                            "height": "100%"
+                        },
+                        {
+                            "type": "Frame",
+                            "position": "absolute",
+                            "top": 0,
+                            "left": 0,
+                            "right": 0,
+                            "bottom": 0,
+                            "background": "@gradientPage"
+                        }
+                    ]
+                }
+            ]
+        },
+        "BrandMark": {
+            "items": [
+                {
+                    "type": "Container",
+                    "direction": "row",
+                    "alignItems": "center",
+                    "width": "100%",
+                    "items": [
+                        {
+                            "type": "Image",
+                            "source": "@logoUrl",
+                            "width": "@brandLogo",
+                            "height": "@brandLogo",
+                            "scale": "best-fill",
+                            "borderRadius": "5dp"
+                        },
+                        {
+                            "type": "Text",
+                            "style": "brandLabel",
+                            "text": "MAWAQIT",
+                            "paddingLeft": "8dp"
+                        }
+                    ]
+                }
+            ]
+        },
+        "PrayerRow": {
+            "parameters": [
+                {
+                    "name": "prayerName",
+                    "type": "string"
+                },
+                {
+                    "name": "prayerTime",
+                    "type": "string"
+                },
+                {
+                    "name": "highlighted",
+                    "type": "boolean",
+                    "default": false
+                },
+                {
+                    "name": "remainingLabel",
+                    "type": "string",
+                    "default": ""
+                },
+                {
+                    "name": "countdownText",
+                    "type": "string",
+                    "default": ""
+                }
+            ],
+            "items": [
+                {
+                    "type": "Frame",
+                    "width": "100%",
+                    "borderRadius": "@rowRadius",
+                    "background": "${highlighted ? @colorAccentSoft : @colorRowBackground}",
+                    "paddingLeft": "@rowPadH",
+                    "paddingRight": "@rowPadH",
+                    "paddingTop": "@rowPadV",
+                    "paddingBottom": "@rowPadV",
+                    "item": {
+                        "type": "Container",
+                        "width": "100%",
+                        "items": [
+                            {
+                                "type": "Container",
+                                "direction": "row",
+                                "width": "100%",
+                                "justifyContent": "spaceBetween",
+                                "alignItems": "center",
+                                "items": [
+                                    {
+                                        "type": "Text",
+                                        "text": "${prayerName}",
+                                        "fontFamily": "Amazon Ember",
+                                        "fontSize": "@fsRowLabel",
+                                        "fontWeight": "${highlighted ? 700 : 500}",
+                                        "color": "${highlighted ? @colorAccent : @colorTextMuted}",
+                                        "maxLines": 1
+                                    },
+                                    {
+                                        "type": "Text",
+                                        "text": "${prayerTime}",
+                                        "fontFamily": "Amazon Ember Display",
+                                        "fontSize": "${highlighted ? @fsRowTimeActive : @fsRowTime}",
+                                        "fontWeight": 700,
+                                        "color": "${highlighted ? @colorAccent : @colorTextPrimary}",
+                                        "maxLines": 1
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Container",
+                                "display": "${highlighted ? 'normal' : 'none'}",
+                                "width": "100%",
+                                "paddingTop": "10dp",
+                                "items": [
+                                    {
+                                        "type": "Frame",
+                                        "width": "100%",
+                                        "height": "1dp",
+                                        "background": "@colorAccent",
+                                        "opacity": 0.2
+                                    },
+                                    {
+                                        "type": "Container",
+                                        "direction": "row",
+                                        "width": "100%",
+                                        "justifyContent": "spaceBetween",
+                                        "alignItems": "baseline",
+                                        "paddingTop": "8dp",
+                                        "items": [
+                                            {
+                                                "type": "Text",
+                                                "text": "${String.toUpperCase(remainingLabel)}",
+                                                "fontFamily": "Amazon Ember",
+                                                "fontSize": "@fsCountdownLabel",
+                                                "fontWeight": 500,
+                                                "letterSpacing": "1dp",
+                                                "color": "@colorAccent",
+                                                "opacity": 0.75,
+                                                "maxLines": 1
+                                            },
+                                            {
+                                                "type": "Text",
+                                                "text": "${countdownText}",
+                                                "fontFamily": "Amazon Ember Display",
+                                                "fontSize": "@fsCountdownValue",
+                                                "fontWeight": 700,
+                                                "color": "@colorAccent",
+                                                "maxLines": 1
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "DataStore:OnObjectChanged": [
+        {
+            "type": "Idle",
+            "when": "${event.data != null}",
+            "delay": "${event.data != null ? Math.max(0, event.data.nextUpdateTime - utcTime) : 0}"
+        },
+        {
+            "type": "SendEvent",
+            "when": "${event.data != null}",
+            "arguments": [
+                "FETCH_ALL_PRAYER_TIME",
+                "${event.data.nextUpdateTime}"
+            ]
+        }
+    ],
+    "mainTemplate": {
+        "parameters": [
+            "payload"
+        ],
+        "item": {
+            "type": "TouchWrapper",
+            "id": "mainWidget",
+            "width": "100vw",
+            "height": "100vh",
+            "bind": [
+                {
+                    "name": "labels",
+                    "value": "${DS_AllPrayerTime.labels ? DS_AllPrayerTime.labels : payload.allPrayerTimeData.labels}"
+                },
+                {
+                    "name": "data",
+                    "value": "${DS_AllPrayerTime.data ? DS_AllPrayerTime.data : payload.allPrayerTimeData.data}"
+                },
+                {
+                    "name": "targetTime",
+                    "value": "${DS_AllPrayerTime.nextUpdateTime != null ? DS_AllPrayerTime.nextUpdateTime : payload.allPrayerTimeData.nextUpdateTime}",
+                    "type": "number"
+                },
+                {
+                    "name": "currentTimeStr",
+                    "value": "${Time.format('HH:mm', localTime)}",
+                    "type": "string"
+                },
+                {
+                    "name": "isNextFajr",
+                    "value": "${currentTimeStr <= data.prayers[0].time || currentTimeStr > data.prayers[4].time}",
+                    "type": "boolean"
+                },
+                {
+                    "name": "isNextDhuhr",
+                    "value": "${currentTimeStr > data.prayers[0].time && currentTimeStr <= data.prayers[1].time}",
+                    "type": "boolean"
+                },
+                {
+                    "name": "isNextAsr",
+                    "value": "${currentTimeStr > data.prayers[1].time && currentTimeStr <= data.prayers[2].time}",
+                    "type": "boolean"
+                },
+                {
+                    "name": "isNextMaghrib",
+                    "value": "${currentTimeStr > data.prayers[2].time && currentTimeStr <= data.prayers[3].time}",
+                    "type": "boolean"
+                },
+                {
+                    "name": "isNextIsha",
+                    "value": "${currentTimeStr > data.prayers[3].time && currentTimeStr <= data.prayers[4].time}",
+                    "type": "boolean"
+                },
+                {
+                    "name": "activeEpoch",
+                    "value": "${isNextFajr ? data.prayers[0].epoch : (isNextDhuhr ? data.prayers[1].epoch : (isNextAsr ? data.prayers[2].epoch : (isNextMaghrib ? data.prayers[3].epoch : data.prayers[4].epoch)))}",
+                    "type": "number"
+                },
+                {
+                    "name": "adjustedEpoch",
+                    "value": "${activeEpoch < utcTime ? activeEpoch + 86400000 : activeEpoch}",
+                    "type": "number"
+                },
+                {
+                    "name": "diffMs",
+                    "value": "${Math.max(0, adjustedEpoch - utcTime)}",
+                    "type": "number"
+                },
+                {
+                    "name": "hrs",
+                    "value": "${Math.floor(diffMs / 3600000)}",
+                    "type": "number"
+                },
+                {
+                    "name": "mins",
+                    "value": "${Math.floor((diffMs % 3600000) / 60000)}",
+                    "type": "number"
+                },
+                {
+                    "name": "countdownText",
+                    "value": "${diffMs <= 0 ? labels.itsTime : (hrs > 0 ? hrs + ' ' + labels.hourUnit + ' ' : '') + mins + ' ' + labels.minuteUnit}",
+                    "type": "string"
+                }
+            ],
+            "onMount": [
+                {
+                    "type": "DataStore:WatchObject",
+                    "namespace": "allPrayerTimeWidget",
+                    "key": "allPrayerTimeData"
+                },
+                {
+                    "type": "Idle",
+                    "delay": 500
+                },
+                {
+                    "type": "SendEvent",
+                    "arguments": [
+                        "FETCH_ALL_PRAYER_TIME",
+                        "${targetTime}"
+                    ]
+                }
+            ],
+            "onPress": [
+                {
+                    "type": "SendEvent",
+                    "arguments": [
+                        "READ_ALL_PRAYER_TIME"
+                    ],
+                    "flags": {
+                        "interactionMode": "STANDARD"
+                    }
+                }
+            ],
+            "item": {
+                "type": "Container",
+                "width": "100%",
+                "height": "100%",
+                "items": [
+                    {
+                        "type": "PageBackdrop"
+                    },
+                    {
+                        "type": "Container",
+                        "position": "absolute",
+                        "width": "100%",
+                        "height": "100%",
+                        "paddingLeft": "@padH",
+                        "paddingRight": "@padH",
+                        "paddingTop": "@padV",
+                        "paddingBottom": "@padV",
+                        "items": [
+                            {
+                                "type": "Container",
+                                "direction": "row",
+                                "width": "100%",
+                                "justifyContent": "spaceBetween",
+                                "items": [
+                                    {
+                                        "type": "Text",
+                                        "style": "widgetLabel",
+                                        "text": "${labels.title}"
+                                    },
+                                    {
+                                        "type": "Text",
+                                        "style": "widgetLabel",
+                                        "text": "${currentTimeStr}"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Container",
+                                "display": "${targetTime == 0 ? 'normal' : 'none'}",
+                                "grow": 1,
+                                "shrink": 1,
+                                "width": "100%",
+                                "justifyContent": "center",
+                                "alignItems": "center",
+                                "items": [
+                                    {
+                                        "type": "Text",
+                                        "style": "mosqueName",
+                                        "text": "${labels.loading}",
+                                        "color": "@colorAccent",
+                                        "textAlign": "center",
+                                        "width": "100%"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Container",
+                                "display": "${targetTime < 0 ? 'normal' : 'none'}",
+                                "grow": 1,
+                                "shrink": 1,
+                                "width": "100%",
+                                "justifyContent": "center",
+                                "alignItems": "center",
+                                "items": [
+                                    {
+                                        "type": "Text",
+                                        "style": "mosqueName",
+                                        "text": "${labels.error}",
+                                        "textAlign": "center",
+                                        "width": "100%"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Container",
+                                "display": "${targetTime > 0 ? 'normal' : 'none'}",
+                                "grow": 1,
+                                "shrink": 1,
+                                "width": "100%",
+                                "justifyContent": "spaceEvenly",
+                                "paddingTop": "10dp",
+                                "paddingBottom": "6dp",
+                                "items": [
+                                    {
+                                        "type": "PrayerRow",
+                                        "prayerName": "${data.prayers[0].name}",
+                                        "prayerTime": "${data.prayers[0].time}",
+                                        "highlighted": "${isNextFajr}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
+                                    },
+                                    {
+                                        "type": "PrayerRow",
+                                        "prayerName": "${data.prayers[1].name}",
+                                        "prayerTime": "${data.prayers[1].time}",
+                                        "highlighted": "${isNextDhuhr}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
+                                    },
+                                    {
+                                        "type": "PrayerRow",
+                                        "prayerName": "${data.prayers[2].name}",
+                                        "prayerTime": "${data.prayers[2].time}",
+                                        "highlighted": "${isNextAsr}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
+                                    },
+                                    {
+                                        "type": "PrayerRow",
+                                        "prayerName": "${data.prayers[3].name}",
+                                        "prayerTime": "${data.prayers[3].time}",
+                                        "highlighted": "${isNextMaghrib}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
+                                    },
+                                    {
+                                        "type": "PrayerRow",
+                                        "prayerName": "${data.prayers[4].name}",
+                                        "prayerTime": "${data.prayers[4].time}",
+                                        "highlighted": "${isNextIsha}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Container",
+                                "display": "${targetTime > 0 ? 'normal' : 'none'}",
+                                "width": "100%",
+                                "alignItems": "center",
+                                "items": [
+                                    {
+                                        "type": "Frame",
+                                        "width": "@ruleWidth",
+                                        "height": "1dp",
+                                        "background": "@colorDivider"
+                                    },
+                                    {
+                                        "type": "Text",
+                                        "style": "mosqueName",
+                                        "text": "${data.mosqueName}",
+                                        "textAlign": "center",
+                                        "width": "100%",
+                                        "paddingTop": "8dp"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "BrandMark",
+                                "paddingTop": "10dp"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

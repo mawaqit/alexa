@@ -1,0 +1,18 @@
+{
+  "allPrayerTimeData": {
+    "labels": {
+      "title": "Prayer Times"
+    },
+    "data": {
+      "prayers": [
+        { "name": "Fajr", "time": "05:17" },
+        { "name": "Dhuhr", "time": "13:23" },
+        { "name": "Asr", "time": "16:47" },
+        { "name": "Maghrib", "time": "20:15" },
+        { "name": "Isha", "time": "21:29" }
+      ],
+      "mosqueName": "Al-Noor Mosque"
+    },
+    "nextUpdateTime": 0
+  }
+}

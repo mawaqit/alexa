@@ -110,6 +110,10 @@ module.exports = {
         title: "Hadith du jour",
         description: "Chargement...",
       },
+      allPrayerTime: {
+        title: "Heures de prière",
+        loading: "Chargement...",
+      },
       installationErrorPrompt:
         "Désolé, une erreur est survenue lors de l'installation du widget. Veuillez réessayer plus tard.",
     },

@@ -29,14 +29,25 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
       const prayerNames = helperFunctions.extractPhonemeText(
         requestAttributes.t("prayerNames"),
       );
-      const prayers = mosqueTimes.times.map((time, index) => ({
-        name: prayerNames[index],
-        time,
-      }));
       const mosqueName = persistentAttributes.primaryText;
       const currentDateTime = new Date(
         new Date().toLocaleString("en-US", { timeZone: userTimeZone }),
       );
+      const prayers = mosqueTimes.times.map((time, index) => {
+        const [hours, minutes] = time.split(":").map(Number);
+        // Same trick as the midnight calculation below: build the target in
+        // the localized-but-fake Date space, then apply its offset from
+        // currentDateTime to the real UTC Date.now() to get a true epoch.
+        const prayerDateTime = new Date(currentDateTime);
+        prayerDateTime.setHours(hours, minutes, 0, 0);
+        const epoch =
+          Date.now() + (prayerDateTime.getTime() - currentDateTime.getTime());
+        return {
+          name: prayerNames[index],
+          time,
+          epoch,
+        };
+      });
 
       // Which prayer is highlighted keeps changing through the day, but that
       // is recomputed reactively in APL from the live localTime binding, so
@@ -57,6 +68,16 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
           content: {
             labels: {
               title: requestAttributes.t("widgets.allPrayerTime.title"),
+              // The countdown on the highlighted row reuses the Next Prayer
+              // widget's copy rather than duplicating it under a second key.
+              remaining: requestAttributes.t(
+                "widgets.nextPrayerTime.remaining",
+              ),
+              itsTime: requestAttributes.t("widgets.nextPrayerTime.itsTime"),
+              hourUnit: requestAttributes.t("widgets.nextPrayerTime.hourUnit"),
+              minuteUnit: requestAttributes.t(
+                "widgets.nextPrayerTime.minuteUnit",
+              ),
             },
             data: {
               prayers,

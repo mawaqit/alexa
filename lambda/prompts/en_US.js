@@ -105,6 +105,7 @@ module.exports = {
       },
       allPrayerTime: {
         title: "Prayer Times",
+        loading: "Fetching...",
       },
       installationErrorPrompt:
         "Sorry, an error occurred while installing the widget. Please try again later.",

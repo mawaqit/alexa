@@ -502,6 +502,19 @@ const getDifferenceInMinutes = (start, end, timezone) => {
   return diffInMilliseconds / 1000 / 60;
 };
 
+/**
+ * Epoch ms for a "HH:mm" wall-clock time on a given "YYYY-MM-DD" day in
+ * `timezone`, DST rules included.
+ *
+ * Building a plain `Date` and adding its offset to `Date.now()` is the wrong
+ * way to get this: that offset is wall-clock milliseconds, so on the two
+ * nights a year the clocks change the result lands an hour early or late.
+ * Interpreting the wall-clock string directly in `timezone` (as
+ * `getDifferenceInMinutes` above already does) sidesteps that.
+ */
+const getWallClockEpoch = (dateStr, time, timezone) =>
+  moment.tz(`${dateStr} ${time}`, "YYYY-MM-DD HH:mm", timezone).valueOf();
+
 function calculateMinutes(requestAttributes, start, end, timezone) {
   const diffInMinutes = getDifferenceInMinutes(start, end, timezone);
 
@@ -1564,6 +1577,7 @@ module.exports = {
   isNewSession,
   resolveIqamaMoment,
   getDifferenceInMinutes,
+  getWallClockEpoch,
   getAccessToken,
   validateUserAccountStatus,
   deleteRoutine,

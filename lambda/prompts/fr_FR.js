@@ -112,6 +112,7 @@ module.exports = {
       },
       allPrayerTime: {
         title: "Heures de prière",
+        loading: "Chargement...",
       },
       installationErrorPrompt:
         "Désolé, une erreur est survenue lors de l'installation du widget. Veuillez réessayer plus tard.",

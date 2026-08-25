@@ -70,17 +70,19 @@
                 "padV": "18dp",
                 "brandLogo": "20dp",
                 "ruleWidth": "56dp",
-                "rowPadH": "14dp",
-                "rowPadV": "9dp",
-                "rowRadius": "14dp"
+                "rowPadH": "18dp",
+                "rowPadV": "16dp",
+                "rowRadius": "16dp"
             },
             "numbers": {
                 "fsLabel": 15,
                 "fsMosque": 14,
                 "fsBrand": 12,
-                "fsRowLabel": 16,
-                "fsRowTime": 19,
-                "fsRowTimeActive": 24
+                "fsRowLabel": 19,
+                "fsRowTime": 22,
+                "fsRowTimeActive": 31,
+                "fsCountdownLabel": 14,
+                "fsCountdownValue": 21
             }
         },
         {
@@ -91,17 +93,19 @@
                 "padV": "12dp",
                 "brandLogo": "16dp",
                 "ruleWidth": "40dp",
-                "rowPadH": "10dp",
-                "rowPadV": "6dp",
-                "rowRadius": "10dp"
+                "rowPadH": "13dp",
+                "rowPadV": "11dp",
+                "rowRadius": "12dp"
             },
             "numbers": {
                 "fsLabel": 12,
                 "fsMosque": 11,
                 "fsBrand": 10,
-                "fsRowLabel": 13,
-                "fsRowTime": 15,
-                "fsRowTimeActive": 19
+                "fsRowLabel": 15,
+                "fsRowTime": 17,
+                "fsRowTimeActive": 24,
+                "fsCountdownLabel": 11,
+                "fsCountdownValue": 17
             }
         }
     ],
@@ -209,6 +213,16 @@
                     "name": "highlighted",
                     "type": "boolean",
                     "default": false
+                },
+                {
+                    "name": "remainingLabel",
+                    "type": "string",
+                    "default": ""
+                },
+                {
+                    "name": "countdownText",
+                    "type": "string",
+                    "default": ""
                 }
             ],
             "items": [
@@ -223,28 +237,79 @@
                     "paddingBottom": "@rowPadV",
                     "item": {
                         "type": "Container",
-                        "direction": "row",
                         "width": "100%",
-                        "justifyContent": "spaceBetween",
-                        "alignItems": "center",
                         "items": [
                             {
-                                "type": "Text",
-                                "text": "${prayerName}",
-                                "fontFamily": "Amazon Ember",
-                                "fontSize": "@fsRowLabel",
-                                "fontWeight": "${highlighted ? 700 : 500}",
-                                "color": "${highlighted ? @colorAccent : @colorTextMuted}",
-                                "maxLines": 1
+                                "type": "Container",
+                                "direction": "row",
+                                "width": "100%",
+                                "justifyContent": "spaceBetween",
+                                "alignItems": "center",
+                                "items": [
+                                    {
+                                        "type": "Text",
+                                        "text": "${prayerName}",
+                                        "fontFamily": "Amazon Ember",
+                                        "fontSize": "@fsRowLabel",
+                                        "fontWeight": "${highlighted ? 700 : 500}",
+                                        "color": "${highlighted ? @colorAccent : @colorTextMuted}",
+                                        "maxLines": 1
+                                    },
+                                    {
+                                        "type": "Text",
+                                        "text": "${prayerTime}",
+                                        "fontFamily": "Amazon Ember Display",
+                                        "fontSize": "${highlighted ? @fsRowTimeActive : @fsRowTime}",
+                                        "fontWeight": 700,
+                                        "color": "${highlighted ? @colorAccent : @colorTextPrimary}",
+                                        "maxLines": 1
+                                    }
+                                ]
                             },
                             {
-                                "type": "Text",
-                                "text": "${prayerTime}",
-                                "fontFamily": "Amazon Ember Display",
-                                "fontSize": "${highlighted ? @fsRowTimeActive : @fsRowTime}",
-                                "fontWeight": 700,
-                                "color": "${highlighted ? @colorAccent : @colorTextPrimary}",
-                                "maxLines": 1
+                                "type": "Container",
+                                "display": "${highlighted ? 'normal' : 'none'}",
+                                "width": "100%",
+                                "paddingTop": "10dp",
+                                "items": [
+                                    {
+                                        "type": "Frame",
+                                        "width": "100%",
+                                        "height": "1dp",
+                                        "background": "@colorAccent",
+                                        "opacity": 0.2
+                                    },
+                                    {
+                                        "type": "Container",
+                                        "direction": "row",
+                                        "width": "100%",
+                                        "justifyContent": "spaceBetween",
+                                        "alignItems": "baseline",
+                                        "paddingTop": "8dp",
+                                        "items": [
+                                            {
+                                                "type": "Text",
+                                                "text": "${String.toUpperCase(remainingLabel)}",
+                                                "fontFamily": "Amazon Ember",
+                                                "fontSize": "@fsCountdownLabel",
+                                                "fontWeight": 500,
+                                                "letterSpacing": "1dp",
+                                                "color": "@colorAccent",
+                                                "opacity": 0.75,
+                                                "maxLines": 1
+                                            },
+                                            {
+                                                "type": "Text",
+                                                "text": "${countdownText}",
+                                                "fontFamily": "Amazon Ember Display",
+                                                "fontSize": "@fsCountdownValue",
+                                                "fontWeight": 700,
+                                                "color": "@colorAccent",
+                                                "maxLines": 1
+                                            }
+                                        ]
+                                    }
+                                ]
                             }
                         ]
                     }
@@ -304,6 +369,36 @@
                     "name": "isNextIsha",
                     "value": "${currentTimeStr > data.prayers[3].time && currentTimeStr <= data.prayers[4].time}",
                     "type": "boolean"
+                },
+                {
+                    "name": "activeEpoch",
+                    "value": "${isNextFajr ? data.prayers[0].epoch : (isNextDhuhr ? data.prayers[1].epoch : (isNextAsr ? data.prayers[2].epoch : (isNextMaghrib ? data.prayers[3].epoch : data.prayers[4].epoch)))}",
+                    "type": "number"
+                },
+                {
+                    "name": "adjustedEpoch",
+                    "value": "${activeEpoch < utcTime ? activeEpoch + 86400000 : activeEpoch}",
+                    "type": "number"
+                },
+                {
+                    "name": "diffMs",
+                    "value": "${Math.max(0, adjustedEpoch - utcTime)}",
+                    "type": "number"
+                },
+                {
+                    "name": "hrs",
+                    "value": "${Math.floor(diffMs / 3600000)}",
+                    "type": "number"
+                },
+                {
+                    "name": "mins",
+                    "value": "${Math.floor((diffMs % 3600000) / 60000)}",
+                    "type": "number"
+                },
+                {
+                    "name": "countdownText",
+                    "value": "${diffMs <= 0 ? labels.itsTime : (hrs > 0 ? hrs + ' ' + labels.hourUnit + ' ' : '') + mins + ' ' + labels.minuteUnit}",
+                    "type": "string"
                 }
             ],
             "onMount": [
@@ -404,31 +499,41 @@
                                         "type": "PrayerRow",
                                         "prayerName": "${data.prayers[0].name}",
                                         "prayerTime": "${data.prayers[0].time}",
-                                        "highlighted": "${isNextFajr}"
+                                        "highlighted": "${isNextFajr}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
                                     },
                                     {
                                         "type": "PrayerRow",
                                         "prayerName": "${data.prayers[1].name}",
                                         "prayerTime": "${data.prayers[1].time}",
-                                        "highlighted": "${isNextDhuhr}"
+                                        "highlighted": "${isNextDhuhr}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
                                     },
                                     {
                                         "type": "PrayerRow",
                                         "prayerName": "${data.prayers[2].name}",
                                         "prayerTime": "${data.prayers[2].time}",
-                                        "highlighted": "${isNextAsr}"
+                                        "highlighted": "${isNextAsr}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
                                     },
                                     {
                                         "type": "PrayerRow",
                                         "prayerName": "${data.prayers[3].name}",
                                         "prayerTime": "${data.prayers[3].time}",
-                                        "highlighted": "${isNextMaghrib}"
+                                        "highlighted": "${isNextMaghrib}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
                                     },
                                     {
                                         "type": "PrayerRow",
                                         "prayerName": "${data.prayers[4].name}",
                                         "prayerTime": "${data.prayers[4].time}",
-                                        "highlighted": "${isNextIsha}"
+                                        "highlighted": "${isNextIsha}",
+                                        "remainingLabel": "${labels.remaining}",
+                                        "countdownText": "${countdownText}"
                                     }
                                 ]
                             },

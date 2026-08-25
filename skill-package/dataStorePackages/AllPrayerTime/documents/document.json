@@ -2,7 +2,7 @@
     "type": "APL",
     "version": "2024.2",
     "theme": "dark",
-    "description": "All prayer times widget. Displays the five daily prayer times and highlights whichever one is next, recomputed live from the device clock.",
+    "description": "All prayer times widget. Displays the five daily prayer times and highlights whichever one is next, recomputed live from the device clock. The isNext* bindings compare data.prayers[].time lexicographically, which is only correct because the times are zero-padded 24h \"HH:mm\" and given in ascending order; the upper bound on each range is inclusive (<=), so a prayer stays \"next\" through its own exact minute.",
     "extensions": [
         {
             "name": "DataStore",
@@ -317,6 +317,21 @@
             ]
         }
     },
+    "DataStore:OnObjectChanged": [
+        {
+            "type": "Idle",
+            "when": "${event.data != null}",
+            "delay": "${event.data != null ? Math.max(0, event.data.nextUpdateTime - utcTime) : 0}"
+        },
+        {
+            "type": "SendEvent",
+            "when": "${event.data != null}",
+            "arguments": [
+                "FETCH_ALL_PRAYER_TIME",
+                "${event.data.nextUpdateTime}"
+            ]
+        }
+    ],
     "mainTemplate": {
         "parameters": [
             "payload"
@@ -478,8 +493,26 @@
                                     {
                                         "type": "Text",
                                         "style": "mosqueName",
-                                        "text": "Fetching...",
+                                        "text": "${labels.loading}",
                                         "color": "@colorAccent",
+                                        "textAlign": "center",
+                                        "width": "100%"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Container",
+                                "display": "${targetTime < 0 ? 'normal' : 'none'}",
+                                "grow": 1,
+                                "shrink": 1,
+                                "width": "100%",
+                                "justifyContent": "center",
+                                "alignItems": "center",
+                                "items": [
+                                    {
+                                        "type": "Text",
+                                        "style": "mosqueName",
+                                        "text": "${labels.error}",
                                         "textAlign": "center",
                                         "width": "100%"
                                     }

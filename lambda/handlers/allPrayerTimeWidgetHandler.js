@@ -1,6 +1,49 @@
 const Alexa = require("ask-sdk-core");
+const moment = require("moment-timezone");
 const apiHandler = require("./apiHandler");
 const helperFunctions = require("../helperFunctions");
+const { AllPrayerTimeIntentHandler } = require("./intentHandler");
+
+// Pushed when the widget has no mosque configured yet, or the install fetch
+// below throws, so the document leaves its "Fetching..." branch instead of
+// sitting on it forever (onMount only ever gets one shot at a real fetch).
+// nextUpdateTime: -1 is a sentinel distinct from the loading state's 0.
+async function pushAllPrayerTimeErrorState(handlerInput, requestAttributes) {
+  try {
+    const commands = [
+      {
+        type: "PUT_OBJECT",
+        namespace: "allPrayerTimeWidget",
+        key: "allPrayerTimeData",
+        content: {
+          labels: {
+            title: requestAttributes.t("widgets.allPrayerTime.title"),
+            error: requestAttributes.t("widgets.installationErrorPrompt"),
+          },
+          data: null,
+          nextUpdateTime: -1,
+        },
+      },
+    ];
+    const tokenResponse = await apiHandler.getAccessToken();
+    const target = {
+      type: "DEVICES",
+      items: [Alexa.getDeviceId(handlerInput.requestEnvelope)],
+    };
+    const apiEndpoint = helperFunctions.getApiEndpoint(handlerInput);
+    await apiHandler.updateDatastore(
+      tokenResponse,
+      commands,
+      target,
+      apiEndpoint,
+    );
+  } catch (error) {
+    console.error(
+      "Error while pushing all prayer time widget error state: ",
+      error,
+    );
+  }
+}
 
 const InstallAllPrayerTimeWidgetRequestHandler = {
   canHandle(handlerInput) {
@@ -16,6 +59,7 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
     const persistentAttributes =
       await attributesManager.getPersistentAttributes();
     if (!persistentAttributes?.uuid) {
+      await pushAllPrayerTimeErrorState(handlerInput, requestAttributes);
       return handlerInput.responseBuilder
         .withShouldEndSession(true)
         .getResponse();
@@ -30,35 +74,48 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
         requestAttributes.t("prayerNames"),
       );
       const mosqueName = persistentAttributes.primaryText;
-      const currentDateTime = new Date(
-        new Date().toLocaleString("en-US", { timeZone: userTimeZone }),
-      );
-      const prayers = mosqueTimes.times.map((time, index) => {
-        const [hours, minutes] = time.split(":").map(Number);
-        // Same trick as the midnight calculation below: build the target in
-        // the localized-but-fake Date space, then apply its offset from
-        // currentDateTime to the real UTC Date.now() to get a true epoch.
-        const prayerDateTime = new Date(currentDateTime);
-        prayerDateTime.setHours(hours, minutes, 0, 0);
-        const epoch =
-          Date.now() + (prayerDateTime.getTime() - currentDateTime.getTime());
-        return {
-          name: prayerNames[index],
-          time,
-          epoch,
-        };
-      });
+      const currentMoment = moment.tz(userTimeZone);
+      const currentTimeStr = currentMoment.format("HH:mm");
 
-      // Which prayer is highlighted keeps changing through the day, but that
-      // is recomputed reactively in APL from the live localTime binding, so
-      // this only needs to refresh once the *set* of times changes — at the
-      // mosque's local midnight — instead of on every prayer transition.
-      const midnight = new Date(currentDateTime);
-      midnight.setHours(24, 0, 0, 0);
-      const msUntilMidnight = midnight.getTime() - currentDateTime.getTime();
-      // Use actual UTC epoch timestamp for logic comparison
-      const nextUpdateTime = Date.now() + msUntilMidnight;
-      const formattedNextUpdateTime = "00:00";
+      // Once Isha has passed there is no "next" prayer left on today's
+      // calendar, so show tomorrow's schedule instead of a stale today's
+      // Fajr time paired with a next-day countdown.
+      let displayTimes = mosqueTimes.times;
+      let targetDateStr = currentMoment.format("YYYY-MM-DD");
+      if (currentTimeStr > mosqueTimes.times[4]) {
+        const tomorrowTimes = await helperFunctions.getTomorrowPrayerTimes(
+          persistentAttributes.uuid,
+          userTimeZone,
+        );
+        if (tomorrowTimes?.times) {
+          displayTimes = tomorrowTimes.times;
+          targetDateStr = currentMoment
+            .clone()
+            .add(1, "day")
+            .format("YYYY-MM-DD");
+        }
+      }
+
+      // `mosqueTimes.times`/`displayTimes` line up with prayers[0..4] only
+      // because apiHandler.getPrayerTimings already strips shuruq (index 1)
+      // from the 6-slot calendar row, and prayerNames — 8 entries, with
+      // Jumma/Eid/Shuruq trailing at 5-7 — happens to start in the same
+      // Fajr..Isha order. A change to either ordering would silently mislabel
+      // prayer times rather than fail.
+      const prayers = displayTimes.map((time, index) => ({
+        name: prayerNames[index],
+        time,
+        epoch: helperFunctions.getWallClockEpoch(
+          targetDateStr,
+          time,
+          userTimeZone,
+        ),
+      }));
+
+      // Refresh right when Isha passes — not at midnight — so the switch to
+      // tomorrow's schedule above actually takes effect promptly instead of
+      // sitting on today's stale list for the rest of the evening.
+      const nextUpdateTime = prayers[4].epoch;
 
       const commands = [
         {
@@ -68,6 +125,7 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
           content: {
             labels: {
               title: requestAttributes.t("widgets.allPrayerTime.title"),
+              loading: requestAttributes.t("widgets.allPrayerTime.loading"),
               // The countdown on the highlighted row reuses the Next Prayer
               // widget's copy rather than duplicating it under a second key.
               remaining: requestAttributes.t(
@@ -84,7 +142,6 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
               mosqueName,
             },
             nextUpdateTime,
-            formattedNextUpdateTime,
           },
         },
       ];
@@ -108,6 +165,7 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
       await attributesManager.savePersistentAttributes();
     } catch (error) {
       console.error("Error while installing all prayer time widget: ", error);
+      await pushAllPrayerTimeErrorState(handlerInput, requestAttributes);
     }
 
     return handlerInput.responseBuilder
@@ -203,7 +261,11 @@ const ReadAllPrayerTimeAPLEventHandler = {
     sessionAttributes.skipAplDirective = true;
     sessionAttributes.skipCardDirective = true;
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-    return await helperFunctions.checkForPersistenceData(handlerInput);
+    // Not checkForPersistenceData: that ends up at getNextPrayerTime, which
+    // speaks only the next prayer — wrong for a widget titled "Prayer Times".
+    // AllPrayerTimeIntentHandler already speaks all five (and falls back to
+    // checkForPersistenceData itself when no mosque is configured yet).
+    return await AllPrayerTimeIntentHandler.handle(handlerInput);
   },
 };
 

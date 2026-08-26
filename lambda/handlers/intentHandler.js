@@ -6,11 +6,13 @@ const {
   getDataSourceforMosqueInfo,
   adhaanRecitation,
   getDataSourceForAdhaanReciter,
+  getDataSourceForAdhanPlayer,
   getMetadata,
   getDataSourceForRoutine,
   getDataSourceForDeleteRoutineList,
 } = require("../datasources.js");
 const listApl = require("../aplDocuments/mosqueListApl.json");
+const adhanPlayerApl = require("../aplDocuments/adhanPlayerApl.json");
 const crypto = require("crypto");
 const { randomUUID: uuidv4 } = crypto;
 const adhaanTasks = [
@@ -819,6 +821,56 @@ const NextIqamaTimeIntentHandler = {
   },
 };
 
+/**
+ * Renders the custom Adhan player when the device supports both APL and
+ * video, or returns null so the caller falls back to the legacy
+ * AudioPlayer directive. Shared by PlayAdhanIntentHandler and
+ * PlayAdhanTaskHandler so the two entry points (voice intent vs.
+ * routine/task trigger) can't drift apart.
+ */
+const renderAdhanPlayer = (handlerInput, audioName, audioUrl) => {
+  const supportedInterfaces = Alexa.getSupportedInterfaces(
+    handlerInput.requestEnvelope,
+  );
+  if (
+    !supportedInterfaces["Alexa.Presentation.APL"] ||
+    !helperFunctions.deviceSupportsVideo(handlerInput)
+  ) {
+    // Devices that support APL but not video fall through to the
+    // AudioPlayer branch — a Video component with no video support
+    // silently plays nothing.
+    return null;
+  }
+  // Play through APL's own Video component so this custom screen — not
+  // Alexa's system AudioPlayer card — stays on top for the whole call to
+  // prayer. AudioIntentHandler/CancelAndStopIntentHandler read
+  // adhanPlaybackMode to know which mechanism voice pause/resume/stop
+  // should control.
+  const sessionAttributes =
+    handlerInput.attributesManager.getSessionAttributes();
+  const dataSource = getDataSourceForAdhanPlayer(
+    handlerInput,
+    audioName,
+    audioUrl,
+  );
+  const aplDirective = helperFunctions.createDirectivePayload(
+    adhanPlayerApl,
+    dataSource,
+  );
+  sessionAttributes.adhanPlaybackMode = "apl-video";
+  // AudioIntentHandler/CancelAndStopIntentHandler need this exact token to
+  // target the on-screen document with an ExecuteCommands directive later.
+  sessionAttributes.adhanPlayerToken = aplDirective.token;
+  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+  // shouldEndSession is deliberately omitted (not set to true or false):
+  // false reopens the mic for a spoken follow-up, which is not wanted
+  // here; true drops sessionAttributes before the next request, so a
+  // later "Alexa, pause/resume/stop" arrives with no
+  // adhanPlaybackMode/token to act on. Omitting it keeps the session (and
+  // this state) alive without listening. See CLAUDE.md's Gotchas section.
+  return handlerInput.responseBuilder.addDirective(aplDirective).getResponse();
+};
+
 const PlayAdhanIntentHandler = {
   canHandle(handlerInput) {
     return (
@@ -849,8 +901,10 @@ const PlayAdhanIntentHandler = {
           ? persistentAttributes.favouriteAdhaan.fajrUrl
           : persistentAttributes.favouriteAdhaan.otherUrl;
     }
-    const playBehavior = "REPLACE_ALL";
-    const metadataInfo = getMetadata(handlerInput, audioName);
+    const aplResponse = renderAdhanPlayer(handlerInput, audioName, audioUrl);
+    if (aplResponse) {
+      return aplResponse;
+    }
     const supportedInterfaces = Alexa.getSupportedInterfaces(
       handlerInput.requestEnvelope,
     );
@@ -861,6 +915,8 @@ const PlayAdhanIntentHandler = {
         .withShouldEndSession(false)
         .getResponse();
     }
+    const playBehavior = "REPLACE_ALL";
+    const metadataInfo = getMetadata(handlerInput, audioName);
     return handlerInput.responseBuilder
       .withShouldEndSession(true)
       .addAudioPlayerPlayDirective(
@@ -1396,8 +1452,10 @@ const PlayAdhanTaskHandler = {
           ? persistentAttributes.favouriteAdhaan.fajrUrl
           : persistentAttributes.favouriteAdhaan.otherUrl;
       }
-      const playBehavior = "REPLACE_ALL";
-      const metadataInfo = getMetadata(handlerInput, audioName);
+      const aplResponse = renderAdhanPlayer(handlerInput, audioName, audioUrl);
+      if (aplResponse) {
+        return aplResponse;
+      }
       const supportedInterfaces = Alexa.getSupportedInterfaces(
         handlerInput.requestEnvelope,
       );
@@ -1408,6 +1466,8 @@ const PlayAdhanTaskHandler = {
           .withShouldEndSession(false)
           .getResponse();
       }
+      const playBehavior = "REPLACE_ALL";
+      const metadataInfo = getMetadata(handlerInput, audioName);
       return handlerInput.responseBuilder
         .withShouldEndSession(true)
         .addAudioPlayerPlayDirective(

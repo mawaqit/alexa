@@ -49,6 +49,20 @@ const checkForConsentTokenToAccessDeviceLocation = (handlerInput) => {
   );
 };
 
+/**
+ * Some Alexa.Presentation.APL-capable devices still can't play video (see
+ * https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/apl-video.html#devices-that-dont-support-video).
+ * On those, a Video component stays on screen but silently renders nothing —
+ * for the Adhan player that means no audio either, since the Video *is* the
+ * playback mechanism. Route those devices to the AudioPlayer fallback
+ * instead of a screen that looks fine but never makes a sound.
+ */
+const deviceSupportsVideo = (handlerInput) => {
+  return Boolean(
+    handlerInput.requestEnvelope.context?.Viewport?.video?.codecs?.length,
+  );
+};
+
 const createDirectivePayload = (
   aplDocument,
   dataSources = {},
@@ -1537,6 +1551,7 @@ function generateSupportId(userId, attempt = 0) {
 module.exports = {
   getPersistedData,
   checkForConsentTokenToAccessDeviceLocation,
+  deviceSupportsVideo,
   createDirectivePayload,
   getNextPrayerTime,
   getPrayerTimingsForMosque,

@@ -853,7 +853,12 @@
           "name": "prayerName"
         }
       ],
-      "invocationName": "mawaqit"
+      "invocationName": "mawaqit",
+      "modelConfiguration": {
+        "fallbackIntentSensitivity": {
+          "level": "MEDIUM"
+        }
+      }
     },
     "prompts": [
       {

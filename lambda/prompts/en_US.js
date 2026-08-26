@@ -69,6 +69,7 @@ module.exports = {
       "or you can tap the recitation of your choice on the screen.",
     hadithErrorPrompt: `Sorry, I couldn't find any hadiths. Please try again.`,
     adhaanErrorPrompt: `Sorry, playing the adhan isn't available right now. Please try again later.`,
+    adhanPlayerSubtitle: `Adhan`,
     selectMosquePrompt: `To register a mosque, say "choose my mosque". `,
     unableToResolvePrayerNamePrompt: `Sorry, I couldn't recognize the prayer name. Please try again.`,
     prayerNamePrompt:

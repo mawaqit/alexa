@@ -52,6 +52,9 @@ const {
   AudioPlayerEventHandler,
   PlaybackCommandHandler,
   AudioIntentHandler,
+  AdhanPlaybackFinishedEventHandler,
+  AdhanPlaybackFailedEventHandler,
+  getAdhanStopResponse,
 } = require("./handlers/audioPlayerHandler.js");
 const {
   CFIRWithoutSlotsHandler,
@@ -165,6 +168,15 @@ const CancelAndStopIntentHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     const speakOutput = requestAttributes.t("stopPrompt");
+
+    // Adhan-specific handling lives in audioPlayerHandler.js (importable
+    // there, unlike this file, which exports nothing but `handler`) — falls
+    // through to the plain speak-only response below when the adhan isn't
+    // actually playing.
+    const adhanStopResponse = getAdhanStopResponse(handlerInput, speakOutput);
+    if (adhanStopResponse) {
+      return adhanStopResponse;
+    }
 
     return handlerInput.responseBuilder
       .speak(speakOutput)
@@ -309,6 +321,8 @@ exports.handler = Alexa.SkillBuilders.custom()
     AudioPlayerEventHandler,
     PlaybackCommandHandler,
     AudioIntentHandler,
+    AdhanPlaybackFinishedEventHandler,
+    AdhanPlaybackFailedEventHandler,
     MosqueInfoIntentHandler,
     AllIqamaTimeIntentHandler,
     NextPrayerTimeIntentWithoutNameHandler,

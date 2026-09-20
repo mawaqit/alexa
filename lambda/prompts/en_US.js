@@ -38,7 +38,7 @@ module.exports = {
     nextPrayerTimeSpecificPrompt: `At %s, the %s prayer is at %s. Do you need anything else?`,
     shuruqPrompt: `At %s, <sub alias='shorook'>Shuruq</sub> is at %s. Do you need anything else?`,
     secondsPrompt: `%s seconds`,
-    errorGeoConversionPrompt: `Sorry, I couldn't convert your address to geolocation. Please try again.`,
+    errorGeoConversionPrompt: `Sorry, I'm having trouble looking up locations right now. Please try again in a few minutes.`,
     nextIqamaTimePrompt: `The iqama for the next prayer, %s, is in %s.`,
     selectedMosquePrompt: `Perfect, %s is now your favorite mosque! `,
     nextPrayerWithoutMosquePrompt: `The next prayer is %s at %s, in %s.`,

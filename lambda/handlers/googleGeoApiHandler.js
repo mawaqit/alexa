@@ -12,14 +12,17 @@ function constructAddress(addressJson) {
     countryCode,
     postalCode,
   } = addressJson;
+  // Postal code before country code. Alexa hands these over as separate
+  // fields, and putting the country between the region and the postcode
+  // splits a pair every geocoder expects to read together.
   return [
     addressLine1,
     addressLine2,
     addressLine3,
     city,
     stateOrRegion,
-    countryCode,
     postalCode,
+    countryCode,
   ]
     .filter(Boolean)
     .join(", ");
@@ -30,7 +33,7 @@ function constructAddress(addressJson) {
  * @param {string} address - The full address string to geocode.
  * @returns {Array|undefined} An array of geocoding result objects from the Google API, or `undefined` if no results were returned.
  * @throws {Error} If the Google API key is not configured in environment variables.
- * @throws {string} If the geocoding request fails.
+ * @throws {Error} `GeoServiceError: ...` if the request or the API itself failed.
  */
 async function fetchGeocodingResults(address) {
   const googleApiKey = getGoogleApiKey();
@@ -40,11 +43,31 @@ async function fetchGeocodingResults(address) {
   const url =
     googleBaseUrl +
     `?address=${encodeURIComponent(address)}&key=${googleApiKey}`;
-  const response = await axios.get(url).catch((error) => {
-    console.error("Error fetching geocoding results:", error);
-    throw new Error("GeoConversionError: No results found");
-  });
-  return response?.data?.results;
+
+  let response;
+  try {
+    response = await axios.get(url);
+  } catch (error) {
+    // A failed request says nothing about the address, so it must not reach the
+    // user as "I couldn't convert your address".
+    console.error(
+      "Geocoding request failed:",
+      error?.response?.status,
+      error?.message,
+    );
+    throw new Error("GeoServiceError: geocoding request failed");
+  }
+
+  // Google answers REQUEST_DENIED, OVER_QUERY_LIMIT and friends with HTTP 200,
+  // so axios resolves and only `status` tells us the key, quota or billing is
+  // at fault. Without this check those arrive as an empty result list and get
+  // blamed on the address.
+  const { status, error_message: errorMessage, results } = response?.data ?? {};
+  if (status && status !== "OK" && status !== "ZERO_RESULTS") {
+    console.error("Geocoding rejected:", status, errorMessage);
+    throw new Error(`GeoServiceError: ${status}`);
+  }
+  return results;
 }
 
 // Function to calculate the matching score for each result

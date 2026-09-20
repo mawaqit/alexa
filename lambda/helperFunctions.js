@@ -316,6 +316,33 @@ const getListOfMosqueBasedOnGeoLocation = async (handlerInput, speakOutput) => {
   }
 };
 
+// Geocoding sits on the only path to choosing a mosque, so when it fails there
+// is nothing else the user can say to get past it. The city is already in the
+// device address and the search API accepts it by name, so fall back to that
+// rather than dead-ending. The caller has already rejected an address with no
+// city, so there is always one to search with.
+const getMosqueListForAddress = async (address) => {
+  try {
+    const { lat, lng } = await getLatLng(address);
+    return await getMosqueList(false, lat, lng);
+  } catch (error) {
+    if (!/^Geo(ServiceError|ConversionError)/.test(error?.message ?? "")) {
+      throw error;
+    }
+    console.log(
+      "Geocoding unavailable, falling back to city search:",
+      error.message,
+    );
+    try {
+      return await getMosqueList(address.city);
+    } catch (fallbackError) {
+      // Report the geocoding failure, not the fallback's: it is the cause.
+      console.log("City search fallback failed:", fallbackError?.message);
+      throw error;
+    }
+  }
+};
+
 const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
   const {
     requestEnvelope,
@@ -361,8 +388,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
         .getResponse();
     }
 
-    const { lat, lng } = await getLatLng(address);
-    const mosqueList = await getMosqueList(false, lat, lng);
+    const mosqueList = await getMosqueListForAddress(address);
     sessionAttributes.mosqueList = mosqueList;
     attributesManager.setSessionAttributes(sessionAttributes);
     return await createResponseDirectiveForMosqueList(
@@ -372,7 +398,7 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
     );
   } catch (error) {
     console.log("Error in retrieving address: ", error);
-    if (error?.message?.startsWith("GeoConversionError")) {
+    if (/^Geo(ServiceError|ConversionError)/.test(error?.message ?? "")) {
       return responseBuilder
         .speak(requestAttributes.t("errorGeoConversionPrompt"))
         .withShouldEndSession(true)

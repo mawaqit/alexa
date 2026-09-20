@@ -100,6 +100,20 @@ describe("address to coordinates", () => {
     await expect(getLatLng(ADDRESS)).rejects.toThrow(/^GeoServiceError/);
   });
 
+  it("reports a success carrying no results as a service failure", async () => {
+    // "OK" with nothing in it is self-contradictory, so it says nothing about
+    // the address — only ZERO_RESULTS does.
+    axios.get.mockResolvedValue({ data: { status: "OK", results: [] } });
+
+    await expect(getLatLng(ADDRESS)).rejects.toThrow(/^GeoServiceError/);
+  });
+
+  it("reports a response with no status as a service failure", async () => {
+    axios.get.mockResolvedValue({ data: {} });
+
+    await expect(getLatLng(ADDRESS)).rejects.toThrow(/^GeoServiceError/);
+  });
+
   it("still reports an unmatched address as a conversion failure", async () => {
     // The one case where the address really is the problem.
     axios.get.mockResolvedValue({

@@ -63,9 +63,18 @@ async function fetchGeocodingResults(address) {
   // at fault. Without this check those arrive as an empty result list and get
   // blamed on the address.
   const { status, error_message: errorMessage, results } = response?.data ?? {};
-  if (status && status !== "OK" && status !== "ZERO_RESULTS") {
+
+  // The only answer that establishes the address itself has no match. Returned
+  // empty so getLatLng reports it as a conversion failure.
+  if (status === "ZERO_RESULTS") {
+    return [];
+  }
+
+  // Everything else — a rejected key, an absent status, OK with no results —
+  // means the lookup did not happen. That is not evidence about the address.
+  if (status !== "OK" || !results?.length) {
     console.error("Geocoding rejected:", status, errorMessage);
-    throw new Error(`GeoServiceError: ${status}`);
+    throw new Error(`GeoServiceError: ${status ?? "malformed response"}`);
   }
   return results;
 }

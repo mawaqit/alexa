@@ -67,3 +67,21 @@ functions:
     timeout: 10
     # Loads events from eventsources.yml -> dispatcher -> [stage]
     events: ${file(eventsources.yml):${self:provider.stage}, file(eventsources.yml):dev}
+
+resources:
+  # Keep every resource when the stack is deleted or a change forces a
+  # replacement: ownership moves to Terraform (mawaqit/infrastructure#389),
+  # CloudFormation only drops its bookkeeping.
+  extensions:
+    DispatcherHandlerLambdaFunction:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    DispatcherHandlerLogGroup:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    IamRoleLambdaExecution:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    DispatcherHandlerLambdaPermissionAlexaSkill1:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain

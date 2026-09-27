@@ -23,6 +23,10 @@ const buildHandlerInput = ({
   // A linked account is the normal state; pass null to exercise the
   // "please link your account" branch.
   accessToken = "access-token",
+  // Only the address-based mosque lookup needs these two. They default to
+  // absent so the consent check stays false for every other test.
+  consentToken = null,
+  deviceAddress = null,
 } = {}) => {
   const session = { ...sessionAttributes };
   let persistent = { ...persistentAttributes };
@@ -33,8 +37,13 @@ const buildHandlerInput = ({
     context: {
       System: {
         apiEndpoint: "https://api.eu.amazonalexa.com",
+        ...(consentToken ? { apiAccessToken: "api-access-token" } : {}),
         device: { deviceId: "device-1", supportedInterfaces },
-        user: { userId: "user-1", ...(accessToken ? { accessToken } : {}) },
+        user: {
+          userId: "user-1",
+          ...(accessToken ? { accessToken } : {}),
+          ...(consentToken ? { permissions: { consentToken } } : {}),
+        },
       },
     },
     request: {
@@ -69,6 +78,9 @@ const buildHandlerInput = ({
         return timezone;
       }),
       getSystemDistanceUnits: jest.fn(async () => distanceUnits),
+    }),
+    getDeviceAddressServiceClient: () => ({
+      getFullAddress: jest.fn(async () => deviceAddress),
     }),
   };
 

@@ -116,6 +116,24 @@ describe("the number the user says selects that exact mosque", () => {
 
     expect(handlerInput._getPersistentAttributes().proximity).toBe(2400);
   });
+
+  it("stores an unknown distance as null when the list came from a city search", async () => {
+    // The city-search fallback has no user coordinates to measure from, so the
+    // API sends no proximity. parseInt(undefined) is NaN, which DynamoDB
+    // rejects — and the save runs before the handler's try block, so the user
+    // heard the generic error prompt and lost the session on every pick.
+    const cityList = MOSQUE_LIST.map(
+      ({ proximity: _unknown, ...mosque }) => mosque,
+    );
+    const handlerInput = buildInput({ said: "4", mosqueList: cityList });
+
+    await SelectMosqueIntentAfterSelectingMosqueHandler.handle(handlerInput);
+
+    expect(handlerInput._getPersistentAttributes()).toMatchObject({
+      uuid: "uuid-4",
+      proximity: null,
+    });
+  });
 });
 
 describe("a number that does not match a mosque", () => {

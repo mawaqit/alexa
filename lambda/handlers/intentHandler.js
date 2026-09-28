@@ -416,7 +416,9 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       locale,
     );
     // Keep the raw distance in meters; it is localized at display time.
-    selectedMosqueDetails.proximity = parseInt(selectedMosqueDetails.proximity);
+    selectedMosqueDetails.proximity = helperFunctions.parseProximity(
+      selectedMosqueDetails.proximity,
+    );
     console.log("Selected Mosque Details: ", selectedMosqueDetails);
     sessionAttributes.persistentAttributes = selectedMosqueDetails;
     handlerInput.attributesManager.setPersistentAttributes(
@@ -1917,7 +1919,7 @@ const MosqueYesIntentHandler = {
         locale,
       );
       // Keep the raw distance in meters; it is localized at display time.
-      selectedMosqueDetails.proximity = parseInt(
+      selectedMosqueDetails.proximity = helperFunctions.parseProximity(
         selectedMosqueDetails.proximity,
       );
       console.log("Selected Mosque Details: ", selectedMosqueDetails);

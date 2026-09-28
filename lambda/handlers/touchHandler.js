@@ -34,7 +34,9 @@ const MosqueListTouchEventHandler = {
       locale,
     );
     // Keep the raw distance in meters; it is localized at display time.
-    selectedMosque.proximity = parseInt(selectedMosque.proximity);
+    selectedMosque.proximity = helperFunctions.parseProximity(
+      selectedMosque.proximity,
+    );
     sessionAttributes.persistentAttributes = selectedMosque;
     try {
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);

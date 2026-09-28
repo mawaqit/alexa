@@ -20,7 +20,7 @@
     "@aws-sdk/client-scheduler": "^3.971.0",
     "@aws-sdk/client-sqs": "^3.971.0",
     "@aws-sdk/client-ssm": "^3.971.0",
-    "qs": "^6.12.3"
+    "qs": "^6.16.0"
   },
   "devDependencies": {
     "serverless-aws-alias": "^1.8.0"

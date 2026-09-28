@@ -2,5 +2,6 @@ packages:
   - "lambda"
   - "azan-lambda"
 allowBuilds:
+  '@parcel/watcher': true
   protobufjs: true
   unrs-resolver: true

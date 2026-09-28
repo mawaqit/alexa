@@ -370,10 +370,10 @@ const getListOfMosqueBasedOnCity = async (handlerInput, speakOutput) => {
         .withShouldEndSession(true)
         .getResponse();
     }
-    console.log(
-      "Address successfully retrieved, now responding to user : ",
-      address,
-    );
+    // console.log(
+    //   "Address successfully retrieved, now responding to user : ",
+    //   address,
+    // );
     const { city, postalCode } = address;
 
     if (

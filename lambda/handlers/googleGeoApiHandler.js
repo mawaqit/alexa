@@ -124,10 +124,10 @@ function findBestResult(results, desiredComponents) {
 // Main function to get latitude and longitude from the address JSON
 async function getLatLng(addressJson) {
   const address = constructAddress(addressJson);
-  console.log(`Fetching geocoding results for address: ${address}`);
+  // console.log(`Fetching geocoding results for address: ${address}`);
   const results = await fetchGeocodingResults(address);
   if (!results?.length) throw new Error("GeoConversionError: No results found");
-  console.log(`Found geocoding results: ${JSON.stringify(results)}`);
+  // console.log(`Found geocoding results: ${JSON.stringify(results)}`);
   const desiredComponents = {
     postal_code: addressJson.postalCode || "",
     locality: addressJson.city?.split(",").pop()?.trim() || "",

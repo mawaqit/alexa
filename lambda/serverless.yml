@@ -105,17 +105,23 @@ resources:
   Resources:
     AlexaAzanDLQ:
       Type: AWS::SQS::Queue
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
         QueueName: mawaqit-alexa-azan-dlq-${self:provider.stage}
         MessageRetentionPeriod: 1209600 # 14 days (maximum)
 
     MawaqitAzanScheduleGroup:
       Type: AWS::Scheduler::ScheduleGroup
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
         Name: mawaqit-azan-schedule-${self:provider.stage}
 
     WorkerEventSourceMapping:
       Type: AWS::Lambda::EventSourceMapping
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
         BatchSize: ${file(env.json):${self:provider.stage}.sqsQueueBatchSize, 10}
         EventSourceArn:
@@ -131,6 +137,8 @@ resources:
 
     AlexaAzanQueue:
       Type: AWS::SQS::Queue
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
         QueueName: mawaqit-alexa-azan-queue-${self:provider.stage}
         VisibilityTimeout: 5400
@@ -142,6 +150,8 @@ resources:
           maxReceiveCount: 3
     AlexaAzanUsersDataTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
         TableName: mawaqit-alexa-azan-users-data-${self:provider.stage}
         AttributeDefinitions:
@@ -153,6 +163,8 @@ resources:
         BillingMode: PAY_PER_REQUEST
     AlexaMosqueAzanDataTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
         TableName: mawaqit-alexa-mosque-azan-data-${self:provider.stage}
         AttributeDefinitions:
@@ -164,6 +176,8 @@ resources:
         BillingMode: PAY_PER_REQUEST
     IamRoleLambdaExecution:
       Type: AWS::IAM::Role
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
         AssumeRolePolicyDocument:
           Version: "2012-10-17"
@@ -174,3 +188,35 @@ resources:
                   - lambda.amazonaws.com
                   - scheduler.amazonaws.com
               Action: sts:AssumeRole
+
+  # Keep every resource when the stack is deleted or a change forces a
+  # replacement: ownership moves to Terraform (mawaqit/infrastructure#389),
+  # CloudFormation only drops its bookkeeping.
+  extensions:
+    IndexHandlerLambdaFunction:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    TriggerHandlerLambdaFunction:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    WorkerHandlerLambdaFunction:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    IndexHandlerLogGroup:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    TriggerHandlerLogGroup:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    WorkerHandlerLogGroup:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    IndexHandlerLambdaPermissionAlexaSkill1:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    ServerlessDeploymentBucket:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+    ServerlessDeploymentBucketPolicy:
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain

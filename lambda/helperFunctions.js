@@ -1435,6 +1435,22 @@ const getUserDistanceUnits = async (handlerInput) => {
  * and unit translation follow the locale natively. Short distances are rendered
  * in the smaller unit with no decimals (< 1 km -> meters, < 1 mile -> feet).
  */
+/**
+ * Normalize a raw proximity into something DynamoDB will store.
+ *
+ * The city fallback searches by name, so the API has no user coordinates to
+ * measure from and returns no proximity at all. The selected mosque is
+ * persisted as-is, and the marshaller rejects `undefined` and `NaN` outright
+ * ("Special numeric value NaN is not allowed"). That throw happens before the
+ * handler's try block, so it reaches the user as the generic error prompt and
+ * ends the session. An unknown distance is `null`; `formatDistance` already
+ * renders that as no distance at all.
+ */
+function parseProximity(proximity) {
+  const meters = parseInt(proximity);
+  return Number.isNaN(meters) ? null : meters;
+}
+
 function formatDistance(meters, locale = "en-US", units = "METRIC") {
   const distanceInMeters = parseFloat(meters);
   if (!Number.isFinite(distanceInMeters)) {
@@ -1620,6 +1636,7 @@ module.exports = {
   isTaskTrigger,
   ALL_PRAYERS,
   formatDistance,
+  parseProximity,
   getUserDistanceUnits,
   formatTime,
   generateSupportId,

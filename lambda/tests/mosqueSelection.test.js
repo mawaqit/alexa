@@ -14,9 +14,11 @@ jest.mock("../handlers/googleTranslateHandler.js");
 const { getPrayerTimings } = require("../handlers/apiHandler.js");
 const { detectLanguage } = require("../handlers/googleTranslateHandler.js");
 const {
+  MosqueYesIntentHandler,
   SelectMosqueIntentAfterSelectingMosqueHandler,
   SelectMosqueIntentStartedHandler,
 } = require("../handlers/intentHandler.js");
+const { MosqueListTouchEventHandler } = require("../handlers/touchHandler.js");
 const { buildHandlerInput, spokenText } = require("./support/handlerInput");
 const { TODAY_TIMES, freezeAt } = require("./support/fixtures");
 
@@ -115,6 +117,77 @@ describe("the number the user says selects that exact mosque", () => {
     await SelectMosqueIntentAfterSelectingMosqueHandler.handle(handlerInput);
 
     expect(handlerInput._getPersistentAttributes().proximity).toBe(2400);
+  });
+});
+
+describe("a mosque list from a city search, with no distance", () => {
+  // The city-search fallback has no user coordinates to measure from, so the
+  // API sends no proximity. parseInt(undefined) is NaN, which DynamoDB rejects;
+  // the save runs outside each handler's try block, so the user heard the
+  // generic error prompt and lost the session on every pick. Three handlers
+  // persist a pick, and each normalizes the distance itself, so each needs its
+  // own case: reverting any one of them would otherwise go unnoticed.
+  const CITY_LIST = MOSQUE_LIST.map(
+    ({ proximity: _unknown, ...mosque }) => mosque,
+  );
+
+  it("stores null when the mosque is chosen by number", async () => {
+    const handlerInput = buildInput({ said: "4", mosqueList: CITY_LIST });
+
+    await SelectMosqueIntentAfterSelectingMosqueHandler.handle(handlerInput);
+
+    expect(handlerInput._getPersistentAttributes()).toMatchObject({
+      uuid: "uuid-4",
+      proximity: null,
+    });
+  });
+
+  it("stores null when the only mosque found is confirmed with yes", async () => {
+    const handlerInput = buildHandlerInput({
+      intentName: "AMAZON.YesIntent",
+      timezone: TZ,
+      sessionAttributes: {
+        isMosqueRequested: true,
+        mosqueList: [{ ...CITY_LIST[0] }],
+      },
+    });
+
+    await MosqueYesIntentHandler.handle(handlerInput);
+
+    expect(handlerInput._savePersistentAttributes).toHaveBeenCalled();
+    expect(handlerInput._getPersistentAttributes()).toMatchObject({
+      uuid: "uuid-1",
+      proximity: null,
+    });
+  });
+
+  it("stores null when the mosque is chosen by touch", async () => {
+    const handlerInput = buildHandlerInput({
+      requestType: "Alexa.Presentation.APL.UserEvent",
+      timezone: TZ,
+    });
+    // The touch handler makes the selected mosque the persistent record and
+    // only saves it through updateRoutinePrayers, which reads the routines off
+    // that same object. Without routines the save is skipped and the case would
+    // pass whatever the distance is.
+    handlerInput.requestEnvelope.request.arguments = [
+      "ListItemSelected",
+      "Mosque List",
+      {
+        ...CITY_LIST[3],
+        routinePrayers: [
+          { name: "Fajr", canonicalName: "Fajr", time: "05:30" },
+        ],
+      },
+    ];
+
+    await MosqueListTouchEventHandler.handle(handlerInput);
+
+    expect(handlerInput._savePersistentAttributes).toHaveBeenCalled();
+    expect(handlerInput._getPersistentAttributes()).toMatchObject({
+      uuid: "uuid-4",
+      proximity: null,
+    });
   });
 });
 

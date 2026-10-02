@@ -111,9 +111,13 @@ Two things bite in the TypeScript tests specifically:
   `logger.info("User updated", { userId })`, not `` logger.info(`User ${userId}…`) ``.
 - **Never log a raw directive, event, or error response body.** An AcceptGrant
   payload carries a live OAuth code and a bearer token; a Discover payload
-  carries an access token. Log their *presence*
-  (`hasGrantCode: Boolean(...)`), never their value. `describeDirective()` in
-  `dispatcher.ts` is the pattern to follow.
+  carries an access token. The dispatcher logs every request and response in
+  full, but only through `redact()` (`src/logging/redact.ts`), which masks
+  every string `code` and `token`. Anything else carrying a credential logs
+  its *presence* (`hasX: Boolean(...)`), never its value.
+- Log lines carry only `level`, `message`, `requestId` and the call-site
+  fields — `CompactLogFormatter` in `logger.ts` drops Powertools' per-line
+  function metadata on purpose.
 - Levels: `logger.debug` for per-step tracing, `info` for state changes worth
   keeping, `error` for a failed path. `LOG_LEVEL` controls verbosity
   (`DEBUG` | `INFO` | `WARN` | `ERROR` | `SILENT`), default `INFO`.

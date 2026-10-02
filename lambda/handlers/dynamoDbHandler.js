@@ -3,6 +3,7 @@ const {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
+  UpdateCommand,
   DeleteCommand,
   QueryCommand,
   BatchGetCommand,
@@ -42,51 +43,71 @@ async function GetAzanUserInfo(id) {
   }
 }
 
+const AZAN_RESERVED_KEYS = new Set(["updatedTimestamp", "createdTimestamp"]);
+
+/**
+ * Creates or updates an Azan user in a single atomic UpdateExpression, touching
+ * only the attributes passed in.
+ *
+ * Must never be a get-then-Put. On account linking this runs concurrently with
+ * azan-lambda's AcceptGrant and Discover handlers on the same row; a Put
+ * replaces the whole item from a (possibly stale, eventually consistent) read,
+ * which silently erased the endpointId Discover had just written — leaving the
+ * user linked but never receiving the adhan.
+ * Mirrors updateAzanUserInfo in azan-lambda/src/services/azanUsers.ts.
+ */
 async function UpdateAzanUserInfo(
   id,
   { refreshToken, endpointId, ...otherAttributes },
 ) {
-  // Check if user exists to determine if we need to set CreatedTimestamp
-  const existingUser = await GetAzanUserInfo(id);
   const timestamp = new Date().toISOString();
 
-  // If existingUser is undefined, standard JS optional chaining (?.) will return undefined
-  // So existingUser?.refresh_token works even if existingUser is missing.
-
-  const item = {
-    id: id,
-    refresh_token: refreshToken ?? existingUser?.refresh_token,
-    endpointId: endpointId ?? existingUser?.endpointId,
-    updatedTimestamp: timestamp,
-    ...otherAttributes,
+  let updateExpression =
+    "SET #updatedTimestamp = :updatedTimestamp, #createdTimestamp = if_not_exists(#createdTimestamp, :createdTimestamp)";
+  const names = {
+    "#updatedTimestamp": "updatedTimestamp",
+    "#createdTimestamp": "createdTimestamp",
+  };
+  const values = {
+    ":updatedTimestamp": timestamp,
+    ":createdTimestamp": timestamp,
   };
 
-  if (!existingUser) {
-    console.log(
-      `[UpdateAzanUserInfo] User ${id} does not exist. Creating new record.`,
-    );
-    item.createdTimestamp = timestamp;
-  } else {
-    console.log(`[UpdateAzanUserInfo] User ${id} exists. Updating record.`);
-    item.createdTimestamp = existingUser.createdTimestamp;
+  // The trigger reads snake_case refresh_token.
+  if (refreshToken != null) {
+    updateExpression += ", #refresh_token = :refresh_token";
+    names["#refresh_token"] = "refresh_token";
+    values[":refresh_token"] = refreshToken;
+  }
+  if (endpointId != null) {
+    updateExpression += ", #endpointId = :endpointId";
+    names["#endpointId"] = "endpointId";
+    values[":endpointId"] = endpointId;
+  }
+  for (const [key, value] of Object.entries(otherAttributes)) {
+    // DynamoDB has no `undefined`; a placeholder without a value fails the
+    // whole update.
+    if (AZAN_RESERVED_KEYS.has(key) || value === undefined) continue;
+    updateExpression += `, #attr_${key} = :val_${key}`;
+    names[`#attr_${key}`] = key;
+    values[`:val_${key}`] = value;
   }
 
   const params = {
     TableName: TABLE_NAME,
-    Item: item,
+    Key: { id },
+    UpdateExpression: updateExpression,
+    ExpressionAttributeNames: names,
+    ExpressionAttributeValues: values,
+    ReturnValues: "ALL_NEW",
   };
 
   try {
-    const itemToLog = { ...item };
-    if (itemToLog.refresh_token) itemToLog.refresh_token = "[REDACTED]";
-
+    const data = await dynamo.send(new UpdateCommand(params));
     console.log(
-      `[UpdateAzanUserInfo] Writing item to DynamoDB:`,
-      JSON.stringify(itemToLog),
+      `[UpdateAzanUserInfo] Updated user ${id}: fields=${Object.values(names).join(",")} hasRefreshToken=${Boolean(data.Attributes?.refresh_token)} hasEndpointId=${Boolean(data.Attributes?.endpointId)}`,
     );
-    await dynamo.send(new PutCommand(params));
-    console.log(`[UpdateAzanUserInfo] Successfully updated/created user ${id}`);
-    return item;
+    return data.Attributes;
   } catch (error) {
     console.error(
       `[UpdateAzanUserInfo] Error updating user info for id ${id}:`,
@@ -174,29 +195,107 @@ async function BatchGetAzanUserInfo(userIds) {
   return allUsers;
 }
 
-async function DeleteUserInfo(id) {
-  const params = {
-    TableName: "mawaqit-alexa-user-data-dev",
-    Key: {
-      id: id,
-    },
-  };
+// ---------------------------------------------------------------------------
+// Cross-stage cleanup
+//
+// Dev and prod share one skill id, so a user has the same Alexa user id in
+// both, and a skill event (SkillDisabled, "delete my data") can land on either
+// stage's Lambda regardless of which stage holds the user's data. Deletion
+// therefore always sweeps every stage's tables, so neither Lambda needs to know
+// where the data lives. Both stages' tables live in this account and region;
+// the names must stay in step with serverless.yml.
+// ---------------------------------------------------------------------------
 
-  try {
-    console.log(
-      `[DeleteUserInfo] Deleting item from DynamoDB:`,
-      JSON.stringify(params),
-    );
-    await dynamo.send(new DeleteCommand(params));
-    console.log(`[DeleteUserInfo] Successfully deleted user ${id}`);
-    return true;
-  } catch (error) {
-    console.error(
-      `[DeleteUserInfo] Error deleting user info for id ${id}:`,
-      error,
-    );
-    throw error;
+const CLEANUP_STAGES = ["dev", "prod"];
+const persistenceTableFor = (stage) => `mawaqit-alexa-user-data-${stage}`;
+const azanTableFor = (stage) => `mawaqit-alexa-azan-users-data-${stage}`;
+
+/**
+ * Runs `operation` against every stage, never stopping at the first failure:
+ * one stage being down must not leave the other stage's data behind.
+ * A missing table is skipped, not failed — otherwise a stage that was never
+ * provisioned would make every deletion report failure forever.
+ * Throws after all stages were attempted if any genuinely failed.
+ */
+async function acrossStages(label, operation) {
+  const results = await Promise.allSettled(CLEANUP_STAGES.map(operation));
+  const failures = [];
+  results.forEach((result, index) => {
+    if (result.status === "fulfilled") return;
+    const stage = CLEANUP_STAGES[index];
+    if (result.reason?.name === "ResourceNotFoundException") {
+      console.warn(`[${label}] No table for stage ${stage}; skipped`);
+      return;
+    }
+    console.error(`[${label}] Failed for stage ${stage}:`, result.reason);
+    failures.push(result.reason);
+  });
+  if (failures.length > 0) throw failures[0];
+  return results;
+}
+
+/**
+ * Looks up the Amazon account ids (`user_id`) persisted for an Alexa user in
+ * every stage's persistence table. Best effort: a stage that cannot be read
+ * just contributes nothing.
+ */
+async function GetPersistedAmazonUserIds(alexaUserId) {
+  const results = await Promise.allSettled(
+    CLEANUP_STAGES.map((stage) =>
+      dynamo.send(
+        new GetCommand({
+          TableName: persistenceTableFor(stage),
+          Key: { id: alexaUserId },
+          ConsistentRead: true,
+        }),
+      ),
+    ),
+  );
+  const ids = new Set();
+  for (const result of results) {
+    if (result.status === "rejected") {
+      console.warn("[GetPersistedAmazonUserIds] Lookup failed:", result.reason);
+      continue;
+    }
+    const item = result.value?.Item;
+    const id = item?.attributes?.user_id ?? item?.userId;
+    if (id) ids.add(id);
   }
+  return [...ids];
+}
+
+/**
+ * Deletes an Amazon account's row from every stage's Azan table, which stops
+ * the adhan trigger pushing to them.
+ *
+ * Keyed by the Amazon account id (`amzn1.account.…`), NOT the Alexa user id
+ * (`amzn1.ask.account.…`) — see userDataCleanup.js for resolving one.
+ */
+async function DeleteAzanUserInfo(amazonUserId) {
+  await acrossStages("DeleteAzanUserInfo", (stage) =>
+    dynamo.send(
+      new DeleteCommand({
+        TableName: azanTableFor(stage),
+        Key: { id: amazonUserId },
+      }),
+    ),
+  );
+  console.log(`[DeleteAzanUserInfo] Deleted azan user ${amazonUserId}`);
+  return true;
+}
+
+/** Deletes an Alexa user's row from every stage's persistence table. */
+async function DeletePersistedUserInfo(alexaUserId) {
+  await acrossStages("DeletePersistedUserInfo", (stage) =>
+    dynamo.send(
+      new DeleteCommand({
+        TableName: persistenceTableFor(stage),
+        Key: { id: alexaUserId },
+      }),
+    ),
+  );
+  console.log(`[DeletePersistedUserInfo] Deleted user ${alexaUserId}`);
+  return true;
 }
 
 const MOSQUE_AZAN_TABLE_NAME = process.env.MOSQUE_AZAN_DATA_TABLE;
@@ -266,7 +365,9 @@ async function GetUserBySupportId(supportId) {
 module.exports = {
   GetAzanUserInfo,
   UpdateAzanUserInfo,
-  DeleteUserInfo,
+  DeleteAzanUserInfo,
+  DeletePersistedUserInfo,
+  GetPersistedAmazonUserIds,
   GetPersistenceUsersByMosqueId,
   BatchGetAzanUserInfo,
   GetMosqueAzanData,

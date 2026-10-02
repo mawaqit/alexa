@@ -73,6 +73,10 @@ export async function handleDiscovery(
 
       await updateAzanUserInfo(userInfo.user_id, { endpointId });
       logger.info("Endpoint registered", { endpointId });
+    } else {
+      // Alexa still gets a device, but the azan trigger never will: nothing
+      // was written, so the row stays without an endpointId.
+      logger.warn("Discovery without a user id; endpoint not persisted");
     }
   } catch (error) {
     logger.error("Discovery failed", { error });

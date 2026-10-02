@@ -88,7 +88,14 @@ export async function updateAzanUserInfo(
 
   try {
     const data = await dynamo.send(new UpdateCommand(params));
-    logger.info("Azan user updated", { userId: id });
+    // Which attributes this write touched, and whether the row now has the two
+    // the azan trigger needs — the first thing to check when one goes missing.
+    logger.info("Azan user updated", {
+      userId: id,
+      updatedFields: Object.values(expressionAttributeNames),
+      hasRefreshToken: Boolean(data.Attributes?.refresh_token),
+      hasEndpointId: Boolean(data.Attributes?.endpointId),
+    });
     return data.Attributes as AzanUserRecord | undefined;
   } catch (error) {
     logger.error("Azan user update failed", { userId: id, error });

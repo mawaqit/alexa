@@ -62,7 +62,7 @@ export async function getLwaTokenResponse(
 
   try {
     const response = await axios.request<LwaTokenResponse>(tokenRequest(data));
-    logger.info("Token exchange successful");
+    logger.debug("Token exchange successful");
     return response.data;
   } catch (error) {
     logger.error("Token exchange failed", { reason: describeError(error) });
@@ -90,7 +90,7 @@ export async function getUserInfo(
 
   try {
     const response = await axios.request<AmazonUserProfile>(config);
-    logger.info("Amazon user profile fetched");
+    logger.debug("Amazon user profile fetched");
     return response.data;
   } catch (error) {
     logger.error("Amazon user profile fetch failed", {

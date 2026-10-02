@@ -18,7 +18,8 @@ const { randomUUID: uuidv4 } = crypto;
 const adhaanTasks = [
   "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan",
 ];
-const { DeleteUserInfo, GetUserBySupportId } = require("./dynamoDbHandler.js");
+const { GetUserBySupportId } = require("./dynamoDbHandler.js");
+const { deleteUserDataEverywhere } = require("./userDataCleanup.js");
 const ALL_PRAYER_INDEX = 8;
 
 const DeleteRoutineStartedHandler = {
@@ -1222,7 +1223,8 @@ const DeleteDataIntentHandler = {
       `Deleting data for user: ${userId} (DeleteDataIntent confirmed)`,
     );
     try {
-      await DeleteUserInfo(userId);
+      // Every stage, azan rows included — see userDataCleanup.js.
+      await deleteUserDataEverywhere(handlerInput);
       await attributesManager.deletePersistentAttributes();
       return responseBuilder
         .speak(requestAttributes.t("deleteDataPrompt"))

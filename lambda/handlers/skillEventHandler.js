@@ -1,5 +1,5 @@
 const Alexa = require("ask-sdk-core");
-const { DeleteUserInfo } = require("./dynamoDbHandler");
+const { deleteUserDataEverywhere } = require("./userDataCleanup");
 
 const SkillEventHandler = {
   canHandle(handlerInput) {
@@ -11,10 +11,13 @@ const SkillEventHandler = {
   async handle(handlerInput) {
     const userId = Alexa.getUserId(handlerInput.requestEnvelope);
     console.log(`Skill was disabled for user: ${userId}`);
+    // Sweeps dev and prod alike: this event may reach either stage's Lambda
+    // whichever stage holds the data. Left behind, an azan row keeps the
+    // adhan pushing to a user who disabled the skill.
     try {
-      await DeleteUserInfo(userId);
+      await deleteUserDataEverywhere(handlerInput);
     } catch (error) {
-      console.error(`Error while deleting user info: ${error}`);
+      console.error(`Error while deleting user data: ${error}`);
     }
     try {
       await handlerInput.attributesManager.deletePersistentAttributes();

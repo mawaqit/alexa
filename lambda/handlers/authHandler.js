@@ -29,6 +29,16 @@ const AuthHandler = {
       await dbHandler.UpdateAzanUserInfo(userInfo.user_id, {
         refreshToken: accessToken.refresh_token,
       });
+
+      // Record the Alexa-user -> Amazon-account mapping now, at link time.
+      // The azan row is keyed by the Amazon id, and SkillDisabled carries no
+      // access token to resolve it — without this, a user who links and then
+      // disables without opening the skill leaves their azan row behind.
+      if (userInfo?.user_id) {
+        attributes.user_id = userInfo.user_id;
+        attributesManager.setPersistentAttributes(attributes);
+        await attributesManager.savePersistentAttributes();
+      }
     } catch (error) {
       console.error("Failed to save authorization code:", error);
     }

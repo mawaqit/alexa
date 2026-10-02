@@ -17,6 +17,7 @@ import type { AlexaResponse } from "../alexa/AlexaResponse";
 import { PAYLOAD_VERSION, SUPPORTED_NAMESPACES } from "../alexa/constants";
 import { createErrorResponse } from "../alexa/errorResponse";
 import { logger, withLambdaContext } from "../logging/logger";
+import { redact } from "../logging/redact";
 import { loadSecrets } from "../services/secrets";
 import type { SmartHomeRequest } from "../types/smartHomeRequest";
 import { handleAuthorization } from "./authorization";
@@ -46,33 +47,11 @@ function isValidPayloadVersion(event: SmartHomeRequest): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Summarises a directive for the log **without its credentials**.
- *
- * An AcceptGrant payload carries a live OAuth authorization code and a bearer
- * token; a Discover payload carries an access token. Serialising the raw event
- * would write all three into CloudWatch in clear text, where they outlive the
- * request and are readable by anyone with log access. Only their presence is
- * ever recorded.
+ * Logs the outgoing response and hands it back unchanged. Redacted like the
+ * request: a response that echoes an endpoint carries its scope token.
  */
-function describeDirective(event: SmartHomeRequest): Record<string, unknown> {
-  const { header, payload } = event.directive;
-  return {
-    namespace: header?.namespace,
-    directiveName: header?.name,
-    messageId: header?.messageId,
-    payloadVersion: header?.payloadVersion,
-    hasGrantCode: Boolean(payload?.grant?.code),
-    hasGranteeToken: Boolean(payload?.grantee?.token),
-    hasScopeToken: Boolean(payload?.scope?.token),
-  };
-}
-
-/** Logs the outgoing response and hands it back unchanged. */
 function sendResponse(response: AlexaResponse): AlexaResponse {
-  logger.debug("Responding", {
-    responseName: response.event.header.name,
-    errorType: response.event.payload.type,
-  });
+  logger.info("==== RESPONSE ====", { response: redact(response) });
   return response;
 }
 
@@ -97,6 +76,10 @@ export const handler = async function (
   // Stamps every later line with this invocation's request id.
   withLambdaContext(context);
 
+  // Logged before any validation, so a malformed event is visible too. Never
+  // the raw event: an AcceptGrant carries a live OAuth code and bearer tokens.
+  logger.info("==== REQUEST ====", { request: redact(event) });
+
   // Fail closed: without the SSM secrets every downstream call would fail with
   // a confusing auth error instead of a clear one.
   try {
@@ -119,8 +102,6 @@ export const handler = async function (
       ),
     );
   }
-
-  logger.info("Directive received", describeDirective(event));
 
   if (!isValidPayloadVersion(event)) {
     return sendResponse(

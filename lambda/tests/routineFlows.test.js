@@ -225,7 +225,7 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
 
   it("asks for confirmation when confirmationStatus is NONE", async () => {
     const handlerInput = buildDeleteInput({ confirmationStatus: "NONE" });
-    dbHandler.DeleteUserInfo.mockResolvedValue({});
+    dbHandler.DeleteAzanUserInfo.mockResolvedValue({});
     handlerInput.attributesManager.deletePersistentAttributes = jest.fn(
       async () => {},
     );
@@ -243,7 +243,7 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
     );
 
     // Verify nothing was deleted
-    expect(dbHandler.DeleteUserInfo).not.toHaveBeenCalled();
+    expect(dbHandler.DeleteAzanUserInfo).not.toHaveBeenCalled();
     expect(
       handlerInput.attributesManager.deletePersistentAttributes,
     ).not.toHaveBeenCalled();
@@ -251,7 +251,7 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
 
   it("does not delete data and asks if they need anything else when confirmationStatus is DENIED", async () => {
     const handlerInput = buildDeleteInput({ confirmationStatus: "DENIED" });
-    dbHandler.DeleteUserInfo.mockResolvedValue({});
+    dbHandler.DeleteAzanUserInfo.mockResolvedValue({});
     handlerInput.attributesManager.deletePersistentAttributes = jest.fn(
       async () => {},
     );
@@ -263,7 +263,7 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
     expect(response.shouldEndSession).toBe(false);
 
     // Verify nothing was deleted
-    expect(dbHandler.DeleteUserInfo).not.toHaveBeenCalled();
+    expect(dbHandler.DeleteAzanUserInfo).not.toHaveBeenCalled();
     expect(
       handlerInput.attributesManager.deletePersistentAttributes,
     ).not.toHaveBeenCalled();
@@ -272,7 +272,7 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
   it("clears both the azan record and the skill's own attributes when confirmationStatus is CONFIRMED", async () => {
     // Leaving either behind means a "deleted" user still gets adhan pushes, or
     // a re-enabled skill silently resurrects the old mosque.
-    dbHandler.DeleteUserInfo.mockResolvedValue({});
+    dbHandler.DeleteAzanUserInfo.mockResolvedValue({});
     const handlerInput = buildDeleteInput({ confirmationStatus: "CONFIRMED" });
     handlerInput.attributesManager.deletePersistentAttributes = jest.fn(
       async () => {},
@@ -280,7 +280,9 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
 
     const response = await DeleteDataIntentHandler.handle(handlerInput);
 
-    expect(dbHandler.DeleteUserInfo).toHaveBeenCalledWith("user-1");
+    expect(dbHandler.DeleteAzanUserInfo).toHaveBeenCalledWith("user-1");
+    // The other stage's copy too — the request may have reached the wrong one.
+    expect(dbHandler.DeletePersistedUserInfo).toHaveBeenCalledWith("user-1");
     expect(
       handlerInput.attributesManager.deletePersistentAttributes,
     ).toHaveBeenCalled();
@@ -289,7 +291,7 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
   });
 
   it("does not report success when the deletion failed (confirmed)", async () => {
-    dbHandler.DeleteUserInfo.mockRejectedValue(new Error("DynamoDB down"));
+    dbHandler.DeleteAzanUserInfo.mockRejectedValue(new Error("DynamoDB down"));
     const handlerInput = buildDeleteInput({ confirmationStatus: "CONFIRMED" });
     handlerInput.attributesManager.deletePersistentAttributes = jest.fn(
       async () => {},

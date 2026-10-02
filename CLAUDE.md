@@ -154,11 +154,12 @@ Two things bite in the TypeScript tests specifically:
   `context.AudioPlayer.playerActivity` (present on every customer-initiated
   request regardless of session state) is the reliable signal there, unlike
   a session attribute written on a response that ends the session in the
-  same call. `apl-video`'s two attributes are cleared in three places:
+  same call. `apl-video`'s two attributes are cleared in four places:
   `AdhanPlaybackFinishedEventHandler`/`AdhanPlaybackFailedEventHandler`
   (the Video's `onEnd`/`onTrackFail` `SendEvent`, token-checked against
   `adhanPlayerToken` so a stale event from a superseded document can't wipe
-  a still-running player), and `AddDirectiveResponseInterceptor`
+  a still-running player), `getAdhanStopResponse` (on voice stop/cancel),
+  and `AddDirectiveResponseInterceptor`
   (`interceptors.js`), which clears them whenever a *different* APL
   document gets rendered mid-adhan. `shouldEndSession` is deliberately
   omitted (not set to `true` or `false`) on the `apl-video` render: `false`

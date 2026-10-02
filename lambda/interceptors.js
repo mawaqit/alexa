@@ -5,6 +5,7 @@ const Alexa = require("ask-sdk-core");
 const helperFunctions = require("./helperFunctions.js");
 const apiHandler = require("./handlers/apiHandler.js");
 const prayerTimeApl = require("./aplDocuments/prayerTimeApl.json");
+const adhanPlayerApl = require("./aplDocuments/adhanPlayerApl.json");
 const { getDataSourceForPrayerTime } = require("./datasources.js");
 const awsSsmHandler = require("./handlers/awsSsmHandler.js");
 const authHandler = require("./handlers/authHandler.js");
@@ -43,7 +44,6 @@ const ResponseTimeCalculationInterceptor = {
 
 const AddDirectiveResponseInterceptor = {
   async process(handlerInput, response) {
-    console.log("AddDirectiveResponseInterceptor");
     const sessionAttributes = handlerInput.requestEnvelope?.session
       ? handlerInput.attributesManager.getSessionAttributes()
       : {};
@@ -55,12 +55,18 @@ const AddDirectiveResponseInterceptor = {
     const { directives } = response;
     const aplDirective = getAplDirective(directives);
     const { ssmlText, text, hasAudio } = getSsmlInfo(response);
-
-    console.log(
-      "APL Directive: %s \n SSML Text: %s",
-      JSON.stringify(aplDirective),
-      ssmlText,
+    const clearedAdhanState = clearStaleAdhanPlayerState(
+      sessionAttributes,
+      aplDirective,
     );
+
+    // Redundant with LogResponseInterceptor, which already dumps the full
+    // response (including directives and outputSpeech).
+    // console.log(
+    //   "APL Directive: %s \n SSML Text: %s",
+    //   JSON.stringify(aplDirective),
+    //   ssmlText,
+    // );
 
     if (ssmlText && !hasAudio) {
       response["outputSpeech"]["ssml"] =
@@ -91,7 +97,8 @@ const AddDirectiveResponseInterceptor = {
     if (
       handlerInput.requestEnvelope?.session &&
       (sessionAttributes?.skipAplDirective ||
-        sessionAttributes?.skipCardDirective)
+        sessionAttributes?.skipCardDirective ||
+        clearedAdhanState)
     ) {
       delete sessionAttributes.skipAplDirective;
       delete sessionAttributes.skipCardDirective;
@@ -99,6 +106,30 @@ const AddDirectiveResponseInterceptor = {
     }
   },
 };
+
+/**
+ * If this response renders a different APL document than the adhan player,
+ * any adhanPlaybackMode/adhanPlayerToken left over from an earlier turn are
+ * now stale — the Video they'd target is no longer on screen, so a later
+ * voice pause/resume/stop would silently target a document that's gone.
+ * This interceptor is the one place every outgoing directive already
+ * passes through, so it's the natural spot to catch that handoff. Doesn't
+ * touch ExecuteCommands directives (e.g. AudioIntentHandler's own
+ * pause/resume) — those don't carry a `document` and are exactly the
+ * legitimate use of this state, not a replacement of it.
+ */
+function clearStaleAdhanPlayerState(sessionAttributes, aplDirective) {
+  if (
+    !sessionAttributes.adhanPlaybackMode ||
+    aplDirective?.type !== "Alexa.Presentation.APL.RenderDocument" ||
+    aplDirective.document === adhanPlayerApl
+  ) {
+    return false;
+  }
+  delete sessionAttributes.adhanPlaybackMode;
+  delete sessionAttributes.adhanPlayerToken;
+  return true;
+}
 
 function getAplDirective(directives) {
   return directives
@@ -132,7 +163,6 @@ async function handleAplSupport(
     !hasAudio &&
     supportsAPL["Alexa.Presentation.APL"]
   ) {
-    console.log("Adding APL Directive");
     const dataSource = await getDataSourceForPrayerTime(handlerInput, text);
     const directive = helperFunctions.createDirectivePayload(
       prayerTimeApl,
@@ -154,9 +184,7 @@ function handleNoAplSupport(
   text,
   skipCardDirective,
 ) {
-  console.log("APL not supported");
   if (ssmlText && !hasAudio && !skipCardDirective) {
-    console.log("Adding Simple Card");
     response.card = {
       type: "Simple",
       title: process.env.skillName,
@@ -167,8 +195,8 @@ function handleNoAplSupport(
 
 const LocalizationInterceptor = {
   async process(handlerInput) {
-    const requestType = Alexa.getRequestType(handlerInput.requestEnvelope);
-    console.log("Request Type: ", requestType);
+    // Request type is redundant with LogRequestInterceptor, which already
+    // dumps the full request envelope (including request.type).
     let locale = Alexa.getLocale(handlerInput.requestEnvelope);
     // Gets the locale from the request and initializes i18next.
     const localizationClient = i18n.use(sprintf).init({
@@ -205,7 +233,6 @@ const LocalizationInterceptor = {
 
 const SavePersistenceAttributesToSession = {
   async process(handlerInput) {
-    console.log("SavePersistenceAttributesToSession Interceptor");
     if (helperFunctions.isNewSession(handlerInput)) {
       await handleNewSession(handlerInput);
     }
@@ -213,7 +240,6 @@ const SavePersistenceAttributesToSession = {
 };
 
 async function handleNewSession(handlerInput) {
-  console.log("New Session");
   const persistentAttributes =
     await helperFunctions.getPersistedData(handlerInput);
 
@@ -223,12 +249,9 @@ async function handleNewSession(handlerInput) {
 }
 
 async function processPersistentAttributes(handlerInput, persistentAttributes) {
-  console.log("Persistent Attributes: ", JSON.stringify(persistentAttributes));
-
   delete persistentAttributes.requestedRoutinePrayer;
   try {
     const userInfo = await GetUserInfo.process(handlerInput);
-    console.log("User Info Retrieved Successfully");
     if (userInfo && userInfo?.user_id && !persistentAttributes?.user_id) {
       persistentAttributes.user_id = userInfo?.user_id;
       handlerInput.attributesManager.setPersistentAttributes(
@@ -237,7 +260,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
       await handlerInput.attributesManager.savePersistentAttributes();
     }
   } catch (error) {
-    console.log("Error while fetching user info: ", error);
+    console.error("Error while fetching user info: ", error);
   }
 
   const sessionAttributes =
@@ -259,7 +282,7 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
     sessionAttributes.persistentAttributes = persistentAttributes;
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
   } catch (error) {
-    console.log("Error while fetching mosque list: ", error);
+    console.error("Error while fetching mosque list: ", error);
     if (error?.message === "Mosque not found") {
       await handlerInput.attributesManager.deletePersistentAttributes();
     } else if (error?.message === "Unable to fetch user timezone") {
@@ -273,14 +296,12 @@ async function processPersistentAttributes(handlerInput, persistentAttributes) {
 
 const SetApiKeysAsEnvironmentVariableFromAwsSsm = {
   async process(_handlerInput) {
-    console.log("SetApiKeysAsEnvironmentVariableFromAwsSsm Interceptor");
     await awsSsmHandler.handler();
   },
 };
 
 const GetUserInfo = {
   async process(handlerInput) {
-    console.log("GetUserInfo Interceptor");
     const accessToken =
       handlerInput.requestEnvelope?.session?.user?.accessToken;
     if (!accessToken) {
@@ -296,8 +317,6 @@ function updateRoutinePrayerTimings(
   mosqueTimes,
   persistentAttributes,
 ) {
-  console.log("Updating Routine Prayers: ", routinePrayers);
-  console.log("Mosque Times: ", mosqueTimes);
   if (
     routinePrayers &&
     Array.isArray(routinePrayers) &&
@@ -310,11 +329,9 @@ function updateRoutinePrayerTimings(
           prayerName?.toLowerCase() === prayer?.canonicalName?.toLowerCase() ||
           prayerName?.toLowerCase() === prayer?.name?.toLowerCase(),
       );
-      console.log("Canonical Index: ", canonicalIndex);
       // 2. Logic to get the new time from your mosque data
       // Assuming 'mosqueTimes' is an object where keys match canonical names
       const newTime = mosqueTimes[canonicalIndex];
-      console.log("New Time: ", newTime);
       // 3. Return the updated object
       return {
         ...prayer,
@@ -325,7 +342,6 @@ function updateRoutinePrayerTimings(
         time: newTime || prayer.time, // fallback to old time if mosque time is missing
       };
     });
-    console.log("Updated Routine Prayers: ", updatedPrayers);
     persistentAttributes.routinePrayers = updatedPrayers;
   }
 }

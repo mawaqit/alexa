@@ -98,7 +98,7 @@ const InstallPrayerTimeWidgetRequestHandler = {
       attributesManager.setPersistentAttributes(persistentAttributes);
       await attributesManager.savePersistentAttributes();
     } catch (error) {
-      console.log("Error while installing prayer time widget: ", error);
+      console.error("Error while installing prayer time widget: ", error);
     }
 
     return handlerInput.responseBuilder
@@ -145,13 +145,8 @@ const UpdatePrayerTimeWidgetRequestHandler = {
     );
   },
   async handle(handlerInput) {
-    /* for now this information is not needed by this sample skill. 
-        Optional: it will be logged for tracking purposes. */
-    console.log(
-      "From Version" + handlerInput.requestEnvelope.request.fromVersion,
-    );
-    console.log("To Version" + handlerInput.requestEnvelope.request.toVersion);
-
+    // fromVersion/toVersion already captured in the full request envelope
+    // logged by LogRequestInterceptor; not otherwise needed by this handler.
     return handlerInput.responseBuilder.getResponse();
   },
 };
@@ -170,7 +165,6 @@ const UpdatePrayerTimeAPLEventHandler = {
   },
   async handle(handlerInput) {
     const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
-    console.log("Next Update Time: " + nextUpdateTime);
 
     const currentTime = Date.now();
 
@@ -193,7 +187,6 @@ const ReadPrayerTimeAPLEventHandler = {
     );
   },
   async handle(handlerInput) {
-    console.log("ReadPrayerTimeAPLEventHandler");
     const sessionAttributes = handlerInput.requestEnvelope?.session
       ? handlerInput.attributesManager.getSessionAttributes()
       : {};

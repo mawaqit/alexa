@@ -1,0 +1,539 @@
+{
+  "type": "APL",
+  "version": "2023.3",
+  "theme": "dark",
+  "description": "Custom Adhan player. Plays the recitation through an off-screen Video component (audio-only) instead of the AudioPlayer interface, so this screen — not Alexa's system Now-Playing card — stays on top for the whole call to prayer. Contract with the backend (handlers/audioPlayerHandler.js): the component ids 'adhanPlayerRoot'/'adhanVideo' are targeted by ExecuteCommands directives built from session state, and the SendEvent argument names 'ADHAN_PLAYBACK_FINISHED'/'ADHAN_PLAYBACK_FAILED' are matched by name there — renaming any of these here silently breaks that wiring, since there's no compile-time link between this document and the backend.",
+  "import": [
+    {
+      "name": "alexa-layouts",
+      "version": "1.7.0"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Artwork and icon paths owned by the presentation layer.",
+      "strings": {
+        "pageBackground": "https://cdn.mawaqit.net/images/background-arabic-calligraphy.png",
+        "playGlyphPath": "M8 5v14l11-7z",
+        "pauseGlyphPath": "M6 5h4v14H6zM14 5h4v14h-4z"
+      }
+    },
+    {
+      "description": "Palette — same deep indigo ink / frosted glass / warm gold accent as mosqueInfoApl.json, so the player reads as part of the same app.",
+      "colors": {
+        "colorGlass": "#FFFFFF14",
+        "colorStroke": "#FFFFFF2B",
+        "colorTextPrimary": "#F7F5FF",
+        "colorTextMuted": "#FFFFFFA3",
+        "colorAccent": "#F2C86B",
+        "colorAccentEdge": "#F2C86B5C"
+      },
+      "gradients": {
+        "gradientPage": {
+          "type": "linear",
+          "angle": 160,
+          "colorRange": ["#0B0A1FD9", "#0B0A1FF2", "#150F33E6"],
+          "inputRange": [0, 0.55, 1]
+        }
+      }
+    },
+    {
+      "description": "Metrics — base (landscape/portrait Echo Show).",
+      "dimensions": {
+        "gutter": "36dp",
+        "gutterV": "28dp",
+        "avatarSize": "220dp",
+        "avatarRing": "3dp",
+        "brandLogo": "30dp",
+        "playButtonSize": "88dp"
+      },
+      "numbers": {
+        "fsReciterName": 32,
+        "fsSubtitle": 16,
+        "fsBrand": 13
+      }
+    },
+    {
+      "when": "${viewport.shape == 'round'}",
+      "description": "Metrics — round viewports. A round screen has far less usable width, so the avatar and controls shrink to fit inside the bezel.",
+      "dimensions": {
+        "gutter": "20dp",
+        "gutterV": "20dp",
+        "avatarSize": "130dp",
+        "avatarRing": "2dp",
+        "brandLogo": "18dp",
+        "playButtonSize": "60dp"
+      },
+      "numbers": {
+        "fsReciterName": 20,
+        "fsSubtitle": 12,
+        "fsBrand": 9
+      }
+    },
+    {
+      "when": "${viewport.width <= 480}",
+      "description": "Metrics — narrow viewports (Echo Show 5).",
+      "dimensions": {
+        "gutter": "22dp",
+        "gutterV": "18dp",
+        "avatarSize": "140dp",
+        "avatarRing": "2dp",
+        "brandLogo": "20dp",
+        "playButtonSize": "64dp"
+      },
+      "numbers": {
+        "fsReciterName": 22,
+        "fsSubtitle": 13,
+        "fsBrand": 11
+      }
+    }
+  ],
+  "styles": {
+    "brandLabel": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsBrand",
+          "fontWeight": 500,
+          "letterSpacing": "1.6dp",
+          "color": "@colorTextMuted",
+          "maxLines": 1
+        }
+      ]
+    },
+    "reciterName": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember Display",
+          "fontSize": "@fsReciterName",
+          "fontWeight": 700,
+          "color": "@colorTextPrimary",
+          "textAlign": "center",
+          "maxLines": 2
+        }
+      ]
+    },
+    "playerSubtitle": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsSubtitle",
+          "fontWeight": 500,
+          "letterSpacing": "1.4dp",
+          "color": "@colorAccent",
+          "textAlign": "center",
+          "maxLines": 1
+        }
+      ]
+    },
+    "playbackTimeLabel": {
+      "values": [
+        {
+          "fontFamily": "Amazon Ember",
+          "fontSize": "@fsSubtitle",
+          "fontWeight": 500,
+          "letterSpacing": "0.5dp",
+          "color": "@colorTextMuted",
+          "textAlign": "center",
+          "maxLines": 1
+        }
+      ]
+    }
+  },
+  "commands": {
+    "TogglePlayback": {
+      "commands": [
+        {
+          "type": "SetValue",
+          "componentId": "adhanPlayerRoot",
+          "property": "isPlaying",
+          "value": "${!isPlaying}"
+        },
+        {
+          "type": "ControlMedia",
+          "componentId": "adhanVideo",
+          "command": "${isPlaying ? 'play' : 'pause'}"
+        }
+      ]
+    }
+  },
+  "layouts": {
+    "PageBackdrop": {
+      "description": "Brand backdrop plus a gradient wash, matching mosqueInfoApl.json.",
+      "items": [
+        {
+          "type": "Container",
+          "position": "absolute",
+          "top": 0,
+          "left": 0,
+          "right": 0,
+          "bottom": 0,
+          "items": [
+            {
+              "type": "Image",
+              "source": "@pageBackground",
+              "scale": "best-fill",
+              "align": "center",
+              "width": "100%",
+              "height": "100%"
+            },
+            {
+              "type": "Frame",
+              "position": "absolute",
+              "top": 0,
+              "left": 0,
+              "right": 0,
+              "bottom": 0,
+              "background": "@gradientPage"
+            }
+          ]
+        }
+      ]
+    },
+    "BrandHeader": {
+      "description": "Discreet skill attribution.",
+      "parameters": [
+        {
+          "name": "logo",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "type": "string"
+        }
+      ],
+      "items": [
+        {
+          "type": "Container",
+          "direction": "row",
+          "alignItems": "center",
+          "width": "100%",
+          "justifyContent": "center",
+          "items": [
+            {
+              "type": "Image",
+              "when": "${logo}",
+              "source": "${logo}",
+              "width": "@brandLogo",
+              "height": "@brandLogo",
+              "scale": "best-fill",
+              "borderRadius": "6dp"
+            },
+            {
+              "type": "Text",
+              "style": "brandLabel",
+              "text": "${label}",
+              "paddingLeft": "10dp"
+            }
+          ]
+        }
+      ]
+    },
+    "AlbumArt": {
+      "description": "Circular, gold-ringed artwork — same treatment as MosqueAvatar in mosqueInfoApl.json.",
+      "parameters": [
+        {
+          "name": "picture",
+          "type": "string"
+        }
+      ],
+      "items": [
+        {
+          "type": "Frame",
+          "width": "@avatarSize",
+          "height": "@avatarSize",
+          "borderRadius": "@avatarSize",
+          "borderWidth": "@avatarRing",
+          "borderColor": "@colorAccentEdge",
+          "background": "@colorGlass",
+          "item": {
+            "type": "Image",
+            "source": "${picture}",
+            "width": "100%",
+            "height": "100%",
+            "scale": "best-fill",
+            "align": "center",
+            "borderRadius": "@avatarSize"
+          }
+        }
+      ]
+    },
+    "PlaybackProgress": {
+      "description": "Thin gold progress track showing how much of the Adhan has played, with an elapsed/total readout. progress/total are seconds (the Video component's onTimeUpdate/onTrackReady events report milliseconds, converted at the source) — no separate derived binding, so the fill and label are never a tick behind what's actually playing.",
+      "parameters": [
+        {
+          "name": "progress",
+          "type": "number",
+          "default": 0
+        },
+        {
+          "name": "total",
+          "type": "number",
+          "default": 0
+        }
+      ],
+      "items": [
+        {
+          "type": "Container",
+          "width": "100%",
+          "items": [
+            {
+              "type": "Frame",
+              "width": "100%",
+              "height": "4dp",
+              "borderRadius": "2dp",
+              "background": "@colorGlass",
+              "item": {
+                "type": "Frame",
+                "width": "${total > 0 ? Math.min((progress / total) * 100, 100) : 0}%",
+                "height": "100%",
+                "borderRadius": "2dp",
+                "background": "@colorAccent"
+              }
+            },
+            {
+              "type": "Text",
+              "style": "playbackTimeLabel",
+              "text": "${Math.floor(Math.max(progress, 0) / 60) + ':' + (Math.floor(Math.max(progress, 0) % 60) < 10 ? '0' : '') + Math.floor(Math.max(progress, 0) % 60) + ' / ' + (total > 0 ? (Math.floor(total / 60) + ':' + (Math.floor(total % 60) < 10 ? '0' : '') + Math.floor(total % 60)) : '--:--')}",
+              "width": "100%",
+              "paddingTop": "8dp"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "mainTemplate": {
+    "parameters": ["payload"],
+    "items": [
+      {
+        "type": "Container",
+        "id": "adhanPlayerRoot",
+        "width": "100%",
+        "height": "100%",
+        "display": "${hasEnded ? 'none' : 'normal'}",
+        "bind": [
+          {
+            "name": "props",
+            "value": "${payload.data.properties}"
+          },
+          {
+            "name": "isPlaying",
+            "value": true,
+            "description": "Mirrors the Video component's actual play state — the Video autoplays, so this starts true. Voice-driven pause/resume (AMAZON.PauseIntent/ResumeIntent) updates this via an ExecuteCommands directive, not just the on-screen button, so the icon never drifts from what's actually playing."
+          },
+          {
+            "name": "videoProgressValue",
+            "type": "number",
+            "value": 0
+          },
+          {
+            "name": "videoTotalValue",
+            "type": "number",
+            "value": 0
+          },
+          {
+            "name": "hasEnded",
+            "type": "boolean",
+            "value": false,
+            "description": "Flips once the Adhan finishes playing. The root container's display is bound to this, so the entire document — backdrop included, not just the player card — disappears. The user asked for nothing left on screen once playback ends, and there's no dismiss-document directive in APL, so hiding everything client-side is the closest available substitute."
+          }
+        ],
+        "layoutDirection": "${payload.data.properties.layoutDirection == 'RTL' ? 'RTL' : 'LTR'}",
+        "items": [
+          {
+            "type": "Video",
+            "id": "adhanVideo",
+            "description": "Audio-only source — no picture to show, so it's sized to nothing and left out of the visible layout. This is the whole point of the custom player: this Video plays the mp3 directly, so the AudioPlayer interface (and its system Now-Playing card) is never invoked. It's given a real, full-screen footprint rather than being shrunk to near-zero or made transparent — some renderers never allocate a media pipeline for an effectively invisible video component, which silently kills playback. PageBackdrop is drawn immediately after it and fully covers it, so nothing is actually seen.",
+            "when": "${!environment.disallowVideo}",
+            "source": "${props.audioUrl}",
+            "audioTrack": "foreground",
+            "autoPlay": true,
+            "position": "absolute",
+            "top": 0,
+            "left": 0,
+            "right": 0,
+            "bottom": 0,
+            "onMount": [
+              {
+                "description": "autoPlay alone isn't reliably honored on-device for an audio Video component — the same ControlMedia play command the Play/Pause button already issues successfully is fired once at document load instead.",
+                "type": "ControlMedia",
+                "componentId": "adhanVideo",
+                "command": "play"
+              }
+            ],
+            "onPlay": [
+              {
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "videoTotalValue",
+                "value": "${event.duration / 1000}"
+              }
+            ],
+            "onTrackReady": [
+              {
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "videoTotalValue",
+                "value": "${event.duration / 1000}"
+              }
+            ],
+            "onTrackUpdate": [
+              {
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "videoTotalValue",
+                "value": "${event.duration / 1000}"
+              }
+            ],
+            "onTimeUpdate": [
+              {
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "videoProgressValue",
+                "value": "${event.currentTime / 1000}"
+              }
+            ],
+            "onTrackFail": [
+              {
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "videoTotalValue",
+                "value": 0
+              },
+              {
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "isPlaying",
+                "value": false
+              },
+              {
+                "description": "Same treatment as onEnd — a broken/expired mp3 URL shouldn't leave a silent, stuck player on screen.",
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "hasEnded",
+                "value": true
+              },
+              {
+                "description": "Lets the backend know playback never actually happened, so it can clear adhanPlaybackMode/adhanPlayerToken and speak an error prompt — mirrors the onEnd SendEvent below.",
+                "type": "SendEvent",
+                "arguments": ["ADHAN_PLAYBACK_FAILED"]
+              }
+            ],
+            "onEnd": [
+              {
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "isPlaying",
+                "value": false
+              },
+              {
+                "description": "Hides the whole document immediately — done client-side so it doesn't wait on the round trip below.",
+                "type": "SetValue",
+                "componentId": "adhanPlayerRoot",
+                "property": "hasEnded",
+                "value": true
+              },
+              {
+                "description": "Lets the backend clear adhanPlaybackMode/adhanPlayerToken and close the session now that the Adhan is genuinely done, rather than leaving them stale until some idle timeout.",
+                "type": "SendEvent",
+                "arguments": ["ADHAN_PLAYBACK_FINISHED"]
+              }
+            ]
+          },
+          {
+            "type": "PageBackdrop"
+          },
+          {
+            "type": "Container",
+            "id": "playerContent",
+            "width": "100%",
+            "height": "100%",
+            "alignItems": "center",
+            "justifyContent": "center",
+            "paddingLeft": "@gutter",
+            "paddingRight": "@gutter",
+            "paddingTop": "@gutterV",
+            "paddingBottom": "@gutterV",
+            "onMount": [
+              {
+                "type": "AnimateItem",
+                "componentId": "playerContent",
+                "duration": 600,
+                "easing": "ease-out",
+                "value": [
+                  {
+                    "property": "opacity",
+                    "from": 0,
+                    "to": 1
+                  },
+                  {
+                    "property": "transform",
+                    "from": [
+                      {
+                        "translateY": "18dp"
+                      }
+                    ],
+                    "to": [
+                      {
+                        "translateY": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "items": [
+              {
+                "type": "BrandHeader",
+                "logo": "${props.skillLogoUrl}",
+                "label": "${props.skillName}",
+                "position": "absolute",
+                "top": "@gutterV",
+                "left": "@gutter",
+                "right": "@gutter"
+              },
+              {
+                "type": "AlbumArt",
+                "picture": "${props.albumArt}"
+              },
+              {
+                "type": "Text",
+                "style": "reciterName",
+                "text": "${props.reciterName}",
+                "width": "100%",
+                "paddingTop": "@gutterV"
+              },
+              {
+                "type": "Text",
+                "style": "playerSubtitle",
+                "text": "${props.subtitle}",
+                "width": "100%",
+                "paddingTop": "6dp"
+              },
+              {
+                "type": "PlaybackProgress",
+                "progress": "${videoProgressValue}",
+                "total": "${videoTotalValue}",
+                "width": "80%",
+                "paddingTop": "@gutterV"
+              },
+              {
+                "type": "AlexaIconButton",
+                "buttonStyle": "contained",
+                "buttonSize": "@playButtonSize",
+                "vectorSource": "${isPlaying ? '@pauseGlyphPath' : '@playGlyphPath'}",
+                "paddingTop": "@gutterV",
+                "primaryAction": [
+                  {
+                    "type": "TogglePlayback"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

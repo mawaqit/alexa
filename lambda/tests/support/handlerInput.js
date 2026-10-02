@@ -17,6 +17,10 @@ const buildHandlerInput = ({
   sessionAttributes = {},
   persistentAttributes = {},
   supportedInterfaces = {},
+  // Mirrors context.Viewport from a real request — pass e.g.
+  // { video: { codecs: ["H_264_42"] } } to simulate a device that supports
+  // video (see helperFunctions.deviceSupportsVideo).
+  viewport = {},
   timezone = "Europe/Paris",
   distanceUnits = "METRIC",
   timezoneError = null,
@@ -45,6 +49,7 @@ const buildHandlerInput = ({
           ...(consentToken ? { permissions: { consentToken } } : {}),
         },
       },
+      Viewport: viewport,
     },
     request: {
       type: requestType,

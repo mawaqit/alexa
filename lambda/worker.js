@@ -18,16 +18,12 @@ exports.handler = async (event) => {
       const { refresh_token, endpointId, eventTimestamp } = user;
 
       if (!refresh_token || !endpointId) {
-        console.log(
+        console.warn(
           `Skipping invalid user data for endpointId: ${endpointId ?? "missing"}`,
         );
         batchItemFailures.push({ itemIdentifier: record.messageId });
         continue;
       }
-
-      console.log(
-        `Processing messageId: ${record.messageId} for endpointId: ${endpointId}`,
-      );
 
       // Refresh token at processing time to ensure it hasn't expired
       let accessToken;

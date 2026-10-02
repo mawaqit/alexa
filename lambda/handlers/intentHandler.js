@@ -6,11 +6,13 @@ const {
   getDataSourceforMosqueInfo,
   adhaanRecitation,
   getDataSourceForAdhaanReciter,
+  getDataSourceForAdhanPlayer,
   getMetadata,
   getDataSourceForRoutine,
   getDataSourceForDeleteRoutineList,
 } = require("../datasources.js");
 const listApl = require("../aplDocuments/mosqueListApl.json");
+const adhanPlayerApl = require("../aplDocuments/adhanPlayerApl.json");
 const crypto = require("crypto");
 const { randomUUID: uuidv4 } = crypto;
 const adhaanTasks = [
@@ -105,7 +107,7 @@ const DeleteRoutineStartedHandler = {
           responseBuilder.addDirective(aplDirective);
           speakOutput += requestAttributes.t("deleteRoutineTouchPrompt");
         } catch (error) {
-          console.log("Error creating APL for Delete Routine: ", error);
+          console.error("Error creating APL for Delete Routine: ", error);
         }
       }
 
@@ -116,7 +118,7 @@ const DeleteRoutineStartedHandler = {
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
-      console.log("Error in DeleteRoutineStartedHandler: ", error);
+      console.error("Error in DeleteRoutineStartedHandler: ", error);
       if (error?.message === "Unable to fetch user timezone") {
         return responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -165,7 +167,7 @@ const DeleteRoutinePrayerIndexHandler = {
         ];
       }
       if (prayerIndex < 1 || prayerIndex > routinePrayers.length) {
-        console.log("Invalid prayer index: ", prayerIndex);
+        console.warn("Invalid prayer index: ", prayerIndex);
         sessionAttributes.skipAplDirective = true;
         sessionAttributes.skipCardDirective = true;
         handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
@@ -199,7 +201,6 @@ const DeleteRoutinePrayerIndexHandler = {
       }
       // Slot is present, delete directly
       const selectedPrayer = routinePrayers[prayerIndex - 1];
-      console.log("Selected Prayer: ", selectedPrayer);
       const routineName = selectedPrayer.name; // or resolved name
       const deleted = await helperFunctions.deleteRoutine(
         handlerInput,
@@ -222,7 +223,7 @@ const DeleteRoutinePrayerIndexHandler = {
         .withShouldEndSession(true)
         .getResponse();
     } catch (error) {
-      console.log("Error in DeleteRoutinePrayerIndexHandler:", error);
+      console.error("Error in DeleteRoutinePrayerIndexHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -261,7 +262,6 @@ const DeleteRoutinePrayerNameHandler = {
         requestEnvelope,
         "prayerName",
       );
-      console.log("Prayer Name: ", prayerResolvedName);
       const sessionAttributes =
         handlerInput.attributesManager.getSessionAttributes();
       const { persistentAttributes } = sessionAttributes;
@@ -276,7 +276,7 @@ const DeleteRoutinePrayerNameHandler = {
         prayerIndex === -1 &&
         prayerNameResolvedId !== String(ALL_PRAYER_INDEX)
       ) {
-        console.log("Invalid prayer name: ", prayerResolvedName);
+        console.warn("Invalid prayer name: ", prayerResolvedName);
         sessionAttributes.skipAplDirective = true;
         sessionAttributes.skipCardDirective = true;
         handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
@@ -308,7 +308,6 @@ const DeleteRoutinePrayerNameHandler = {
         prayerNameResolvedId === String(ALL_PRAYER_INDEX)
           ? helperFunctions.ALL_PRAYERS(handlerInput)
           : routinePrayers[prayerIndex];
-      console.log("Selected Prayer: ", selectedPrayer);
       const routineName = selectedPrayer.name; // or resolved name
       const deleted = await helperFunctions.deleteRoutine(
         handlerInput,
@@ -332,7 +331,7 @@ const DeleteRoutinePrayerNameHandler = {
         .withShouldEndSession(true)
         .getResponse();
     } catch (error) {
-      console.log("Error in DeleteRoutinePrayerNameHandler:", error);
+      console.error("Error in DeleteRoutinePrayerNameHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -381,7 +380,6 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       handlerInput.requestEnvelope,
       "selectedMosque",
     );
-    console.log("Selected Mosque: ", selectedMosque);
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
     const requestAttributes =
@@ -393,7 +391,7 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
     // below, surfacing as the global error prompt. Re-offer the list instead.
     // (MosqueYesIntentHandler guards the same thing.)
     if (!Array.isArray(mosqueList) || mosqueList.length === 0) {
-      console.log("SelectMosqueIntent without a mosque list in session.");
+      console.warn("SelectMosqueIntent without a mosque list in session.");
       return await helperFunctions.getListOfMosque(
         handlerInput,
         requestAttributes.t("unableToFindMosquePrompt"),
@@ -443,7 +441,7 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
         ),
       );
     } catch (error) {
-      console.log("Error in fetching prayer timings: ", error);
+      console.error("Error in fetching prayer timings: ", error);
       if (error?.message === "Mosque not found") {
         return await helperFunctions.getListOfMosque(
           handlerInput,
@@ -481,10 +479,6 @@ const NextPrayerTimeIntentHandler = {
       return await helperFunctions.checkForPersistenceData(handlerInput);
     }
     const { primaryText } = persistentAttributes;
-    const prayerName = Alexa.getSlotValue(
-      handlerInput.requestEnvelope,
-      "prayerName",
-    );
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     try {
@@ -493,7 +487,6 @@ const NextPrayerTimeIntentHandler = {
         handlerInput.requestEnvelope,
         "prayerName",
       );
-      console.log("Prayer Name Resolved Id: ", prayerNameResolvedId);
       if (!prayerNameResolvedId) {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))
@@ -502,7 +495,6 @@ const NextPrayerTimeIntentHandler = {
       }
       const prayerNameFromData =
         requestAttributes.t("prayerNames")[parseInt(prayerNameResolvedId)];
-      console.log("Prayer Name: ", prayerName);
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       const currentDateTime = new Date(
         new Date().toLocaleString("en-US", { timeZone: userTimeZone }),
@@ -510,8 +502,6 @@ const NextPrayerTimeIntentHandler = {
       const now = moment(currentDateTime);
       const currentMoment = moment(now.format("YYYY-MM-DDTHH:mm"));
       const locale = Alexa.getLocale(handlerInput.requestEnvelope);
-      console.log("Now: ", JSON.stringify(now));
-      console.log("Prayer Name From Data: ", prayerNameFromData);
       if (parseInt(prayerNameResolvedId) < 5) {
         const prayerIndex = parseInt(prayerNameResolvedId);
         let timeForNextPrayer = mosqueTimesData.times[prayerIndex];
@@ -528,7 +518,7 @@ const NextPrayerTimeIntentHandler = {
               timeForNextPrayer = tomorrowTimes.times[prayerIndex];
             }
           } catch (error) {
-            console.log("Error fetching tomorrow's prayer times: ", error);
+            console.error("Error fetching tomorrow's prayer times: ", error);
           }
         }
         return helperFunctions.getPrayerTimeForSpecificPrayer(
@@ -629,7 +619,10 @@ const NextPrayerTimeIntentHandler = {
                   firstNonNullShuruq = tomorrowTimes.shuruq;
                 }
               } catch (error) {
-                console.log("Error fetching tomorrow's prayer times: ", error);
+                console.error(
+                  "Error fetching tomorrow's prayer times: ",
+                  error,
+                );
               }
             }
             return helperFunctions.getPrayerTimeForSpecificPrayer(
@@ -656,7 +649,7 @@ const NextPrayerTimeIntentHandler = {
             .getResponse();
       }
     } catch (error) {
-      console.log("Error in NextPrayerTimeIntentHandler: ", error);
+      console.error("Error in NextPrayerTimeIntentHandler: ", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -715,7 +708,7 @@ const NextPrayerTimeIntentWithoutNameHandler = {
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
-      console.log("Error in NextPrayerTimeIntentWithoutNameHandler: ", error);
+      console.error("Error in NextPrayerTimeIntentWithoutNameHandler: ", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -749,7 +742,6 @@ const NextIqamaTimeIntentHandler = {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-      console.log("User Timezone: ", userTimeZone);
       const prayerNames = requestAttributes.t("prayerNames");
       const { iqamaEnabled } = mosqueTimes;
       if (!iqamaEnabled) {
@@ -768,7 +760,7 @@ const NextIqamaTimeIntentHandler = {
       )
         .then((data) => data.iqamaCalendar)
         .catch((error) => {
-          console.log("Error in fetching iqama calendar: ", error);
+          console.error("Error in fetching iqama calendar: ", error);
           throw error;
         });
       const iqamaCalendar = mosqueTimes.iqamaCalendar;
@@ -778,13 +770,12 @@ const NextIqamaTimeIntentHandler = {
       const date = currentDateTime.getDate();
       const month = currentDateTime.getMonth();
       const iqamaTimes = iqamaCalendar?.[month]?.[String(date)];
-      console.log("Iqama Times: ", iqamaTimes);
       // Without today's row, getNextPrayerTime falls back to its `iqamaTime = []`
       // default and resolves every slot to the adhan itself — which would be
       // announced to the user as the iqama. Saying we don't have the times is
       // correct; sending someone to the mosque at the call to prayer is not.
       if (!Array.isArray(iqamaTimes)) {
-        console.log(
+        console.warn(
           "No iqama row for today; refusing to fall back to adhan times.",
         );
         return handlerInput.responseBuilder
@@ -803,7 +794,6 @@ const NextIqamaTimeIntentHandler = {
         iqamaTimes,
         persistentAttributes.uuid,
       );
-      console.log("Next Iqama Time: ", nextIqamaTime);
       helperFunctions.checkForCharacterDisplay(
         handlerInput,
         nextIqamaTime.diffInMinutesPrompt,
@@ -819,7 +809,7 @@ const NextIqamaTimeIntentHandler = {
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
-      console.log("Error in fetching next iqama timings: ", error);
+      console.error("Error in fetching next iqama timings: ", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -832,6 +822,56 @@ const NextIqamaTimeIntentHandler = {
         .getResponse();
     }
   },
+};
+
+/**
+ * Renders the custom Adhan player when the device supports both APL and
+ * video, or returns null so the caller falls back to the legacy
+ * AudioPlayer directive. Shared by PlayAdhanIntentHandler and
+ * PlayAdhanTaskHandler so the two entry points (voice intent vs.
+ * routine/task trigger) can't drift apart.
+ */
+const renderAdhanPlayer = (handlerInput, audioName, audioUrl) => {
+  const supportedInterfaces = Alexa.getSupportedInterfaces(
+    handlerInput.requestEnvelope,
+  );
+  if (
+    !supportedInterfaces["Alexa.Presentation.APL"] ||
+    !helperFunctions.deviceSupportsVideo(handlerInput)
+  ) {
+    // Devices that support APL but not video fall through to the
+    // AudioPlayer branch — a Video component with no video support
+    // silently plays nothing.
+    return null;
+  }
+  // Play through APL's own Video component so this custom screen — not
+  // Alexa's system AudioPlayer card — stays on top for the whole call to
+  // prayer. AudioIntentHandler/CancelAndStopIntentHandler read
+  // adhanPlaybackMode to know which mechanism voice pause/resume/stop
+  // should control.
+  const sessionAttributes =
+    handlerInput.attributesManager.getSessionAttributes();
+  const dataSource = getDataSourceForAdhanPlayer(
+    handlerInput,
+    audioName,
+    audioUrl,
+  );
+  const aplDirective = helperFunctions.createDirectivePayload(
+    adhanPlayerApl,
+    dataSource,
+  );
+  sessionAttributes.adhanPlaybackMode = "apl-video";
+  // AudioIntentHandler/CancelAndStopIntentHandler need this exact token to
+  // target the on-screen document with an ExecuteCommands directive later.
+  sessionAttributes.adhanPlayerToken = aplDirective.token;
+  handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+  // shouldEndSession is deliberately omitted (not set to true or false):
+  // false reopens the mic for a spoken follow-up, which is not wanted
+  // here; true drops sessionAttributes before the next request, so a
+  // later "Alexa, pause/resume/stop" arrives with no
+  // adhanPlaybackMode/token to act on. Omitting it keeps the session (and
+  // this state) alive without listening. See CLAUDE.md's Gotchas section.
+  return handlerInput.responseBuilder.addDirective(aplDirective).getResponse();
 };
 
 const PlayAdhanIntentHandler = {
@@ -864,19 +904,22 @@ const PlayAdhanIntentHandler = {
           ? persistentAttributes.favouriteAdhaan.fajrUrl
           : persistentAttributes.favouriteAdhaan.otherUrl;
     }
-    console.log("Audio URL: ", audioUrl);
-    const playBehavior = "REPLACE_ALL";
-    const metadataInfo = getMetadata(handlerInput, audioName);
+    const aplResponse = renderAdhanPlayer(handlerInput, audioName, audioUrl);
+    if (aplResponse) {
+      return aplResponse;
+    }
     const supportedInterfaces = Alexa.getSupportedInterfaces(
       handlerInput.requestEnvelope,
     );
     if (!supportedInterfaces["AudioPlayer"]) {
-      console.log("Audio Player is not supported on this device");
+      console.warn("Audio Player is not supported on this device");
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("adhaanErrorPrompt"))
         .withShouldEndSession(false)
         .getResponse();
     }
+    const playBehavior = "REPLACE_ALL";
+    const metadataInfo = getMetadata(handlerInput, audioName);
     return handlerInput.responseBuilder
       .withShouldEndSession(true)
       .addAudioPlayerPlayDirective(
@@ -971,7 +1014,6 @@ const MosqueInfoIntentHandler = {
           prayers,
           mosqueInfo,
         );
-        console.log("Data Source: ", JSON.stringify(dataSource));
         const aplDirective = helperFunctions.createDirectivePayload(
           require("../aplDocuments/mosqueInfoApl.json"),
           dataSource,
@@ -983,7 +1025,7 @@ const MosqueInfoIntentHandler = {
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
-      console.log("Error in fetching Mosque Info ", error);
+      console.error("Error in fetching Mosque Info ", error);
       return handlerInput.responseBuilder
         .speak(requestAttributes.t("mosqueInfoErrorPrompt"))
         .withShouldEndSession(true)
@@ -1010,7 +1052,6 @@ const AllIqamaTimeIntentHandler = {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
-      console.log("User Timezone: ", userTimeZone);
       const prayerNames = requestAttributes.t("prayerNames");
       const { iqamaEnabled } = mosqueTimes;
       if (!iqamaEnabled) {
@@ -1026,7 +1067,7 @@ const AllIqamaTimeIntentHandler = {
       )
         .then((data) => data.iqamaCalendar)
         .catch((error) => {
-          console.log("Error in fetching iqama calendar: ", error);
+          console.error("Error in fetching iqama calendar: ", error);
           throw error;
         });
       const iqamaCalendar = mosqueTimes.iqamaCalendar;
@@ -1036,13 +1077,12 @@ const AllIqamaTimeIntentHandler = {
       const date = currentDateTime.getDate();
       const month = currentDateTime.getMonth();
       const iqamaTimes = iqamaCalendar?.[month]?.[String(date)];
-      console.log("Iqama Times: ", iqamaTimes);
       // Without today's row, getNextPrayerTime falls back to its `iqamaTime = []`
       // default and resolves every slot to the adhan itself — which would be
       // announced to the user as the iqama. Saying we don't have the times is
       // correct; sending someone to the mosque at the call to prayer is not.
       if (!Array.isArray(iqamaTimes)) {
-        console.log(
+        console.warn(
           "No iqama row for today; refusing to fall back to adhan times.",
         );
         return handlerInput.responseBuilder
@@ -1067,7 +1107,6 @@ const AllIqamaTimeIntentHandler = {
             iqamaTime,
             userTimeZone,
           );
-          console.log("Iqama Details for %s: ", prayer, iqamaDetails);
           allIqamaTimes += requestAttributes.t(
             "allIqamaTimesPrompt",
             prayer,
@@ -1086,7 +1125,7 @@ const AllIqamaTimeIntentHandler = {
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
-      console.log("Error in fetching iqama timings: ", error);
+      console.error("Error in fetching iqama timings: ", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1129,7 +1168,7 @@ const AllPrayerTimeIntentHandler = {
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
-      console.log("Error in fetching Prayer timings: ", error);
+      console.error("Error in fetching Prayer timings: ", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1178,7 +1217,10 @@ const DeleteDataIntentHandler = {
     }
 
     const userId = Alexa.getUserId(requestEnvelope);
-    console.log(`Skill was disabled for user: ${userId}`);
+    // Audit trail: user explicitly confirmed deletion of their data.
+    console.log(
+      `Deleting data for user: ${userId} (DeleteDataIntent confirmed)`,
+    );
     try {
       await DeleteUserInfo(userId);
       await attributesManager.deletePersistentAttributes();
@@ -1206,7 +1248,6 @@ const FavoriteAdhaanReciterStartedHandler = {
     );
   },
   async handle(handlerInput) {
-    console.log("In FavoriteAdhaanReciterStartedHandler");
     const { responseBuilder, attributesManager } = handlerInput;
     const requestAttributes = attributesManager.getRequestAttributes();
     const locale = Alexa.getLocale(handlerInput.requestEnvelope);
@@ -1237,14 +1278,12 @@ const FavoriteAdhaanReciterStartedHandler = {
         }),
       );
     } catch (error) {
-      console.log("Error in getting adhaan reciter list: ", error);
+      console.error("Error in getting adhaan reciter list: ", error);
     }
 
-    console.log("Adhaan Recitation List: ", adhaanRecitationList);
     const adhaanListPrompt = adhaanRecitationList
       .map((adhaan, index) => `${index + 1}. ${adhaan.primaryText}`)
       .join(", ");
-    console.log("Adhaan List Prompt: ", adhaanListPrompt);
     speechPrompt += requestAttributes.t("adhanReciterPrompt", adhaanListPrompt);
     if (
       Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)[
@@ -1256,16 +1295,14 @@ const FavoriteAdhaanReciterStartedHandler = {
           handlerInput,
           adhaanRecitationList,
         );
-        console.log("Data Source: ", JSON.stringify(dataSource));
         const aplDirective = helperFunctions.createDirectivePayload(
           listApl,
           dataSource,
         );
-        console.log("APL Directive: ", JSON.stringify(aplDirective));
         responseBuilder.addDirective(aplDirective);
         speechPrompt += requestAttributes.t("chooseAdhaanByTouchPrompt");
       } catch (error) {
-        console.log("Error in creating APL Directive: ", error);
+        console.error("Error in creating APL Directive: ", error);
       }
     }
 
@@ -1292,7 +1329,6 @@ const FavoriteAdhaanReciterIntentHandler = {
       handlerInput.requestEnvelope,
       "favouriteReciter",
     );
-    console.log("Favourite Reciter: ", favouriteReciter);
     const reciterIndex = parseInt(favouriteReciter) - 1;
     if (
       Number.isNaN(reciterIndex) ||
@@ -1313,7 +1349,6 @@ const FavoriteAdhaanReciterIntentHandler = {
       );
       return await FavoriteAdhaanReciterStartedHandler.handle(handlerInput);
     }
-    console.log("Selected Adhaan Reciter: ", adhaanReciter);
     const sessionAttributes =
       handlerInput.attributesManager.getSessionAttributes();
     sessionAttributes.persistentAttributes.favouriteAdhaan = adhaanReciter;
@@ -1346,7 +1381,7 @@ const HadithIntentHandler = {
       Alexa.getLocale(handlerInput.requestEnvelope),
     );
     const hadith = await getRandomHadith(locale).catch((error) => {
-      console.log("Error in fetching hadith: ", error);
+      console.error("Error in fetching hadith: ", error);
       return requestAttributes.t("hadithErrorPrompt");
     });
 
@@ -1389,7 +1424,7 @@ const PlayAdhanTaskHandler = {
             sessionAttributes,
           );
         } catch (error) {
-          console.log(
+          console.error(
             "Unable to hydrate mosque times for routine playback: ",
             error,
           );
@@ -1420,19 +1455,22 @@ const PlayAdhanTaskHandler = {
           ? persistentAttributes.favouriteAdhaan.fajrUrl
           : persistentAttributes.favouriteAdhaan.otherUrl;
       }
-      console.log("Audio URL: ", audioUrl);
-      const playBehavior = "REPLACE_ALL";
-      const metadataInfo = getMetadata(handlerInput, audioName);
+      const aplResponse = renderAdhanPlayer(handlerInput, audioName, audioUrl);
+      if (aplResponse) {
+        return aplResponse;
+      }
       const supportedInterfaces = Alexa.getSupportedInterfaces(
         handlerInput.requestEnvelope,
       );
       if (!supportedInterfaces["AudioPlayer"]) {
-        console.log("Audio Player is not supported on this device");
+        console.warn("Audio Player is not supported on this device");
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("adhaanErrorPrompt"))
           .withShouldEndSession(false)
           .getResponse();
       }
+      const playBehavior = "REPLACE_ALL";
+      const metadataInfo = getMetadata(handlerInput, audioName);
       return handlerInput.responseBuilder
         .withShouldEndSession(true)
         .addAudioPlayerPlayDirective(
@@ -1445,7 +1483,7 @@ const PlayAdhanTaskHandler = {
         )
         .getResponse();
     } catch (error) {
-      console.log("Error in PlayAdhanTaskHandler: ", error);
+      console.error("Error in PlayAdhanTaskHandler: ", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1511,16 +1549,14 @@ const CreateRoutineStartedHandler = {
             handlerInput,
             prayerNameDetails,
           );
-          console.log("Data Source: ", JSON.stringify(routineDataSource));
           const aplDirective = helperFunctions.createDirectivePayload(
             listApl,
             routineDataSource,
           );
-          console.log("APL Directive: ", JSON.stringify(aplDirective));
           handlerInput.responseBuilder.addDirective(aplDirective);
           speechPrompt += requestAttributes.t("prayerNameTouchPrompt");
         } catch (error) {
-          console.log("Error in creating APL Directive: ", error);
+          console.error("Error in creating APL Directive: ", error);
         }
       }
       const currentIntent = handlerInput.requestEnvelope.request.intent;
@@ -1530,7 +1566,7 @@ const CreateRoutineStartedHandler = {
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
-      console.log("Error in CreateRoutineStartedHandler: ", error);
+      console.error("Error in CreateRoutineStartedHandler: ", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1587,7 +1623,7 @@ const CreateRoutinePrayerIndexHandler = {
         (prayerIndex < 1 || prayerIndex > prayerNameDetails.length) &&
         prayerIndex !== ALL_PRAYER_INDEX + 1
       ) {
-        console.log("Invalid prayer index: ", prayerIndex);
+        console.warn("Invalid prayer index: ", prayerIndex);
         return handlerInput.responseBuilder
           .speak(
             requestAttributes.t(
@@ -1626,14 +1662,13 @@ const CreateRoutinePrayerIndexHandler = {
         selectedPrayer = prayerNameDetails[prayerIndex - 2];
       }
 
-      console.log("Selected Prayer: ", selectedPrayer);
       return await helperFunctions.logRoutineCreation(
         handlerInput,
         selectedPrayer,
         prayerNameDetails,
       );
     } catch (error) {
-      console.log("Error in CreateRoutinePrayerIndexHandler:", error);
+      console.error("Error in CreateRoutinePrayerIndexHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1704,7 +1739,7 @@ const CreateRoutinePrayerNameHandler = {
       }
 
       if (!selectedPrayer) {
-        console.log(
+        console.warn(
           "Selected prayer not found or already enabled for resolved ID: ",
           prayerNameResolvedId,
         );
@@ -1714,14 +1749,13 @@ const CreateRoutinePrayerNameHandler = {
           .getResponse();
       }
 
-      console.log("Selected Prayer: ", selectedPrayer);
       return await helperFunctions.logRoutineCreation(
         handlerInput,
         selectedPrayer,
         prayerNameDetails,
       );
     } catch (error) {
-      console.log("Error in CreateRoutinePrayerNameHandler:", error);
+      console.error("Error in CreateRoutinePrayerNameHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1746,10 +1780,8 @@ const SessionResumedRequestHandler = {
   async handle(handlerInput) {
     const status = handlerInput.requestEnvelope.request?.cause?.status;
     const code = parseInt(status.code);
-    const message = status.message;
-    console.log(
-      `SessionResumedRequest received status code : ${code} and message : ${message}`,
-    );
+    // status code/message already captured in the full request envelope
+    // logged by LogRequestInterceptor (request.cause.status).
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
 
@@ -1846,7 +1878,7 @@ const YesIntentHandler = {
         prayerNameDetails,
       );
     } catch (error) {
-      console.log("Error in YesIntentHandler:", error);
+      console.error("Error in YesIntentHandler:", error);
       if (error?.message === "Unable to fetch user timezone") {
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("timezoneErrorPrompt"))
@@ -1922,7 +1954,6 @@ const MosqueYesIntentHandler = {
       selectedMosqueDetails.proximity = helperFunctions.parseProximity(
         selectedMosqueDetails.proximity,
       );
-      console.log("Selected Mosque Details: ", selectedMosqueDetails);
       sessionAttributes.persistentAttributes = selectedMosqueDetails;
       handlerInput.attributesManager.setPersistentAttributes(
         sessionAttributes.persistentAttributes,
@@ -1945,7 +1976,7 @@ const MosqueYesIntentHandler = {
         ),
       );
     } catch (error) {
-      console.log("Error in MosqueYesIntentHandler: ", error);
+      console.error("Error in MosqueYesIntentHandler: ", error);
       if (error?.message === "Mosque not found") {
         return await helperFunctions.getListOfMosque(
           handlerInput,
@@ -2026,7 +2057,7 @@ const UserIdIntentHandler = {
             supportId = candidateCode;
             isUnique = true;
           } else {
-            console.log(
+            console.warn(
               `[UserIdIntentHandler] Collision detected for code: ${candidateCode}. Retrying...`,
             );
             attempt++;

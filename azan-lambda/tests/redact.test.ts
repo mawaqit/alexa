@@ -53,4 +53,46 @@ describe("redact", () => {
   it("returns undefined for a value that has no JSON form", () => {
     expect(redact(undefined)).toBeUndefined();
   });
+
+  it("masks an Authorization header", () => {
+    // The dispatcher logs the raw event before validating it, so whatever
+    // arrives is logged as-is.
+    expect(redact({ Authorization: "Bearer secret" })).toEqual({
+      Authorization: "[REDACTED]",
+    });
+  });
+
+  it("masks credential keys whatever their case or separator", () => {
+    const logged = JSON.stringify(
+      redact({
+        Token: "t",
+        access_token: "a",
+        "Refresh-Token": "r",
+        clientSecret: "s",
+        PASSWORD: "p",
+      }),
+    );
+
+    for (const secret of ['"t"', '"a"', '"r"', '"s"', '"p"']) {
+      expect(logged).not.toContain(secret);
+    }
+  });
+
+  it("masks a Bearer or Basic credential under any key", () => {
+    expect(
+      redact({
+        headers: { "X-Forwarded-Auth": "Bearer abc" },
+        note: "basic dXNlcjpwYXNz",
+      }),
+    ).toEqual({
+      headers: { "X-Forwarded-Auth": "[REDACTED]" },
+      note: "[REDACTED]",
+    });
+  });
+
+  it("keeps the BearerToken type label, which is not a credential", () => {
+    // Every AcceptGrant and Discover names its token type this way; masking
+    // it would hide which kind of token Amazon sent.
+    expect(redact({ type: "BearerToken" })).toEqual({ type: "BearerToken" });
+  });
 });

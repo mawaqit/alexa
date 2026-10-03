@@ -219,9 +219,8 @@ const UpdatePrayerTimeAPLEventHandler = {
   async handle(handlerInput) {
     const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
 
-    const currentTime = Date.now();
-
-    if (!nextUpdateTime || currentTime >= nextUpdateTime) {
+    // Allows for a device clock slightly ahead of ours.
+    if (helperFunctions.isWidgetRefreshDue(nextUpdateTime)) {
       return InstallPrayerTimeWidgetRequestHandler.handle(handlerInput);
     }
 
@@ -240,12 +239,9 @@ const ReadPrayerTimeAPLEventHandler = {
     );
   },
   async handle(handlerInput) {
-    const sessionAttributes = handlerInput.requestEnvelope?.session
-      ? handlerInput.attributesManager.getSessionAttributes()
-      : {};
-    sessionAttributes.skipAplDirective = true;
-    sessionAttributes.skipCardDirective = true;
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    helperFunctions.suppressScreenOutput(handlerInput);
+    // Out-of-session safe: checkForPersistenceData reads the mosque from
+    // persistence when there is no session.
     return await helperFunctions.checkForPersistenceData(handlerInput);
   },
 };

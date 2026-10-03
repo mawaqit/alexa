@@ -223,6 +223,18 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
       ...options,
     });
 
+  // The azan table is keyed by the Amazon account id, the persistence table
+  // by the Alexa user id ("user-1" in buildHandlerInput). They must differ
+  // here, or deleting the azan row by the wrong id would pass unnoticed.
+  const AMAZON_ID = "amzn1.account.TEST";
+  const buildConfirmedDeleteInput = () => {
+    dbHandler.GetPersistedAmazonUserIds.mockResolvedValue([]);
+    return buildDeleteInput({
+      confirmationStatus: "CONFIRMED",
+      persistentAttributes: { user_id: AMAZON_ID },
+    });
+  };
+
   it("asks for confirmation when confirmationStatus is NONE", async () => {
     const handlerInput = buildDeleteInput({ confirmationStatus: "NONE" });
     dbHandler.DeleteAzanUserInfo.mockResolvedValue({});
@@ -273,14 +285,15 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
     // Leaving either behind means a "deleted" user still gets adhan pushes, or
     // a re-enabled skill silently resurrects the old mosque.
     dbHandler.DeleteAzanUserInfo.mockResolvedValue({});
-    const handlerInput = buildDeleteInput({ confirmationStatus: "CONFIRMED" });
+    const handlerInput = buildConfirmedDeleteInput();
     handlerInput.attributesManager.deletePersistentAttributes = jest.fn(
       async () => {},
     );
 
     const response = await DeleteDataIntentHandler.handle(handlerInput);
 
-    expect(dbHandler.DeleteAzanUserInfo).toHaveBeenCalledWith("user-1");
+    expect(dbHandler.DeleteAzanUserInfo).toHaveBeenCalledWith(AMAZON_ID);
+    expect(dbHandler.DeleteAzanUserInfo).not.toHaveBeenCalledWith("user-1");
     // The other stage's copy too — the request may have reached the wrong one.
     expect(dbHandler.DeletePersistedUserInfo).toHaveBeenCalledWith("user-1");
     expect(
@@ -292,13 +305,16 @@ describe('"delete my data" — irreversible, so it must be complete', () => {
 
   it("does not report success when the deletion failed (confirmed)", async () => {
     dbHandler.DeleteAzanUserInfo.mockRejectedValue(new Error("DynamoDB down"));
-    const handlerInput = buildDeleteInput({ confirmationStatus: "CONFIRMED" });
+    const handlerInput = buildConfirmedDeleteInput();
     handlerInput.attributesManager.deletePersistentAttributes = jest.fn(
       async () => {},
     );
 
     const response = await DeleteDataIntentHandler.handle(handlerInput);
 
+    // The failure must come from the real azan-row delete, not a call by the
+    // wrong id.
+    expect(dbHandler.DeleteAzanUserInfo).toHaveBeenCalledWith(AMAZON_ID);
     expect(spokenText(response)).not.toContain("successfully deleted");
     expect(
       handlerInput.attributesManager.deletePersistentAttributes,

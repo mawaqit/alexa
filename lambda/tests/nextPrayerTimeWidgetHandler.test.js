@@ -8,6 +8,9 @@
  *   that fallback, the screen must not.
  * - Its countdown runs to the prayer's exact start, and the prayer keeps its
  *   "It's time" screen for its whole minute before moving on.
+ *
+ * Tapping it speaks the next prayer, and must work whether or not the tap
+ * arrives with a session.
  */
 jest.mock("../handlers/apiHandler.js");
 
@@ -19,8 +22,9 @@ const {
 } = require("../handlers/apiHandler.js");
 const {
   InstallPrayerTimeWidgetRequestHandler,
+  ReadPrayerTimeAPLEventHandler,
 } = require("../handlers/prayerTimeWidgetHandler.js");
-const { buildHandlerInput } = require("./support/handlerInput");
+const { buildHandlerInput, spokenText } = require("./support/handlerInput");
 const {
   TODAY_TIMES,
   TOMORROW_TIMINGS,
@@ -170,5 +174,73 @@ describe("InstallPrayerTimeWidgetRequestHandler — what the widget is sent", ()
       InstallPrayerTimeWidgetRequestHandler.handle(handlerInput),
     ).resolves.toBeDefined();
     expect(updateDatastore).not.toHaveBeenCalled();
+  });
+});
+
+describe("ReadPrayerTimeAPLEventHandler — tapping the widget", () => {
+  const buildTap = ({ inSession, persistentAttributes = {} }) =>
+    buildHandlerInput({
+      requestType: "Alexa.Presentation.APL.UserEvent",
+      timezone: TZ,
+      inSession,
+      persistentAttributes,
+      sessionAttributes: inSession
+        ? {
+            persistentAttributes: {
+              uuid: UUID,
+              primaryText: "Mosquée de Paris",
+            },
+            mosqueTimes: { times: TODAY_TIMES },
+          }
+        : {},
+    });
+
+  it("speaks the next prayer and keeps the conversation open in session", async () => {
+    freezeAt(`${TODAY} 04:00`, TZ);
+    const handlerInput = buildTap({ inSession: true });
+
+    const response = await ReadPrayerTimeAPLEventHandler.handle(handlerInput);
+
+    expect(spokenText(response)).toContain("The next prayer is Fajr");
+    expect(spokenText(response)).toContain("Do you need anything else");
+    expect(response.shouldEndSession).toBe(false);
+    // The tap must not re-render a full-screen document over the widget.
+    expect(handlerInput.attributesManager.getRequestAttributes()).toMatchObject(
+      { skipAplDirective: true, skipCardDirective: true },
+    );
+  });
+
+  it("speaks the next prayer when the tap arrives without a session", async () => {
+    // Every session-attribute read throws out of session, which used to turn
+    // the tap into an unhandled error.
+    freezeAt(`${TODAY} 04:00`, TZ);
+    serveTimes();
+
+    const response = await ReadPrayerTimeAPLEventHandler.handle(
+      buildTap({
+        inSession: false,
+        persistentAttributes: { uuid: UUID, primaryText: "Mosquée de Paris" },
+      }),
+    );
+    const speech = spokenText(response);
+
+    expect(speech).toContain("The next prayer is Fajr");
+    expect(speech).toContain("5:30 AM");
+    // No session to continue: a question would be left unanswerable.
+    expect(speech).not.toContain("Do you need anything else");
+    expect(response.shouldEndSession).toBe(true);
+  });
+
+  it("says no mosque is registered when the tap arrives without a session or a mosque", async () => {
+    // Choosing a mosque is a dialog, which can't run without a session.
+    freezeAt(`${TODAY} 04:00`, TZ);
+
+    const response = await ReadPrayerTimeAPLEventHandler.handle(
+      buildTap({ inSession: false }),
+    );
+
+    expect(spokenText(response)).toMatch(/haven't registered a mosque/);
+    expect(response.shouldEndSession).toBe(true);
+    expect(getPrayerTimings).not.toHaveBeenCalled();
   });
 });

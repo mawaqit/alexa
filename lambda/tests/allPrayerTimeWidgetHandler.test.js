@@ -1,10 +1,12 @@
 /**
- * Two failure surfaces on the All Prayer Time widget.
+ * Failure surfaces on the All Prayer Time widget.
  *
  * (1) Tapping the widget used to speak only the next prayer (via
  *     checkForPersistenceData -> getNextPrayerTime), same as the single-prayer
  *     widget — wrong for a widget titled "Prayer Times". It now delegates to
- *     AllPrayerTimeIntentHandler, which speaks all five.
+ *     AllPrayerTimeIntentHandler, which speaks all five — with or without a
+ *     session, since the SDK throws on any session-attribute access without
+ *     one.
  * (2) The widget must never show another day's times as current. A missing
  *     mosque, a failed fetch, or tomorrow's times missing after Isha used to
  *     push nothing, a sentinel nothing ever retried, or today's list after
@@ -12,6 +14,9 @@
  *     document retries it on the next mount.
  * (3) The list moves to tomorrow one minute after Isha — Isha keeps its
  *     "It's time" minute, like the Next Prayer widget.
+ * (4) A refresh refused as early pushes nothing, so nothing re-arms the
+ *     device's timer until the widget remounts. A device clock a few seconds
+ *     fast must therefore still get its refresh.
  */
 jest.mock("../handlers/apiHandler.js");
 
@@ -24,6 +29,7 @@ const {
 const {
   ReadAllPrayerTimeAPLEventHandler,
   InstallAllPrayerTimeWidgetRequestHandler,
+  UpdateAllPrayerTimeAPLEventHandler,
 } = require("../handlers/allPrayerTimeWidgetHandler.js");
 const { buildHandlerInput, spokenText } = require("./support/handlerInput");
 const {
@@ -44,6 +50,24 @@ const epochOf = (date, time) =>
   moment.tz(`${date} ${time}`, "YYYY-MM-DD HH:mm", TZ).valueOf();
 const freezeAtSecond = (wallClock) =>
   jest.setSystemTime(moment.tz(wallClock, "YYYY-MM-DD HH:mm:ss", TZ).toDate());
+
+// Today's times, plus tomorrow's when the calendar is asked for (which is
+// how getTomorrowPrayerTimes reads them).
+const serveTimes = ({ tomorrow = TOMORROW_TIMINGS } = {}) =>
+  getPrayerTimings.mockImplementation(
+    async (_uuid, _tz, _iqama, isPrayerCalendarRequired) =>
+      isPrayerCalendarRequired
+        ? {
+            calendar: buildCalendar(tomorrow ? { [TOMORROW]: tomorrow } : {}),
+          }
+        : { times: TODAY_TIMES },
+  );
+
+const pushedContent = () => {
+  expect(updateDatastore).toHaveBeenCalledTimes(1);
+  const [, commands] = updateDatastore.mock.calls[0];
+  return commands[0].content;
+};
 
 beforeEach(() => {
   jest.useFakeTimers({ doNotFake: ["nextTick"] });
@@ -69,6 +93,14 @@ describe("ReadAllPrayerTimeAPLEventHandler — tapping the widget", () => {
         mosqueTimes: { times: TODAY_TIMES, shuruq: "06:45" },
       },
     });
+  // Nothing is preloaded without a session: the mosque comes from persistence.
+  const buildOutOfSessionTap = (persistentAttributes) =>
+    buildHandlerInput({
+      requestType: "Alexa.Presentation.APL.UserEvent",
+      timezone: TZ,
+      inSession: false,
+      persistentAttributes,
+    });
 
   it("speaks all five prayers, not just the next one", async () => {
     freezeAt("2026-07-16 04:00", TZ);
@@ -87,9 +119,43 @@ describe("ReadAllPrayerTimeAPLEventHandler — tapping the widget", () => {
 
     await ReadAllPrayerTimeAPLEventHandler.handle(handlerInput);
 
-    expect(handlerInput.attributesManager.getSessionAttributes()).toMatchObject(
+    // Request attributes, which AddDirectiveResponseInterceptor reads for this
+    // response — session attributes don't exist on an out-of-session tap.
+    expect(handlerInput.attributesManager.getRequestAttributes()).toMatchObject(
       { skipAplDirective: true, skipCardDirective: true },
     );
+  });
+
+  it("speaks all five prayers when the tap arrives without a session", async () => {
+    // Every session-attribute read throws out of session, which used to turn
+    // the tap into the generic error prompt.
+    freezeAt("2026-07-16 04:00", TZ);
+    getPrayerTimings.mockResolvedValue({ times: TODAY_TIMES });
+
+    const response = await ReadAllPrayerTimeAPLEventHandler.handle(
+      buildOutOfSessionTap({ uuid: UUID, primaryText: "Mosquée de Paris" }),
+    );
+    const speech = spokenText(response);
+
+    expect(getPrayerTimings).toHaveBeenCalledWith(UUID, TZ);
+    expect(speech).toContain("Fajr is at 5:30 AM");
+    expect(speech).toContain("Isha is at 11:05 PM");
+    // No session to continue: a question would be left unanswerable.
+    expect(speech).not.toContain("Do you need anything else");
+    expect(response.shouldEndSession).toBe(true);
+  });
+
+  it("says no mosque is registered when the tap arrives without a session or a mosque", async () => {
+    // Choosing a mosque is a dialog, which can't run without a session.
+    freezeAt("2026-07-16 04:00", TZ);
+
+    const response = await ReadAllPrayerTimeAPLEventHandler.handle(
+      buildOutOfSessionTap({}),
+    );
+
+    expect(spokenText(response)).toMatch(/haven't registered a mosque/);
+    expect(response.shouldEndSession).toBe(true);
+    expect(getPrayerTimings).not.toHaveBeenCalled();
   });
 });
 
@@ -103,24 +169,6 @@ describe("InstallAllPrayerTimeWidgetRequestHandler — what the widget is sent",
         ...persistentAttributes,
       },
     });
-
-  // Today's times, plus tomorrow's when the calendar is asked for (which is
-  // how getTomorrowPrayerTimes reads them).
-  const serveTimes = ({ tomorrow = TOMORROW_TIMINGS } = {}) =>
-    getPrayerTimings.mockImplementation(
-      async (_uuid, _tz, _iqama, isPrayerCalendarRequired) =>
-        isPrayerCalendarRequired
-          ? {
-              calendar: buildCalendar(tomorrow ? { [TOMORROW]: tomorrow } : {}),
-            }
-          : { times: TODAY_TIMES },
-    );
-
-  const pushedContent = () => {
-    expect(updateDatastore).toHaveBeenCalledTimes(1);
-    const [, commands] = updateDatastore.mock.calls[0];
-    return commands[0].content;
-  };
 
   it("pushes today's list before Isha, refreshing once Isha's minute ends", async () => {
     freezeAt(`${TODAY} 13:00`, TZ);
@@ -221,5 +269,49 @@ describe("InstallAllPrayerTimeWidgetRequestHandler — what the widget is sent",
     const content = pushedContent();
     expect(content.nextUpdateTime).toBe(Date.now());
     expect(content.pushedAt).toBe(Date.now());
+  });
+});
+
+describe("UpdateAllPrayerTimeAPLEventHandler — the device's refresh timer", () => {
+  // The refresh the document sends once nextUpdateTime is due by its clock.
+  const buildRefresh = (nextUpdateTime) => {
+    const handlerInput = buildHandlerInput({
+      requestType: "Alexa.Presentation.APL.UserEvent",
+      timezone: TZ,
+      inSession: false,
+      persistentAttributes: { uuid: UUID, primaryText: "Mosquée de Paris" },
+    });
+    handlerInput.requestEnvelope.request.arguments = [
+      "FETCH_ALL_PRAYER_TIME",
+      nextUpdateTime,
+    ];
+    return handlerInput;
+  };
+  const ishaMinuteEnd = epochOf(TODAY, ISHA) + 60 * 1000;
+
+  it("refreshes when the device's clock runs a few seconds ahead of ours", async () => {
+    // Refused, this would push nothing and the widget would keep today's
+    // list after Isha until it remounts.
+    freezeAtSecond(`${TODAY} 23:05:57`);
+    serveTimes();
+
+    await UpdateAllPrayerTimeAPLEventHandler.handle(
+      buildRefresh(ishaMinuteEnd),
+    );
+
+    expect(pushedContent().data.prayers[0].epoch).toBe(
+      epochOf(TOMORROW, "05:31"),
+    );
+  });
+
+  it("ignores a refresh that is not due yet", async () => {
+    freezeAt(`${TODAY} 13:00`, TZ);
+    serveTimes();
+
+    await UpdateAllPrayerTimeAPLEventHandler.handle(
+      buildRefresh(ishaMinuteEnd),
+    );
+
+    expect(updateDatastore).not.toHaveBeenCalled();
   });
 });

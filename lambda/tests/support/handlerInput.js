@@ -31,13 +31,17 @@ const buildHandlerInput = ({
   // absent so the consent check stays false for every other test.
   consentToken = null,
   deviceAddress = null,
+  // false builds an out-of-session request, as a widget tap can be: no
+  // `session` in the envelope, and session-attribute access throws exactly as
+  // the SDK's AttributesManager does.
+  inSession = true,
 } = {}) => {
   const session = { ...sessionAttributes };
   let persistent = { ...persistentAttributes };
   const savePersistentAttributes = jest.fn(async () => {});
 
   const requestEnvelope = {
-    session: { new: true, attributes: {} },
+    ...(inSession ? { session: { new: true, attributes: {} } } : {}),
     context: {
       System: {
         apiEndpoint: "https://api.eu.amazonalexa.com",
@@ -63,8 +67,22 @@ const buildHandlerInput = ({
 
   const attributesManager = {
     getRequestAttributes: () => requestAttributes,
-    getSessionAttributes: () => session,
-    setSessionAttributes: (next) => Object.assign(session, next),
+    getSessionAttributes: () => {
+      if (!inSession) {
+        throw new Error(
+          "Cannot get SessionAttributes from out of session request!",
+        );
+      }
+      return session;
+    },
+    setSessionAttributes: (next) => {
+      if (!inSession) {
+        throw new Error(
+          "Cannot set SessionAttributes to out of session request!",
+        );
+      }
+      Object.assign(session, next);
+    },
     getPersistentAttributes: async () => persistent,
     setPersistentAttributes: (next) => {
       persistent = next;

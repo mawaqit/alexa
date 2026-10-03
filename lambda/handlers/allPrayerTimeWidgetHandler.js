@@ -17,9 +17,11 @@ const KEY = "allPrayerTimeData";
 // and only then does the list move on to tomorrow.
 const PRAYER_MINUTE_MS = 60 * 1000;
 // The device's refresh timer fires at Isha + 1 minute by its own clock. The
-// switch happens 5 s earlier on ours, so a device clock running slightly
-// ahead doesn't land the refresh a hair early and get today's list again.
-const SWITCH_TO_TOMORROW_AFTER_MS = PRAYER_MINUTE_MS - 5 * 1000;
+// switch happens a few seconds earlier on ours, so a device clock running
+// slightly ahead doesn't land the refresh a hair early and get today's list
+// again. Same tolerance as the refresh gate (helperFunctions.isWidgetRefreshDue).
+const SWITCH_TO_TOMORROW_AFTER_MS =
+  PRAYER_MINUTE_MS - helperFunctions.WIDGET_CLOCK_SKEW_MS;
 
 /**
  * Returns times unchanged when it is an array of at least five entries.
@@ -262,16 +264,14 @@ const UpdateAllPrayerTimeAPLEventHandler = {
     );
   },
   /**
-   * Refreshes when APL argument 1 (epoch milliseconds) is falsy or due.
-   * Otherwise returns a response ending the session. Delegated refresh
-   * errors propagate.
+   * Refreshes when APL argument 1 (epoch milliseconds) is falsy or due,
+   * allowing for a device clock slightly ahead of ours. Otherwise returns a
+   * response ending the session. Delegated refresh errors propagate.
    */
   async handle(handlerInput) {
     const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
 
-    const currentTime = Date.now();
-
-    if (!nextUpdateTime || currentTime >= nextUpdateTime) {
+    if (helperFunctions.isWidgetRefreshDue(nextUpdateTime)) {
       return InstallAllPrayerTimeWidgetRequestHandler.handle(handlerInput);
     }
 
@@ -294,16 +294,12 @@ const ReadAllPrayerTimeAPLEventHandler = {
   },
   /**
    * Speaks all five prayer times through the all-prayer intent, which handles
-   * a missing mosque and timing errors. Sets session flags to suppress APL
-   * and card directives, then returns the delegated skill response.
+   * a missing mosque, timing errors, and a request without a session.
+   * Suppresses the APL and card directives for this response, then returns
+   * the delegated skill response.
    */
   async handle(handlerInput) {
-    const sessionAttributes = handlerInput.requestEnvelope?.session
-      ? handlerInput.attributesManager.getSessionAttributes()
-      : {};
-    sessionAttributes.skipAplDirective = true;
-    sessionAttributes.skipCardDirective = true;
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    helperFunctions.suppressScreenOutput(handlerInput);
     // Not checkForPersistenceData: that ends up at getNextPrayerTime, which
     // speaks only the next prayer — wrong for a widget titled "Prayer Times".
     // AllPrayerTimeIntentHandler already speaks all five (and falls back to

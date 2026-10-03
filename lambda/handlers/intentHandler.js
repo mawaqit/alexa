@@ -169,9 +169,7 @@ const DeleteRoutinePrayerIndexHandler = {
       }
       if (prayerIndex < 1 || prayerIndex > routinePrayers.length) {
         console.warn("Invalid prayer index: ", prayerIndex);
-        sessionAttributes.skipAplDirective = true;
-        sessionAttributes.skipCardDirective = true;
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        helperFunctions.suppressScreenOutput(handlerInput);
         return handlerInput.responseBuilder
           .speak(
             requestAttributes.t(
@@ -278,9 +276,7 @@ const DeleteRoutinePrayerNameHandler = {
         prayerNameResolvedId !== String(ALL_PRAYER_INDEX)
       ) {
         console.warn("Invalid prayer name: ", prayerResolvedName);
-        sessionAttributes.skipAplDirective = true;
-        sessionAttributes.skipCardDirective = true;
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        helperFunctions.suppressScreenOutput(handlerInput);
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))
           .addDirective({
@@ -1158,20 +1154,28 @@ const AllPrayerTimeIntentHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     try {
-      const sessionAttributes =
-        handlerInput.attributesManager.getSessionAttributes();
-      const { persistentAttributes, mosqueTimes } = sessionAttributes;
+      // Also reached from a widget tap, which may arrive without a session.
+      const { persistentAttributes, mosqueTimes } =
+        await helperFunctions.getPrayerContext(handlerInput);
       if (!persistentAttributes?.uuid) {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }
+      const allPrayerTimes =
+        await helperFunctions.getAllPrayerTimesSpeechoutput(
+          handlerInput,
+          mosqueTimes,
+          persistentAttributes.uuid,
+        );
+      // Without a session there is no conversation to continue.
+      const inSession = helperFunctions.hasSession(handlerInput);
       return handlerInput.responseBuilder
         .speak(
-          (await helperFunctions.getAllPrayerTimesSpeechoutput(
-            handlerInput,
-            mosqueTimes,
-          )) + requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          inSession
+            ? allPrayerTimes +
+                requestAttributes.t("doYouNeedAnythingElsePrompt")
+            : allPrayerTimes,
         )
-        .withShouldEndSession(false)
+        .withShouldEndSession(!inSession)
         .getResponse();
     } catch (error) {
       console.error("Error in fetching Prayer timings: ", error);

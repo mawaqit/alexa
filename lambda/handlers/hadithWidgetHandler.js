@@ -169,16 +169,14 @@ const UpdateHadithAPLEventHandler = {
     );
   },
   /**
-   * Refreshes when APL argument 1 (epoch milliseconds) is falsy or due.
-   * Otherwise returns a response ending the session. Delegated refresh
-   * errors propagate.
+   * Refreshes when APL argument 1 (epoch milliseconds) is falsy or due,
+   * allowing for a device clock slightly ahead of ours. Otherwise returns a
+   * response ending the session. Delegated refresh errors propagate.
    */
   async handle(handlerInput) {
     const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
 
-    const currentTime = Date.now();
-
-    if (!nextUpdateTime || currentTime >= nextUpdateTime) {
+    if (helperFunctions.isWidgetRefreshDue(nextUpdateTime)) {
       return InstallHadithWidgetRequestHandler.handle(handlerInput);
     }
 
@@ -202,12 +200,7 @@ const ReadHadithAPLEventHandler = {
     const hadith =
       helperFunctions.getAplArgument(handlerInput, 1) ||
       requestAttributes.t("widgets.hadithOfTheDay.description");
-    const sessionAttributes = handlerInput.requestEnvelope?.session
-      ? handlerInput.attributesManager.getSessionAttributes()
-      : {};
-    sessionAttributes.skipAplDirective = true;
-    sessionAttributes.skipCardDirective = true;
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    helperFunctions.suppressScreenOutput(handlerInput);
     return handlerInput.responseBuilder
       .speak(hadith)
       .withShouldEndSession(true)

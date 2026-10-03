@@ -1,21 +1,69 @@
 const Alexa = require("ask-sdk-core");
+const moment = require("moment-timezone");
 const apiHandler = require("./apiHandler");
 const helperFunctions = require("../helperFunctions");
+const { putWidgetObject } = require("./dataStoreHandler");
+const {
+  registerWidgetUsage,
+  unregisterWidgetUsage,
+} = require("./widgetRegistry");
+
+const PACKAGE_ID = "NextPrayerTime";
+const NAMESPACE = "nextPrayerTimeWidget";
+const KEY = "nextPrayerData";
+
+// A prayer stays "next" — shown as "It's time" — for its whole minute.
+const PRAYER_MINUTE_MS = 60 * 1000;
+
+// Pushed instead of a prayer the skill can't vouch for (no mosque, a failed
+// fetch, tomorrow's Fajr unknown after Isha), so the widget never shows a
+// guessed time. Due immediately: the document retries it on the next mount,
+// or a minute later while it stays on screen (pushedAt + 60 s).
+async function pushNextPrayerTimeErrorState(
+  handlerInput,
+  requestAttributes,
+  errorPromptKey,
+) {
+  const now = Date.now();
+  try {
+    await putWidgetObject(handlerInput, NAMESPACE, KEY, {
+      labels: {
+        title: requestAttributes.t("widgets.nextPrayerTime.title"),
+        error: requestAttributes.t(errorPromptKey),
+      },
+      data: null,
+      status: "error",
+      nextUpdateTime: now,
+      pushedAt: now,
+    });
+  } catch (error) {
+    console.error(
+      "Error while pushing next prayer widget error state: ",
+      error,
+    );
+  }
+}
 
 const InstallPrayerTimeWidgetRequestHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesInstalled" &&
-      helperFunctions.getPackageId(handlerInput) === "NextPrayerTime"
+      helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
     const requestAttributes = attributesManager.getRequestAttributes();
+    await registerWidgetUsage(handlerInput, PACKAGE_ID);
     const persistentAttributes =
       await attributesManager.getPersistentAttributes();
     if (!persistentAttributes?.uuid) {
+      await pushNextPrayerTimeErrorState(
+        handlerInput,
+        requestAttributes,
+        "mosqueNotRegisteredPrompt",
+      );
       return handlerInput.responseBuilder
         .withShouldEndSession(true)
         .getResponse();
@@ -26,6 +74,9 @@ const InstallPrayerTimeWidgetRequestHandler = {
         persistentAttributes.uuid,
         userTimeZone,
       );
+      if (!Array.isArray(mosqueTimes?.times) || mosqueTimes.times.length < 5) {
+        throw new Error("Today's prayer times are unavailable");
+      }
       const prayerNames = requestAttributes.t("prayerNames");
       const nextPrayerTime = await helperFunctions.getNextPrayerTime(
         requestAttributes,
@@ -34,71 +85,61 @@ const InstallPrayerTimeWidgetRequestHandler = {
         prayerNames,
         [],
         persistentAttributes.uuid,
+        // After Isha, an unknown Fajr becomes the error state, not a guess.
+        { requireTomorrowTimes: true },
       );
+      if (!nextPrayerTime?.time) {
+        throw new Error("Next prayer could not be determined");
+      }
       const mosqueName = persistentAttributes.primaryText;
-      const currentDateTime = new Date(
-        new Date().toLocaleString("en-US", { timeZone: userTimeZone }),
-      );
-      // Use actual UTC epoch timestamp for logic comparison
-      const nextUpdateTime =
-        Date.now() + nextPrayerTime.diffInMinutes * 60 * 1000;
 
-      // If you still need the HH:mm format for display in APL, you can keep this:
-      const nextUpdateDate = new Date(
-        currentDateTime.getTime() + nextPrayerTime.diffInMinutes * 60 * 1000,
+      // The prayer's exact start, which the countdown runs to. Tomorrow's
+      // date once today's occurrence (and its "It's time" minute) is over.
+      const currentMoment = moment.tz(userTimeZone);
+      let nextUpdateTime = helperFunctions.getWallClockEpoch(
+        currentMoment.format("YYYY-MM-DD"),
+        nextPrayerTime.time,
+        userTimeZone,
       );
-      const formattedNextUpdateTime = `${String(nextUpdateDate.getHours()).padStart(2, "0")}:${String(nextUpdateDate.getMinutes()).padStart(2, "0")}`;
+      if (nextUpdateTime + PRAYER_MINUTE_MS <= Date.now()) {
+        nextUpdateTime = helperFunctions.getWallClockEpoch(
+          currentMoment.clone().add(1, "day").format("YYYY-MM-DD"),
+          nextPrayerTime.time,
+          userTimeZone,
+        );
+      }
 
-      const commands = [
-        {
-          type: "PUT_OBJECT",
-          namespace: "nextPrayerTimeWidget",
-          key: "nextPrayerData",
-          content: {
-            labels: {
-              title: requestAttributes.t("widgets.nextPrayerTime.title"),
-              at: requestAttributes.t("widgets.nextPrayerTime.at"),
-              remaining: requestAttributes.t(
-                "widgets.nextPrayerTime.remaining",
-              ),
-              itsTime: requestAttributes.t("widgets.nextPrayerTime.itsTime"),
-              hourUnit: requestAttributes.t("widgets.nextPrayerTime.hourUnit"),
-              minuteUnit: requestAttributes.t(
-                "widgets.nextPrayerTime.minuteUnit",
-              ),
-            },
-            data: {
-              nextPrayerName: helperFunctions.extractPhonemeText(
-                nextPrayerTime.name,
-              ),
-              nextPrayerTime: nextPrayerTime.time,
-              mosqueName,
-            },
-            nextUpdateTime,
-            formattedNextUpdateTime,
-          },
+      await putWidgetObject(handlerInput, NAMESPACE, KEY, {
+        labels: {
+          title: requestAttributes.t("widgets.nextPrayerTime.title"),
+          at: requestAttributes.t("widgets.nextPrayerTime.at"),
+          remaining: requestAttributes.t("widgets.nextPrayerTime.remaining"),
+          itsTime: requestAttributes.t("widgets.nextPrayerTime.itsTime"),
+          hourUnit: requestAttributes.t("widgets.nextPrayerTime.hourUnit"),
+          minuteUnit: requestAttributes.t("widgets.nextPrayerTime.minuteUnit"),
         },
-      ];
-      const tokenResponse = await apiHandler.getAccessToken();
-
-      const target = {
-        type: "DEVICES",
-        items: [Alexa.getDeviceId(handlerInput.requestEnvelope)],
-      };
-      const apiEndpoint = helperFunctions.getApiEndpoint(handlerInput);
-      await apiHandler.updateDatastore(
-        tokenResponse,
-        commands,
-        target,
-        apiEndpoint,
-      );
-      persistentAttributes.lastPrayerTimeWidgetUpdate =
-        new Date().toISOString();
-      persistentAttributes.isPrayerTimeWidgetInstalled = true;
-      attributesManager.setPersistentAttributes(persistentAttributes);
-      await attributesManager.savePersistentAttributes();
+        data: {
+          nextPrayerName: helperFunctions.extractPhonemeText(
+            nextPrayerTime.name,
+          ),
+          nextPrayerTime: nextPrayerTime.time,
+          mosqueName,
+        },
+        status: "ok",
+        // Doubles as the countdown target. During the prayer's own minute it
+        // is already due; the document's pushedAt + 60 s rule then holds the
+        // "It's time" screen for that minute before fetching the next prayer.
+        nextUpdateTime,
+        formattedNextUpdateTime: nextPrayerTime.time,
+        pushedAt: Date.now(),
+      });
     } catch (error) {
       console.error("Error while installing prayer time widget: ", error);
+      await pushNextPrayerTimeErrorState(
+        handlerInput,
+        requestAttributes,
+        "widgets.loadErrorPrompt",
+      );
     }
 
     return handlerInput.responseBuilder
@@ -115,19 +156,11 @@ const RemovePrayerTimeWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesRemoved" &&
-      helperFunctions.getPackageId(handlerInput) === "NextPrayerTime"
+      helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
   async handle(handlerInput) {
-    const { attributesManager } = handlerInput;
-    const attributes =
-      (await attributesManager.getPersistentAttributes()) || {};
-
-    // Remove the instance from the array when the widget has been removed.
-    attributes.isPrayerTimeWidgetInstalled = false;
-    attributesManager.setPersistentAttributes(attributes);
-    await attributesManager.savePersistentAttributes();
-
+    await unregisterWidgetUsage(handlerInput, PACKAGE_ID);
     return handlerInput.responseBuilder.getResponse();
   },
 };
@@ -141,12 +174,12 @@ const UpdatePrayerTimeWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UpdateRequest" &&
-      helperFunctions.getPackageId(handlerInput) === "NextPrayerTime"
+      helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
   async handle(handlerInput) {
-    // fromVersion/toVersion already captured in the full request envelope
-    // logged by LogRequestInterceptor; not otherwise needed by this handler.
+    // Records toVersion on the device's widget record.
+    await registerWidgetUsage(handlerInput, PACKAGE_ID);
     return handlerInput.responseBuilder.getResponse();
   },
 };

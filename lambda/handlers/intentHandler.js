@@ -419,11 +419,10 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       selectedMosqueDetails.proximity,
     );
     console.log("Selected Mosque Details: ", selectedMosqueDetails);
-    sessionAttributes.persistentAttributes = selectedMosqueDetails;
-    handlerInput.attributesManager.setPersistentAttributes(
-      sessionAttributes.persistentAttributes,
+    await helperFunctions.persistSelectedMosque(
+      handlerInput,
+      selectedMosqueDetails,
     );
-    await handlerInput.attributesManager.savePersistentAttributes();
     try {
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       const mosqueTimes = await getPrayerTimings(
@@ -1956,11 +1955,10 @@ const MosqueYesIntentHandler = {
       selectedMosqueDetails.proximity = helperFunctions.parseProximity(
         selectedMosqueDetails.proximity,
       );
-      sessionAttributes.persistentAttributes = selectedMosqueDetails;
-      handlerInput.attributesManager.setPersistentAttributes(
-        sessionAttributes.persistentAttributes,
+      await helperFunctions.persistSelectedMosque(
+        handlerInput,
+        selectedMosqueDetails,
       );
-      await handlerInput.attributesManager.savePersistentAttributes();
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       const mosqueTimes = await getPrayerTimings(
         selectedMosqueDetails.uuid,

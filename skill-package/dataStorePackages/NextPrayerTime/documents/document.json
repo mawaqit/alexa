@@ -251,6 +251,34 @@
             ]
         }
     },
+    "onMount": [
+        {
+            "description": "Fires OnObjectChanged now with the stored object (or null), then on every PUT_OBJECT / REMOVE_NAMESPACE.",
+            "type": "DataStore:WatchObject",
+            "namespace": "nextPrayerTimeWidget",
+            "key": "nextPrayerData"
+        }
+    ],
+    "DataStore:OnObjectChanged": [
+        {
+            "description": "Refresh rule, run on every mount (WatchObject fires at once with the stored data) and on every push. Fetch when the data is missing, due, or an error (errors are pushed already due), but never within 60s of the last push (pushedAt): that holds the one-minute \"It's time\" screen and stops a due-on-arrival push from looping. Opened after being away: the last push is old, so stale data or an error is fetched at once. Its own sequencer, so newer data cancels the pending wait without cancelling anything else.",
+            "type": "Sequential",
+            "sequencer": "dataStoreRefresh",
+            "commands": [
+                {
+                    "type": "Idle",
+                    "delay": "${event.data == null ? 0 : Math.max(0, Math.max((event.data.nextUpdateTime != null ? event.data.nextUpdateTime : 0) - utcTime, (event.data.pushedAt != null ? event.data.pushedAt : 0) + 60000 - utcTime))}"
+                },
+                {
+                    "type": "SendEvent",
+                    "arguments": [
+                        "FETCH_PRAYER_TIME",
+                        "${event.data == null || event.data.nextUpdateTime == null ? 0 : event.data.nextUpdateTime}"
+                    ]
+                }
+            ]
+        }
+    ],
     "mainTemplate": {
         "parameters": [
             "payload"
@@ -275,6 +303,11 @@
                     "type": "number"
                 },
                 {
+                    "name": "isError",
+                    "value": "${DS_PrayerTime.status == 'error'}",
+                    "type": "boolean"
+                },
+                {
                     "name": "diffMs",
                     "value": "${Math.max(0, targetTime - utcTime)}",
                     "type": "number"
@@ -288,24 +321,6 @@
                     "name": "mins",
                     "value": "${Math.floor((diffMs % 3600000) / 60000)}",
                     "type": "number"
-                }
-            ],
-            "onMount": [
-                {
-                    "type": "DataStore:WatchObject",
-                    "namespace": "nextPrayerTimeWidget",
-                    "key": "nextPrayerData"
-                },
-                {
-                    "type": "Idle",
-                    "delay": 500
-                },
-                {
-                    "type": "SendEvent",
-                    "arguments": [
-                        "FETCH_PRAYER_TIME",
-                        "${targetTime}"
-                    ]
                 }
             ],
             "onPress": [
@@ -357,7 +372,7 @@
                             },
                             {
                                 "type": "Container",
-                                "display": "${targetTime == 0 ? 'normal' : 'none'}",
+                                "display": "${!isError && targetTime == 0 ? 'normal' : 'none'}",
                                 "grow": 1,
                                 "shrink": 1,
                                 "width": "100%",
@@ -375,8 +390,28 @@
                                 ]
                             },
                             {
+                                "description": "Shown instead of a prayer the skill couldn't vouch for (no mosque, a failed fetch, tomorrow's Fajr unknown). The refresh rule retries it.",
                                 "type": "Container",
-                                "display": "${targetTime > 0 ? 'normal' : 'none'}",
+                                "display": "${isError ? 'normal' : 'none'}",
+                                "grow": 1,
+                                "shrink": 1,
+                                "width": "100%",
+                                "justifyContent": "center",
+                                "alignItems": "center",
+                                "items": [
+                                    {
+                                        "type": "Text",
+                                        "style": "mosqueName",
+                                        "text": "${labels.error}",
+                                        "maxLines": 3,
+                                        "textAlign": "center",
+                                        "width": "100%"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Container",
+                                "display": "${!isError && targetTime > 0 ? 'normal' : 'none'}",
                                 "grow": 1,
                                 "shrink": 1,
                                 "width": "100%",
@@ -417,7 +452,7 @@
                             },
                             {
                                 "type": "Container",
-                                "display": "${targetTime > 0 ? 'normal' : 'none'}",
+                                "display": "${!isError && targetTime > 0 ? 'normal' : 'none'}",
                                 "width": "100%",
                                 "alignItems": "center",
                                 "items": [

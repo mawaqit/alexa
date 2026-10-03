@@ -2,7 +2,7 @@
     "type": "APL",
     "version": "2024.2",
     "theme": "dark",
-    "description": "All prayer times widget. Displays the five daily prayer times and highlights whichever one is next, recomputed live from the device clock. The isNext* bindings compare data.prayers[].time lexicographically, which is only correct because the times are zero-padded 24h \"HH:mm\" and given in ascending order; the upper bound on each range is inclusive (<=), so a prayer stays \"next\" through its own exact minute.",
+    "description": "All prayer times widget. Displays the five daily prayer times and highlights whichever one is next, recomputed live from the device clock. The isNext* bindings compare utcTime with data.prayers[].epoch, not the HH:mm text, because text ignores the date: once tomorrow's list is shown it could pick a prayer a day away. Each prayer stays \"next\" (\"It's time\") until one minute after its epoch.",
     "extensions": [
         {
             "name": "DataStore",
@@ -317,18 +317,31 @@
             ]
         }
     },
+    "onMount": [
+        {
+            "description": "Fires OnObjectChanged now with the stored object (or null), then on every PUT_OBJECT / REMOVE_NAMESPACE.",
+            "type": "DataStore:WatchObject",
+            "namespace": "allPrayerTimeWidget",
+            "key": "allPrayerTimeData"
+        }
+    ],
     "DataStore:OnObjectChanged": [
         {
-            "type": "Idle",
-            "when": "${event.data != null}",
-            "delay": "${event.data != null ? Math.max(0, event.data.nextUpdateTime - utcTime) : 0}"
-        },
-        {
-            "type": "SendEvent",
-            "when": "${event.data != null}",
-            "arguments": [
-                "FETCH_ALL_PRAYER_TIME",
-                "${event.data.nextUpdateTime}"
+            "description": "Refresh rule, run on every mount (WatchObject fires at once with the stored data) and on every push. Fetch when the data is missing, due, or an error (errors are pushed already due; a legacy -1 is simply due), but never within 60s of the last push (pushedAt), so a due-on-arrival push can't loop. Opened after being away: the last push is old, so stale data or an error is fetched at once. Its own sequencer, so newer data cancels the pending wait without cancelling anything else.",
+            "type": "Sequential",
+            "sequencer": "dataStoreRefresh",
+            "commands": [
+                {
+                    "type": "Idle",
+                    "delay": "${event.data == null ? 0 : Math.max(0, Math.max((event.data.nextUpdateTime != null ? event.data.nextUpdateTime : 0) - utcTime, (event.data.pushedAt != null ? event.data.pushedAt : 0) + 60000 - utcTime))}"
+                },
+                {
+                    "type": "SendEvent",
+                    "arguments": [
+                        "FETCH_ALL_PRAYER_TIME",
+                        "${event.data == null || event.data.nextUpdateTime == null ? 0 : event.data.nextUpdateTime}"
+                    ]
+                }
             ]
         }
     ],
@@ -361,28 +374,33 @@
                     "type": "string"
                 },
                 {
+                    "name": "isError",
+                    "value": "${DS_AllPrayerTime.status == 'error' || targetTime < 0}",
+                    "type": "boolean"
+                },
+                {
                     "name": "isNextFajr",
-                    "value": "${currentTimeStr <= data.prayers[0].time || currentTimeStr > data.prayers[4].time}",
+                    "value": "${utcTime < data.prayers[0].epoch + 60000 || utcTime >= data.prayers[4].epoch + 60000}",
                     "type": "boolean"
                 },
                 {
                     "name": "isNextDhuhr",
-                    "value": "${currentTimeStr > data.prayers[0].time && currentTimeStr <= data.prayers[1].time}",
+                    "value": "${utcTime >= data.prayers[0].epoch + 60000 && utcTime < data.prayers[1].epoch + 60000}",
                     "type": "boolean"
                 },
                 {
                     "name": "isNextAsr",
-                    "value": "${currentTimeStr > data.prayers[1].time && currentTimeStr <= data.prayers[2].time}",
+                    "value": "${utcTime >= data.prayers[1].epoch + 60000 && utcTime < data.prayers[2].epoch + 60000}",
                     "type": "boolean"
                 },
                 {
                     "name": "isNextMaghrib",
-                    "value": "${currentTimeStr > data.prayers[2].time && currentTimeStr <= data.prayers[3].time}",
+                    "value": "${utcTime >= data.prayers[2].epoch + 60000 && utcTime < data.prayers[3].epoch + 60000}",
                     "type": "boolean"
                 },
                 {
                     "name": "isNextIsha",
-                    "value": "${currentTimeStr > data.prayers[3].time && currentTimeStr <= data.prayers[4].time}",
+                    "value": "${utcTime >= data.prayers[3].epoch + 60000 && utcTime < data.prayers[4].epoch + 60000}",
                     "type": "boolean"
                 },
                 {
@@ -392,7 +410,7 @@
                 },
                 {
                     "name": "adjustedEpoch",
-                    "value": "${activeEpoch < utcTime ? activeEpoch + 86400000 : activeEpoch}",
+                    "value": "${activeEpoch + 60000 <= utcTime ? activeEpoch + 86400000 : activeEpoch}",
                     "type": "number"
                 },
                 {
@@ -414,24 +432,6 @@
                     "name": "countdownText",
                     "value": "${diffMs <= 0 ? labels.itsTime : (hrs > 0 ? hrs + ' ' + labels.hourUnit + ' ' : '') + mins + ' ' + labels.minuteUnit}",
                     "type": "string"
-                }
-            ],
-            "onMount": [
-                {
-                    "type": "DataStore:WatchObject",
-                    "namespace": "allPrayerTimeWidget",
-                    "key": "allPrayerTimeData"
-                },
-                {
-                    "type": "Idle",
-                    "delay": 500
-                },
-                {
-                    "type": "SendEvent",
-                    "arguments": [
-                        "FETCH_ALL_PRAYER_TIME",
-                        "${targetTime}"
-                    ]
                 }
             ],
             "onPress": [
@@ -483,7 +483,7 @@
                             },
                             {
                                 "type": "Container",
-                                "display": "${targetTime == 0 ? 'normal' : 'none'}",
+                                "display": "${!isError && targetTime == 0 ? 'normal' : 'none'}",
                                 "grow": 1,
                                 "shrink": 1,
                                 "width": "100%",
@@ -491,10 +491,14 @@
                                 "alignItems": "center",
                                 "items": [
                                     {
+                                        "description": "Shown while nothing is stored, when labels come from the bundled datasource, which has no loading label. Same look as NextPrayerTime's Fetching... screen.",
                                         "type": "Text",
-                                        "style": "mosqueName",
-                                        "text": "${labels.loading}",
+                                        "text": "${labels.loading ? labels.loading : 'Fetching...'}",
+                                        "fontFamily": "Amazon Ember Display",
+                                        "fontSize": "@fsRowTime",
+                                        "fontWeight": 700,
                                         "color": "@colorAccent",
+                                        "maxLines": 1,
                                         "textAlign": "center",
                                         "width": "100%"
                                     }
@@ -502,7 +506,7 @@
                             },
                             {
                                 "type": "Container",
-                                "display": "${targetTime < 0 ? 'normal' : 'none'}",
+                                "display": "${isError ? 'normal' : 'none'}",
                                 "grow": 1,
                                 "shrink": 1,
                                 "width": "100%",
@@ -513,6 +517,7 @@
                                         "type": "Text",
                                         "style": "mosqueName",
                                         "text": "${labels.error}",
+                                        "maxLines": 3,
                                         "textAlign": "center",
                                         "width": "100%"
                                     }
@@ -520,7 +525,7 @@
                             },
                             {
                                 "type": "Container",
-                                "display": "${targetTime > 0 ? 'normal' : 'none'}",
+                                "display": "${!isError && targetTime > 0 ? 'normal' : 'none'}",
                                 "grow": 1,
                                 "shrink": 1,
                                 "width": "100%",
@@ -572,7 +577,7 @@
                             },
                             {
                                 "type": "Container",
-                                "display": "${targetTime > 0 ? 'normal' : 'none'}",
+                                "display": "${!isError && targetTime > 0 ? 'normal' : 'none'}",
                                 "width": "100%",
                                 "alignItems": "center",
                                 "items": [

@@ -17,6 +17,21 @@ const SKILL_ID =
 const eventBridgeScheduler = require("./handlers/eventBridgeScheduler.js");
 const authHandler = require("./handlers/authHandler");
 const dbHandler = require("./handlers/dynamoDbHandler");
+const { invalidateMosqueWidgets } = require("./handlers/widgetRegistry.js");
+
+// Every field getMosqueList puts on a mosque. A new pick drops all of them
+// before merging, so a field the new mosque lacks (an APL touch argument omits
+// undefined values) can't leave the previous mosque's value behind.
+const MOSQUE_FIELDS = [
+  "primaryText",
+  "uuid",
+  "proximity",
+  "localisation",
+  "jumua",
+  "jumua2",
+  "jumua3",
+  "image",
+];
 
 const CANONICAL_PRAYER_NAMES = [
   "Fajr",
@@ -83,6 +98,10 @@ const getNextPrayerTime = async (
   prayerNames,
   iqamaTime = [],
   mosqueUuid = null,
+  // The widget shows a time on screen, so it must not guess: with this set,
+  // a missing tomorrow calendar throws instead of reusing today's Fajr time.
+  // Voice keeps the fallback (default false).
+  { requireTomorrowTimes = false } = {},
 ) => {
   const currentDateTime = new Date(
     new Date().toLocaleString("en-US", { timeZone: timezone }),
@@ -118,6 +137,7 @@ const getNextPrayerTime = async (
     const tomorrowBase = moment(now).add(1, "days");
     let firstPrayerTime = times[0];
     let firstIqamaTime = iqamaTime[0];
+    let hasTomorrowPrayerTime = false;
     if (mosqueUuid) {
       try {
         const tomorrowTimes = await getTomorrowPrayerTimes(
@@ -126,6 +146,7 @@ const getNextPrayerTime = async (
         );
         if (tomorrowTimes?.times?.[0]) {
           firstPrayerTime = tomorrowTimes.times[0];
+          hasTomorrowPrayerTime = true;
         }
         if (isIqama) {
           const tomorrowIqama = await getTomorrowIqamaTimes(
@@ -139,6 +160,9 @@ const getNextPrayerTime = async (
       } catch (error) {
         console.error("Error fetching tomorrow's times: ", error);
       }
+    }
+    if (requireTomorrowTimes && !hasTomorrowPrayerTime) {
+      throw new Error("Tomorrow's prayer times are unavailable");
     }
     // For iqama, resolve tomorrow's first iqama moment (absolute or offset from
     // the prayer time); otherwise use tomorrow's first prayer time directly.
@@ -1355,6 +1379,41 @@ const deleteRoutine = async (handlerInput, routineName) => {
   }
   return false;
 };
+/**
+ * Saves a newly chosen mosque into the user's record and the session.
+ *
+ * Merges rather than replaces: the record also holds routines, the favourite
+ * adhan, the support id, the linked account id and the installed widgets,
+ * none of which a mosque change should erase. When the mosque actually
+ * changes, the prayer widgets' data is deleted so they refetch for the new one.
+ */
+const persistSelectedMosque = async (handlerInput, selectedMosque) => {
+  const { attributesManager } = handlerInput;
+  const existing = (await attributesManager.getPersistentAttributes()) || {};
+  const previousUuid = existing.uuid;
+
+  const merged = { ...existing };
+  MOSQUE_FIELDS.forEach((field) => delete merged[field]);
+  Object.assign(merged, selectedMosque);
+
+  const sessionAttributes = attributesManager.getSessionAttributes() || {};
+  sessionAttributes.persistentAttributes = merged;
+  attributesManager.setSessionAttributes(sessionAttributes);
+  attributesManager.setPersistentAttributes(merged);
+
+  // Runs alongside the save; it handles its own errors, so a data store
+  // failure never fails the mosque change.
+  const widgetRefresh =
+    previousUuid !== merged.uuid
+      ? invalidateMosqueWidgets(handlerInput)
+      : Promise.resolve();
+  await Promise.all([
+    attributesManager.savePersistentAttributes(),
+    widgetRefresh,
+  ]);
+  return merged;
+};
+
 const updateRoutinePrayers = async (handlerInput) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
@@ -1639,6 +1698,7 @@ module.exports = {
   validateUserAccountStatus,
   deleteRoutine,
   updateRoutinePrayers,
+  persistSelectedMosque,
   CANONICAL_PRAYER_NAMES,
   isTaskTrigger,
   ALL_PRAYERS,

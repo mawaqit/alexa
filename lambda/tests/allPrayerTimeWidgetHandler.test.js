@@ -5,15 +5,19 @@
  *     checkForPersistenceData -> getNextPrayerTime), same as the single-prayer
  *     widget — wrong for a widget titled "Prayer Times". It now delegates to
  *     AllPrayerTimeIntentHandler, which speaks all five.
- * (2) A missing mosque, or a failed prayer-times fetch, used to push nothing
- *     to the datastore: nextUpdateTime stayed 0 and the document sat on
- *     "Fetching..." forever, since onMount only gets one shot at a fetch. It
- *     now pushes an explicit error sentinel (nextUpdateTime: -1) the document
- *     can branch on instead.
+ * (2) The widget must never show another day's times as current. A missing
+ *     mosque, a failed fetch, or tomorrow's times missing after Isha used to
+ *     push nothing, a sentinel nothing ever retried, or today's list after
+ *     Isha. Each now pushes an error state that is due at once, so the
+ *     document retries it on the next mount.
+ * (3) The list moves to tomorrow one minute after Isha — Isha keeps its
+ *     "It's time" minute, like the Next Prayer widget.
  */
 jest.mock("../handlers/apiHandler.js");
 
+const moment = require("moment-timezone");
 const {
+  getAccessToken,
   getPrayerTimings,
   updateDatastore,
 } = require("../handlers/apiHandler.js");
@@ -22,14 +26,33 @@ const {
   InstallAllPrayerTimeWidgetRequestHandler,
 } = require("../handlers/allPrayerTimeWidgetHandler.js");
 const { buildHandlerInput, spokenText } = require("./support/handlerInput");
-const { TODAY_TIMES, freezeAt } = require("./support/fixtures");
+const {
+  TODAY_TIMES,
+  TOMORROW_TIMINGS,
+  buildCalendar,
+  freezeAt,
+} = require("./support/fixtures");
 
 const TZ = "Europe/Paris";
 const UUID = "mosque-uuid";
+const TODAY = "2026-07-16";
+const TOMORROW = "2026-07-17";
+// TODAY_TIMES' Isha.
+const ISHA = "23:05";
+
+const epochOf = (date, time) =>
+  moment.tz(`${date} ${time}`, "YYYY-MM-DD HH:mm", TZ).valueOf();
+const freezeAtSecond = (wallClock) =>
+  jest.setSystemTime(moment.tz(wallClock, "YYYY-MM-DD HH:mm:ss", TZ).toDate());
 
 beforeEach(() => {
   jest.useFakeTimers({ doNotFake: ["nextTick"] });
   jest.clearAllMocks();
+  getAccessToken.mockResolvedValue({
+    access_token: "token",
+    token_type: "Bearer",
+  });
+  updateDatastore.mockResolvedValue({ results: [] });
 });
 
 afterEach(() => {
@@ -70,53 +93,133 @@ describe("ReadAllPrayerTimeAPLEventHandler — tapping the widget", () => {
   });
 });
 
-describe("InstallAllPrayerTimeWidgetRequestHandler — failure surfaces", () => {
-  it("pushes an error sentinel instead of nothing when no mosque is configured", async () => {
-    freezeAt("2026-07-16 04:00", TZ);
-    const handlerInput = buildHandlerInput({
+describe("InstallAllPrayerTimeWidgetRequestHandler — what the widget is sent", () => {
+  const buildInstall = (persistentAttributes = { uuid: UUID }) =>
+    buildHandlerInput({
       requestType: "Alexa.DataStore.PackageManager.UsagesInstalled",
       timezone: TZ,
-      persistentAttributes: {},
+      persistentAttributes: {
+        primaryText: "Mosquée de Paris",
+        ...persistentAttributes,
+      },
     });
 
-    await InstallAllPrayerTimeWidgetRequestHandler.handle(handlerInput);
+  // Today's times, plus tomorrow's when the calendar is asked for (which is
+  // how getTomorrowPrayerTimes reads them).
+  const serveTimes = ({ tomorrow = TOMORROW_TIMINGS } = {}) =>
+    getPrayerTimings.mockImplementation(
+      async (_uuid, _tz, _iqama, isPrayerCalendarRequired) =>
+        isPrayerCalendarRequired
+          ? {
+              calendar: buildCalendar(tomorrow ? { [TOMORROW]: tomorrow } : {}),
+            }
+          : { times: TODAY_TIMES },
+    );
 
+  const pushedContent = () => {
     expect(updateDatastore).toHaveBeenCalledTimes(1);
     const [, commands] = updateDatastore.mock.calls[0];
-    expect(commands[0].content.nextUpdateTime).toBe(-1);
-    expect(commands[0].content.labels.error).toBeTruthy();
+    return commands[0].content;
+  };
+
+  it("pushes today's list before Isha, refreshing once Isha's minute ends", async () => {
+    freezeAt(`${TODAY} 13:00`, TZ);
+    serveTimes();
+
+    await InstallAllPrayerTimeWidgetRequestHandler.handle(buildInstall());
+
+    const content = pushedContent();
+    expect(content.status).toBe("ok");
+    expect(content.data.prayers.map((p) => p.time)).toEqual(TODAY_TIMES);
+    expect(content.data.prayers[4].epoch).toBe(epochOf(TODAY, ISHA));
+    expect(content.nextUpdateTime).toBe(epochOf(TODAY, ISHA) + 60 * 1000);
+    expect(content.pushedAt).toBe(Date.now());
   });
 
-  it("pushes the same error sentinel when the prayer-times fetch throws", async () => {
-    freezeAt("2026-07-16 04:00", TZ);
+  it("keeps today's list through Isha's own minute", async () => {
+    // The Next Prayer widget shows "It's time" for this minute; this list
+    // must agree rather than already showing tomorrow.
+    freezeAtSecond(`${TODAY} 23:05:30`);
+    serveTimes();
+
+    await InstallAllPrayerTimeWidgetRequestHandler.handle(buildInstall());
+
+    expect(pushedContent().data.prayers[4].epoch).toBe(epochOf(TODAY, ISHA));
+  });
+
+  it("switches to tomorrow's list, dated tomorrow, once Isha's minute is over", async () => {
+    freezeAtSecond(`${TODAY} 23:06:00`);
+    serveTimes();
+
+    await InstallAllPrayerTimeWidgetRequestHandler.handle(buildInstall());
+
+    const content = pushedContent();
+    // Tomorrow's real times (05:31 Fajr), not today's reused.
+    expect(content.data.prayers.map((p) => p.time)).toEqual(
+      TOMORROW_TIMINGS.filter((_, index) => index !== 1),
+    );
+    expect(content.data.prayers[0].epoch).toBe(epochOf(TOMORROW, "05:31"));
+    expect(content.nextUpdateTime).toBe(epochOf(TOMORROW, "23:04") + 60 * 1000);
+  });
+
+  it("switches even when the device's refresh lands a few seconds early", async () => {
+    // The device timer fires at Isha + 1 min by its own clock; a clock a few
+    // seconds ahead must not get today's list for another minute.
+    freezeAtSecond(`${TODAY} 23:05:57`);
+    serveTimes();
+
+    await InstallAllPrayerTimeWidgetRequestHandler.handle(buildInstall());
+
+    expect(pushedContent().data.prayers[0].epoch).toBe(
+      epochOf(TOMORROW, "05:31"),
+    );
+  });
+
+  it("pushes the error state, not today's list, when tomorrow is missing after Isha", async () => {
+    // Today's list after Isha would present the day just ended as upcoming.
+    freezeAt(`${TODAY} 23:30`, TZ);
+    serveTimes({ tomorrow: null });
+
+    await InstallAllPrayerTimeWidgetRequestHandler.handle(buildInstall());
+
+    const content = pushedContent();
+    expect(content.status).toBe("error");
+    expect(content.data).toBeNull();
+    expect(content.labels.error).toBe(
+      "Couldn't load prayer times. They'll update shortly.",
+    );
+  });
+
+  it("pushes the error state when the prayer-times fetch throws", async () => {
+    freezeAt(`${TODAY} 13:00`, TZ);
     getPrayerTimings.mockRejectedValue(new Error("MAWAQIT API down"));
-    const handlerInput = buildHandlerInput({
-      requestType: "Alexa.DataStore.PackageManager.UsagesInstalled",
-      timezone: TZ,
-      persistentAttributes: { uuid: UUID, primaryText: "Mosquée de Paris" },
-    });
 
-    await InstallAllPrayerTimeWidgetRequestHandler.handle(handlerInput);
+    await InstallAllPrayerTimeWidgetRequestHandler.handle(buildInstall());
 
-    expect(updateDatastore).toHaveBeenCalledTimes(1);
-    const [, commands] = updateDatastore.mock.calls[0];
-    expect(commands[0].content.nextUpdateTime).toBe(-1);
+    expect(pushedContent().status).toBe("error");
   });
 
-  it("does not push an error state on a normal successful install", async () => {
-    freezeAt("2026-07-16 04:00", TZ);
-    getPrayerTimings.mockResolvedValue({ times: TODAY_TIMES });
-    const handlerInput = buildHandlerInput({
-      requestType: "Alexa.DataStore.PackageManager.UsagesInstalled",
-      timezone: TZ,
-      persistentAttributes: { uuid: UUID, primaryText: "Mosquée de Paris" },
-    });
+  it("asks for a mosque when none is configured", async () => {
+    freezeAt(`${TODAY} 13:00`, TZ);
 
-    await InstallAllPrayerTimeWidgetRequestHandler.handle(handlerInput);
+    await InstallAllPrayerTimeWidgetRequestHandler.handle(buildInstall({}));
 
-    expect(updateDatastore).toHaveBeenCalledTimes(1);
-    const [, commands] = updateDatastore.mock.calls[0];
-    expect(commands[0].content.nextUpdateTime).toBeGreaterThan(0);
-    expect(commands[0].content.labels.error).toBeUndefined();
+    const content = pushedContent();
+    expect(content.status).toBe("error");
+    expect(content.labels.error).toMatch(/haven't registered a mosque/);
+    expect(getPrayerTimings).not.toHaveBeenCalled();
+  });
+
+  it("makes every error state due at once, so the next mount retries it", async () => {
+    // The old -1 sentinel was never retried: one outage at Isha left the
+    // error on screen until the user changed mosque.
+    freezeAt(`${TODAY} 13:00`, TZ);
+    getPrayerTimings.mockRejectedValue(new Error("MAWAQIT API down"));
+
+    await InstallAllPrayerTimeWidgetRequestHandler.handle(buildInstall());
+
+    const content = pushedContent();
+    expect(content.nextUpdateTime).toBe(Date.now());
+    expect(content.pushedAt).toBe(Date.now());
   });
 });

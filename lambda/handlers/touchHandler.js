@@ -33,7 +33,7 @@ const MosqueListTouchEventHandler = {
     selectedMosque.proximity = helperFunctions.parseProximity(
       selectedMosque.proximity,
     );
-    sessionAttributes.persistentAttributes = selectedMosque;
+    await helperFunctions.persistSelectedMosque(handlerInput, selectedMosque);
     try {
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       const mosqueTimes = await getPrayerTimings(

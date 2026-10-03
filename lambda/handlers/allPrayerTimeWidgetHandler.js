@@ -3,40 +3,52 @@ const moment = require("moment-timezone");
 const apiHandler = require("./apiHandler");
 const helperFunctions = require("../helperFunctions");
 const { AllPrayerTimeIntentHandler } = require("./intentHandler");
+const { putWidgetObject } = require("./dataStoreHandler");
+const {
+  registerWidgetUsage,
+  unregisterWidgetUsage,
+} = require("./widgetRegistry");
 
-// Pushed when the widget has no mosque configured yet, or the install fetch
-// below throws, so the document leaves its "Fetching..." branch instead of
-// sitting on it forever (onMount only ever gets one shot at a real fetch).
-// nextUpdateTime: -1 is a sentinel distinct from the loading state's 0.
-async function pushAllPrayerTimeErrorState(handlerInput, requestAttributes) {
+const PACKAGE_ID = "AllPrayerTime";
+const NAMESPACE = "allPrayerTimeWidget";
+const KEY = "allPrayerTimeData";
+
+// Isha keeps its "It's time" row for one minute, like the Next Prayer widget,
+// and only then does the list move on to tomorrow.
+const PRAYER_MINUTE_MS = 60 * 1000;
+// The device's refresh timer fires at Isha + 1 minute by its own clock. The
+// switch happens 5 s earlier on ours, so a device clock running slightly
+// ahead doesn't land the refresh a hair early and get today's list again.
+const SWITCH_TO_TOMORROW_AFTER_MS = PRAYER_MINUTE_MS - 5 * 1000;
+
+const requireFivePrayerTimes = (times, which) => {
+  if (!Array.isArray(times) || times.length < 5) {
+    throw new Error(`${which} prayer times are unavailable`);
+  }
+  return times;
+};
+
+// Pushed instead of any list the skill can't vouch for (no mosque, a failed
+// fetch, tomorrow missing after Isha), so the widget never shows another
+// day's times as current. Due immediately: the document retries it on the
+// next mount, or a minute later while it stays on screen (pushedAt + 60 s).
+async function pushAllPrayerTimeErrorState(
+  handlerInput,
+  requestAttributes,
+  errorPromptKey,
+) {
+  const now = Date.now();
   try {
-    const commands = [
-      {
-        type: "PUT_OBJECT",
-        namespace: "allPrayerTimeWidget",
-        key: "allPrayerTimeData",
-        content: {
-          labels: {
-            title: requestAttributes.t("widgets.allPrayerTime.title"),
-            error: requestAttributes.t("widgets.installationErrorPrompt"),
-          },
-          data: null,
-          nextUpdateTime: -1,
-        },
+    await putWidgetObject(handlerInput, NAMESPACE, KEY, {
+      labels: {
+        title: requestAttributes.t("widgets.allPrayerTime.title"),
+        error: requestAttributes.t(errorPromptKey),
       },
-    ];
-    const tokenResponse = await apiHandler.getAccessToken();
-    const target = {
-      type: "DEVICES",
-      items: [Alexa.getDeviceId(handlerInput.requestEnvelope)],
-    };
-    const apiEndpoint = helperFunctions.getApiEndpoint(handlerInput);
-    await apiHandler.updateDatastore(
-      tokenResponse,
-      commands,
-      target,
-      apiEndpoint,
-    );
+      data: null,
+      status: "error",
+      nextUpdateTime: now,
+      pushedAt: now,
+    });
   } catch (error) {
     console.error(
       "Error while pushing all prayer time widget error state: ",
@@ -50,16 +62,21 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesInstalled" &&
-      helperFunctions.getPackageId(handlerInput) === "AllPrayerTime"
+      helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
     const requestAttributes = attributesManager.getRequestAttributes();
+    await registerWidgetUsage(handlerInput, PACKAGE_ID);
     const persistentAttributes =
       await attributesManager.getPersistentAttributes();
     if (!persistentAttributes?.uuid) {
-      await pushAllPrayerTimeErrorState(handlerInput, requestAttributes);
+      await pushAllPrayerTimeErrorState(
+        handlerInput,
+        requestAttributes,
+        "mosqueNotRegisteredPrompt",
+      );
       return handlerInput.responseBuilder
         .withShouldEndSession(true)
         .getResponse();
@@ -70,30 +87,38 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
         persistentAttributes.uuid,
         userTimeZone,
       );
+      const todayTimes = requireFivePrayerTimes(mosqueTimes?.times, "Today's");
       const prayerNames = helperFunctions.extractPhonemeText(
         requestAttributes.t("prayerNames"),
       );
       const mosqueName = persistentAttributes.primaryText;
       const currentMoment = moment.tz(userTimeZone);
-      const currentTimeStr = currentMoment.format("HH:mm");
+      const todayStr = currentMoment.format("YYYY-MM-DD");
 
-      // Once Isha has passed there is no "next" prayer left on today's
-      // calendar, so show tomorrow's schedule instead of a stale today's
-      // Fajr time paired with a next-day countdown.
-      let displayTimes = mosqueTimes.times;
-      let targetDateStr = currentMoment.format("YYYY-MM-DD");
-      if (currentTimeStr > mosqueTimes.times[4]) {
+      // Once Isha's minute is over there is no "next" prayer left today, so
+      // the list moves on to tomorrow. If tomorrow can't be loaded this
+      // throws into the error state: showing today's list after Isha would
+      // present yesterday's times as upcoming.
+      let displayTimes = todayTimes;
+      let targetDateStr = todayStr;
+      const ishaEpoch = helperFunctions.getWallClockEpoch(
+        todayStr,
+        todayTimes[4],
+        userTimeZone,
+      );
+      if (Date.now() >= ishaEpoch + SWITCH_TO_TOMORROW_AFTER_MS) {
         const tomorrowTimes = await helperFunctions.getTomorrowPrayerTimes(
           persistentAttributes.uuid,
           userTimeZone,
         );
-        if (tomorrowTimes?.times) {
-          displayTimes = tomorrowTimes.times;
-          targetDateStr = currentMoment
-            .clone()
-            .add(1, "day")
-            .format("YYYY-MM-DD");
-        }
+        displayTimes = requireFivePrayerTimes(
+          tomorrowTimes?.times,
+          "Tomorrow's",
+        );
+        targetDateStr = currentMoment
+          .clone()
+          .add(1, "day")
+          .format("YYYY-MM-DD");
       }
 
       // `mosqueTimes.times`/`displayTimes` line up with prayers[0..4] only
@@ -102,7 +127,7 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
       // Jumma/Eid/Shuruq trailing at 5-7 — happens to start in the same
       // Fajr..Isha order. A change to either ordering would silently mislabel
       // prayer times rather than fail.
-      const prayers = displayTimes.map((time, index) => ({
+      const prayers = displayTimes.slice(0, 5).map((time, index) => ({
         name: prayerNames[index],
         time,
         epoch: helperFunctions.getWallClockEpoch(
@@ -112,60 +137,36 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
         ),
       }));
 
-      // Refresh right when Isha passes — not at midnight — so the switch to
-      // tomorrow's schedule above actually takes effect promptly instead of
-      // sitting on today's stale list for the rest of the evening.
-      const nextUpdateTime = prayers[4].epoch;
+      // Refresh when Isha's minute ends — not at midnight — so the switch to
+      // tomorrow's schedule above takes effect promptly.
+      const nextUpdateTime = prayers[4].epoch + PRAYER_MINUTE_MS;
 
-      const commands = [
-        {
-          type: "PUT_OBJECT",
-          namespace: "allPrayerTimeWidget",
-          key: "allPrayerTimeData",
-          content: {
-            labels: {
-              title: requestAttributes.t("widgets.allPrayerTime.title"),
-              loading: requestAttributes.t("widgets.allPrayerTime.loading"),
-              // The countdown on the highlighted row reuses the Next Prayer
-              // widget's copy rather than duplicating it under a second key.
-              remaining: requestAttributes.t(
-                "widgets.nextPrayerTime.remaining",
-              ),
-              itsTime: requestAttributes.t("widgets.nextPrayerTime.itsTime"),
-              hourUnit: requestAttributes.t("widgets.nextPrayerTime.hourUnit"),
-              minuteUnit: requestAttributes.t(
-                "widgets.nextPrayerTime.minuteUnit",
-              ),
-            },
-            data: {
-              prayers,
-              mosqueName,
-            },
-            nextUpdateTime,
-          },
+      await putWidgetObject(handlerInput, NAMESPACE, KEY, {
+        labels: {
+          title: requestAttributes.t("widgets.allPrayerTime.title"),
+          loading: requestAttributes.t("widgets.allPrayerTime.loading"),
+          // The countdown on the highlighted row reuses the Next Prayer
+          // widget's copy rather than duplicating it under a second key.
+          remaining: requestAttributes.t("widgets.nextPrayerTime.remaining"),
+          itsTime: requestAttributes.t("widgets.nextPrayerTime.itsTime"),
+          hourUnit: requestAttributes.t("widgets.nextPrayerTime.hourUnit"),
+          minuteUnit: requestAttributes.t("widgets.nextPrayerTime.minuteUnit"),
         },
-      ];
-      const tokenResponse = await apiHandler.getAccessToken();
-
-      const target = {
-        type: "DEVICES",
-        items: [Alexa.getDeviceId(handlerInput.requestEnvelope)],
-      };
-      const apiEndpoint = helperFunctions.getApiEndpoint(handlerInput);
-      await apiHandler.updateDatastore(
-        tokenResponse,
-        commands,
-        target,
-        apiEndpoint,
-      );
-      persistentAttributes.lastAllPrayerTimeWidgetUpdate =
-        new Date().toISOString();
-      persistentAttributes.isAllPrayerTimeWidgetInstalled = true;
-      attributesManager.setPersistentAttributes(persistentAttributes);
-      await attributesManager.savePersistentAttributes();
+        data: {
+          prayers,
+          mosqueName,
+        },
+        status: "ok",
+        nextUpdateTime,
+        pushedAt: Date.now(),
+      });
     } catch (error) {
       console.error("Error while installing all prayer time widget: ", error);
-      await pushAllPrayerTimeErrorState(handlerInput, requestAttributes);
+      await pushAllPrayerTimeErrorState(
+        handlerInput,
+        requestAttributes,
+        "widgets.loadErrorPrompt",
+      );
     }
 
     return handlerInput.responseBuilder
@@ -182,19 +183,11 @@ const RemoveAllPrayerTimeWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesRemoved" &&
-      helperFunctions.getPackageId(handlerInput) === "AllPrayerTime"
+      helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
   async handle(handlerInput) {
-    const { attributesManager } = handlerInput;
-    const attributes =
-      (await attributesManager.getPersistentAttributes()) || {};
-
-    // Remove the instance from the array when the widget has been removed.
-    attributes.isAllPrayerTimeWidgetInstalled = false;
-    attributesManager.setPersistentAttributes(attributes);
-    await attributesManager.savePersistentAttributes();
-
+    await unregisterWidgetUsage(handlerInput, PACKAGE_ID);
     return handlerInput.responseBuilder.getResponse();
   },
 };
@@ -208,12 +201,12 @@ const UpdateAllPrayerTimeWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UpdateRequest" &&
-      helperFunctions.getPackageId(handlerInput) === "AllPrayerTime"
+      helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
   async handle(handlerInput) {
-    // fromVersion/toVersion already captured in the full request envelope
-    // logged by LogRequestInterceptor; not otherwise needed by this handler.
+    // Records toVersion on the device's widget record.
+    await registerWidgetUsage(handlerInput, PACKAGE_ID);
     return handlerInput.responseBuilder.getResponse();
   },
 };

@@ -110,6 +110,9 @@ module.exports = {
       },
       installationErrorPrompt:
         "Sorry, an error occurred while installing the widget. Please try again later.",
+      // Shown on a prayer widget when today's or tomorrow's times can't be
+      // loaded; the widget retries on its own.
+      loadErrorPrompt: "Couldn't load prayer times. They'll update shortly.",
     },
     nextPrayerWithoutMosqueAndTimePrompt: `The next prayer is %s at %s.`,
     linkAccountPrompt:

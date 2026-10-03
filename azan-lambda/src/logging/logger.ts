@@ -15,6 +15,10 @@ import type {
  * The request id stays: it is what tells concurrent invocations apart.
  */
 class CompactLogFormatter extends LogFormatter {
+  /**
+   * Returns a log item with level, message, an available request id, and
+   * caller-supplied attributes; omits the default function metadata.
+   */
   formatAttributes(
     attributes: UnformattedAttributes,
     additionalLogAttributes: LogAttributes,

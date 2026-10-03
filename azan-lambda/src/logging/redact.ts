@@ -9,11 +9,14 @@ const SECRET_KEYS = new Set(["code", "token"]);
 const REDACTED = "[REDACTED]";
 
 /**
- * Returns a JSON-safe copy of `value` with every credential replaced, so a
- * whole directive or response can be logged without leaking one.
+ * Returns a JSON copy of `value`, replacing string values under keys `code`
+ * and `token` at any depth with "[REDACTED]".
  *
  * Only string values are masked: the keys are generic enough that a
  * non-string `code` is not a credential, and masking it would hide a real bug.
+ * Returns undefined when JSON.stringify produces no JSON value. Other values
+ * follow JSON serialization rules; serialization errors propagate, including
+ * TypeError for circular references or BigInt values without a JSON conversion.
  */
 export function redact(value: unknown): unknown {
   // Widened, not asserted: `undefined`, a function, or a symbol serialises to

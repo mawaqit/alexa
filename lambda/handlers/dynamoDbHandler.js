@@ -47,7 +47,7 @@ const AZAN_RESERVED_KEYS = new Set(["updatedTimestamp", "createdTimestamp"]);
 
 /**
  * Creates or updates an Azan user in a single atomic UpdateExpression, touching
- * only the attributes passed in.
+ * only the supplied attributes and managed timestamps.
  *
  * Must never be a get-then-Put. On account linking this runs concurrently with
  * azan-lambda's AcceptGrant and Discover handlers on the same row; a Put
@@ -55,6 +55,13 @@ const AZAN_RESERVED_KEYS = new Set(["updatedTimestamp", "createdTimestamp"]);
  * which silently erased the endpointId Discover had just written — leaving the
  * user linked but never receiving the adhan.
  * Mirrors updateAzanUserInfo in azan-lambda/src/services/azanUsers.ts.
+ *
+ * `id` is the Amazon account id. Nullish refreshToken/endpointId values and
+ * undefined extra attributes are skipped; refreshToken is stored as
+ * refresh_token. Timestamps are managed here: creation is set only if absent,
+ * and update time is always refreshed. Caller-supplied timestamps are ignored.
+ * Returns the updated attributes, or undefined if DynamoDB omits them;
+ * DynamoDB failures propagate.
  */
 async function UpdateAzanUserInfo(
   id,
@@ -207,7 +214,13 @@ async function BatchGetAzanUserInfo(userIds) {
 // ---------------------------------------------------------------------------
 
 const CLEANUP_STAGES = ["dev", "prod"];
+/**
+ * Returns the persistence table name for the supplied stage.
+ */
 const persistenceTableFor = (stage) => `mawaqit-alexa-user-data-${stage}`;
+/**
+ * Returns the Azan table name for the supplied stage.
+ */
 const azanTableFor = (stage) => `mawaqit-alexa-azan-users-data-${stage}`;
 
 /**
@@ -215,7 +228,9 @@ const azanTableFor = (stage) => `mawaqit-alexa-azan-users-data-${stage}`;
  * one stage being down must not leave the other stage's data behind.
  * A missing table is skipped, not failed — otherwise a stage that was never
  * provisioned would make every deletion report failure forever.
- * Throws after all stages were attempted if any genuinely failed.
+ * Returns the settled results in dev/prod order, including skipped failures.
+ * Rethrows the first non-missing-table rejection in that order after both
+ * stages settle. `operation` must return a promise; synchronous throws escape.
  */
 async function acrossStages(label, operation) {
   const results = await Promise.allSettled(CLEANUP_STAGES.map(operation));
@@ -237,7 +252,8 @@ async function acrossStages(label, operation) {
 /**
  * Looks up the Amazon account ids (`user_id`) persisted for an Alexa user in
  * every stage's persistence table. Best effort: a stage that cannot be read
- * just contributes nothing.
+ * just contributes nothing. Returns distinct ids, also accepting the legacy
+ * top-level userId field, or an empty array when no mapping is found.
  */
 async function GetPersistedAmazonUserIds(alexaUserId) {
   const results = await Promise.allSettled(
@@ -270,6 +286,8 @@ async function GetPersistedAmazonUserIds(alexaUserId) {
  *
  * Keyed by the Amazon account id (`amzn1.account.…`), NOT the Alexa user id
  * (`amzn1.ask.account.…`) — see userDataCleanup.js for resolving one.
+ * Returns true after dev and prod complete, skipping missing tables. Other
+ * DynamoDB failures propagate after both stages have been attempted.
  */
 async function DeleteAzanUserInfo(amazonUserId) {
   await acrossStages("DeleteAzanUserInfo", (stage) =>
@@ -284,7 +302,11 @@ async function DeleteAzanUserInfo(amazonUserId) {
   return true;
 }
 
-/** Deletes an Alexa user's row from every stage's persistence table. */
+/**
+ * Deletes an Alexa user's row from the dev and prod persistence tables.
+ * Returns true, skipping missing tables; other DynamoDB failures propagate
+ * after both stages have been attempted.
+ */
 async function DeletePersistedUserInfo(alexaUserId) {
   await acrossStages("DeletePersistedUserInfo", (stage) =>
     dynamo.send(

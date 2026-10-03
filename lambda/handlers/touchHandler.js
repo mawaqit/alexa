@@ -14,6 +14,11 @@ const MosqueListTouchEventHandler = {
         requestAttributes.t("titleForMosqueList")
     );
   },
+  /**
+   * Persists the mosque supplied in APL argument 2 and refreshes routine
+   * times before returning prayer speech. Persistence errors propagate;
+   * timing errors select a recovery prompt or mosque search.
+   */
   async handle(handlerInput) {
     const locale = Alexa.getLocale(handlerInput.requestEnvelope);
     const selectedMosque = helperFunctions.getAplArgument(handlerInput, 2);

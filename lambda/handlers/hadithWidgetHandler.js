@@ -17,6 +17,12 @@ const InstallHadithWidgetRequestHandler = {
       helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Records widget usage and pushes a localized random hadith to the device.
+   * Sets refresh due in UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS hours
+   * (default one). Hadith-fetch and delivery failures are caught; returns
+   * a response ending the session.
+   */
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
     const requestAttributes = attributesManager.getRequestAttributes();
@@ -96,6 +102,10 @@ const RemoveHadithWidgetRequestHandler = {
       helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Marks this device's widget inactive and attempts to remove its data.
+   * Registry and delivery failures are caught; returns an empty skill response.
+   */
   async handle(handlerInput) {
     await unregisterWidgetUsage(handlerInput, PACKAGE_ID);
     return handlerInput.responseBuilder.getResponse();
@@ -114,6 +124,10 @@ const UpdateHadithWidgetRequestHandler = {
       helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Records the reported package version and returns an empty skill response.
+   * Registry persistence failures are caught.
+   */
   async handle(handlerInput) {
     // Records toVersion on the device's widget record.
     await registerWidgetUsage(handlerInput, PACKAGE_ID);
@@ -154,6 +168,11 @@ const UpdateHadithAPLEventHandler = {
       helperFunctions.getAplArgument(handlerInput, 0) === "FETCH_NEW_HADITH"
     );
   },
+  /**
+   * Refreshes when APL argument 1 (epoch milliseconds) is falsy or due.
+   * Otherwise returns a response ending the session. Delegated refresh
+   * errors propagate.
+   */
   async handle(handlerInput) {
     const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
 

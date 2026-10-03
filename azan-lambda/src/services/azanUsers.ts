@@ -31,6 +31,13 @@ const RESERVED_KEYS = new Set(["updatedTimestamp", "createdTimestamp"]);
  * The table is written by this Lambda and by the main skill backend at the same
  * time, so this must never be a read-modify-write: two concurrent writers would
  * lose one of the two updates.
+ *
+ * `id` is the Amazon account id. Nullish refreshToken/endpointId values and
+ * undefined extra attributes are skipped; refreshToken is stored as
+ * refresh_token. Timestamps are managed here: creation is set only if absent,
+ * and update time is always refreshed. Caller-supplied timestamps are ignored.
+ * Returns the updated attributes, or undefined if DynamoDB omits them;
+ * DynamoDB failures propagate.
  */
 export async function updateAzanUserInfo(
   id: string,

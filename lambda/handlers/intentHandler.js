@@ -375,6 +375,12 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       Alexa.getSlotValue(handlerInput.requestEnvelope, "selectedMosque")
     );
   },
+  /**
+   * Selects a mosque by its one-based spoken list index, reoffering the list
+   * when missing or invalid. Persists the choice and refreshes routine times
+   * before returning prayer speech. Persistence errors propagate; timing
+   * errors select a recovery prompt or mosque search.
+   */
   async handle(handlerInput) {
     const locale = Alexa.getLocale(handlerInput.requestEnvelope);
     const selectedMosque = Alexa.getSlotValue(
@@ -1190,6 +1196,11 @@ const DeleteDataIntentHandler = {
       Alexa.getIntentName(handlerInput.requestEnvelope) === "DeleteDataIntent"
     );
   },
+  /**
+   * Requests confirmation before deleting user data, or keeps the session
+   * open when denied. On confirmation, deletes dev/prod user rows and then
+   * SDK persistence; returns a session-ending success or failure prompt.
+   */
   async handle(handlerInput) {
     const { requestEnvelope, responseBuilder, attributesManager } =
       handlerInput;
@@ -1921,6 +1932,11 @@ const MosqueYesIntentHandler = {
       handlerInput.attributesManager.getSessionAttributes().isMosqueRequested
     );
   },
+  /**
+   * Confirms the first offered mosque, clears selection flags, persists it,
+   * and refreshes routine times before returning prayer speech. A missing
+   * mosque restarts the search; other failures select an error prompt.
+   */
   async handle(handlerInput) {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();

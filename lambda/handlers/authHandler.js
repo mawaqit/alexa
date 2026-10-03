@@ -10,6 +10,11 @@ const AuthHandler = {
       "Alexa.Authorization.Grant"
     );
   },
+  /**
+   * Persists the grant code, exchanges it for tokens, and saves the refresh
+   * token and Amazon account mapping. A missing code skips these steps;
+   * exchange and persistence failures are caught. Returns an empty response.
+   */
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
     const code = handlerInput.requestEnvelope.request?.body?.grant?.code;

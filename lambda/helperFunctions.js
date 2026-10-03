@@ -91,6 +91,19 @@ const createDirectivePayload = (
   };
 };
 
+/**
+ * Returns the next prayer or iqama in schedule order, keeping the current
+ * minute eligible. `times` contains HH:mm wall-clock times in `timezone`,
+ * aligned with `prayerNames`; iqama entries are HH:mm times or minute offsets.
+ * The result contains name, HH:mm time, diffInMinutes, and a localized
+ * diffInMinutesPrompt.
+ *
+ * After today's last slot, uses the first slot of tomorrow's calendar when
+ * mosqueUuid is available. Fetch failures are caught and unavailable entries
+ * fall back to today's values. With requireTomorrowTimes, missing tomorrow's
+ * first prayer instead throws "Tomorrow's prayer times are unavailable"; this
+ * option does not require tomorrow's iqama. Invalid timezones can throw RangeError.
+ */
 const getNextPrayerTime = async (
   requestAttributes,
   times,
@@ -1386,6 +1399,9 @@ const deleteRoutine = async (handlerInput, routineName) => {
  * adhan, the support id, the linked account id and the installed widgets,
  * none of which a mosque change should erase. When the mosque actually
  * changes, the prayer widgets' data is deleted so they refetch for the new one.
+ * Removes old mosque fields before merging and returns the merged record.
+ * Persistence failures propagate; widget invalidation failures are caught.
+ * Session state is updated before the save, and invalidation runs alongside it.
  */
 const persistSelectedMosque = async (handlerInput, selectedMosque) => {
   const { attributesManager } = handlerInput;

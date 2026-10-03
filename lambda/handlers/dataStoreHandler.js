@@ -9,6 +9,10 @@ const apiHandler = require("./apiHandler");
  * resolves to null and the caller skips the call instead of throwing.
  * */
 
+/**
+ * Returns a DEVICES target for the request device, or null for a missing or
+ * empty device id.
+ */
 const getDeviceTarget = (handlerInput) => {
   const deviceId =
     handlerInput?.requestEnvelope?.context?.System?.device?.deviceId;
@@ -20,6 +24,10 @@ const getDeviceTarget = (handlerInput) => {
 // USER reaches every data-store-capable device on the account, which is what
 // account-wide changes (mosque, skill disabled) need — the request's own
 // device may not even have a screen.
+/**
+ * Returns a USER target for the context user, falling back to the session
+ * user when the context id is nullish. Returns null for a missing or empty id.
+ */
 const getUserTarget = (handlerInput) => {
   const envelope = handlerInput?.requestEnvelope;
   const userId =
@@ -29,6 +37,11 @@ const getUserTarget = (handlerInput) => {
     : null;
 };
 
+/**
+ * Sends commands to the supplied Data Store target using the request API
+ * endpoint, defaulting to EU when absent. Returns the API response body.
+ * Rejects a missing access token and propagates token-fetch and delivery errors.
+ */
 const sendDataStoreCommands = async (handlerInput, commands, target) => {
   const token = await apiHandler.getAccessToken();
   if (!token?.access_token) {
@@ -42,6 +55,11 @@ const sendDataStoreCommands = async (handlerInput, commands, target) => {
 
 // Replaces a widget's content on the requesting device. Throws when the
 // request has no device, like any other delivery failure.
+/**
+ * Replaces namespace/key content on the requesting device and returns the
+ * Data Store response body. Rejects a missing device or access token and
+ * propagates token-fetch and delivery errors.
+ */
 const putWidgetObject = async (handlerInput, namespace, key, content) => {
   const target = getDeviceTarget(handlerInput);
   if (!target) {

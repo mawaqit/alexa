@@ -21,6 +21,10 @@ const PRAYER_MINUTE_MS = 60 * 1000;
 // ahead doesn't land the refresh a hair early and get today's list again.
 const SWITCH_TO_TOMORROW_AFTER_MS = PRAYER_MINUTE_MS - 5 * 1000;
 
+/**
+ * Returns times unchanged when it is an array of at least five entries.
+ * Throws an Error labeled with which otherwise; does not validate entries.
+ */
 const requireFivePrayerTimes = (times, which) => {
   if (!Array.isArray(times) || times.length < 5) {
     throw new Error(`${which} prayer times are unavailable`);
@@ -32,6 +36,11 @@ const requireFivePrayerTimes = (times, which) => {
 // fetch, tomorrow missing after Isha), so the widget never shows another
 // day's times as current. Due immediately: the document retries it on the
 // next mount, or a minute later while it stays on screen (pushedAt + 60 s).
+/**
+ * Attempts to replace widget content with a localized errorPromptKey message
+ * and null data, due immediately using epoch milliseconds. Translation and
+ * Data Store failures are caught, so this resolves without a result.
+ */
 async function pushAllPrayerTimeErrorState(
   handlerInput,
   requestAttributes,
@@ -58,6 +67,9 @@ async function pushAllPrayerTimeErrorState(
 }
 
 const InstallAllPrayerTimeWidgetRequestHandler = {
+  /**
+   * Matches installation events for the AllPrayerTime package.
+   */
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
@@ -65,6 +77,14 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
       helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Records widget usage and pushes five prayer times to the request device.
+   * Switches to tomorrow at Isha + 55 seconds; refresh is due at the displayed
+   * day's Isha + 60 seconds. All timestamps are epoch milliseconds.
+   * Missing mosque data or timing/delivery failures trigger a best-effort
+   * error-state push. Persistent-attribute read failures propagate. Returns
+   * a response ending the session.
+   */
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
     const requestAttributes = attributesManager.getRequestAttributes();
@@ -179,6 +199,9 @@ const InstallAllPrayerTimeWidgetRequestHandler = {
  * UsagesRemoved triggers when a user removes your widget package on their device.
  * */
 const RemoveAllPrayerTimeWidgetRequestHandler = {
+  /**
+   * Matches removal events for the AllPrayerTime package.
+   */
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
@@ -186,6 +209,10 @@ const RemoveAllPrayerTimeWidgetRequestHandler = {
       helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Marks this device's widget inactive and attempts to remove its data.
+   * Registry and delivery failures are caught; returns an empty skill response.
+   */
   async handle(handlerInput) {
     await unregisterWidgetUsage(handlerInput, PACKAGE_ID);
     return handlerInput.responseBuilder.getResponse();
@@ -197,6 +224,9 @@ const RemoveAllPrayerTimeWidgetRequestHandler = {
  * Your skill receives this event if your widget manifest has updateStateChanges set to INFORM
  * */
 const UpdateAllPrayerTimeWidgetRequestHandler = {
+  /**
+   * Matches update requests for the AllPrayerTime package.
+   */
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
@@ -204,6 +234,10 @@ const UpdateAllPrayerTimeWidgetRequestHandler = {
       helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Records the reported package version and returns an empty skill response.
+   * Registry persistence failures are caught.
+   */
   async handle(handlerInput) {
     // Records toVersion on the device's widget record.
     await registerWidgetUsage(handlerInput, PACKAGE_ID);
@@ -216,6 +250,9 @@ const UpdateAllPrayerTimeWidgetRequestHandler = {
  * from within the AllPrayerTime widget or the AllPrayerTime skill APL experience
  * */
 const UpdateAllPrayerTimeAPLEventHandler = {
+  /**
+   * Matches APL events whose first argument is FETCH_ALL_PRAYER_TIME.
+   */
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
@@ -224,6 +261,11 @@ const UpdateAllPrayerTimeAPLEventHandler = {
         "FETCH_ALL_PRAYER_TIME"
     );
   },
+  /**
+   * Refreshes when APL argument 1 (epoch milliseconds) is falsy or due.
+   * Otherwise returns a response ending the session. Delegated refresh
+   * errors propagate.
+   */
   async handle(handlerInput) {
     const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
 
@@ -240,6 +282,9 @@ const UpdateAllPrayerTimeAPLEventHandler = {
 };
 
 const ReadAllPrayerTimeAPLEventHandler = {
+  /**
+   * Matches APL events whose first argument is READ_ALL_PRAYER_TIME.
+   */
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
@@ -247,6 +292,11 @@ const ReadAllPrayerTimeAPLEventHandler = {
       helperFunctions.getAplArgument(handlerInput, 0) === "READ_ALL_PRAYER_TIME"
     );
   },
+  /**
+   * Speaks all five prayer times through the all-prayer intent, which handles
+   * a missing mosque and timing errors. Sets session flags to suppress APL
+   * and card directives, then returns the delegated skill response.
+   */
   async handle(handlerInput) {
     const sessionAttributes = handlerInput.requestEnvelope?.session
       ? handlerInput.attributesManager.getSessionAttributes()

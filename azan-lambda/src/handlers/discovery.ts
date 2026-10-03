@@ -51,6 +51,9 @@ function endpointIdFromUser(userId: string): string {
  * Alexa asks what devices this skill exposes. We answer with a single virtual
  * doorbell: that is the mechanism the azan rides on, since a doorbell is the
  * one endpoint type Alexa will announce proactively on a user's devices.
+ * Persists the endpoint for a returned Amazon user id; a profile without an id
+ * gets the shared endpoint without a database write. Profile lookup and
+ * persistence failures return an INTERNAL_ERROR response.
  */
 export async function handleDiscovery(
   event: SmartHomeRequest,

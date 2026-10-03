@@ -7,13 +7,15 @@ const {
 } = require("./dynamoDbHandler.js");
 
 /**
- * Finds every Amazon account id (`amzn1.account.…`) linked to this Alexa user.
+ * Returns distinct Amazon account ids (`amzn1.account.…`) found for this user.
  *
  * The Azan table is keyed by the Amazon id, but a skill request carries only
  * the Alexa user id. The mapping is the `user_id` persisted at account linking
  * (AuthHandler) or on a later session — and it may sit in either stage's
  * table, so all of them are searched. The linked access token is the last
- * resort; SkillDisabled usually has none.
+ * resort; SkillDisabled usually has none. Failed cross-stage reads are skipped,
+ * but SDK persistence reads and access-token profile failures propagate.
+ * Returns an empty array when no mapping or token yields an id.
  */
 async function resolveAmazonUserIds(handlerInput, alexaUserId) {
   const ids = new Set(await GetPersistedAmazonUserIds(alexaUserId));
@@ -36,17 +38,18 @@ async function resolveAmazonUserIds(handlerInput, alexaUserId) {
 }
 
 /**
- * Deletes everything stored for the requesting user, in every stage: the Azan
- * row(s) — which stop the adhan pushes — and the persistence row.
+ * Deletes the requesting user's persistence rows and resolved Amazon accounts'
+ * Azan rows from the dev and prod tables.
  *
  * Dev and prod share a skill id, so the event may reach either stage's Lambda
  * while the data lives in the other; sweeping all stages means neither Lambda
- * needs to know which. Azan rows go first: their key is read from the
- * persistence rows deleted after.
+ * needs to know which. Amazon ids are resolved before any deletion starts;
+ * Azan and persistence deletions then run concurrently.
  *
- * Attempts every delete before throwing, so one failure never leaves the rest
- * behind. The caller still runs attributesManager.deletePersistentAttributes()
- * to clear this stage's SDK state.
+ * Resolution errors propagate before deletion. Once ids are resolved, all
+ * deletes settle before the first rejection is rethrown. With no Amazon ids,
+ * only persistence rows are deleted. Does not clear the SDK persistence cache
+ * or widget data; callers handle those separately.
  */
 async function deleteUserDataEverywhere(handlerInput) {
   const alexaUserId = Alexa.getUserId(handlerInput.requestEnvelope);

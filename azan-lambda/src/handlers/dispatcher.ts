@@ -66,8 +66,10 @@ function sendResponse(response: AlexaResponse): AlexaResponse {
  * `event` is typed `unknown` on purpose: it arrives from Alexa unvalidated, and
  * the guards below are what make it safe to read.
  *
- * Every path returns a response — a throw escaping this function reaches Alexa
- * as an opaque timeout, so failures are answered, never raised.
+ * Secret-loading failures and recognized validation failures return Smart Home
+ * error responses. Serialization errors and malformed nested directive fields
+ * (such as a null directive or a non-string namespace) can still reject the
+ * returned promise; delegated handler rejections also propagate.
  */
 export const handler = async function (
   event: unknown,

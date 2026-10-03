@@ -9,6 +9,11 @@ const SkillEventHandler = {
       "AlexaSkillEvent.SkillDisabled"
     );
   },
+  /**
+   * Attempts to clear account-wide widget data, delete dev/prod user rows,
+   * and clear SDK persistence. Cleanup failures are caught independently;
+   * returns an empty skill response.
+   */
   async handle(handlerInput) {
     const userId = Alexa.getUserId(handlerInput.requestEnvelope);
     console.log(`Skill was disabled for user: ${userId}`);

@@ -45,7 +45,10 @@ function describeError(error: unknown): string | number {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** Exchanges an AcceptGrant authorization code for a long-lived token set. */
+/**
+ * Exchanges an AcceptGrant authorization code for a long-lived token set.
+ * Rejects an empty or missing authorization code and propagates request failures.
+ */
 export async function getLwaTokenResponse(
   authCode: string | undefined,
 ): Promise<LwaTokenResponse> {
@@ -70,7 +73,10 @@ export async function getLwaTokenResponse(
   }
 }
 
-/** Resolves an access token to the Amazon account that issued it. */
+/**
+ * Resolves an access token to the Amazon account that issued it.
+ * Rejects an empty or missing access token and propagates request failures.
+ */
 export async function getUserInfo(
   accessToken: string | undefined,
 ): Promise<AmazonUserProfile> {

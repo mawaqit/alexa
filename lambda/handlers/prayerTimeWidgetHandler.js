@@ -19,6 +19,11 @@ const PRAYER_MINUTE_MS = 60 * 1000;
 // fetch, tomorrow's Fajr unknown after Isha), so the widget never shows a
 // guessed time. Due immediately: the document retries it on the next mount,
 // or a minute later while it stays on screen (pushedAt + 60 s).
+/**
+ * Attempts to replace widget content with a localized errorPromptKey message
+ * and null data, due immediately using epoch milliseconds. Translation and
+ * Data Store failures are caught, so this resolves without a result.
+ */
 async function pushNextPrayerTimeErrorState(
   handlerInput,
   requestAttributes,
@@ -52,6 +57,13 @@ const InstallPrayerTimeWidgetRequestHandler = {
       helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Records widget usage and pushes the next prayer to the request device,
+   * with its start as the countdown target in epoch milliseconds. Tomorrow's
+   * Fajr must come from the calendar. Missing mosque data or timing/delivery
+   * failures trigger a best-effort error-state push. Persistent-attribute
+   * read failures propagate. Returns a response ending the session.
+   */
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
     const requestAttributes = attributesManager.getRequestAttributes();
@@ -159,6 +171,10 @@ const RemovePrayerTimeWidgetRequestHandler = {
       helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Marks this device's widget inactive and attempts to remove its data.
+   * Registry and delivery failures are caught; returns an empty skill response.
+   */
   async handle(handlerInput) {
     await unregisterWidgetUsage(handlerInput, PACKAGE_ID);
     return handlerInput.responseBuilder.getResponse();
@@ -177,6 +193,10 @@ const UpdatePrayerTimeWidgetRequestHandler = {
       helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Records the reported package version and returns an empty skill response.
+   * Registry persistence failures are caught.
+   */
   async handle(handlerInput) {
     // Records toVersion on the device's widget record.
     await registerWidgetUsage(handlerInput, PACKAGE_ID);

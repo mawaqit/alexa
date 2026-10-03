@@ -46,19 +46,32 @@ const LEGACY_WIDGET_FIELDS = Object.freeze([
   "lastAllPrayerTimeWidgetUpdate",
 ]);
 
+/**
+ * Returns whether the value is a nonempty string; whitespace is accepted.
+ */
 const isNonEmptyString = (value) => typeof value === "string" && value !== "";
 
+/**
+ * Checks only that a record has nonempty string package and device ids.
+ */
 const isWidgetRecord = (record) =>
   record !== null &&
   typeof record === "object" &&
   isNonEmptyString(record.packageId) &&
   isNonEmptyString(record.deviceId);
 
+/**
+ * Returns valid widget record references, including inactive records, or an
+ * empty array when installedWidgets is absent or not an array.
+ */
 const getInstalledWidgets = (attributes) =>
   Array.isArray(attributes?.installedWidgets)
     ? attributes.installedWidgets.filter(isWidgetRecord)
     : [];
 
+/**
+ * Returns the request device id, or null if it is not a nonempty string.
+ */
 const getDeviceId = (envelope) => {
   const deviceId = envelope?.context?.System?.device?.deviceId;
   return isNonEmptyString(deviceId) ? deviceId : null;
@@ -66,6 +79,10 @@ const getDeviceId = (envelope) => {
 
 // UsagesInstalled/UsagesRemoved carry payload.packageVersion; UpdateRequest
 // carries toVersion at the top of the request.
+/**
+ * Returns payload.packageVersion or, when nullish, request.toVersion;
+ * returns null unless the selected value is a nonempty string.
+ */
 const getRequestPackageVersion = (envelope) => {
   const request = envelope?.request;
   const version = request?.payload?.packageVersion ?? request?.toVersion;
@@ -75,6 +92,10 @@ const getRequestPackageVersion = (envelope) => {
 // Every request from a device lists its installed packages in context. Amazon
 // documents the field as packageVersion, but devices have been seen sending
 // `version`, so both are accepted.
+/**
+ * Returns the first matching context package's packageVersion, falling back
+ * to version when nullish, or null if no nonempty string version is found.
+ */
 const getContextPackageVersion = (envelope, packageId) => {
   const installed =
     envelope?.context?.["Alexa.DataStore.PackageManager"]?.installedPackages;
@@ -84,6 +105,10 @@ const getContextPackageVersion = (envelope, packageId) => {
   return isNonEmptyString(version) ? version : null;
 };
 
+/**
+ * Returns nonempty string instance ids from the request usages, or an empty
+ * array when usages is absent or not an array. Duplicates are retained.
+ */
 const getUsageInstanceIds = (envelope) => {
   const usages = envelope?.request?.payload?.usages;
   if (!Array.isArray(usages)) return [];
@@ -92,6 +117,11 @@ const getUsageInstanceIds = (envelope) => {
 
 // A widget's own UserEvent identifies its instance only through the
 // presentation URI: widget://<skillId>_<stage>/<packageId>/<instanceId>.
+/**
+ * Returns the segment following packageId in a widget presentation URI,
+ * or null when unavailable. Uses the context URI only if the request URI is
+ * nullish; does not decode URI segments.
+ */
 const getPresentationInstanceId = (envelope, packageId) => {
   const uri =
     envelope?.request?.presentationUri ??
@@ -104,6 +134,10 @@ const getPresentationInstanceId = (envelope, packageId) => {
   return isNonEmptyString(instanceId) ? instanceId : null;
 };
 
+/**
+ * Deletes legacy widget flags and update timestamps from attributes; returns
+ * whether any field was found.
+ */
 const dropLegacyFields = (attributes) => {
   let dropped = false;
   LEGACY_WIDGET_FIELDS.forEach((field) => {
@@ -218,6 +252,9 @@ const markWidgetRemoved = (
   return true;
 };
 
+/**
+ * Sets and saves persistent attributes; persistence errors propagate.
+ */
 const saveAttributes = async (attributesManager, attributes) => {
   attributesManager.setPersistentAttributes(attributes);
   await attributesManager.savePersistentAttributes();
@@ -265,6 +302,10 @@ const registerWidgetUsage = async (handlerInput, packageId) => {
   }
 };
 
+/**
+ * Removes the supplied Data Store namespaces from target and returns the
+ * API response body. Token-fetch and delivery errors propagate.
+ */
 const removeNamespaces = async (handlerInput, namespaces, target) =>
   sendDataStoreCommands(
     handlerInput,

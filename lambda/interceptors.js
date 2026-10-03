@@ -47,7 +47,9 @@ const AddDirectiveResponseInterceptor = {
     const sessionAttributes = handlerInput.requestEnvelope?.session
       ? handlerInput.attributesManager.getSessionAttributes()
       : {};
-    const { skipAplDirective, skipCardDirective } = sessionAttributes;
+    // Set through helperFunctions.suppressScreenOutput for this response only.
+    const { skipAplDirective, skipCardDirective } =
+      handlerInput.attributesManager.getRequestAttributes();
     if (!response) {
       return;
     }
@@ -94,14 +96,7 @@ const AddDirectiveResponseInterceptor = {
     } else {
       handleNoAplSupport(response, ssmlText, hasAudio, text, skipCardDirective);
     }
-    if (
-      handlerInput.requestEnvelope?.session &&
-      (sessionAttributes?.skipAplDirective ||
-        sessionAttributes?.skipCardDirective ||
-        clearedAdhanState)
-    ) {
-      delete sessionAttributes.skipAplDirective;
-      delete sessionAttributes.skipCardDirective;
+    if (handlerInput.requestEnvelope?.session && clearedAdhanState) {
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
     }
   },

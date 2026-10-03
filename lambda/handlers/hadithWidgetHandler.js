@@ -2,15 +2,27 @@ const Alexa = require("ask-sdk-core");
 const apiHandler = require("./apiHandler");
 const { getRandomHadith } = require("./apiHandler");
 const helperFunctions = require("../helperFunctions");
+const {
+  registerWidgetUsage,
+  unregisterWidgetUsage,
+} = require("./widgetRegistry");
+
+const PACKAGE_ID = "HadithOfTheDay";
 
 const InstallHadithWidgetRequestHandler = {
   canHandle(handlerInput) {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesInstalled" &&
-      helperFunctions.getPackageId(handlerInput) === "HadithOfTheDay"
+      helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Records widget usage and pushes a localized random hadith to the device.
+   * Sets refresh due in UPDATE_INTERVAL_HADITH_WIDGET_IN_HOURS hours
+   * (default one). Hadith-fetch and delivery failures are caught; returns
+   * a response ending the session.
+   */
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
     const requestAttributes = attributesManager.getRequestAttributes();
@@ -18,8 +30,7 @@ const InstallHadithWidgetRequestHandler = {
     const description = requestAttributes.t(
       "widgets.hadithOfTheDay.description",
     );
-    const attributes =
-      (await attributesManager.getPersistentAttributes()) || {};
+    await registerWidgetUsage(handlerInput, PACKAGE_ID);
     const locale = helperFunctions.splitLanguage(
       Alexa.getLocale(handlerInput.requestEnvelope),
     );
@@ -52,6 +63,8 @@ const InstallHadithWidgetRequestHandler = {
             },
             nextUpdateTime: nextUpdateTime,
             formattedNextUpdateTime: formattedNextUpdateTime,
+            // Lets the document hold off re-fetching for 60 s after a push.
+            pushedAt: Date.now(),
           },
         },
       ];
@@ -68,14 +81,9 @@ const InstallHadithWidgetRequestHandler = {
         target,
         apiEndpoint,
       );
-      attributes.lastHadithWidgetUpdate = new Date().toISOString();
-      attributes.isHadithWidgetInstalled = true;
     } catch (error) {
-      attributes.isHadithWidgetInstalled = false;
       console.error("Error while installing hadith: ", error);
     }
-    attributesManager.setPersistentAttributes(attributes);
-    await attributesManager.savePersistentAttributes();
 
     return handlerInput.responseBuilder
       .withShouldEndSession(true)
@@ -91,19 +99,15 @@ const RemoveHadithWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UsagesRemoved" &&
-      helperFunctions.getPackageId(handlerInput) === "HadithOfTheDay"
+      helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Marks this device's widget inactive and attempts to remove its data.
+   * Registry and delivery failures are caught; returns an empty skill response.
+   */
   async handle(handlerInput) {
-    const { attributesManager } = handlerInput;
-    const attributes =
-      (await attributesManager.getPersistentAttributes()) || {};
-
-    // Remove the instance from the array when the widget has been removed.
-    attributes.isHadithWidgetInstalled = false;
-    attributesManager.setPersistentAttributes(attributes);
-    await attributesManager.savePersistentAttributes();
-
+    await unregisterWidgetUsage(handlerInput, PACKAGE_ID);
     return handlerInput.responseBuilder.getResponse();
   },
 };
@@ -117,12 +121,16 @@ const UpdateHadithWidgetRequestHandler = {
     return (
       Alexa.getRequestType(handlerInput.requestEnvelope) ===
         "Alexa.DataStore.PackageManager.UpdateRequest" &&
-      helperFunctions.getPackageId(handlerInput) === "HadithOfTheDay"
+      helperFunctions.getPackageId(handlerInput) === PACKAGE_ID
     );
   },
+  /**
+   * Records the reported package version and returns an empty skill response.
+   * Registry persistence failures are caught.
+   */
   async handle(handlerInput) {
-    // fromVersion/toVersion already captured in the full request envelope
-    // logged by LogRequestInterceptor; not otherwise needed by this handler.
+    // Records toVersion on the device's widget record.
+    await registerWidgetUsage(handlerInput, PACKAGE_ID);
     return handlerInput.responseBuilder.getResponse();
   },
 };
@@ -160,12 +168,15 @@ const UpdateHadithAPLEventHandler = {
       helperFunctions.getAplArgument(handlerInput, 0) === "FETCH_NEW_HADITH"
     );
   },
+  /**
+   * Refreshes when APL argument 1 (epoch milliseconds) is falsy or due,
+   * allowing for a device clock slightly ahead of ours. Otherwise returns a
+   * response ending the session. Delegated refresh errors propagate.
+   */
   async handle(handlerInput) {
     const nextUpdateTime = helperFunctions.getAplArgument(handlerInput, 1);
 
-    const currentTime = Date.now();
-
-    if (currentTime >= nextUpdateTime) {
+    if (helperFunctions.isWidgetRefreshDue(nextUpdateTime)) {
       return InstallHadithWidgetRequestHandler.handle(handlerInput);
     }
 
@@ -189,12 +200,7 @@ const ReadHadithAPLEventHandler = {
     const hadith =
       helperFunctions.getAplArgument(handlerInput, 1) ||
       requestAttributes.t("widgets.hadithOfTheDay.description");
-    const sessionAttributes = handlerInput.requestEnvelope?.session
-      ? handlerInput.attributesManager.getSessionAttributes()
-      : {};
-    sessionAttributes.skipAplDirective = true;
-    sessionAttributes.skipCardDirective = true;
-    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+    helperFunctions.suppressScreenOutput(handlerInput);
     return handlerInput.responseBuilder
       .speak(hadith)
       .withShouldEndSession(true)

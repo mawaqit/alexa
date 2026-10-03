@@ -109,6 +109,25 @@ describe("getNextPrayerTime — after the last prayer of the day", () => {
     expect(result.diffInMinutes).toBe(360);
   });
 
+  it("throws instead of reusing today's Fajr when the caller requires tomorrow's times", async () => {
+    // The widget shows the time on screen and must not guess; voice (the
+    // default, above) keeps the fallback.
+    freezeAt("2026-07-16 23:30", TIMEZONE);
+    getPrayerTimings.mockRejectedValue(new Error("MAWAQIT API down"));
+
+    await expect(
+      getNextPrayerTime(
+        { t },
+        TODAY_TIMES,
+        TIMEZONE,
+        PRAYER_NAMES,
+        [],
+        MOSQUE_UUID,
+        { requireTomorrowTimes: true },
+      ),
+    ).rejects.toThrow("Tomorrow's prayer times are unavailable");
+  });
+
   it("falls back to today's Fajr time for tomorrow when no mosque uuid is known", async () => {
     freezeAt("2026-07-16 23:30", TIMEZONE);
 

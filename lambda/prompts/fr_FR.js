@@ -111,8 +111,16 @@ module.exports = {
         title: "Hadith du jour",
         description: "Chargement...",
       },
+      allPrayerTime: {
+        title: "Heures de prière",
+        loading: "Chargement...",
+      },
       installationErrorPrompt:
         "Désolé, une erreur est survenue lors de l'installation du widget. Veuillez réessayer plus tard.",
+      // Affiché sur un widget de prière quand les horaires du jour ou du
+      // lendemain sont indisponibles ; le widget réessaie de lui-même.
+      loadErrorPrompt:
+        "Impossible de charger les horaires. Ils seront mis à jour sous peu.",
     },
     nextPrayerWithoutMosqueAndTimePrompt: "La prochaine prière est %s à %s.",
     linkAccountPrompt:

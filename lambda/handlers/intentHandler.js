@@ -18,7 +18,8 @@ const { randomUUID: uuidv4 } = crypto;
 const adhaanTasks = [
   "amzn1.ask.skill.81a30fbf-496f-4aa4-a60b-9e35fb513506.PlayAdhaan",
 ];
-const { DeleteUserInfo, GetUserBySupportId } = require("./dynamoDbHandler.js");
+const { GetUserBySupportId } = require("./dynamoDbHandler.js");
+const { deleteUserDataEverywhere } = require("./userDataCleanup.js");
 const ALL_PRAYER_INDEX = 8;
 
 const DeleteRoutineStartedHandler = {
@@ -168,9 +169,7 @@ const DeleteRoutinePrayerIndexHandler = {
       }
       if (prayerIndex < 1 || prayerIndex > routinePrayers.length) {
         console.warn("Invalid prayer index: ", prayerIndex);
-        sessionAttributes.skipAplDirective = true;
-        sessionAttributes.skipCardDirective = true;
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        helperFunctions.suppressScreenOutput(handlerInput);
         return handlerInput.responseBuilder
           .speak(
             requestAttributes.t(
@@ -277,9 +276,7 @@ const DeleteRoutinePrayerNameHandler = {
         prayerNameResolvedId !== String(ALL_PRAYER_INDEX)
       ) {
         console.warn("Invalid prayer name: ", prayerResolvedName);
-        sessionAttributes.skipAplDirective = true;
-        sessionAttributes.skipCardDirective = true;
-        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        helperFunctions.suppressScreenOutput(handlerInput);
         return handlerInput.responseBuilder
           .speak(requestAttributes.t("unableToResolvePrayerNamePrompt"))
           .addDirective({
@@ -374,6 +371,12 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       Alexa.getSlotValue(handlerInput.requestEnvelope, "selectedMosque")
     );
   },
+  /**
+   * Selects a mosque by its one-based spoken list index, reoffering the list
+   * when missing or invalid. Persists the choice and refreshes routine times
+   * before returning prayer speech. Persistence errors propagate; timing
+   * errors select a recovery prompt or mosque search.
+   */
   async handle(handlerInput) {
     const locale = Alexa.getLocale(handlerInput.requestEnvelope);
     const selectedMosque = Alexa.getSlotValue(
@@ -418,11 +421,10 @@ const SelectMosqueIntentAfterSelectingMosqueHandler = {
       selectedMosqueDetails.proximity,
     );
     console.log("Selected Mosque Details: ", selectedMosqueDetails);
-    sessionAttributes.persistentAttributes = selectedMosqueDetails;
-    handlerInput.attributesManager.setPersistentAttributes(
-      sessionAttributes.persistentAttributes,
+    await helperFunctions.persistSelectedMosque(
+      handlerInput,
+      selectedMosqueDetails,
     );
-    await handlerInput.attributesManager.savePersistentAttributes();
     try {
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       const mosqueTimes = await getPrayerTimings(
@@ -1152,20 +1154,28 @@ const AllPrayerTimeIntentHandler = {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
     try {
-      const sessionAttributes =
-        handlerInput.attributesManager.getSessionAttributes();
-      const { persistentAttributes, mosqueTimes } = sessionAttributes;
+      // Also reached from a widget tap, which may arrive without a session.
+      const { persistentAttributes, mosqueTimes } =
+        await helperFunctions.getPrayerContext(handlerInput);
       if (!persistentAttributes?.uuid) {
         return await helperFunctions.checkForPersistenceData(handlerInput);
       }
+      const allPrayerTimes =
+        await helperFunctions.getAllPrayerTimesSpeechoutput(
+          handlerInput,
+          mosqueTimes,
+          persistentAttributes.uuid,
+        );
+      // Without a session there is no conversation to continue.
+      const inSession = helperFunctions.hasSession(handlerInput);
       return handlerInput.responseBuilder
         .speak(
-          (await helperFunctions.getAllPrayerTimesSpeechoutput(
-            handlerInput,
-            mosqueTimes,
-          )) + requestAttributes.t("doYouNeedAnythingElsePrompt"),
+          inSession
+            ? allPrayerTimes +
+                requestAttributes.t("doYouNeedAnythingElsePrompt")
+            : allPrayerTimes,
         )
-        .withShouldEndSession(false)
+        .withShouldEndSession(!inSession)
         .getResponse();
     } catch (error) {
       console.error("Error in fetching Prayer timings: ", error);
@@ -1190,6 +1200,11 @@ const DeleteDataIntentHandler = {
       Alexa.getIntentName(handlerInput.requestEnvelope) === "DeleteDataIntent"
     );
   },
+  /**
+   * Requests confirmation before deleting user data, or keeps the session
+   * open when denied. On confirmation, deletes dev/prod user rows and then
+   * SDK persistence; returns a session-ending success or failure prompt.
+   */
   async handle(handlerInput) {
     const { requestEnvelope, responseBuilder, attributesManager } =
       handlerInput;
@@ -1222,7 +1237,8 @@ const DeleteDataIntentHandler = {
       `Deleting data for user: ${userId} (DeleteDataIntent confirmed)`,
     );
     try {
-      await DeleteUserInfo(userId);
+      // Every stage, azan rows included — see userDataCleanup.js.
+      await deleteUserDataEverywhere(handlerInput);
       await attributesManager.deletePersistentAttributes();
       return responseBuilder
         .speak(requestAttributes.t("deleteDataPrompt"))
@@ -1920,6 +1936,11 @@ const MosqueYesIntentHandler = {
       handlerInput.attributesManager.getSessionAttributes().isMosqueRequested
     );
   },
+  /**
+   * Confirms the first offered mosque, clears selection flags, persists it,
+   * and refreshes routine times before returning prayer speech. A missing
+   * mosque restarts the search; other failures select an error prompt.
+   */
   async handle(handlerInput) {
     const requestAttributes =
       handlerInput.attributesManager.getRequestAttributes();
@@ -1954,11 +1975,10 @@ const MosqueYesIntentHandler = {
       selectedMosqueDetails.proximity = helperFunctions.parseProximity(
         selectedMosqueDetails.proximity,
       );
-      sessionAttributes.persistentAttributes = selectedMosqueDetails;
-      handlerInput.attributesManager.setPersistentAttributes(
-        sessionAttributes.persistentAttributes,
+      await helperFunctions.persistSelectedMosque(
+        handlerInput,
+        selectedMosqueDetails,
       );
-      await handlerInput.attributesManager.savePersistentAttributes();
       const userTimeZone = await helperFunctions.getUserTimezone(handlerInput);
       const mosqueTimes = await getPrayerTimings(
         selectedMosqueDetails.uuid,

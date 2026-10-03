@@ -17,6 +17,21 @@ const SKILL_ID =
 const eventBridgeScheduler = require("./handlers/eventBridgeScheduler.js");
 const authHandler = require("./handlers/authHandler");
 const dbHandler = require("./handlers/dynamoDbHandler");
+const { invalidateMosqueWidgets } = require("./handlers/widgetRegistry.js");
+
+// Every field getMosqueList puts on a mosque. A new pick drops all of them
+// before merging, so a field the new mosque lacks (an APL touch argument omits
+// undefined values) can't leave the previous mosque's value behind.
+const MOSQUE_FIELDS = [
+  "primaryText",
+  "uuid",
+  "proximity",
+  "localisation",
+  "jumua",
+  "jumua2",
+  "jumua3",
+  "image",
+];
 
 const CANONICAL_PRAYER_NAMES = [
   "Fajr",
@@ -76,6 +91,19 @@ const createDirectivePayload = (
   };
 };
 
+/**
+ * Returns the next prayer or iqama in schedule order, keeping the current
+ * minute eligible. `times` contains HH:mm wall-clock times in `timezone`,
+ * aligned with `prayerNames`; iqama entries are HH:mm times or minute offsets.
+ * The result contains name, HH:mm time, diffInMinutes, and a localized
+ * diffInMinutesPrompt.
+ *
+ * After today's last slot, uses the first slot of tomorrow's calendar when
+ * mosqueUuid is available. Fetch failures are caught and unavailable entries
+ * fall back to today's values. With requireTomorrowTimes, missing tomorrow's
+ * first prayer instead throws "Tomorrow's prayer times are unavailable"; this
+ * option does not require tomorrow's iqama. Invalid timezones can throw RangeError.
+ */
 const getNextPrayerTime = async (
   requestAttributes,
   times,
@@ -83,6 +111,10 @@ const getNextPrayerTime = async (
   prayerNames,
   iqamaTime = [],
   mosqueUuid = null,
+  // The widget shows a time on screen, so it must not guess: with this set,
+  // a missing tomorrow calendar throws instead of reusing today's Fajr time.
+  // Voice keeps the fallback (default false).
+  { requireTomorrowTimes = false } = {},
 ) => {
   const currentDateTime = new Date(
     new Date().toLocaleString("en-US", { timeZone: timezone }),
@@ -118,6 +150,7 @@ const getNextPrayerTime = async (
     const tomorrowBase = moment(now).add(1, "days");
     let firstPrayerTime = times[0];
     let firstIqamaTime = iqamaTime[0];
+    let hasTomorrowPrayerTime = false;
     if (mosqueUuid) {
       try {
         const tomorrowTimes = await getTomorrowPrayerTimes(
@@ -126,6 +159,7 @@ const getNextPrayerTime = async (
         );
         if (tomorrowTimes?.times?.[0]) {
           firstPrayerTime = tomorrowTimes.times[0];
+          hasTomorrowPrayerTime = true;
         }
         if (isIqama) {
           const tomorrowIqama = await getTomorrowIqamaTimes(
@@ -139,6 +173,9 @@ const getNextPrayerTime = async (
       } catch (error) {
         console.error("Error fetching tomorrow's times: ", error);
       }
+    }
+    if (requireTomorrowTimes && !hasTomorrowPrayerTime) {
+      throw new Error("Tomorrow's prayer times are unavailable");
     }
     // For iqama, resolve tomorrow's first iqama moment (absolute or offset from
     // the prayer time); otherwise use tomorrow's first prayer time directly.
@@ -167,13 +204,74 @@ const getNextPrayerTime = async (
   }
 };
 
+/**
+ * Whether the request carries a session. A widget tap can arrive without one,
+ * and the SDK then throws on any session-attribute read or write.
+ */
+const hasSession = (handlerInput) =>
+  Boolean(handlerInput.requestEnvelope?.session);
+
+/**
+ * Returns the saved mosque record and, when already loaded, its timings.
+ *
+ * In session both are the copies SavePersistenceAttributesToSession put in
+ * session attributes. Without a session there are none, so the record is read
+ * from persistence and `mosqueTimes` is left undefined for the caller to
+ * fetch. Out of session, `persistentAttributes` is undefined when no mosque is
+ * saved or the read fails.
+ */
+const getPrayerContext = async (handlerInput) => {
+  if (hasSession(handlerInput)) {
+    const { persistentAttributes, mosqueTimes } =
+      handlerInput.attributesManager.getSessionAttributes();
+    return { persistentAttributes, mosqueTimes };
+  }
+  const persisted = await getPersistedData(handlerInput);
+  return { persistentAttributes: persisted?.uuid ? persisted : undefined };
+};
+
+/**
+ * The answer when no mosque is usable and the request has no session:
+ * choosing a mosque is a conversation, and there is no session to hold it.
+ */
+const mosqueNotRegisteredWithoutSession = (handlerInput) =>
+  handlerInput.responseBuilder
+    .speak(
+      handlerInput.attributesManager
+        .getRequestAttributes()
+        .t("mosqueNotRegisteredPrompt"),
+    )
+    .withShouldEndSession(true)
+    .getResponse();
+
+/**
+ * Keeps AddDirectiveResponseInterceptor from adding its APL document and
+ * card to this response. Request attributes, not session ones: the flags
+ * only ever apply to the current response, and a request without a session
+ * has no session attributes to carry them.
+ */
+const suppressScreenOutput = (handlerInput) => {
+  const requestAttributes =
+    handlerInput.attributesManager.getRequestAttributes();
+  requestAttributes.skipAplDirective = true;
+  requestAttributes.skipCardDirective = true;
+};
+
 const checkForPersistenceData = async (handlerInput) => {
   const { attributesManager } = handlerInput;
-  const sessionAttributes = attributesManager.getSessionAttributes();
-  const { persistentAttributes, mosqueTimes } = sessionAttributes;
+  const { persistentAttributes, mosqueTimes } =
+    await getPrayerContext(handlerInput);
   const requestAttributes = attributesManager.getRequestAttributes();
   if (persistentAttributes) {
-    return await getPrayerTimingsForMosque(handlerInput, mosqueTimes, "");
+    return await getPrayerTimingsForMosque(
+      handlerInput,
+      mosqueTimes,
+      "",
+      persistentAttributes,
+    );
+  }
+  if (!hasSession(handlerInput)) {
+    return mosqueNotRegisteredWithoutSession(handlerInput);
   }
   const isLaunchRequest =
     Alexa.getRequestType(handlerInput.requestEnvelope) === "LaunchRequest";
@@ -198,17 +296,25 @@ const getPrayerTimingsForMosque = async (
   handlerInput,
   mosqueTimes,
   speakOutput,
+  // Required without a session, where reading the session's copy would
+  // throw; in session it defaults to that copy.
+  persistentAttributes = handlerInput.attributesManager.getSessionAttributes()
+    .persistentAttributes,
 ) => {
   const { attributesManager } = handlerInput;
   const requestAttributes = attributesManager.getRequestAttributes();
-  const { persistentAttributes } = attributesManager.getSessionAttributes();
+  const inSession = hasSession(handlerInput);
   try {
     const userTimeZone = await getUserTimezone(handlerInput);
     const locale = Alexa.getLocale(handlerInput.requestEnvelope);
     const prayerNames = requestAttributes.t("prayerNames");
+    // Nothing preloads the timings for a request without a session.
+    const { times } =
+      mosqueTimes ??
+      (await getPrayerTimings(persistentAttributes.uuid, userTimeZone));
     const nextPrayerTime = await getNextPrayerTime(
       requestAttributes,
-      mosqueTimes.times,
+      times,
       userTimeZone,
       prayerNames,
       [],
@@ -238,16 +344,21 @@ const getPrayerTimingsForMosque = async (
     // } else {
     //   console.log("Routine for this prayer already exists.");
     // }
-    speakOutput += requestAttributes.t("doYouNeedAnythingElsePrompt");
+    // Without a session there is no conversation to continue.
+    if (inSession) {
+      speakOutput += requestAttributes.t("doYouNeedAnythingElsePrompt");
+    }
     checkForCharacterDisplay(handlerInput, nextPrayerTime.time);
     return handlerInput.responseBuilder
       .speak(speakOutput)
-      .withShouldEndSession(false)
+      .withShouldEndSession(!inSession)
       .getResponse();
   } catch (error) {
     console.error("Error in fetching prayer timings: ", error);
     if (error?.message === "Mosque not found") {
-      return await getListOfMosque(handlerInput, speakOutput);
+      return inSession
+        ? await getListOfMosque(handlerInput, speakOutput)
+        : mosqueNotRegisteredWithoutSession(handlerInput);
     }
     if (error?.message === "Unable to fetch user timezone") {
       return handlerInput.responseBuilder
@@ -541,6 +652,19 @@ const getDifferenceInMinutes = (start, end, timezone) => {
   const diffInMilliseconds = endDate - startDate;
   return diffInMilliseconds / 1000 / 60;
 };
+
+/**
+ * Epoch ms for a "HH:mm" wall-clock time on a given "YYYY-MM-DD" day in
+ * `timezone`, DST rules included.
+ *
+ * Building a plain `Date` and adding its offset to `Date.now()` is the wrong
+ * way to get this: that offset is wall-clock milliseconds, so on the two
+ * nights a year the clocks change the result lands an hour early or late.
+ * Interpreting the wall-clock string directly in `timezone` (as
+ * `getDifferenceInMinutes` above already does) sidesteps that.
+ */
+const getWallClockEpoch = (dateStr, time, timezone) =>
+  moment.tz(`${dateStr} ${time}`, "YYYY-MM-DD HH:mm", timezone).valueOf();
 
 function calculateMinutes(requestAttributes, start, end, timezone) {
   const diffInMinutes = getDifferenceInMinutes(start, end, timezone);
@@ -870,8 +994,16 @@ function getIntentName(handlerInput) {
   return handlerInput?.requestEnvelope?.request?.intent?.name || null;
 }
 
-const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
+const getAllPrayerTimesSpeechoutput = async (
+  handlerInput,
+  mosqueTimes,
+  // Fetches the timings when `mosqueTimes` is missing, as it is for a request
+  // without a session.
+  mosqueUuid,
+) => {
   const userTimeZone = await getUserTimezone(handlerInput);
+  const { times } =
+    mosqueTimes ?? (await getPrayerTimings(mosqueUuid, userTimeZone));
   const requestAttributes =
     handlerInput.attributesManager.getRequestAttributes();
   const locale = Alexa.getLocale(handlerInput.requestEnvelope);
@@ -881,7 +1013,7 @@ const getAllPrayerTimesSpeechoutput = async (handlerInput, mosqueTimes) => {
     new Date().toLocaleString("en-US", { timeZone: userTimeZone }),
   );
   prayerNames.forEach((prayer, index) => {
-    const prayerTime = mosqueTimes.times[index];
+    const prayerTime = times[index];
     if (prayerTime) {
       const prayerDetails = generateNextPrayerTime(
         requestAttributes,
@@ -1263,6 +1395,20 @@ const getAplArgument = (handlerInput, argument) => {
   return handlerInput.requestEnvelope.request?.arguments?.[argument];
 };
 
+// How far ahead of ours a device clock may run before its widget timers
+// reach us too early.
+const WIDGET_CLOCK_SKEW_MS = 5 * 1000;
+
+/**
+ * Whether a widget's FETCH_* refresh is due. The device times it by its own
+ * clock, so one running a few seconds fast arrives early by ours, and a
+ * refusal pushes nothing, which leaves nothing to re-arm the device's timer
+ * until the widget remounts. A falsy `nextUpdateTime` (nothing stored yet) is
+ * always due.
+ */
+const isWidgetRefreshDue = (nextUpdateTime) =>
+  !nextUpdateTime || Date.now() >= nextUpdateTime - WIDGET_CLOCK_SKEW_MS;
+
 const isNewSession = (handlerInput) => {
   return handlerInput.requestEnvelope?.session?.new;
 };
@@ -1342,6 +1488,44 @@ const deleteRoutine = async (handlerInput, routineName) => {
   }
   return false;
 };
+/**
+ * Saves a newly chosen mosque into the user's record and the session.
+ *
+ * Merges rather than replaces: the record also holds routines, the favourite
+ * adhan, the support id, the linked account id and the installed widgets,
+ * none of which a mosque change should erase. When the mosque actually
+ * changes, the prayer widgets' data is deleted so they refetch for the new one.
+ * Removes old mosque fields before merging and returns the merged record.
+ * Persistence failures propagate; widget invalidation failures are caught.
+ * Session state is updated before the save, and invalidation runs alongside it.
+ */
+const persistSelectedMosque = async (handlerInput, selectedMosque) => {
+  const { attributesManager } = handlerInput;
+  const existing = (await attributesManager.getPersistentAttributes()) || {};
+  const previousUuid = existing.uuid;
+
+  const merged = { ...existing };
+  MOSQUE_FIELDS.forEach((field) => delete merged[field]);
+  Object.assign(merged, selectedMosque);
+
+  const sessionAttributes = attributesManager.getSessionAttributes() || {};
+  sessionAttributes.persistentAttributes = merged;
+  attributesManager.setSessionAttributes(sessionAttributes);
+  attributesManager.setPersistentAttributes(merged);
+
+  // Runs alongside the save; it handles its own errors, so a data store
+  // failure never fails the mosque change.
+  const widgetRefresh =
+    previousUuid !== merged.uuid
+      ? invalidateMosqueWidgets(handlerInput)
+      : Promise.resolve();
+  await Promise.all([
+    attributesManager.savePersistentAttributes(),
+    widgetRefresh,
+  ]);
+  return merged;
+};
+
 const updateRoutinePrayers = async (handlerInput) => {
   const { attributesManager } = handlerInput;
   const sessionAttributes = attributesManager.getSessionAttributes();
@@ -1586,6 +1770,9 @@ module.exports = {
   getPrayerTimingsForMosque,
   getListOfMosque,
   checkForPersistenceData,
+  hasSession,
+  getPrayerContext,
+  suppressScreenOutput,
   createResponseDirectiveForMosqueList,
   getListOfMosqueBasedOnCity,
   getResolvedValue,
@@ -1618,13 +1805,17 @@ module.exports = {
   getApiEndpoint,
   getPackageId,
   getAplArgument,
+  WIDGET_CLOCK_SKEW_MS,
+  isWidgetRefreshDue,
   isNewSession,
   resolveIqamaMoment,
   getDifferenceInMinutes,
+  getWallClockEpoch,
   getAccessToken,
   validateUserAccountStatus,
   deleteRoutine,
   updateRoutinePrayers,
+  persistSelectedMosque,
   CANONICAL_PRAYER_NAMES,
   isTaskTrigger,
   ALL_PRAYERS,

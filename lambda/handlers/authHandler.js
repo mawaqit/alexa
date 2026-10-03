@@ -10,6 +10,11 @@ const AuthHandler = {
       "Alexa.Authorization.Grant"
     );
   },
+  /**
+   * Persists the grant code, exchanges it for tokens, and saves the refresh
+   * token and Amazon account mapping. A missing code skips these steps;
+   * exchange and persistence failures are caught. Returns an empty response.
+   */
   async handle(handlerInput) {
     const { attributesManager } = handlerInput;
     const code = handlerInput.requestEnvelope.request?.body?.grant?.code;
@@ -29,6 +34,16 @@ const AuthHandler = {
       await dbHandler.UpdateAzanUserInfo(userInfo.user_id, {
         refreshToken: accessToken.refresh_token,
       });
+
+      // Record the Alexa-user -> Amazon-account mapping now, at link time.
+      // The azan row is keyed by the Amazon id, and SkillDisabled carries no
+      // access token to resolve it — without this, a user who links and then
+      // disables without opening the skill leaves their azan row behind.
+      if (userInfo?.user_id) {
+        attributes.user_id = userInfo.user_id;
+        attributesManager.setPersistentAttributes(attributes);
+        await attributesManager.savePersistentAttributes();
+      }
     } catch (error) {
       console.error("Failed to save authorization code:", error);
     }

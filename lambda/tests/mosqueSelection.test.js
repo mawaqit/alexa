@@ -11,7 +11,11 @@ jest.mock("../handlers/apiHandler.js");
 jest.mock("../handlers/dynamoDbHandler.js");
 jest.mock("../handlers/googleTranslateHandler.js");
 
-const { getPrayerTimings } = require("../handlers/apiHandler.js");
+const {
+  getAccessToken,
+  getPrayerTimings,
+  updateDatastore,
+} = require("../handlers/apiHandler.js");
 const { detectLanguage } = require("../handlers/googleTranslateHandler.js");
 const {
   MosqueYesIntentHandler,
@@ -162,23 +166,17 @@ describe("a mosque list from a city search, with no distance", () => {
   });
 
   it("stores null when the mosque is chosen by touch", async () => {
+    // No routines on purpose: the touch handler used to save only through
+    // updateRoutinePrayers, which skips the save without routines, so a
+    // mosque picked by touch was never stored for most users.
     const handlerInput = buildHandlerInput({
       requestType: "Alexa.Presentation.APL.UserEvent",
       timezone: TZ,
     });
-    // The touch handler makes the selected mosque the persistent record and
-    // only saves it through updateRoutinePrayers, which reads the routines off
-    // that same object. Without routines the save is skipped and the case would
-    // pass whatever the distance is.
     handlerInput.requestEnvelope.request.arguments = [
       "ListItemSelected",
       "Mosque List",
-      {
-        ...CITY_LIST[3],
-        routinePrayers: [
-          { name: "Fajr", canonicalName: "Fajr", time: "05:30" },
-        ],
-      },
+      { ...CITY_LIST[3] },
     ];
 
     await MosqueListTouchEventHandler.handle(handlerInput);
@@ -275,5 +273,98 @@ describe("the mosque resolves but its times do not", () => {
       await SelectMosqueIntentAfterSelectingMosqueHandler.handle(handlerInput);
 
     expect(spokenText(response)).toMatch(/time zone|timezone/i);
+  });
+});
+
+describe("changing mosque", () => {
+  // Picking a mosque used to replace the user's whole record with the mosque,
+  // silently erasing routines, the favourite adhan, the support id and the
+  // installed widgets. And the prayer widgets kept showing the old mosque
+  // until their next scheduled refresh.
+  const PREVIOUS_RECORD = {
+    uuid: "uuid-old",
+    primaryText: "Old Mosque",
+    jumua2: "14:30",
+    favouriteAdhaan: { primaryText: "Mecca" },
+    supportId: "123-456",
+    user_id: "amzn1.account.ABC",
+    installedWidgets: [{ packageId: "AllPrayerTime", deviceId: "device-1" }],
+  };
+
+  const buildChange = ({ said = "2", persistentAttributes } = {}) =>
+    buildHandlerInput({
+      intentName: "SelectMosqueIntent",
+      timezone: TZ,
+      slots: { selectedMosque: { name: "selectedMosque", value: said } },
+      sessionAttributes: { mosqueList: [...MOSQUE_LIST] },
+      persistentAttributes,
+    });
+
+  beforeEach(() => {
+    getAccessToken.mockResolvedValue({
+      access_token: "token",
+      token_type: "Bearer",
+    });
+    updateDatastore.mockResolvedValue({ results: [] });
+  });
+
+  it("keeps the rest of the user's record", async () => {
+    const handlerInput = buildChange({ persistentAttributes: PREVIOUS_RECORD });
+
+    await SelectMosqueIntentAfterSelectingMosqueHandler.handle(handlerInput);
+
+    const saved = handlerInput._getPersistentAttributes();
+    expect(saved).toMatchObject({
+      uuid: "uuid-2",
+      primaryText: "Masjid An-Nour",
+      favouriteAdhaan: { primaryText: "Mecca" },
+      supportId: "123-456",
+      user_id: "amzn1.account.ABC",
+      installedWidgets: PREVIOUS_RECORD.installedWidgets,
+    });
+    // The new mosque has no second Jumu'a; the old one's must not survive the
+    // merge and be announced for the wrong mosque.
+    expect(saved.jumua2).toBeUndefined();
+  });
+
+  it("clears both prayer widgets on all of the user's devices", async () => {
+    const handlerInput = buildChange({ persistentAttributes: PREVIOUS_RECORD });
+
+    await SelectMosqueIntentAfterSelectingMosqueHandler.handle(handlerInput);
+
+    expect(updateDatastore).toHaveBeenCalledTimes(1);
+    const [, commands, target] = updateDatastore.mock.calls[0];
+    expect(commands).toEqual([
+      { type: "REMOVE_NAMESPACE", namespace: "nextPrayerTimeWidget" },
+      { type: "REMOVE_NAMESPACE", namespace: "allPrayerTimeWidget" },
+    ]);
+    expect(target).toEqual({ type: "USER", id: "user-1" });
+  });
+
+  it("clears the widgets on a first pick too, so the no-mosque state goes", async () => {
+    await SelectMosqueIntentAfterSelectingMosqueHandler.handle(buildChange());
+
+    expect(updateDatastore).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves the widgets alone when the same mosque is picked again", async () => {
+    const handlerInput = buildChange({
+      persistentAttributes: { ...PREVIOUS_RECORD, uuid: "uuid-2" },
+    });
+
+    await SelectMosqueIntentAfterSelectingMosqueHandler.handle(handlerInput);
+
+    expect(updateDatastore).not.toHaveBeenCalled();
+  });
+
+  it("still saves the mosque and answers when the data store call fails", async () => {
+    updateDatastore.mockRejectedValue(new Error("data store down"));
+    const handlerInput = buildChange({ persistentAttributes: PREVIOUS_RECORD });
+
+    const response =
+      await SelectMosqueIntentAfterSelectingMosqueHandler.handle(handlerInput);
+
+    expect(handlerInput._getPersistentAttributes().uuid).toBe("uuid-2");
+    expect(spokenText(response)).toContain("Masjid An-Nour");
   });
 });

@@ -111,9 +111,20 @@ Two things bite in the TypeScript tests specifically:
   `logger.info("User updated", { userId })`, not `` logger.info(`User ${userId}…`) ``.
 - **Never log a raw directive, event, or error response body.** An AcceptGrant
   payload carries a live OAuth code and a bearer token; a Discover payload
-  carries an access token. Log their *presence*
-  (`hasGrantCode: Boolean(...)`), never their value. `describeDirective()` in
-  `dispatcher.ts` is the pattern to follow.
+  carries an access token. The dispatcher logs every request and response in
+  full, but only through `redact()` (`src/logging/redact.ts`), which masks
+  every string under a credential key (`code`, `token`, `authorization`,
+  `access_token`, …, any case or separator) and every `Bearer`/`Basic`
+  value. Anything else carrying a credential logs its *presence*
+  (`hasX: Boolean(...)`), never its value.
+- **Never rethrow an `AxiosError` from a service.** Its `config` is the whole
+  request (bodies, `Authorization` headers), and Powertools logs every
+  enumerable property of an error, so a caller's `logger.error(…, { error })`
+  would write it to CloudWatch. Throw a plain `Error` with the status instead,
+  as `amazonAuth.ts` does.
+- Log lines carry only `level`, `message`, `requestId` and the call-site
+  fields — `CompactLogFormatter` in `logger.ts` drops Powertools' per-line
+  function metadata on purpose.
 - Levels: `logger.debug` for per-step tracing, `info` for state changes worth
   keeping, `error` for a failed path. `LOG_LEVEL` controls verbosity
   (`DEBUG` | `INFO` | `WARN` | `ERROR` | `SILENT`), default `INFO`.

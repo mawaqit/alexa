@@ -45,7 +45,27 @@ function describeError(error: unknown): string | number {
   return error instanceof Error ? error.message : String(error);
 }
 
-/** Exchanges an AcceptGrant authorization code for a long-lived token set. */
+/**
+ * Logs a failed call to Amazon and returns an error that is safe to log again.
+ *
+ * Callers log what this module throws, and Powertools serializes every
+ * enumerable property of an error. An AxiosError's `config` is the whole
+ * request: the client secret and auth code in the token exchange's body, the
+ * bearer token in the profile call's header. So the original is neither
+ * rethrown nor kept as `cause`; only its HTTP status or message survives.
+ */
+function sanitizedFailure(message: string, error: unknown): Error {
+  const reason = describeError(error);
+  logger.error(message, { reason });
+  return new Error(`${message}: ${reason}`);
+}
+
+/**
+ * Exchanges an AcceptGrant authorization code for a long-lived token set.
+ * Rejects an empty or missing authorization code. A failed request rejects
+ * with a plain Error carrying only the HTTP status or message, never the
+ * request.
+ */
 export async function getLwaTokenResponse(
   authCode: string | undefined,
 ): Promise<LwaTokenResponse> {
@@ -62,15 +82,18 @@ export async function getLwaTokenResponse(
 
   try {
     const response = await axios.request<LwaTokenResponse>(tokenRequest(data));
-    logger.info("Token exchange successful");
+    logger.debug("Token exchange successful");
     return response.data;
   } catch (error) {
-    logger.error("Token exchange failed", { reason: describeError(error) });
-    throw error;
+    throw sanitizedFailure("Token exchange failed", error);
   }
 }
 
-/** Resolves an access token to the Amazon account that issued it. */
+/**
+ * Resolves an access token to the Amazon account that issued it.
+ * Rejects an empty or missing access token. A failed request rejects with a
+ * plain Error carrying only the HTTP status or message, never the request.
+ */
 export async function getUserInfo(
   accessToken: string | undefined,
 ): Promise<AmazonUserProfile> {
@@ -90,12 +113,9 @@ export async function getUserInfo(
 
   try {
     const response = await axios.request<AmazonUserProfile>(config);
-    logger.info("Amazon user profile fetched");
+    logger.debug("Amazon user profile fetched");
     return response.data;
   } catch (error) {
-    logger.error("Amazon user profile fetch failed", {
-      reason: describeError(error),
-    });
-    throw error;
+    throw sanitizedFailure("Amazon user profile fetch failed", error);
   }
 }

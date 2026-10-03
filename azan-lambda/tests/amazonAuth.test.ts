@@ -4,15 +4,27 @@
  * bearer header. These tests pin the request shape, and pin that credentials
  * are read from process.env at *call* time — they are populated by the SSM
  * handler after module load, so reading them at import time would send blanks.
+ *
+ * They also pin that a failure never carries those credentials out: callers
+ * log the error, and an AxiosError holds the whole request.
  */
 
-import axiosModule, { AxiosError, type AxiosResponse } from "axios";
+import { LogFormatter, LogItem } from "@aws-lambda-powertools/logger";
+import axiosModule, {
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from "axios";
 
 import { getLwaTokenResponse, getUserInfo } from "../src/services/amazonAuth";
 
 jest.mock("axios");
 
 const axios = jest.mocked(axiosModule);
+// The automock stubs AxiosError and isAxiosError; a failure needs the real
+// ones to carry its request config the way axios does.
+const actualAxios = jest.requireActual<{ default: typeof axiosModule }>(
+  "axios",
+).default;
 
 const TOKEN_URL = "https://api.amazon.com/auth/o2/token";
 const PROFILE_URL = "https://api.amazon.com/user/profile";
@@ -27,15 +39,50 @@ const sentForm = (): Record<string, string> => {
   return Object.fromEntries(body.entries());
 };
 
-/** An error shaped the way axios reports a non-2xx response. */
-const httpError = (status: number): AxiosError => {
-  const error = new AxiosError("Request failed");
-  error.response = { status } as AxiosResponse;
-  return error;
+/**
+ * A non-2xx failure as axios reports it: the request config (headers and the
+ * serialized body) rides along on the error.
+ */
+const httpError = (
+  status: number,
+  request: { headers?: Record<string, string>; data?: string },
+) => {
+  const config: InternalAxiosRequestConfig = {
+    headers: new actualAxios.AxiosHeaders(request.headers),
+    data: request.data,
+  };
+  return new actualAxios.AxiosError(
+    "Request failed",
+    "ERR_BAD_REQUEST",
+    config,
+    undefined,
+    { status, config } as AxiosResponse,
+  );
+};
+
+/** Powertools' own serialization of a logged error, as CloudWatch gets it. */
+class ErrorOnlyFormatter extends LogFormatter {
+  formatAttributes(): LogItem {
+    return new LogItem({ attributes: {} });
+  }
+}
+const asLogged = (error: Error): string =>
+  JSON.stringify(new ErrorOnlyFormatter().formatError(error));
+
+/** The value a promise rejects with, which must be an Error. */
+const rejectionOf = async (promise: Promise<unknown>): Promise<Error> => {
+  const reason: unknown = await promise.then(
+    () => undefined,
+    (error: unknown) => error,
+  );
+  if (!(reason instanceof Error))
+    throw new Error("Expected an Error rejection");
+  return reason;
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
+  axios.isAxiosError.mockImplementation(actualAxios.isAxiosError);
   process.env.clientId = "client-id";
   process.env.clientSecret = "client-secret";
 });
@@ -81,11 +128,20 @@ describe("getLwaTokenResponse", () => {
     expect(axios.request).not.toHaveBeenCalled();
   });
 
-  it("propagates a failed token exchange", async () => {
-    const error = httpError(400);
-    axios.request.mockRejectedValue(error);
+  it("fails with the HTTP status, without the client secret or auth code", async () => {
+    // The caller logs this error. Rethrowing the AxiosError put the request
+    // body, client secret and live auth code included, into CloudWatch.
+    axios.request.mockRejectedValue(
+      httpError(400, {
+        data: "client_secret=client-secret&grant_type=authorization_code&code=live-auth-code",
+      }),
+    );
 
-    await expect(getLwaTokenResponse("auth-code")).rejects.toBe(error);
+    const error = await rejectionOf(getLwaTokenResponse("live-auth-code"));
+
+    expect(error.message).toBe("Token exchange failed: 400");
+    expect(asLogged(error)).not.toContain("client-secret");
+    expect(asLogged(error)).not.toContain("live-auth-code");
   });
 });
 
@@ -112,10 +168,18 @@ describe("getUserInfo", () => {
     expect(axios.request).not.toHaveBeenCalled();
   });
 
-  it("propagates an expired-token failure", async () => {
-    const error = httpError(401);
-    axios.request.mockRejectedValue(error);
+  it("fails with the HTTP status, without the bearer token", async () => {
+    // The caller logs this error. Rethrowing the AxiosError put the request's
+    // Authorization header, live access token included, into CloudWatch.
+    axios.request.mockRejectedValue(
+      httpError(401, {
+        headers: { Authorization: "Bearer live-access-token" },
+      }),
+    );
 
-    await expect(getUserInfo("stale")).rejects.toBe(error);
+    const error = await rejectionOf(getUserInfo("live-access-token"));
+
+    expect(error.message).toBe("Amazon user profile fetch failed: 401");
+    expect(asLogged(error)).not.toContain("live-access-token");
   });
 });
